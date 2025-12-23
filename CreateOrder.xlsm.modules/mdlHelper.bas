@@ -807,7 +807,7 @@ End Function
 '*/
 Public Function GetStaffData(queryValue As String, Optional byLichniyNomer As Boolean = True) As Object
 
-    Call mdlHelper.EnsureStaffColumnsInitialized
+    Call EnsureStaffColumnsInitialized
     
     Dim wsStaff As Worksheet
     Dim colLichniyNomer As Long, colZvanie As Long, colFIO As Long, colDolzhnost As Long, colVoinskayaChast As Long
@@ -865,4 +865,116 @@ Public Sub EnsureStaffColumnsInitialized()
         InitStaffColumnIndexes
     End If
 End Sub
+
+'==========================================================
+' ФУНКЦИИ СОВМЕСТИМОСТИ С EXCEL 2010/2016
+'==========================================================
+
+'/**
+'* SaveWordDocumentSafe — универсальная функция сохранения Word документа
+'* Поддерживает Excel 2010+ с автоматическим fallback на старые методы
+'* @param wdDoc Object — объект Word.Document
+'* @param filePath String — путь для сохранения
+'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'*/
+Public Sub SaveWordDocumentSafe(wdDoc As Object, filePath As String)
+    On Error Resume Next
+    
+    ' Пробуем использовать SaveAs2 (Word 2010+)
+    wdDoc.SaveAs2 filePath
+    
+    ' Если ошибка, используем старый метод SaveAs
+    If Err.Number <> 0 Then
+        Err.Clear
+        On Error Resume Next
+        ' Определяем формат по расширению
+        Dim fileFormat As Long
+        If Right(LCase(filePath), 5) = ".docx" Then
+            fileFormat = 16 ' wdFormatXMLDocument
+        ElseIf Right(LCase(filePath), 4) = ".doc" Then
+            fileFormat = 0 ' wdFormatDocument
+        Else
+            fileFormat = 16 ' По умолчанию docx
+        End If
+        
+        wdDoc.SaveAs filePath, fileFormat
+    End If
+    
+    On Error GoTo 0
+End Sub
+
+'/**
+'* CheckExcelVersion — проверка минимальной версии Excel (2010+)
+'* @return Boolean — True если версия подходит, False если нет
+'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'*/
+Public Function CheckExcelVersion() As Boolean
+    Dim version As String
+    version = Application.Version
+    
+    ' Excel 2010 = 14.0, Excel 2016 = 16.0
+    Dim majorVersion As Integer
+    Dim dotPos As Integer
+    dotPos = InStr(version, ".")
+    
+    If dotPos > 0 Then
+        majorVersion = CInt(Left(version, dotPos - 1))
+    Else
+        majorVersion = CInt(version)
+    End If
+    
+    If majorVersion < 14 Then
+        MsgBox "Требуется Microsoft Excel 2010 или выше. " & _
+               "Текущая версия: " & version, vbCritical
+        CheckExcelVersion = False
+    Else
+        CheckExcelVersion = True
+    End If
+End Function
+
+'/**
+'* CreateWordAppSafely — безопасное создание Word приложения с обработкой ошибок
+'* @return Object — объект Word.Application или Nothing при ошибке
+'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'*/
+Public Function CreateWordAppSafely() As Object
+    Dim wdApp As Object
+    
+    On Error Resume Next
+    ' Пробуем получить существующий экземпляр
+    Set wdApp = GetObject(, "Word.Application")
+    
+    If wdApp Is Nothing Then
+        ' Создаем новый экземпляр
+        Set wdApp = CreateObject("Word.Application")
+        
+        If wdApp Is Nothing Then
+            MsgBox "Не удалось создать экземпляр Microsoft Word. " & _
+                   "Убедитесь, что Word установлен и доступен.", vbCritical
+            Set CreateWordAppSafely = Nothing
+            Exit Function
+        End If
+    End If
+    
+    On Error GoTo 0
+    Set CreateWordAppSafely = wdApp
+End Function
+
+'/**
+'* IsWordAvailable — проверка доступности Microsoft Word
+'* @return Boolean — True если Word доступен, False если нет
+'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'*/
+Public Function IsWordAvailable() As Boolean
+    On Error Resume Next
+    Dim wdApp As Object
+    Set wdApp = CreateObject("Word.Application")
+    If Err.Number = 0 And Not wdApp Is Nothing Then
+        wdApp.Quit False
+        IsWordAvailable = True
+    Else
+        IsWordAvailable = False
+    End If
+    On Error GoTo 0
+End Function
 

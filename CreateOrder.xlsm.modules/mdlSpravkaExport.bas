@@ -4,6 +4,8 @@ Attribute VB_Name = "mdlSpravkaExport"
 ' Версия: 2.2.2 (WordSafe, контроль процессов)
 '===============================================================================
 
+Option Explicit
+
 '/**
  '* Процедура создания справок о нахождении военнослужащего в зоне СВО с безопасным управлением экземплярами Word.
  '* Гарантирует корректное закрытие документа и приложения Word, удаляет "висячие" процессы Word.
@@ -197,7 +199,7 @@ Sub ExportToWordSpravkaFromTemplate()
                 fileName = "СправкаДСО_" & lichniyNomer & "_" & cleanFIO & "_" & periodForFileName & ".docx"
                 savePath = ThisWorkbook.Path & "\" & fileName
 
-                wdDoc.SaveAs2 savePath
+                Call mdlHelper.SaveWordDocumentSafe(wdDoc, savePath)
                 wdDoc.Close
                 Set wdDoc = Nothing
             End If

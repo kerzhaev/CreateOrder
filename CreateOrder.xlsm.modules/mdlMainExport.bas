@@ -7,6 +7,8 @@ Attribute VB_Name = "mdlMainExport"
 ' файл сохраняется как "Основной приказ.docx" в папке с макросом и сразу открывается
 ' ===============================================================================
 
+Option Explicit
+
 'If GetProductStatus() = 2 Then
 '    frmAbout.Show
 '    Exit Sub
@@ -154,7 +156,7 @@ Sub ExportToWordFromStaffByLichniyNomer()
 
     fileName = "Основной приказ.docx"
     savePath = ThisWorkbook.Path & "\" & fileName
-    wdDoc.SaveAs2 savePath
+    Call mdlHelper.SaveWordDocumentSafe(wdDoc, savePath)
     wdDoc.Activate
     wdApp.Visible = True
 

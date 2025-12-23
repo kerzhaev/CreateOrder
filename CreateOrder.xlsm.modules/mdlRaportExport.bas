@@ -7,6 +7,8 @@ Attribute VB_Name = "mdlRaportExport"
 ' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
 ' ===============================================================================
 
+Option Explicit
+
 Sub ExportToWordRaportFromTemplateByLichniyNomer()
 
     Call mdlHelper.EnsureStaffColumnsInitialized
@@ -154,6 +156,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
 
                     ' Подсчитываем итоговое количество суток и расчет отдыха
                     Dim totalDays As Long, restDays As Long, daysList As String
+                    Dim periodForRaport As String, calculationText As String
                     totalDays = 0
                     daysList = ""
                     For j = 1 To UBound(periodArr)
@@ -167,13 +170,24 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                     If totalDays > 0 Then
                         restDays = Int(totalDays / 3) * 2
                         periodsText = periodsText & "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха." & vbCrLf
+                        calculationText = "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха."
                     Else
                         periodsText = periodsText & "Нет актуальных периодов для расчета." & vbCrLf
+                        calculationText = "Нет актуальных периодов для расчета."
+                    End If
+                    
+                    ' Формируем строку периода участия
+                    If firstDate <> "" And lastDate <> "" Then
+                        periodForRaport = "с " & firstDate & " по " & lastDate
+                    Else
+                        periodForRaport = "период не указан"
                     End If
                 Else
                     periodsText = "Нет актуальных периодов для расчета." & vbCrLf
                     firstDate = "нет"
                     lastDate = "периодов"
+                    periodForRaport = "период не указан"
+                    calculationText = "Нет актуальных периодов для расчета."
                 End If
 
                 ' Замена коротких плейсхолдеров Find+Replace как обычно
@@ -243,7 +257,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                 fileName = "Рапорт_" & lichniyNomer & "_" & cleanFIO & "_" & periodForFileName & ".docx"
                 savePath = ThisWorkbook.Path & "\" & fileName
 
-                wdDoc.SaveAs2 savePath
+                Call mdlHelper.SaveWordDocumentSafe(wdDoc, savePath)
                 wdDoc.Close
                 Debug.Print "Создан рапорт: " & fileName
             End If

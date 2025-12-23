@@ -515,7 +515,7 @@ Private Sub AddSearchResultToDSO_LastRow()
 
     ' Получаем все данные сотрудника централизованно
     Dim staffInfo As Object
-    Set staffInfo = GetStaffData(lnVal, True) ' по личному номеру
+    Set staffInfo = mdlHelper.GetStaffData(lnVal, True) ' по личному номеру
 
     lastRowDSO = lastRowDSO + 1
     wsDSO.Cells(lastRowDSO, 1).value = lastRowDSO - 1

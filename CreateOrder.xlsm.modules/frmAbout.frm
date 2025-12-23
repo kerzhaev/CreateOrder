@@ -109,8 +109,14 @@ End Sub
 
 ' ===== Служебная процедура для копирования текста в буфер обмена =====
 Private Sub PutToClipboard(ByVal text As String)
-    Dim hGlobalMemory As LongPtr, lpGlobalMemory As LongPtr
-    Dim hWnd As LongPtr
+    #If VBA7 Then
+        Dim hGlobalMemory As LongPtr, lpGlobalMemory As LongPtr
+        Dim hWnd As LongPtr
+    #Else
+        Dim hGlobalMemory As Long, lpGlobalMemory As Long
+        Dim hWnd As Long
+    #End If
+    
     hWnd = 0
     If OpenClipboard(hWnd) Then
         EmptyClipboard

@@ -508,7 +508,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
     ' Сохранение
     Dim savePath As String
     savePath = ThisWorkbook.Path & "\ПриказЗаРиск_" & Format(Date, "dd.mm.yyyy") & ".docx"
-    doc.SaveAs2 savePath
+    Call mdlHelper.SaveWordDocumentSafe(doc, savePath)
 End Sub
 
 
