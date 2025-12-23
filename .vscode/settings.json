@@ -1,0 +1,12 @@
+{
+    "files.encoding": "windows1251",
+    "files.autoGuessEncoding": false,
+    "files.associations": {
+        "*.bas": "vb",
+        "*.cls": "vb",
+        "*.frm": "vb"
+    },
+    "[vb]": {
+        "files.encoding": "windows1251"
+    }
+}
