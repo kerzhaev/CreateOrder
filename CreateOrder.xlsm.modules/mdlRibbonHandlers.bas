@@ -25,7 +25,7 @@ Sub RunMainExport(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании основного приказа: " & Err.description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании основного приказа: " & Err.Description, vbCritical, "Ошибка"
 End Sub
 
 ' Обработчик для справки ДСО
@@ -38,7 +38,7 @@ Sub RunSpravkaExport(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании справки: " & Err.description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании справки: " & Err.Description, vbCritical, "Ошибка"
 End Sub
 
 ' Обработчик для рапорта
@@ -51,7 +51,7 @@ Sub RunRaportExport(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании рапорта: " & Err.description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании рапорта: " & Err.Description, vbCritical, "Ошибка"
 End Sub
 
 ' Обработчик для Excel отчета
@@ -64,7 +64,7 @@ Sub RunExcelReport(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании Excel отчета: " & Err.description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании Excel отчета: " & Err.Description, vbCritical, "Ошибка"
 End Sub
 
 ' *** НЕДОСТАЮЩИЙ ОБРАБОТЧИК *** Обработчик для валидации данных
@@ -80,7 +80,7 @@ Sub RunDataValidation(control As IRibbonControl)
 ErrorHandler:
     Application.ScreenUpdating = True
     Application.StatusBar = False
-    MsgBox "Ошибка при валидации данных: " & Err.description, vbCritical, "Ошибка валидации"
+    MsgBox "Ошибка при валидации данных: " & Err.Description, vbCritical, "Ошибка валидации"
 End Sub
 
 ' *** НЕДОСТАЮЩИЙ ОБРАБОТЧИК *** Обработчик для диагностики структуры
@@ -93,7 +93,7 @@ Sub RunDiagnoseStructure(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при диагностике структуры: " & Err.description, vbCritical, "Ошибка диагностики"
+    MsgBox "Ошибка при диагностике структуры: " & Err.Description, vbCritical, "Ошибка диагностики"
 End Sub
 
 ' *** НЕДОСТАЮЩИЙ ОБРАБОТЧИК *** Обработчик для импорта данных
@@ -106,7 +106,7 @@ Sub RunImportData(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при импорте данных: " & Err.description, vbCritical, "Ошибка импорта"
+    MsgBox "Ошибка при импорте данных: " & Err.Description, vbCritical, "Ошибка импорта"
 End Sub
 
 ' *** НЕДОСТАЮЩИЙ ОБРАБОТЧИК *** Обработчик для предпросмотра данных
@@ -119,7 +119,7 @@ Sub RunPreviewData(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при предпросмотре данных: " & Err.description, vbCritical, "Ошибка предпросмотра"
+    MsgBox "Ошибка при предпросмотре данных: " & Err.Description, vbCritical, "Ошибка предпросмотра"
 End Sub
 
 ' Обработчик для справки
@@ -327,5 +327,85 @@ Public Sub OnPeriodsReportClick(control As IRibbonControl)
     Call mdlFRPExport.ExportPeriodsToExcel_WithChoice
 End Sub
 
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Обработчик кнопки "Экспорт надбавок" (надбавки без периодов)
+' @param control As IRibbonControl - элемент управления Ribbon
+' =============================================
+Public Sub OnExportAllowancesClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    Application.ScreenUpdating = False
+    Call mdlUniversalPaymentExport.ExportPaymentsWithoutPeriods
+    Application.ScreenUpdating = True
+    Exit Sub
+    
+ErrorHandler:
+    Application.ScreenUpdating = True
+    MsgBox "Ошибка при экспорте надбавок: " & Err.Description, vbCritical, "Ошибка"
+End Sub
 
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Обработчик кнопки "Проверить надбавки"
+' @param control As IRibbonControl - элемент управления Ribbon
+' =============================================
+Public Sub OnValidateAllowancesClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    Application.ScreenUpdating = False
+    Call mdlPaymentValidation.ValidatePaymentsWithoutPeriods
+    Application.ScreenUpdating = True
+    Exit Sub
+    
+ErrorHandler:
+    Application.ScreenUpdating = True
+    MsgBox "Ошибка при проверке надбавок: " & Err.Description, vbCritical, "Ошибка"
+End Sub
+
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Обработчик кнопки "Справочники"
+' @param control As IRibbonControl - элемент управления Ribbon
+' =============================================
+Public Sub OnManageReferencesClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    Application.ScreenUpdating = False
+    
+    ' Переходим на лист со справочниками или показываем информацию
+    Dim wsRef As Worksheet
+    On Error Resume Next
+    Set wsRef = ThisWorkbook.Sheets(mdlReferenceData.SHEET_REF_PAYMENT_TYPES)
+    If wsRef Is Nothing Then
+        ' Если лист не найден, создаем или показываем сообщение
+        MsgBox "Лист справочников не найден. Убедитесь, что лист '" & mdlReferenceData.SHEET_REF_PAYMENT_TYPES & "' существует.", vbInformation, "Справочники"
+    Else
+        wsRef.Activate
+        wsRef.Cells(1, 1).Select
+    End If
+    On Error GoTo ErrorHandler
+    
+    Application.ScreenUpdating = True
+    Exit Sub
+    
+ErrorHandler:
+    Application.ScreenUpdating = True
+    MsgBox "Ошибка при открытии справочников: " & Err.Description, vbCritical, "Ошибка"
+End Sub
+
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Обработчик кнопки "Удалить дубликаты модулей"
+' @description Удаляет модули с именами, заканчивающимися на цифру (например, mdlHelper1)
+' @param control As IRibbonControl - элемент управления Ribbon
+' =============================================
+Public Sub OnRemoveDuplicateModulesClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    Application.ScreenUpdating = False
+    Call MdlBackup.RemoveDuplicateModules
+    Application.ScreenUpdating = True
+    Exit Sub
+    
+ErrorHandler:
+    Application.ScreenUpdating = True
+    MsgBox "Ошибка при удалении дубликатов модулей: " & Err.Description, vbCritical, "Ошибка"
+End Sub
 

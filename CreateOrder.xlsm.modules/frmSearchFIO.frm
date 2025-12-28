@@ -13,6 +13,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+
+
 ' =====================================================================
 ' Автоматизированная форма поиска и внесения периодов для военнослужащего
 ' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
@@ -36,18 +39,18 @@ Dim periodsArray As Variant            ' Хранит массив периодов выбранного ФИО (
 '* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
 '*/
 Private Sub txtSearch_Change()
-    Call mdlHelper.EnsureStaffColumnsInitialized
+    EnsureStaffColumnsInitialized
     Dim wsStaff As Worksheet, lastRowFIO As Long, lastRowLN As Long, lastRow As Long, i As Long, query As String, foundCount As Long
     Set wsStaff = ThisWorkbook.Sheets("Штат")
 
-    If mdlHelper.colFIO_Global <= 0 Or mdlHelper.colFIO_Global > wsStaff.Columns.count Or _
-       mdlHelper.colLichniyNomer_Global <= 0 Or mdlHelper.colLichniyNomer_Global > wsStaff.Columns.count Then
+    If colFIO_Global <= 0 Or colFIO_Global > wsStaff.Columns.count Or _
+       colLichniyNomer_Global <= 0 Or colLichniyNomer_Global > wsStaff.Columns.count Then
         MsgBox "Ошибка: Индексы столбцов данных определены некорректно. Проверьте структуру листа 'Штат' и повторите инициализацию!", vbCritical
         Exit Sub
     End If
 
-    lastRowFIO = wsStaff.Cells(wsStaff.Rows.count, mdlHelper.colFIO_Global).End(xlUp).Row
-    lastRowLN = wsStaff.Cells(wsStaff.Rows.count, mdlHelper.colLichniyNomer_Global).End(xlUp).Row
+    lastRowFIO = wsStaff.Cells(wsStaff.Rows.count, colFIO_Global).End(xlUp).Row
+    lastRowLN = wsStaff.Cells(wsStaff.Rows.count, colLichniyNomer_Global).End(xlUp).Row
     lastRow = Application.WorksheetFunction.Max(lastRowFIO, lastRowLN)
 
     query = LCase(Trim(txtSearch.text))
@@ -60,14 +63,14 @@ Private Sub txtSearch_Change()
 
     foundCount = 0
     For i = 2 To lastRow
-        If InStr(LCase(wsStaff.Cells(i, mdlHelper.colFIO_Global).value), query) > 0 Or _
-           InStr(LCase(wsStaff.Cells(i, mdlHelper.colLichniyNomer_Global).value), query) > 0 Then
+        If InStr(LCase(wsStaff.Cells(i, colFIO_Global).value), query) > 0 Or _
+           InStr(LCase(wsStaff.Cells(i, colLichniyNomer_Global).value), query) > 0 Then
             Dim infoLine As String
-            infoLine = wsStaff.Cells(i, mdlHelper.colLichniyNomer_Global).value & vbTab & _
-                       wsStaff.Cells(i, mdlHelper.colFIO_Global).value & vbTab & _
-                       wsStaff.Cells(i, mdlHelper.colZvanie_Global).value & vbTab & _
-                       wsStaff.Cells(i, mdlHelper.colDolzhnost_Global).value & vbTab & _
-                       wsStaff.Cells(i, mdlHelper.colVoinskayaChast_Global).value
+            infoLine = wsStaff.Cells(i, colLichniyNomer_Global).value & vbTab & _
+                       wsStaff.Cells(i, colFIO_Global).value & vbTab & _
+                       wsStaff.Cells(i, colZvanie_Global).value & vbTab & _
+                       wsStaff.Cells(i, colDolzhnost_Global).value & vbTab & _
+                       wsStaff.Cells(i, colVoinskayaChast_Global).value
             lstResults.AddItem infoLine
             foundCount = foundCount + 1
         End If
@@ -87,7 +90,7 @@ Private Sub UserForm_Initialize()
     If selectedLichniyNomer <> "" Then
         Call ShowPassportData(selectedLichniyNomer)
         Call LoadPeriodsForLichniy(selectedLichniyNomer)
-        Call mdlHelper.InitStaffColumnIndexes
+        InitStaffColumnIndexes
     End If
 End Sub
 
@@ -141,17 +144,17 @@ End Sub
 '*/
 Private Sub ShowPassportData(lichniyNomer As String)
 
-    Call mdlHelper.EnsureStaffColumnsInitialized
+    EnsureStaffColumnsInitialized
     
     Dim wsStaff As Worksheet, lastRow As Long, i As Long
     Set wsStaff = ThisWorkbook.Sheets("Штат")
-    lastRow = wsStaff.Cells(wsStaff.Rows.count, mdlHelper.colLichniyNomer_Global).End(xlUp).Row
+    lastRow = wsStaff.Cells(wsStaff.Rows.count, colLichniyNomer_Global).End(xlUp).Row
     For i = 2 To lastRow
-        If Trim(wsStaff.Cells(i, mdlHelper.colLichniyNomer_Global).value) = Trim(lichniyNomer) Then
-            lblFIO.Caption = wsStaff.Cells(i, mdlHelper.colFIO_Global).value
-            lblZvanie.Caption = "Звание: " & wsStaff.Cells(i, mdlHelper.colZvanie_Global).value
-            lblDolzhnost.Caption = "Должность: " & wsStaff.Cells(i, mdlHelper.colDolzhnost_Global).value
-            lblChast.Caption = "Часть: " & Trim(wsStaff.Cells(i, mdlHelper.colVoinskayaChast_Global).value)
+        If Trim(wsStaff.Cells(i, colLichniyNomer_Global).value) = Trim(lichniyNomer) Then
+            lblFIO.Caption = wsStaff.Cells(i, colFIO_Global).value
+            lblZvanie.Caption = "Звание: " & wsStaff.Cells(i, colZvanie_Global).value
+            lblDolzhnost.Caption = "Должность: " & wsStaff.Cells(i, colDolzhnost_Global).value
+            lblChast.Caption = "Часть: " & Trim(wsStaff.Cells(i, colVoinskayaChast_Global).value)
 
             Exit Sub
         End If
@@ -515,7 +518,7 @@ Private Sub AddSearchResultToDSO_LastRow()
 
     ' Получаем все данные сотрудника централизованно
     Dim staffInfo As Object
-    Set staffInfo = mdlHelper.GetStaffData(lnVal, True) ' по личному номеру
+    Set staffInfo = GetStaffData(lnVal, True) ' по личному номеру
 
     lastRowDSO = lastRowDSO + 1
     wsDSO.Cells(lastRowDSO, 1).value = lastRowDSO - 1

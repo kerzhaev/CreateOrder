@@ -57,7 +57,7 @@ Public Sub ExportRiskAllowanceOrder()
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при формировании приказа за риск: " & Err.description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при формировании приказа за риск: " & Err.Description, vbCritical, "Ошибка"
 End Sub
 
 '/**

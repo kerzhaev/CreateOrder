@@ -164,7 +164,7 @@ Sub ExportToWordFromStaffByLichniyNomer()
     Exit Sub
 
 ErrorHandler:
-    MsgBox "Ошибка экспорта: " & Err.description, vbCritical, "Ошибка"
+    MsgBox "Ошибка экспорта: " & Err.Description, vbCritical, "Ошибка"
     If Not wdDoc Is Nothing Then wdDoc.Close False
 
 End Sub

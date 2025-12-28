@@ -209,20 +209,20 @@ Sub CreateWorkbookSnapshot()
     Dim originalPath As String
     Dim snapshotPath As String
     Dim timeStamp As String
-    Dim description As String
+    Dim Description As String
     Dim fileName As String
     
     ' Получаем описание от пользователя
-    description = InputBox("Введите краткое описание этого снапшота:", _
+    Description = InputBox("Введите краткое описание этого снапшота:", _
                           "Описание снапшота", "Рабочая_версия")
     
-    If description = "" Then Exit Sub
+    If Description = "" Then Exit Sub
     
     ' Создаем временную метку
     timeStamp = Format(Now, "yyyy-mm-dd_hh-mm")
     
     ' Формируем имя файла
-    fileName = Replace(ThisWorkbook.name, ".xlsm", "") & "_" & description & "_" & timeStamp & ".xlsm"
+    fileName = Replace(ThisWorkbook.name, ".xlsm", "") & "_" & Description & "_" & timeStamp & ".xlsm"
     
     ' Определяем путь для сохранения
     originalPath = ThisWorkbook.Path
@@ -253,3 +253,74 @@ Sub QuickSnapshot()
     Call CreateWorkbookSnapshot
 End Sub
 
+
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Удаление дубликатов модулей с именами, заканчивающимися на цифру (например, mdlHelper1)
+' @description Используется перед импортом модулей через VbaModuleManager для предотвращения конфликтов имен
+' =============================================
+Sub RemoveDuplicateModules()
+    Dim vbComp As Object
+    Dim compName As String
+    Dim baseName As String
+    Dim lastChar As String
+    Dim i As Long
+    Dim modulesToRemove As Collection
+    Dim compToRemove As Object
+    
+    On Error GoTo ErrorHandler
+    
+    Set modulesToRemove = New Collection
+    
+    ' Проходим по всем компонентам проекта
+    For Each vbComp In ThisWorkbook.VBProject.VBComponents
+        ' Проверяем только стандартные модули, классы и формы (не модули листов)
+        If vbComp.Type = 1 Or vbComp.Type = 2 Or vbComp.Type = 3 Then
+            compName = vbComp.name
+            lastChar = Right(compName, 1)
+            
+            ' Проверяем, заканчивается ли имя на цифру
+            If IsNumeric(lastChar) Then
+                ' Получаем базовое имя (без последней цифры)
+                baseName = Left(compName, Len(compName) - 1)
+                
+                ' Проверяем, существует ли модуль с базовым именем
+                On Error Resume Next
+                Set compToRemove = Nothing
+                Set compToRemove = ThisWorkbook.VBProject.VBComponents(baseName)
+                On Error GoTo ErrorHandler
+                
+                ' Если базовый модуль существует, добавляем дубликат в список на удаление
+                If Not compToRemove Is Nothing Then
+                    modulesToRemove.Add vbComp
+                    Debug.Print "Найден дубликат: " & compName & " (базовый модуль: " & baseName & ")"
+                End If
+            End If
+        End If
+    Next vbComp
+    
+    ' Удаляем найденные дубликаты
+    If modulesToRemove.count > 0 Then
+        Dim response As VbMsgBoxResult
+        response = MsgBox("Найдено дубликатов модулей: " & modulesToRemove.count & vbCrLf & _
+                         "Удалить дубликаты?", _
+                         vbYesNo + vbQuestion, "Удаление дубликатов")
+        
+        If response = vbYes Then
+            For i = 1 To modulesToRemove.count
+                Set vbComp = modulesToRemove(i)
+                ThisWorkbook.VBProject.VBComponents.Remove vbComp
+                Debug.Print "Удален дубликат: " & vbComp.name
+            Next i
+            
+            MsgBox "Удалено дубликатов: " & modulesToRemove.count, vbInformation, "Готово"
+        End If
+    Else
+        MsgBox "Дубликаты модулей не найдены.", vbInformation, "Проверка завершена"
+    End If
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Ошибка при удалении дубликатов: " & Err.Description, vbCritical, "Ошибка"
+End Sub

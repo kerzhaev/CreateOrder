@@ -60,7 +60,7 @@ Public Sub ValidateMainSheetData()
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка в процессе валидации: " & Err.description, vbCritical, "Ошибка"
+    MsgBox "Ошибка в процессе валидации: " & Err.Description, vbCritical, "Ошибка"
 CleanUp:
     Application.ScreenUpdating = True
     Application.EnableEvents = True
@@ -133,7 +133,7 @@ Public Sub DiagnoseWorkbookStructure()
     Exit Sub
 
 DiagError:
-    MsgBox "Ошибка диагностики: " & Err.description, vbCritical
+    MsgBox "Ошибка диагностики: " & Err.Description, vbCritical
 End Sub
 
 ' Экстренная остановка

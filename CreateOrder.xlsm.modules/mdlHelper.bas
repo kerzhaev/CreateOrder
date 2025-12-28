@@ -910,7 +910,7 @@ End Sub
 '*/
 Public Function CheckExcelVersion() As Boolean
     Dim version As String
-    version = Application.Version
+    version = Application.version
     
     ' Excel 2010 = 14.0, Excel 2016 = 16.0
     Dim majorVersion As Integer

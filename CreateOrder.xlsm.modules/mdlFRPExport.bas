@@ -161,7 +161,7 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка: " & Err.description, vbCritical
+    MsgBox "Ошибка: " & Err.Description, vbCritical
 CleanUp:
     Application.ScreenUpdating = True
     Application.StatusBar = False
@@ -258,7 +258,7 @@ Sub CreateRiskExcelReport()
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка при создании отчёта Риск: " & Err.description, vbCritical
+    MsgBox "Ошибка при создании отчёта Риск: " & Err.Description, vbCritical
     If Not wbNew Is Nothing Then wbNew.Close False
     Resume CleanUp
 CleanUp:

@@ -210,7 +210,7 @@ Sub ExportToWordSpravkaFromTemplate()
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка при создании справок: " & Err.description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании справок: " & Err.Description, vbCritical, "Ошибка"
     If Not wdDoc Is Nothing Then
         wdDoc.Close False
         Set wdDoc = Nothing

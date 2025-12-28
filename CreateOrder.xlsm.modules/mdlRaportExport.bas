@@ -268,7 +268,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка при создании рапортов: " & Err.description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании рапортов: " & Err.Description, vbCritical, "Ошибка"
     If Not wdDoc Is Nothing Then wdDoc.Close False
 CleanUp:
     Application.ScreenUpdating = True

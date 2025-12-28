@@ -13,6 +13,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+
+
 '==============================================================
 ' frmAbout - Форма информации и активации макроса
 ' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ

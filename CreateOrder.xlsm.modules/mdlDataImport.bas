@@ -93,7 +93,7 @@ ErrorHandler:
     If Not sourceWorkbook Is Nothing Then
         sourceWorkbook.Close False
     End If
-    MsgBox "Ошибка при импорте данных: " & Err.description, vbCritical, "Ошибка импорта"
+    MsgBox "Ошибка при импорте данных: " & Err.Description, vbCritical, "Ошибка импорта"
     
 CleanUp:
     ' Восстанавливаем настройки
@@ -236,7 +236,7 @@ Sub PreviewImportData()
 ErrorHandler:
     If Not sourceWorkbook Is Nothing Then sourceWorkbook.Close False
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при просмотре файла: " & Err.description, vbCritical
+    MsgBox "Ошибка при просмотре файла: " & Err.Description, vbCritical
 End Sub
 
 
