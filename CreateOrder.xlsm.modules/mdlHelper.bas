@@ -854,6 +854,158 @@ Public Function GetStaffData(queryValue As String, Optional byLichniyNomer As Bo
 End Function
 
 '/**
+'* FindTableNumberColumn — Поиск колонки "Лицо" с табельными номерами (числовые значения)
+'* @param ws As Worksheet — лист "Штат"
+'* @return Long — номер колонки или 0, если не найдена
+'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'*/
+Public Function FindTableNumberColumn(ws As Worksheet) As Long
+    On Error GoTo ErrorHandler
+    
+    Dim lastCol As Long, i As Long
+    Dim headerText As String
+    Dim testValue As Variant
+    Dim hasNumericValues As Boolean
+    Dim numericCount As Long, totalCount As Long
+    
+    lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
+    FindTableNumberColumn = 0
+    
+    ' Ищем колонку с заголовком "Лицо" и числовыми значениями
+    For i = 1 To lastCol
+        headerText = LCase(Trim(ws.Cells(1, i).value))
+        If headerText = "лицо" Then
+            ' Проверяем, содержит ли колонка числовые значения
+            hasNumericValues = False
+            numericCount = 0
+            totalCount = 0
+            Dim lastRow As Long, j As Long
+            lastRow = ws.Cells(ws.Rows.count, i).End(xlUp).Row
+            If lastRow > 1 Then
+                For j = 2 To Application.WorksheetFunction.Min(lastRow, 20) ' Проверяем первые 20 строк
+                    testValue = ws.Cells(j, i).value
+                    If Not IsEmpty(testValue) Then
+                        totalCount = totalCount + 1
+                        If IsNumeric(testValue) Then
+                            numericCount = numericCount + 1
+                        End If
+                    End If
+                Next j
+                ' Если больше половины значений числовые - это колонка табельных номеров
+                If totalCount > 0 And numericCount > totalCount / 2 Then
+                    FindTableNumberColumn = i
+                    Exit Function
+                End If
+            End If
+        End If
+    Next i
+    
+    Exit Function
+    
+ErrorHandler:
+    FindTableNumberColumn = 0
+End Function
+
+'/**
+'* GetStaffDataByTableNumber — Поиск сотрудника по табельному номеру (колонка "Лицо" с числовыми значениями)
+'* @param tableNumber As String — табельный номер для поиска
+'* @return Object (Scripting.Dictionary) — словарь с данными: "Лицо", "Личный номер", "Воинское звание", "Часть", "Штатная должность"
+'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'*/
+Public Function GetStaffDataByTableNumber(tableNumber As String) As Object
+    On Error GoTo ErrorHandler
+    
+    Call EnsureStaffColumnsInitialized
+    
+    Dim wsStaff As Worksheet
+    Dim colTableNumber As Long
+    Dim colLichniyNomer As Long, colZvanie As Long, colFIO As Long, colDolzhnost As Long, colVoinskayaChast As Long
+    Dim resultDict As Object
+    Dim lastRow As Long, i As Long
+    Dim foundOk As Boolean
+    
+    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    
+    ' Определяем колонки
+    foundOk = FindColumnNumbers(wsStaff, colLichniyNomer, colZvanie, colFIO, colDolzhnost, colVoinskayaChast)
+    If Not foundOk Then
+        Set GetStaffDataByTableNumber = CreateObject("Scripting.Dictionary")
+        Exit Function
+    End If
+    
+    ' Ищем колонку с табельными номерами
+    colTableNumber = FindTableNumberColumn(wsStaff)
+    If colTableNumber = 0 Then
+        Set GetStaffDataByTableNumber = CreateObject("Scripting.Dictionary")
+        Exit Function
+    End If
+    
+    lastRow = wsStaff.Cells(wsStaff.Rows.count, colTableNumber).End(xlUp).Row
+    Set resultDict = CreateObject("Scripting.Dictionary")
+    
+    ' Ищем по табельному номеру (точное совпадение)
+    For i = 2 To lastRow
+        If Trim(CStr(wsStaff.Cells(i, colTableNumber).value)) = Trim(tableNumber) Then
+            resultDict("Лицо") = wsStaff.Cells(i, colFIO).value
+            resultDict("Личный номер") = wsStaff.Cells(i, colLichniyNomer).value
+            resultDict("Воинское звание") = wsStaff.Cells(i, colZvanie).value
+            resultDict("Часть") = wsStaff.Cells(i, colVoinskayaChast).value
+            resultDict("Штатная должность") = wsStaff.Cells(i, colDolzhnost).value
+            Set GetStaffDataByTableNumber = resultDict
+            Exit Function
+        End If
+    Next i
+    
+    ' Не найдено
+    Set GetStaffDataByTableNumber = CreateObject("Scripting.Dictionary")
+    Exit Function
+    
+ErrorHandler:
+    Set GetStaffDataByTableNumber = CreateObject("Scripting.Dictionary")
+End Function
+
+'/**
+'* FindEmployeeByAnyNumber — Универсальный поиск сотрудника по личному или табельному номеру
+'* Сначала пытается найти по личному номеру, затем по табельному
+'* @param number As String — номер (личный или табельный)
+'* @return Object (Scripting.Dictionary) — словарь с данными сотрудника или пустой словарь
+'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'*/
+Public Function FindEmployeeByAnyNumber(number As String) As Object
+    On Error GoTo ErrorHandler
+    
+    Dim staffData As Object
+    Dim numberTrimmed As String
+    
+    numberTrimmed = Trim(number)
+    If numberTrimmed = "" Then
+        Set FindEmployeeByAnyNumber = CreateObject("Scripting.Dictionary")
+        Exit Function
+    End If
+    
+    ' Сначала пытаемся найти по личному номеру
+    Set staffData = GetStaffData(numberTrimmed, True)
+    If staffData.count > 0 Then
+        Set FindEmployeeByAnyNumber = staffData
+        Exit Function
+    End If
+    
+    ' Если не найдено, пытаемся найти по табельному номеру
+    Set staffData = GetStaffDataByTableNumber(numberTrimmed)
+    If staffData.count > 0 Then
+        Set FindEmployeeByAnyNumber = staffData
+        Exit Function
+    End If
+    
+    ' Не найдено ни по одному типу номера
+    Set FindEmployeeByAnyNumber = CreateObject("Scripting.Dictionary")
+    Exit Function
+    
+ErrorHandler:
+    Set FindEmployeeByAnyNumber = CreateObject("Scripting.Dictionary")
+End Function
+
+'/**
 '* EnsureStaffColumnsInitialized — Гарантирует, что индексы столбцов инициализированы
 '* Если переменные сброшены (равны 0), вызывает InitStaffColumnIndexes заново.
 '* Вставлять этот вызов в начале любой процедуры, использующей глобальные индексы.

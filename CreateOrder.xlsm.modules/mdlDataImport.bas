@@ -123,7 +123,7 @@ Function SelectWorksheetFromFile(wb As Workbook) As String
     sheetNames = "Выберите лист для импорта:" & vbCrLf & vbCrLf
     i = 1
     For Each ws In wb.Worksheets
-        sheetNames = sheetNames & i & ". " & ws.name & vbCrLf
+        sheetNames = sheetNames & i & ". " & ws.Name & vbCrLf
         i = i + 1
     Next ws
     
@@ -142,7 +142,7 @@ Function SelectWorksheetFromFile(wb As Workbook) As String
     If IsNumeric(userInput) Then
         sheetNumber = CInt(userInput)
         If sheetNumber >= 1 And sheetNumber <= wb.Worksheets.count Then
-            SelectWorksheetFromFile = wb.Worksheets(sheetNumber).name
+            SelectWorksheetFromFile = wb.Worksheets(sheetNumber).Name
         Else
             MsgBox "Неверный номер листа. Выберите число от 1 до " & wb.Worksheets.count, vbExclamation
             SelectWorksheetFromFile = ""
@@ -166,7 +166,7 @@ Function GetOrCreateStaffWorksheet() As Worksheet
     
     ' Проверяем существование листа "Штат"
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = "Штат" Then
+        If ws.Name = "Штат" Then
             Set GetOrCreateStaffWorksheet = ws
             staffExists = True
             Exit For
@@ -176,7 +176,7 @@ Function GetOrCreateStaffWorksheet() As Worksheet
     ' Создаем лист "Штат", если он не существует
     If Not staffExists Then
         Set GetOrCreateStaffWorksheet = ThisWorkbook.Worksheets.Add
-        GetOrCreateStaffWorksheet.name = "Штат"
+        GetOrCreateStaffWorksheet.Name = "Штат"
         MsgBox "Лист 'Штат' не существовал и был создан.", vbInformation, "Создание листа"
     End If
 End Function
@@ -214,8 +214,8 @@ Sub PreviewImportData()
     maxCols = IIf(sourceWorksheet.Cells(1, sourceWorksheet.Columns.count).End(xlToLeft).Column > 5, 5, sourceWorksheet.Cells(1, sourceWorksheet.Columns.count).End(xlToLeft).Column)
     
     previewText = "=== ПРЕДВАРИТЕЛЬНЫЙ ПРОСМОТР ДАННЫХ ===" & vbCrLf & vbCrLf
-    previewText = previewText & "Файл: " & sourceWorkbook.name & vbCrLf
-    previewText = previewText & "Лист: " & sourceWorksheet.name & vbCrLf & vbCrLf
+    previewText = previewText & "Файл: " & sourceWorkbook.Name & vbCrLf
+    previewText = previewText & "Лист: " & sourceWorksheet.Name & vbCrLf & vbCrLf
     
     For i = 1 To maxRows
         For j = 1 To maxCols

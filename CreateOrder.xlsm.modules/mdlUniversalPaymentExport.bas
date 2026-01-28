@@ -11,6 +11,138 @@ Option Explicit
 
 ' =============================================
 ' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Главная функция массового импорта сотрудников по номерам
+' =============================================
+Public Sub ImportEmployeesByNumbers()
+    On Error GoTo ErrorHandler
+    
+    Dim wsPayments As Worksheet
+    Dim selectedRange As Range
+    Dim reportText As String
+    
+    Application.ScreenUpdating = False
+    Application.StatusBar = "Массовое добавление сотрудников..."
+    
+    ' Проверяем активный лист
+    If ActiveSheet.Name <> mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
+        MsgBox "Активен не тот лист. Перейдите на лист '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbExclamation, "Ошибка"
+        GoTo CleanUp
+    End If
+    
+    Set wsPayments = ActiveSheet
+    
+    ' Получаем выделенный диапазон
+    Set selectedRange = Selection
+    If selectedRange Is Nothing Then
+        MsgBox "Выделите ячейки с номерами в колонке D (личный номер).", vbExclamation, "Ошибка"
+        GoTo CleanUp
+    End If
+    
+    ' Проверяем, что диапазон находится в колонке D
+    If selectedRange.Column <> mdlPaymentValidation.COL_LICHNIY_NOMER Then
+        MsgBox "Выделенный диапазон должен находиться в колонке D (личный номер).", vbExclamation, "Ошибка"
+        GoTo CleanUp
+    End If
+    
+    ' Обрабатываем диапазон
+    reportText = ProcessSelectedRangeForImport(wsPayments, selectedRange)
+    
+    ' Показываем отчет
+    MsgBox reportText, vbInformation, "Массовое добавление завершено"
+    
+    GoTo CleanUp
+    
+ErrorHandler:
+    MsgBox "Ошибка при массовом добавлении сотрудников: " & Err.Description, vbCritical, "Ошибка"
+    
+CleanUp:
+    Application.ScreenUpdating = True
+    Application.StatusBar = False
+End Sub
+
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Обработка выделенного диапазона и заполнение данных сотрудников
+' @param wsPayments As Worksheet - лист "Выплаты_Без_Периодов"
+' @param selectedRange As Range - выделенный диапазон
+' @return String - отчет о результатах
+' =============================================
+Public Function ProcessSelectedRangeForImport(wsPayments As Worksheet, selectedRange As Range) As String
+    On Error GoTo ErrorHandler
+    
+    Dim cell As Range
+    Dim numberValue As String
+    Dim staffData As Object
+    Dim foundCount As Long
+    Dim notFoundCount As Long
+    Dim notFoundList As String
+    Dim reportText As String
+    Dim lastRow As Long
+    Dim i As Long
+    
+    foundCount = 0
+    notFoundCount = 0
+    notFoundList = ""
+    
+    Application.ScreenUpdating = False
+    
+    ' Обрабатываем каждую ячейку в диапазоне
+    For Each cell In selectedRange.Cells
+        numberValue = Trim(CStr(cell.value))
+        
+        ' Пропускаем пустые ячейки
+        If numberValue = "" Then
+            GoTo NextCell
+        End If
+        
+        ' Ищем сотрудника по номеру (личный или табельный)
+        Set staffData = mdlHelper.FindEmployeeByAnyNumber(numberValue)
+        
+        If staffData.count > 0 Then
+            ' Найден сотрудник - заполняем данные
+            cell.value = CStr(staffData("Личный номер")) ' Обновляем личный номер (нормализация)
+            wsPayments.Cells(cell.Row, mdlPaymentValidation.COL_FIO).value = CStr(staffData("Лицо")) ' Заполняем ФИО
+            foundCount = foundCount + 1
+        Else
+            ' Не найден - добавляем в список
+            notFoundCount = notFoundCount + 1
+            If notFoundList <> "" Then
+                notFoundList = notFoundList & ", "
+            End If
+            notFoundList = notFoundList & numberValue
+        End If
+        
+NextCell:
+    Next cell
+    
+    ' Автоматическая нумерация в колонке A
+    lastRow = wsPayments.Cells(wsPayments.Rows.count, mdlPaymentValidation.COL_LICHNIY_NOMER).End(xlUp).Row
+    For i = 2 To lastRow
+        If Trim(CStr(wsPayments.Cells(i, mdlPaymentValidation.COL_NUMBER).value)) = "" Then
+            wsPayments.Cells(i, mdlPaymentValidation.COL_NUMBER).value = i - 1
+        End If
+    Next i
+    
+    ' Формируем отчет
+    reportText = "Результаты массового добавления:" & vbCrLf & vbCrLf
+    reportText = reportText & "Найдено и добавлено: " & foundCount & vbCrLf
+    reportText = reportText & "Не найдено: " & notFoundCount
+    
+    If notFoundCount > 0 And Len(notFoundList) < 200 Then
+        reportText = reportText & vbCrLf & "Номера, которые не найдены: " & notFoundList
+    ElseIf notFoundCount > 0 Then
+        reportText = reportText & vbCrLf & "(Список не найденных номеров слишком длинный для отображения)"
+    End If
+    
+    ProcessSelectedRangeForImport = reportText
+    Exit Function
+    
+ErrorHandler:
+    ProcessSelectedRangeForImport = "Ошибка при обработке диапазона: " & Err.Description
+End Function
+
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
 ' @description Преобразование PaymentWithoutPeriod в Dictionary (для хранения в Collection)
 ' @param payment As PaymentWithoutPeriod - данные о выплате
 ' @return Object (Dictionary) - словарь с данными выплаты
@@ -123,7 +255,7 @@ Public Function CollectPaymentsData() As Collection
     Set wsPayments = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
+        If ws.Name = mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
             Set wsPayments = ws
             Exit For
         End If
@@ -292,7 +424,7 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
         Set doc = wordApp.Documents.Add
         ' Устанавливаем шрифт по умолчанию
         With doc.Styles(1).Font
-            .name = "Times New Roman"
+            .Name = "Times New Roman"
             .Size = 12
         End With
     End If
@@ -477,7 +609,7 @@ Public Function GeneratePaymentTextDirectly(ByVal doc As Object, ByRef payment A
     Set rng = doc.Range
     rng.Collapse Direction:=0
     rng.text = textLine
-    rng.Font.name = "Times New Roman"
+    rng.Font.Name = "Times New Roman"
     rng.Font.Size = 12
     
     GeneratePaymentTextDirectly = True

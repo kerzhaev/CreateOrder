@@ -71,12 +71,12 @@ End Sub
 ' --- Все универсальные вспомогательные функции убраны и заменены на вызовы mdlHelper ---
 
 ' Пример: специфическая логика, не имеющая универсального аналога:
-Function GetWorksheetSafeValidation(Optional name As String = "") As Worksheet
+Function GetWorksheetSafeValidation(Optional Name As String = "") As Worksheet
     On Error Resume Next
-    If name = "" Then
+    If Name = "" Then
         Set GetWorksheetSafeValidation = ThisWorkbook.ActiveSheet
     Else
-        Set GetWorksheetSafeValidation = ThisWorkbook.Sheets(name)
+        Set GetWorksheetSafeValidation = ThisWorkbook.Sheets(Name)
     End If
     On Error GoTo 0
 End Function
@@ -101,14 +101,14 @@ Public Sub DiagnoseWorkbookStructure()
     On Error GoTo DiagError
     
     diagText = "=== ДИАГНОСТИКА СТРУКТУРЫ КНИГИ ===" & vbCrLf & vbCrLf
-    diagText = diagText & "Файл: " & ThisWorkbook.name & vbCrLf
+    diagText = diagText & "Файл: " & ThisWorkbook.Name & vbCrLf
     diagText = diagText & "Путь: " & ThisWorkbook.Path & vbCrLf
     diagText = diagText & "Листов: " & ThisWorkbook.Worksheets.count & vbCrLf & vbCrLf
     
     diagText = diagText & "АНАЛИЗ ЛИСТОВ:" & vbCrLf
     wsCount = 1
     For Each ws In ThisWorkbook.Worksheets
-        diagText = diagText & wsCount & ". " & ws.name
+        diagText = diagText & wsCount & ". " & ws.Name
         
         Dim lastRow As Long
         On Error Resume Next

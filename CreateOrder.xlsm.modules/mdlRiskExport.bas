@@ -434,7 +434,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
     
     ' Установка шрифта Times New Roman по умолчанию для всего документа
     With doc.Styles(1).Font
-        .name = "Times New Roman"
+        .Name = "Times New Roman"
         .Size = 12
     End With
     
@@ -443,7 +443,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
     rng.text = "ПРИКАЗ" & vbCrLf
     rng.Font.Bold = True
     rng.Font.Size = 12
-    rng.Font.name = "Times New Roman"
+    rng.Font.Name = "Times New Roman"
     rng.ParagraphFormat.Alignment = 1 ' wdAlignParagraphCenter
     
     ' Нумерация сотрудников
@@ -461,7 +461,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
         rng.text = header
         rng.Font.Bold = False
         rng.Font.Size = 12
-        rng.Font.name = "Times New Roman"
+        rng.Font.Name = "Times New Roman"
         rng.ParagraphFormat.Alignment = 3 ' wdAlignParagraphJustify
         
   ' Периоды
@@ -480,7 +480,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
             rng.ParagraphFormat.Alignment = 0 ' wdAlignParagraphLeft
             rng.Font.Bold = False
             rng.Font.Size = 12
-            rng.Font.name = "Times New Roman"
+            rng.Font.Name = "Times New Roman"
             
             ' Предупреждение о просроченности
             If employees(i).periods(j).IsExpired Then
@@ -492,7 +492,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
                 rng.Font.Color = RGB(255, 0, 0)
                 rng.Font.Bold = True
                 rng.Font.Size = 12
-                rng.Font.name = "Times New Roman"
+                rng.Font.Name = "Times New Roman"
                 rng.ParagraphFormat.Alignment = 0 ' wdAlignParagraphLeft
             End If
         Next j
@@ -555,7 +555,7 @@ Private Sub AddRiskFoundationFromDSO(ByVal doc As Object, ByVal lichniyNomer As 
         
         rng.text = foundationLine
         rng.Font.Size = 12
-        rng.Font.name = "Times New Roman"
+        rng.Font.Name = "Times New Roman"
         rng.ParagraphFormat.Alignment = 0 ' wdAlignParagraphLeft
     End If
 End Sub

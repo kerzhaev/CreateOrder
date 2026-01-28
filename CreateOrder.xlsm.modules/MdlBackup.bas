@@ -32,13 +32,13 @@ Sub CreateVBASnapshot()
     For Each vbComp In ThisWorkbook.VBProject.VBComponents
         Select Case vbComp.Type
             Case 1 ' vbext_ct_StdModule - стандартные модули
-                fileName = vbComp.name & ".bas"
+                fileName = vbComp.Name & ".bas"
             Case 2 ' vbext_ct_ClassModule - модули классов
-                fileName = vbComp.name & ".cls"
+                fileName = vbComp.Name & ".cls"
             Case 3 ' vbext_ct_MSForm - пользовательские формы
-                fileName = vbComp.name & ".frm"
+                fileName = vbComp.Name & ".frm"
             Case 100 ' vbext_ct_Document - модули листов/книги
-                fileName = vbComp.name & ".cls"
+                fileName = vbComp.Name & ".cls"
         End Select
         
         ' Экспортируем компонент
@@ -55,13 +55,13 @@ Sub CreateVBASnapshot()
     Open infoFile For Output As fileNum
     Print #fileNum, "VBA Project Snapshot"
     Print #fileNum, "Дата создания: " & Format(Now, "dd.mm.yyyy hh:mm:ss")
-    Print #fileNum, "Файл проекта: " & ThisWorkbook.name
+    Print #fileNum, "Файл проекта: " & ThisWorkbook.Name
     Print #fileNum, "Путь: " & ThisWorkbook.FullName
     Print #fileNum, "Количество модулей: " & ThisWorkbook.VBProject.VBComponents.count
     Print #fileNum, ""
     Print #fileNum, "Список модулей:"
     For Each vbComp In ThisWorkbook.VBProject.VBComponents
-        Print #fileNum, "- " & vbComp.name & " (Тип: " & GetComponentTypeName(vbComp.Type) & ")"
+        Print #fileNum, "- " & vbComp.Name & " (Тип: " & GetComponentTypeName(vbComp.Type) & ")"
     Next vbComp
     Close fileNum
     
@@ -125,12 +125,12 @@ Sub RestoreFromSnapshot()
     
     ' Импортируем модули из снапшота
     For Each file In folder.Files
-        If Right(LCase(file.name), 4) = ".bas" Or _
-           Right(LCase(file.name), 4) = ".cls" Or _
-           Right(LCase(file.name), 4) = ".frm" Then
+        If Right(LCase(file.Name), 4) = ".bas" Or _
+           Right(LCase(file.Name), 4) = ".cls" Or _
+           Right(LCase(file.Name), 4) = ".frm" Then
             
             ThisWorkbook.VBProject.VBComponents.Import file.Path
-            Debug.Print "Импортирован: " & file.name
+            Debug.Print "Импортирован: " & file.Name
         End If
     Next file
     
@@ -191,7 +191,7 @@ Sub AddVersionTagsToAllModules()
             codeModule.InsertLines 2, "' Рабочая версия сохранена: " & currentDate
             codeModule.InsertLines 3, ""
             
-            Debug.Print "Метка версии добавлена в модуль: " & vbComp.name
+            Debug.Print "Метка версии добавлена в модуль: " & vbComp.Name
         End If
     Next vbComp
     
@@ -222,7 +222,7 @@ Sub CreateWorkbookSnapshot()
     timeStamp = Format(Now, "yyyy-mm-dd_hh-mm")
     
     ' Формируем имя файла
-    fileName = Replace(ThisWorkbook.name, ".xlsm", "") & "_" & Description & "_" & timeStamp & ".xlsm"
+    fileName = Replace(ThisWorkbook.Name, ".xlsm", "") & "_" & Description & "_" & timeStamp & ".xlsm"
     
     ' Определяем путь для сохранения
     originalPath = ThisWorkbook.Path
@@ -276,7 +276,7 @@ Sub RemoveDuplicateModules()
     For Each vbComp In ThisWorkbook.VBProject.VBComponents
         ' Проверяем только стандартные модули, классы и формы (не модули листов)
         If vbComp.Type = 1 Or vbComp.Type = 2 Or vbComp.Type = 3 Then
-            compName = vbComp.name
+            compName = vbComp.Name
             lastChar = Right(compName, 1)
             
             ' Проверяем, заканчивается ли имя на цифру
@@ -310,7 +310,7 @@ Sub RemoveDuplicateModules()
             For i = 1 To modulesToRemove.count
                 Set vbComp = modulesToRemove(i)
                 ThisWorkbook.VBProject.VBComponents.Remove vbComp
-                Debug.Print "Удален дубликат: " & vbComp.name
+                Debug.Print "Удален дубликат: " & vbComp.Name
             Next i
             
             MsgBox "Удалено дубликатов: " & modulesToRemove.count, vbInformation, "Готово"

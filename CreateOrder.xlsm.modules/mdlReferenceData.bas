@@ -60,7 +60,7 @@ Public Function LoadVUSPositionPairs() As Object
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = SHEET_REF_VUS_CREW Then
+        If ws.Name = SHEET_REF_VUS_CREW Then
             Set wsRef = ws
             Exit For
         End If
@@ -114,7 +114,7 @@ Public Function CheckVUSPositionPair(ByVal vus As String, ByVal Position As Stri
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = SHEET_REF_VUS_CREW Then
+        If ws.Name = SHEET_REF_VUS_CREW Then
             Set wsRef = ws
             Exit For
         End If
@@ -172,7 +172,7 @@ Public Function GetPaymentTypeConfig(ByVal paymentType As String) As Object
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = SHEET_REF_PAYMENT_TYPES Then
+        If ws.Name = SHEET_REF_PAYMENT_TYPES Then
             Set wsRef = ws
             Exit For
         End If
@@ -228,7 +228,7 @@ Public Function GetAllPaymentTypes() As Collection
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = SHEET_REF_PAYMENT_TYPES Then
+        If ws.Name = SHEET_REF_PAYMENT_TYPES Then
             Set wsRef = ws
             Exit For
         End If

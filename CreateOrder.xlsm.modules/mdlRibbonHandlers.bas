@@ -177,7 +177,7 @@ Sub ShowSettings(control As IRibbonControl)
     dsoExists = False
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = "ДСО" Then
+        If ws.Name = "ДСО" Then
             dsoExists = True
             Exit For
         End If
@@ -193,7 +193,7 @@ Sub ShowSettings(control As IRibbonControl)
     Dim wsExists As Boolean
     wsExists = False
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = "Штат" Then
+        If ws.Name = "Штат" Then
             wsExists = True
             Exit For
         End If
@@ -272,7 +272,7 @@ Sub CheckSystemReadiness(control As IRibbonControl)
     wsExists = False
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = "Штат" Then
+        If ws.Name = "Штат" Then
             wsExists = True
             Exit For
         End If
@@ -359,6 +359,98 @@ Public Sub OnValidateAllowancesClick(control As IRibbonControl)
 ErrorHandler:
     Application.ScreenUpdating = True
     MsgBox "Ошибка при проверке надбавок: " & Err.Description, vbCritical, "Ошибка"
+End Sub
+
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Обработчик кнопки "Массовое добавление" сотрудников
+' @param control As IRibbonControl - элемент управления Ribbon
+' =============================================
+Public Sub OnMassImportEmployeesClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    
+    ' Проверяем активный лист
+    If ActiveSheet.Name <> mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
+        MsgBox "Для массового добавления перейдите на лист '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbExclamation, "Внимание"
+        Exit Sub
+    End If
+    
+    Call mdlUniversalPaymentExport.ImportEmployeesByNumbers
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Ошибка при массовом добавлении сотрудников: " & Err.Description, vbCritical, "Ошибка"
+End Sub
+
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Обработчик кнопки "Выбрать сотрудника" (открытие формы выбора)
+' @param control As IRibbonControl - элемент управления Ribbon
+' =============================================
+Public Sub OnSelectEmployeeClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    
+    Dim wsPayments As Worksheet
+    Dim activeCell As Range
+    Dim targetRow As Long
+    
+    ' Проверяем активный лист
+
+   If ActiveSheet Is Nothing Then
+       MsgBox "Нет активного листа.", vbExclamation, "Внимание"
+       Exit Sub
+   End If
+
+    If ActiveSheet.Name <> mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
+        MsgBox "Для выбора сотрудника перейдите на лист '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbExclamation, "Внимание"
+        Exit Sub
+    End If
+    
+    Set wsPayments = ActiveSheet
+
+     On Error Resume Next
+   Set activeCell = Application.ActiveCell
+   On Error GoTo ErrorHandler
+   
+   If activeCell Is Nothing Then
+       MsgBox "Нет активной ячейки.", vbExclamation, "Внимание"
+       Exit Sub
+   End If
+    
+    ' Проверяем, что активная ячейка находится в колонке C или D
+    If activeCell.Column <> mdlPaymentValidation.COL_FIO And activeCell.Column <> mdlPaymentValidation.COL_LICHNIY_NOMER Then
+        MsgBox "Активная ячейка должна находиться в колонке C (ФИО) или D (личный номер).", vbExclamation, "Внимание"
+        Exit Sub
+    End If
+    
+    ' Определяем целевую строку
+    targetRow = activeCell.Row
+    
+    ' Открываем форму выбора сотрудника
+    frmSelectEmployee.selectedLichniyNomer = ""
+    frmSelectEmployee.selectedFIO = ""
+    frmSelectEmployee.isCancelled = True
+    
+    frmSelectEmployee.Show
+    
+    ' Если выбор сделан (не отменен), заполняем ячейки
+    If Not frmSelectEmployee.isCancelled Then
+        wsPayments.Cells(targetRow, mdlPaymentValidation.COL_FIO).value = frmSelectEmployee.selectedFIO
+        wsPayments.Cells(targetRow, mdlPaymentValidation.COL_LICHNIY_NOMER).value = frmSelectEmployee.selectedLichniyNomer
+    End If
+
+       ' Очистка объектов
+   Set activeCell = Nothing
+   Set wsPayments = Nothing
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Ошибка при выборе сотрудника: " & Err.Description, vbCritical, "Ошибка"
+       ' Очистка объектов в случае ошибки
+   Set activeCell = Nothing
+   Set wsPayments = Nothing
 End Sub
 
 ' =============================================

@@ -57,9 +57,9 @@ Sub CheckAndRestoreAddins()
     diagText = diagText & "[сярюмнбкеммше мюдярпнийх]" & vbCrLf
     For Each addin In Application.AddIns
         If addin.Installed Then
-            diagText = diagText & "[+] " & addin.name & " - юйрхбмю" & vbCrLf
+            diagText = diagText & "[+] " & addin.Name & " - юйрхбмю" & vbCrLf
         Else
-            diagText = diagText & "[-] " & addin.name & " - нрйкчвемю" & vbCrLf
+            diagText = diagText & "[-] " & addin.Name & " - нрйкчвемю" & vbCrLf
         End If
     Next addin
     

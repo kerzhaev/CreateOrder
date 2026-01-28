@@ -40,7 +40,7 @@ Public Sub ValidatePaymentsWithoutPeriods()
     Set wsPayments = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.name = mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
+        If ws.Name = mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
             Set wsPayments = ws
             Exit For
         End If

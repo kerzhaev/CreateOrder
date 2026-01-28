@@ -84,7 +84,7 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
 
     Set wbNew = Workbooks.Add
     Set wsNew = wbNew.Sheets(1)
-    wsNew.name = "Отчет ДСО"
+    wsNew.Name = "Отчет ДСО"
     
     ' Заголовки
     wsNew.Cells(1, 1).value = "№ п/п"
@@ -194,7 +194,7 @@ Sub CreateRiskExcelReport()
 
     Set wbNew = Workbooks.Add
     Set wsNew = wbNew.Sheets(1)
-    wsNew.name = "ФРП Риск"
+    wsNew.Name = "ФРП Риск"
     
     ' Заголовки
     wsNew.Cells(1, 1).value = "№ п/п"

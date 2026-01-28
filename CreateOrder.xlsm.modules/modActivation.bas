@@ -28,7 +28,7 @@ End Function
 '=== Сохранить статус активации ===
 Public Sub SaveActivationStatus(ByVal activated As Boolean)
     On Error Resume Next
-    ThisWorkbook.Names.Add name:="ActivatedProduct", RefersTo:="=" & activated
+    ThisWorkbook.Names.Add Name:="ActivatedProduct", RefersTo:="=" & activated
 End Sub
 
 '=== Загрузить статус активации ===
@@ -50,7 +50,7 @@ Public Function GetTrialStartDate() As Date
     trialDate = 0
     If Not NameExists(TRIAL_NAME) Then
         trialDate = Date
-        ThisWorkbook.Names.Add name:=TRIAL_NAME, RefersTo:=trialDate
+        ThisWorkbook.Names.Add Name:=TRIAL_NAME, RefersTo:=trialDate
     Else
         trialDate = ThisWorkbook.Names(TRIAL_NAME).RefersTo
     End If
