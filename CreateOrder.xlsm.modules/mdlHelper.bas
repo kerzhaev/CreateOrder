@@ -1036,7 +1036,7 @@ Public Sub SaveWordDocumentSafe(wdDoc As Object, filePath As String)
     wdDoc.SaveAs2 filePath
     
     ' Если ошибка, используем старый метод SaveAs
-    If Err.Number <> 0 Then
+    If Err.number <> 0 Then
         Err.Clear
         On Error Resume Next
         ' Определяем формат по расширению
@@ -1121,7 +1121,7 @@ Public Function IsWordAvailable() As Boolean
     On Error Resume Next
     Dim wdApp As Object
     Set wdApp = CreateObject("Word.Application")
-    If Err.Number = 0 And Not wdApp Is Nothing Then
+    If Err.number = 0 And Not wdApp Is Nothing Then
         wdApp.Quit False
         IsWordAvailable = True
     Else

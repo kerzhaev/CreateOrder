@@ -410,7 +410,7 @@ Public Sub OnSelectEmployeeClick(control As IRibbonControl)
     Set wsPayments = ActiveSheet
 
      On Error Resume Next
-   Set activeCell = Application.ActiveCell
+   Set activeCell = Application.activeCell
    On Error GoTo ErrorHandler
    
    If activeCell Is Nothing Then

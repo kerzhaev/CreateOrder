@@ -69,7 +69,7 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
         If currentLichniyNomer <> "" Then
             On Error Resume Next
             Set personData = uniquePersons(currentLichniyNomer)
-            If Err.Number <> 0 Then
+            If Err.number <> 0 Then
                 Set personData = New Collection
                 personData.Add currentLichniyNomer, "lichniyNomer"
                 personData.Add Trim(CStr(wsMain.Cells(i, 2).value)), "fio"
