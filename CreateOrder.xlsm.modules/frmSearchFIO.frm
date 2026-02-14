@@ -19,35 +19,35 @@ Attribute VB_Exposed = False
 
 
 ' =====================================================================
-' Автоматизированная форма поиска и внесения периодов для военнослужащего
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' РђРІС‚РѕРјР°С‚РёР·РёСЂРѕРІР°РЅРЅР°СЏ С„РѕСЂРјР° РїРѕРёСЃРєР° Рё РІРЅРµСЃРµРЅРёСЏ РїРµСЂРёРѕРґРѕРІ РґР»СЏ РІРѕРµРЅРЅРѕСЃР»СѓР¶Р°С‰РµРіРѕ
+' РђРІС‚РѕСЂ: РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
 ' =====================================================================
 
 Option Explicit
 
-' === Объявление модульных переменных для хранения состояния ===
-Public selectedLichniyNomer As String     ' Хранит личный номер выбранного ФИО
-Dim periodsArray As Variant            ' Хранит массив периодов выбранного ФИО (для упрощения работы)
+' === РћР±СЉСЏРІР»РµРЅРёРµ РјРѕРґСѓР»СЊРЅС‹С… РїРµСЂРµРјРµРЅРЅС‹С… РґР»СЏ С…СЂР°РЅРµРЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ ===
+Public selectedLichniyNomer As String     ' РҐСЂР°РЅРёС‚ Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ РІС‹Р±СЂР°РЅРЅРѕРіРѕ Р¤РРћ
+Dim periodsArray As Variant            ' РҐСЂР°РЅРёС‚ РјР°СЃСЃРёРІ РїРµСЂРёРѕРґРѕРІ РІС‹Р±СЂР°РЅРЅРѕРіРѕ Р¤РРћ (РґР»СЏ СѓРїСЂРѕС‰РµРЅРёСЏ СЂР°Р±РѕС‚С‹)
 
 
 
 
 
-' ================== Поиск по листу штата =====================
-' === Обработчик поиска военнослужащего ===
+' ================== РџРѕРёСЃРє РїРѕ Р»РёСЃС‚Сѓ С€С‚Р°С‚Р° =====================
+' === РћР±СЂР°Р±РѕС‚С‡РёРє РїРѕРёСЃРєР° РІРѕРµРЅРЅРѕСЃР»СѓР¶Р°С‰РµРіРѕ ===
 '/**
-'* Реализация поиска военнослужащего на форме с использованием глобальных индексов.
-'* Теперь поиск и отображение работают независимо от порядка столбцов.
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* Р РµР°Р»РёР·Р°С†РёСЏ РїРѕРёСЃРєР° РІРѕРµРЅРЅРѕСЃР»СѓР¶Р°С‰РµРіРѕ РЅР° С„РѕСЂРјРµ СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј РіР»РѕР±Р°Р»СЊРЅС‹С… РёРЅРґРµРєСЃРѕРІ.
+'* РўРµРїРµСЂСЊ РїРѕРёСЃРє Рё РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ СЂР°Р±РѕС‚Р°СЋС‚ РЅРµР·Р°РІРёСЃРёРјРѕ РѕС‚ РїРѕСЂСЏРґРєР° СЃС‚РѕР»Р±С†РѕРІ.
+'* @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
 '*/
 Private Sub txtSearch_Change()
     EnsureStaffColumnsInitialized
     Dim wsStaff As Worksheet, lastRowFIO As Long, lastRowLN As Long, lastRow As Long, i As Long, query As String, foundCount As Long
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
 
     If colFIO_Global <= 0 Or colFIO_Global > wsStaff.Columns.count Or _
        colLichniyNomer_Global <= 0 Or colLichniyNomer_Global > wsStaff.Columns.count Then
-        MsgBox "Ошибка: Индексы столбцов данных определены некорректно. Проверьте структуру листа 'Штат' и повторите инициализацию!", vbCritical
+        MsgBox "РћС€РёР±РєР°: РРЅРґРµРєСЃС‹ СЃС‚РѕР»Р±С†РѕРІ РґР°РЅРЅС‹С… РѕРїСЂРµРґРµР»РµРЅС‹ РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ. РџСЂРѕРІРµСЂСЊС‚Рµ СЃС‚СЂСѓРєС‚СѓСЂСѓ Р»РёСЃС‚Р° 'РЁС‚Р°С‚' Рё РїРѕРІС‚РѕСЂРёС‚Рµ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ!", vbCritical
         Exit Sub
     End If
 
@@ -58,7 +58,7 @@ Private Sub txtSearch_Change()
     query = LCase(Trim(txtSearch.text))
     lstResults.Clear
     If Len(query) < 2 Then
-        lstResults.AddItem "Введите минимум 2 символа для поиска..."
+        lstResults.AddItem "Р’РІРµРґРёС‚Рµ РјРёРЅРёРјСѓРј 2 СЃРёРјРІРѕР»Р° РґР»СЏ РїРѕРёСЃРєР°..."
         lblStatus.Caption = ""
         Exit Sub
     End If
@@ -78,10 +78,10 @@ Private Sub txtSearch_Change()
         End If
     Next i
     If foundCount = 0 Then
-        lstResults.AddItem "Совпадений не найдено."
+        lstResults.AddItem "РЎРѕРІРїР°РґРµРЅРёР№ РЅРµ РЅР°Р№РґРµРЅРѕ."
         lblStatus.Caption = ""
     Else
-        lblStatus.Caption = "Найдено: " & foundCount
+        lblStatus.Caption = "РќР°Р№РґРµРЅРѕ: " & foundCount
     End If
 End Sub
 
@@ -104,13 +104,13 @@ Public Sub FillByLichniyNomer()
     End If
 End Sub
 
-' ============ Реакция на выбор ФИО из результатов поиска =============
-' === Обработка клика по результату поиска (выбор ФИО) ===
+' ============ Р РµР°РєС†РёСЏ РЅР° РІС‹Р±РѕСЂ Р¤РРћ РёР· СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ РїРѕРёСЃРєР° =============
+' === РћР±СЂР°Р±РѕС‚РєР° РєР»РёРєР° РїРѕ СЂРµР·СѓР»СЊС‚Р°С‚Сѓ РїРѕРёСЃРєР° (РІС‹Р±РѕСЂ Р¤РРћ) ===
 '/**
-'* Обработка выбора строки в списке результатов поиска военнослужащих.
-'* Использует глобальные индексы: корректно работает при любом порядке столбцов на листе "Штат".
-'* При выборе — осуществляет переход на строку в "ДСО", выводит паспортные данные и периоды.
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* РћР±СЂР°Р±РѕС‚РєР° РІС‹Р±РѕСЂР° СЃС‚СЂРѕРєРё РІ СЃРїРёСЃРєРµ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ РїРѕРёСЃРєР° РІРѕРµРЅРЅРѕСЃР»СѓР¶Р°С‰РёС….
+'* РСЃРїРѕР»СЊР·СѓРµС‚ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РёРЅРґРµРєСЃС‹: РєРѕСЂСЂРµРєС‚РЅРѕ СЂР°Р±РѕС‚Р°РµС‚ РїСЂРё Р»СЋР±РѕРј РїРѕСЂСЏРґРєРµ СЃС‚РѕР»Р±С†РѕРІ РЅР° Р»РёСЃС‚Рµ "РЁС‚Р°С‚".
+'* РџСЂРё РІС‹Р±РѕСЂРµ вЂ” РѕСЃСѓС‰РµСЃС‚РІР»СЏРµС‚ РїРµСЂРµС…РѕРґ РЅР° СЃС‚СЂРѕРєСѓ РІ "Р”РЎРћ", РІС‹РІРѕРґРёС‚ РїР°СЃРїРѕСЂС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ Рё РїРµСЂРёРѕРґС‹.
+'* @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
 '*/
 Private Sub lstResults_Click()
     If lstResults.ListCount = 0 Or lstResults.ListIndex = -1 Then Exit Sub
@@ -118,7 +118,7 @@ Private Sub lstResults_Click()
     fields = Split(lstResults.List(lstResults.ListIndex), vbTab)
     lichniyNomer = fields(0)
 
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     lastRowDSO = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
     For i = 2 To lastRowDSO
         If Trim(wsDSO.Cells(i, 3).value) = Trim(lichniyNomer) Then
@@ -130,58 +130,58 @@ Private Sub lstResults_Click()
     selectedLichniyNomer = lichniyNomer
     ShowPassportData selectedLichniyNomer
     LoadPeriodsForLichniy selectedLichniyNomer
-    lblStatus.Caption = "Готово. Можно добавлять или редактировать периоды."
+    lblStatus.Caption = "Р“РѕС‚РѕРІРѕ. РњРѕР¶РЅРѕ РґРѕР±Р°РІР»СЏС‚СЊ РёР»Рё СЂРµРґР°РєС‚РёСЂРѕРІР°С‚СЊ РїРµСЂРёРѕРґС‹."
 End Sub
 
 
 
 
-' ================ Вывод "паспорта" военнослужащего ================
-' === Вывод "паспорта" военнослужащего на форму ===
+' ================ Р’С‹РІРѕРґ "РїР°СЃРїРѕСЂС‚Р°" РІРѕРµРЅРЅРѕСЃР»СѓР¶Р°С‰РµРіРѕ ================
+' === Р’С‹РІРѕРґ "РїР°СЃРїРѕСЂС‚Р°" РІРѕРµРЅРЅРѕСЃР»СѓР¶Р°С‰РµРіРѕ РЅР° С„РѕСЂРјСѓ ===
 '/**
-'* Процедура вывода "паспорта" военнослужащего на форму frmSearchFIO.
-'* Использует только глобальные индексы столбцов из листа "Штат" — независимо от порядка.
-'* @param lichniyNomer String — личный номер военнослужащего
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* РџСЂРѕС†РµРґСѓСЂР° РІС‹РІРѕРґР° "РїР°СЃРїРѕСЂС‚Р°" РІРѕРµРЅРЅРѕСЃР»СѓР¶Р°С‰РµРіРѕ РЅР° С„РѕСЂРјСѓ frmSearchFIO.
+'* РСЃРїРѕР»СЊР·СѓРµС‚ С‚РѕР»СЊРєРѕ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РёРЅРґРµРєСЃС‹ СЃС‚РѕР»Р±С†РѕРІ РёР· Р»РёСЃС‚Р° "РЁС‚Р°С‚" вЂ” РЅРµР·Р°РІРёСЃРёРјРѕ РѕС‚ РїРѕСЂСЏРґРєР°.
+'* @param lichniyNomer String вЂ” Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ РІРѕРµРЅРЅРѕСЃР»СѓР¶Р°С‰РµРіРѕ
+'* @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
 '*/
 Private Sub ShowPassportData(lichniyNomer As String)
 
     EnsureStaffColumnsInitialized
     
     Dim wsStaff As Worksheet, lastRow As Long, i As Long
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
     lastRow = wsStaff.Cells(wsStaff.Rows.count, colLichniyNomer_Global).End(xlUp).Row
     For i = 2 To lastRow
         If Trim(wsStaff.Cells(i, colLichniyNomer_Global).value) = Trim(lichniyNomer) Then
             lblFIO.Caption = wsStaff.Cells(i, colFIO_Global).value
-            lblZvanie.Caption = "Звание: " & wsStaff.Cells(i, colZvanie_Global).value
-            lblDolzhnost.Caption = "Должность: " & wsStaff.Cells(i, colDolzhnost_Global).value
-            lblChast.Caption = "Часть: " & Trim(wsStaff.Cells(i, colVoinskayaChast_Global).value)
+            lblZvanie.Caption = "Р—РІР°РЅРёРµ: " & wsStaff.Cells(i, colZvanie_Global).value
+            lblDolzhnost.Caption = "Р”РѕР»Р¶РЅРѕСЃС‚СЊ: " & wsStaff.Cells(i, colDolzhnost_Global).value
+            lblChast.Caption = "Р§Р°СЃС‚СЊ: " & Trim(wsStaff.Cells(i, colVoinskayaChast_Global).value)
 
             Exit Sub
         End If
     Next i
-    lblFIO.Caption = "ФИО:"
-    lblZvanie.Caption = "Звание:"
-    lblDolzhnost.Caption = "Должность:"
-    lblChast.Caption = "Часть:"
+    lblFIO.Caption = "Р¤РРћ:"
+    lblZvanie.Caption = "Р—РІР°РЅРёРµ:"
+    lblDolzhnost.Caption = "Р”РѕР»Р¶РЅРѕСЃС‚СЊ:"
+    lblChast.Caption = "Р§Р°СЃС‚СЊ:"
     
     Debug.Print "selectedLichniyNomer: " & selectedLichniyNomer
 
 End Sub
 
 
-' ============== Загрузка периодов из "ДСО" по личному номеру ============
-' === Вывод таблицы периодов для выбранного ФИО ===
-' --- Показывает красиво периоды с заголовком для выбранного военнослужащего ---
-' ===== КРАСИВЫЙ ВЫВОД ПЕРИОДОВ В 4 КОЛОНКИ (ListBox с ColumnCount=4) =====
+' ============== Р—Р°РіСЂСѓР·РєР° РїРµСЂРёРѕРґРѕРІ РёР· "Р”РЎРћ" РїРѕ Р»РёС‡РЅРѕРјСѓ РЅРѕРјРµСЂСѓ ============
+' === Р’С‹РІРѕРґ С‚Р°Р±Р»РёС†С‹ РїРµСЂРёРѕРґРѕРІ РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕРіРѕ Р¤РРћ ===
+' --- РџРѕРєР°Р·С‹РІР°РµС‚ РєСЂР°СЃРёРІРѕ РїРµСЂРёРѕРґС‹ СЃ Р·Р°РіРѕР»РѕРІРєРѕРј РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕРіРѕ РІРѕРµРЅРЅРѕСЃР»СѓР¶Р°С‰РµРіРѕ ---
+' ===== РљР РђРЎРР’Р«Р™ Р’Р«Р’РћР” РџР•Р РРћР”РћР’ Р’ 4 РљРћР›РћРќРљР (ListBox СЃ ColumnCount=4) =====
 Private Sub LoadPeriodsForLichniy(lichniyNomer As String)
     Dim wsDSO As Worksheet
     Dim lastRow As Long, lastCol As Long
     Dim i As Long, j As Long, periodCounter As Integer
     Dim baseReasonRaw As String, baseReasonArr() As String
     Dim rowIdx As Long
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
     lstPeriods.Clear
     lstPeriods.ColumnCount = 4
@@ -191,7 +191,7 @@ Private Sub LoadPeriodsForLichniy(lichniyNomer As String)
 
     For i = 2 To lastRow
         If Trim(wsDSO.Cells(i, 3).value) = Trim(lichniyNomer) Then
-            ' Получаем массив оснований, разделённых запятыми
+            ' РџРѕР»СѓС‡Р°РµРј РјР°СЃСЃРёРІ РѕСЃРЅРѕРІР°РЅРёР№, СЂР°Р·РґРµР»С‘РЅРЅС‹С… Р·Р°РїСЏС‚С‹РјРё
             baseReasonRaw = wsDSO.Cells(i, 4).value
             baseReasonArr = Split(baseReasonRaw, ",")
             lastCol = wsDSO.Cells(i, wsDSO.Columns.count).End(xlToLeft).Column
@@ -215,26 +215,26 @@ Private Sub LoadPeriodsForLichniy(lichniyNomer As String)
         End If
     Next i
     If lstPeriods.ListCount = 0 Then
-        lstPeriods.AddItem "Нет действующих периодов"
+        lstPeriods.AddItem "РќРµС‚ РґРµР№СЃС‚РІСѓСЋС‰РёС… РїРµСЂРёРѕРґРѕРІ"
     End If
 End Sub
 
 
 
-' ============ Автозаполнение ComboBox оснований ===============
-' --- Заполнение ComboBox "Основание" только приказами из столбца 4 (через запятую) ---
+' ============ РђРІС‚РѕР·Р°РїРѕР»РЅРµРЅРёРµ ComboBox РѕСЃРЅРѕРІР°РЅРёР№ ===============
+' --- Р—Р°РїРѕР»РЅРµРЅРёРµ ComboBox "РћСЃРЅРѕРІР°РЅРёРµ" С‚РѕР»СЊРєРѕ РїСЂРёРєР°Р·Р°РјРё РёР· СЃС‚РѕР»Р±С†Р° 4 (С‡РµСЂРµР· Р·Р°РїСЏС‚СѓСЋ) ---
 Private Sub cmbReason_Enter()
     Dim wsDSO As Worksheet
     Dim lastRow As Long, i As Long
     Dim reasonsDict As Object
     Dim arrBase As Variant, part As Variant
     Set reasonsDict = CreateObject("Scripting.Dictionary")
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 4).End(xlUp).Row
 
     cmbReason.Clear
 
-    ' Проходим по строкам и собираем все приказы из столбца 4
+    ' РџСЂРѕС…РѕРґРёРј РїРѕ СЃС‚СЂРѕРєР°Рј Рё СЃРѕР±РёСЂР°РµРј РІСЃРµ РїСЂРёРєР°Р·С‹ РёР· СЃС‚РѕР»Р±С†Р° 4
     For i = 2 To lastRow
         If wsDSO.Cells(i, 4).value <> "" Then
             arrBase = Split(wsDSO.Cells(i, 4).value, ",")
@@ -249,7 +249,7 @@ Private Sub cmbReason_Enter()
         End If
     Next i
 
-    ' Заносим в ComboBox только уникальные значения
+    ' Р—Р°РЅРѕСЃРёРј РІ ComboBox С‚РѕР»СЊРєРѕ СѓРЅРёРєР°Р»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
     Dim key As Variant
     For Each key In reasonsDict.Keys
         cmbReason.AddItem key
@@ -258,29 +258,29 @@ End Sub
 
 
 
-' ===== Добавить новый период во вкладку ДСО для выбранного ФИО =====
+' ===== Р”РѕР±Р°РІРёС‚СЊ РЅРѕРІС‹Р№ РїРµСЂРёРѕРґ РІРѕ РІРєР»Р°РґРєСѓ Р”РЎРћ РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕРіРѕ Р¤РРћ =====
 '============================================================
-' Добавление периода: если ФИО не существует в ДСО,
-' автоматически добавляет строку, присваивает порядковый номер,
-' переносит ФИО, личный номер, а далее — периоды и основания.
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' Р”РѕР±Р°РІР»РµРЅРёРµ РїРµСЂРёРѕРґР°: РµСЃР»Рё Р¤РРћ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚ РІ Р”РЎРћ,
+' Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РґРѕР±Р°РІР»СЏРµС‚ СЃС‚СЂРѕРєСѓ, РїСЂРёСЃРІР°РёРІР°РµС‚ РїРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ,
+' РїРµСЂРµРЅРѕСЃРёС‚ Р¤РРћ, Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ, Р° РґР°Р»РµРµ вЂ” РїРµСЂРёРѕРґС‹ Рё РѕСЃРЅРѕРІР°РЅРёСЏ.
+' РђРІС‚РѕСЂ: РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
 '============================================================
 Private Sub btnAddPeriod_Click()
-    ' Проверка заполненности полей периода
+    ' РџСЂРѕРІРµСЂРєР° Р·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё РїРѕР»РµР№ РїРµСЂРёРѕРґР°
     If txtPeriodStart.text = "" Or txtPeriodEnd.text = "" Or cmbReason.text = "" Then
-        MsgBox "Укажите даты и основание для периода.", vbExclamation
+        MsgBox "РЈРєР°Р¶РёС‚Рµ РґР°С‚С‹ Рё РѕСЃРЅРѕРІР°РЅРёРµ РґР»СЏ РїРµСЂРёРѕРґР°.", vbExclamation
         Exit Sub
     End If
     If selectedLichniyNomer = "" Then
-        MsgBox "ФИО не выбрана!", vbExclamation
+        MsgBox "Р¤РРћ РЅРµ РІС‹Р±СЂР°РЅР°!", vbExclamation
         Exit Sub
     End If
 
     Dim wsDSO As Worksheet
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     Dim lastRow As Long, rowNum As Long, found As Boolean, i As Long
 
-    ' Поиск ФИО по личному номеру
+    ' РџРѕРёСЃРє Р¤РРћ РїРѕ Р»РёС‡РЅРѕРјСѓ РЅРѕРјРµСЂСѓ
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
     found = False
     rowNum = 0
@@ -292,25 +292,25 @@ Private Sub btnAddPeriod_Click()
         End If
     Next i
 
-    ' Если ФИО нет — создаём новую запись
+    ' Р•СЃР»Рё Р¤РРћ РЅРµС‚ вЂ” СЃРѕР·РґР°С‘Рј РЅРѕРІСѓСЋ Р·Р°РїРёСЃСЊ
     If Not found Then
         rowNum = lastRow + 1
-        wsDSO.Cells(rowNum, 1).value = rowNum - 1 ' порядковый номер (столбец 1)
-        wsDSO.Cells(rowNum, 2).value = lblFIO.Caption ' ФИО (столбец 2)
-        wsDSO.Cells(rowNum, 3).value = selectedLichniyNomer ' Личный номер (столбец 3)
-        wsDSO.Cells(rowNum, 4).value = "" ' столбец основание — заполнится ниже
+        wsDSO.Cells(rowNum, 1).value = rowNum - 1 ' РїРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ (СЃС‚РѕР»Р±РµС† 1)
+        wsDSO.Cells(rowNum, 2).value = lblFIO.Caption ' Р¤РРћ (СЃС‚РѕР»Р±РµС† 2)
+        wsDSO.Cells(rowNum, 3).value = selectedLichniyNomer ' Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ (СЃС‚РѕР»Р±РµС† 3)
+        wsDSO.Cells(rowNum, 4).value = "" ' СЃС‚РѕР»Р±РµС† РѕСЃРЅРѕРІР°РЅРёРµ вЂ” Р·Р°РїРѕР»РЅРёС‚СЃСЏ РЅРёР¶Рµ
     End If
 
-    ' Ищем последний занятый столбец в строке и добавляем период далее
+    ' РС‰РµРј РїРѕСЃР»РµРґРЅРёР№ Р·Р°РЅСЏС‚С‹Р№ СЃС‚РѕР»Р±РµС† РІ СЃС‚СЂРѕРєРµ Рё РґРѕР±Р°РІР»СЏРµРј РїРµСЂРёРѕРґ РґР°Р»РµРµ
     Dim lastCol As Long
     lastCol = wsDSO.Cells(rowNum, wsDSO.Columns.count).End(xlToLeft).Column
-    If lastCol < 4 Then lastCol = 4 ' если только что создана строка
+    If lastCol < 4 Then lastCol = 4 ' РµСЃР»Рё С‚РѕР»СЊРєРѕ С‡С‚Рѕ СЃРѕР·РґР°РЅР° СЃС‚СЂРѕРєР°
 
-    ' Даты периода попадают в новые столбцы (пары: начало, конец)
+    ' Р”Р°С‚С‹ РїРµСЂРёРѕРґР° РїРѕРїР°РґР°СЋС‚ РІ РЅРѕРІС‹Рµ СЃС‚РѕР»Р±С†С‹ (РїР°СЂС‹: РЅР°С‡Р°Р»Рѕ, РєРѕРЅРµС†)
     wsDSO.Cells(rowNum, lastCol + 1).value = txtPeriodStart.text
     wsDSO.Cells(rowNum, lastCol + 2).value = txtPeriodEnd.text
 
-    ' --- Корректно добавлять основание только в столбец 4 (через запятую) ---
+    ' --- РљРѕСЂСЂРµРєС‚РЅРѕ РґРѕР±Р°РІР»СЏС‚СЊ РѕСЃРЅРѕРІР°РЅРёРµ С‚РѕР»СЊРєРѕ РІ СЃС‚РѕР»Р±РµС† 4 (С‡РµСЂРµР· Р·Р°РїСЏС‚СѓСЋ) ---
     Dim oldReasonRaw As String, newReasonRaw As String
     oldReasonRaw = wsDSO.Cells(rowNum, 4).value
     If Trim(oldReasonRaw) = "" Then
@@ -327,16 +327,16 @@ Private Sub btnAddPeriod_Click()
     txtPeriodStart.text = ""
     txtPeriodEnd.text = ""
     cmbReason.text = ""
-    lblStatus.Caption = "Период добавлен."
+    lblStatus.Caption = "РџРµСЂРёРѕРґ РґРѕР±Р°РІР»РµРЅ."
 End Sub
 
 
 
 '============================================================
-' Удаляет выбранный период (дату начала/конца и основание)
-' Данные после удаления сдвигаются влево, последние ячейки
-' очищаются, чтобы не возникало "дыр" и ошибок в паре дат.
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' РЈРґР°Р»СЏРµС‚ РІС‹Р±СЂР°РЅРЅС‹Р№ РїРµСЂРёРѕРґ (РґР°С‚Сѓ РЅР°С‡Р°Р»Р°/РєРѕРЅС†Р° Рё РѕСЃРЅРѕРІР°РЅРёРµ)
+' Р”Р°РЅРЅС‹Рµ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ СЃРґРІРёРіР°СЋС‚СЃСЏ РІР»РµРІРѕ, РїРѕСЃР»РµРґРЅРёРµ СЏС‡РµР№РєРё
+' РѕС‡РёС‰Р°СЋС‚СЃСЏ, С‡С‚РѕР±С‹ РЅРµ РІРѕР·РЅРёРєР°Р»Рѕ "РґС‹СЂ" Рё РѕС€РёР±РѕРє РІ РїР°СЂРµ РґР°С‚.
+' РђРІС‚РѕСЂ: РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
 '============================================================
 Private Sub btnDeletePeriod_Click()
     If selectedLichniyNomer = "" Or lstPeriods.ListIndex = -1 Then Exit Sub
@@ -344,7 +344,7 @@ Private Sub btnDeletePeriod_Click()
     Dim wsDSO As Worksheet
     Dim lastRow As Long, lastCol As Long, i As Long
     Dim periodNum As Integer, reasonsArr() As String, maxPairs As Integer, k As Integer
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
     periodNum = lstPeriods.List(lstPeriods.ListIndex, 0)
     If IsNumeric(periodNum) = False Or periodNum < 1 Then Exit Sub
@@ -352,18 +352,18 @@ Private Sub btnDeletePeriod_Click()
     For i = 2 To lastRow
         If Trim(wsDSO.Cells(i, 3).value) = Trim(selectedLichniyNomer) Then
             lastCol = wsDSO.Cells(i, wsDSO.Columns.count).End(xlToLeft).Column
-            ' Считаем максимальное число пар дат (для этой строки)
+            ' РЎС‡РёС‚Р°РµРј РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ С‡РёСЃР»Рѕ РїР°СЂ РґР°С‚ (РґР»СЏ СЌС‚РѕР№ СЃС‚СЂРѕРєРё)
             maxPairs = (lastCol - 5 + 1) \ 2
-            ' Сдвигаем все правее стоящие пары дат влево
+            ' РЎРґРІРёРіР°РµРј РІСЃРµ РїСЂР°РІРµРµ СЃС‚РѕСЏС‰РёРµ РїР°СЂС‹ РґР°С‚ РІР»РµРІРѕ
             For k = periodNum To maxPairs - 1
                 wsDSO.Cells(i, 5 + (k - 1) * 2).value = wsDSO.Cells(i, 5 + k * 2).value
                 wsDSO.Cells(i, 5 + (k - 1) * 2 + 1).value = wsDSO.Cells(i, 5 + k * 2 + 1).value
             Next k
-            ' Очищаем самую последнюю пару ячеек (теперь лишняя)
+            ' РћС‡РёС‰Р°РµРј СЃР°РјСѓСЋ РїРѕСЃР»РµРґРЅСЋСЋ РїР°СЂСѓ СЏС‡РµРµРє (С‚РµРїРµСЂСЊ Р»РёС€РЅСЏСЏ)
             wsDSO.Cells(i, 5 + (maxPairs - 1) * 2).value = vbNullString
             wsDSO.Cells(i, 5 + (maxPairs - 1) * 2 + 1).value = vbNullString
 
-            ' ---- Корректируем основания (массив) ----
+            ' ---- РљРѕСЂСЂРµРєС‚РёСЂСѓРµРј РѕСЃРЅРѕРІР°РЅРёСЏ (РјР°СЃСЃРёРІ) ----
             reasonsArr = Split(wsDSO.Cells(i, 4).value, ",")
             If UBound(reasonsArr) >= periodNum - 1 Then
                 For k = periodNum - 1 To UBound(reasonsArr) - 1
@@ -373,7 +373,7 @@ Private Sub btnDeletePeriod_Click()
                 wsDSO.Cells(i, 4).value = Join(reasonsArr, ",")
             End If
 
-            ' ---- Дополнительно: Очищаем все "мусорные" ячейки по датам ----
+            ' ---- Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ: РћС‡РёС‰Р°РµРј РІСЃРµ "РјСѓСЃРѕСЂРЅС‹Рµ" СЏС‡РµР№РєРё РїРѕ РґР°С‚Р°Рј ----
             For k = 5 To lastCol
                 If Trim(wsDSO.Cells(i, k).value) = "" Or IsEmpty(wsDSO.Cells(i, k).value) Then
                     wsDSO.Cells(i, k).value = vbNullString
@@ -386,7 +386,7 @@ Private Sub btnDeletePeriod_Click()
             txtPeriodStart.text = ""
             txtPeriodEnd.text = ""
             cmbReason.text = ""
-            lblStatus.Caption = "Период удалён корректно."
+            lblStatus.Caption = "РџРµСЂРёРѕРґ СѓРґР°Р»С‘РЅ РєРѕСЂСЂРµРєС‚РЅРѕ."
             Exit Sub
         End If
     Next i
@@ -397,31 +397,31 @@ End Sub
 
 
 
-' ============ Закрыть форму ============
+' ============ Р—Р°РєСЂС‹С‚СЊ С„РѕСЂРјСѓ ============
 Private Sub btnClose_Click()
     Unload Me
 End Sub
 
 
-' --- При выборе периода заполняются поля ввода дат и основания ---
+' --- РџСЂРё РІС‹Р±РѕСЂРµ РїРµСЂРёРѕРґР° Р·Р°РїРѕР»РЅСЏСЋС‚СЃСЏ РїРѕР»СЏ РІРІРѕРґР° РґР°С‚ Рё РѕСЃРЅРѕРІР°РЅРёСЏ ---
 Private Sub lstPeriods_Click()
     If lstPeriods.ListIndex = -1 Then Exit Sub
-    ' Проверка на заголовок или спец. строку
-    If lstPeriods.List(lstPeriods.ListIndex, 0) = "Нет действующих периодов" Then Exit Sub
+    ' РџСЂРѕРІРµСЂРєР° РЅР° Р·Р°РіРѕР»РѕРІРѕРє РёР»Рё СЃРїРµС†. СЃС‚СЂРѕРєСѓ
+    If lstPeriods.List(lstPeriods.ListIndex, 0) = "РќРµС‚ РґРµР№СЃС‚РІСѓСЋС‰РёС… РїРµСЂРёРѕРґРѕРІ" Then Exit Sub
     
-    txtPeriodStart.text = lstPeriods.List(lstPeriods.ListIndex, 1) ' Начало
-    txtPeriodEnd.text = lstPeriods.List(lstPeriods.ListIndex, 2)   ' Конец
-    cmbReason.text = lstPeriods.List(lstPeriods.ListIndex, 3)      ' Основание
+    txtPeriodStart.text = lstPeriods.List(lstPeriods.ListIndex, 1) ' РќР°С‡Р°Р»Рѕ
+    txtPeriodEnd.text = lstPeriods.List(lstPeriods.ListIndex, 2)   ' РљРѕРЅРµС†
+    cmbReason.text = lstPeriods.List(lstPeriods.ListIndex, 3)      ' РћСЃРЅРѕРІР°РЅРёРµ
 End Sub
 
 
-' --- Редактирование выбранного периода ---
-' --- Обновление выбранного периода, основания инлайн ---
+' --- Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РІС‹Р±СЂР°РЅРЅРѕРіРѕ РїРµСЂРёРѕРґР° ---
+' --- РћР±РЅРѕРІР»РµРЅРёРµ РІС‹Р±СЂР°РЅРЅРѕРіРѕ РїРµСЂРёРѕРґР°, РѕСЃРЅРѕРІР°РЅРёСЏ РёРЅР»Р°Р№РЅ ---
 Private Sub btnEditPeriod_Click()
     If selectedLichniyNomer = "" Or lstPeriods.ListIndex = -1 Then Exit Sub
     Dim wsDSO As Worksheet, lastRow As Long, i As Long, lastCol As Long, j As Long, periodNum As Integer
     Dim reasonsArr() As String, k As Integer, maxPairs As Integer
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
     periodNum = lstPeriods.List(lstPeriods.ListIndex, 0)
     If IsNumeric(periodNum) = False Then Exit Sub
@@ -430,13 +430,13 @@ Private Sub btnEditPeriod_Click()
         If Trim(wsDSO.Cells(i, 3).value) = Trim(selectedLichniyNomer) Then
             lastCol = wsDSO.Cells(i, wsDSO.Columns.count).End(xlToLeft).Column
             maxPairs = (lastCol - 4 + 1) \ 2
-            ' Индексирование строго по совпадающей паре
+            ' РРЅРґРµРєСЃРёСЂРѕРІР°РЅРёРµ СЃС‚СЂРѕРіРѕ РїРѕ СЃРѕРІРїР°РґР°СЋС‰РµР№ РїР°СЂРµ
             j = 5 + (periodNum - 1) * 2
             wsDSO.Cells(i, j).value = txtPeriodStart.text
             wsDSO.Cells(i, j + 1).value = txtPeriodEnd.text
 
             reasonsArr = Split(wsDSO.Cells(i, 4).value, ",")
-            ' Если оснований меньше, расширить массив до нужного размера
+            ' Р•СЃР»Рё РѕСЃРЅРѕРІР°РЅРёР№ РјРµРЅСЊС€Рµ, СЂР°СЃС€РёСЂРёС‚СЊ РјР°СЃСЃРёРІ РґРѕ РЅСѓР¶РЅРѕРіРѕ СЂР°Р·РјРµСЂР°
             If UBound(reasonsArr) < periodNum - 1 Then
                 ReDim Preserve reasonsArr(periodNum - 1)
                 For k = 0 To UBound(reasonsArr)
@@ -449,7 +449,7 @@ Private Sub btnEditPeriod_Click()
             wsDSO.Cells(i, 4).value = Join(reasonsArr, ",")
 
             Call LoadPeriodsForLichniy(selectedLichniyNomer)
-            lblStatus.Caption = "Период успешно обновлён."
+            lblStatus.Caption = "РџРµСЂРёРѕРґ СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»С‘РЅ."
             Exit Sub
         End If
     Next i
@@ -457,19 +457,19 @@ End Sub
 
 
 Private Sub CleanPeriodsForLichniyRow(wsDSO As Worksheet, rowNum As Long)
-    ' Очищает весь "хвост" после последней заполненной пары дат для корректной работы валидатора
+    ' РћС‡РёС‰Р°РµС‚ РІРµСЃСЊ "С…РІРѕСЃС‚" РїРѕСЃР»Рµ РїРѕСЃР»РµРґРЅРµР№ Р·Р°РїРѕР»РЅРµРЅРЅРѕР№ РїР°СЂС‹ РґР°С‚ РґР»СЏ РєРѕСЂСЂРµРєС‚РЅРѕР№ СЂР°Р±РѕС‚С‹ РІР°Р»РёРґР°С‚РѕСЂР°
     Dim lastCol As Long, lastPeriodCol As Long, j As Long, isEmptyPair As Boolean
     lastCol = wsDSO.Cells(rowNum, wsDSO.Columns.count).End(xlToLeft).Column
-    lastPeriodCol = 4 ' Последний "реально заполненный" столбец в паре
+    lastPeriodCol = 4 ' РџРѕСЃР»РµРґРЅРёР№ "СЂРµР°Р»СЊРЅРѕ Р·Р°РїРѕР»РЅРµРЅРЅС‹Р№" СЃС‚РѕР»Р±РµС† РІ РїР°СЂРµ
 
-    ' Определяем реальный хвост (последний заполненный период)
+    ' РћРїСЂРµРґРµР»СЏРµРј СЂРµР°Р»СЊРЅС‹Р№ С…РІРѕСЃС‚ (РїРѕСЃР»РµРґРЅРёР№ Р·Р°РїРѕР»РЅРµРЅРЅС‹Р№ РїРµСЂРёРѕРґ)
     For j = 5 To lastCol Step 2
         If wsDSO.Cells(rowNum, j).value <> "" And wsDSO.Cells(rowNum, j + 1).value <> "" Then
             lastPeriodCol = j + 1
         End If
     Next j
 
-    ' Очищаем всё дальше этого столбца (если вдруг что-то осталось в хвосте)
+    ' РћС‡РёС‰Р°РµРј РІСЃС‘ РґР°Р»СЊС€Рµ СЌС‚РѕРіРѕ СЃС‚РѕР»Р±С†Р° (РµСЃР»Рё РІРґСЂСѓРі С‡С‚Рѕ-С‚Рѕ РѕСЃС‚Р°Р»РѕСЃСЊ РІ С…РІРѕСЃС‚Рµ)
     For j = lastPeriodCol + 1 To lastCol
         wsDSO.Cells(rowNum, j).value = vbNullString
     Next j
@@ -483,26 +483,26 @@ Private Sub lstResults_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
     Call AddSearchResultToDSO_LastRow
 End Sub
 
-' === ДОБАВЛЕНИЕ ФИО и личного номера после последней строки ДСО ===
+' === Р”РћР‘РђР’Р›Р•РќРР• Р¤РРћ Рё Р»РёС‡РЅРѕРіРѕ РЅРѕРјРµСЂР° РїРѕСЃР»Рµ РїРѕСЃР»РµРґРЅРµР№ СЃС‚СЂРѕРєРё Р”РЎРћ ===
 '===============================================================
-' Добавляет ФИО и личный номер после последней записи,
-' используя имена столбцов из строки заголовка таблицы "Штат".
+' Р”РѕР±Р°РІР»СЏРµС‚ Р¤РРћ Рё Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ РїРѕСЃР»Рµ РїРѕСЃР»РµРґРЅРµР№ Р·Р°РїРёСЃРё,
+' РёСЃРїРѕР»СЊР·СѓСЏ РёРјРµРЅР° СЃС‚РѕР»Р±С†РѕРІ РёР· СЃС‚СЂРѕРєРё Р·Р°РіРѕР»РѕРІРєР° С‚Р°Р±Р»РёС†С‹ "РЁС‚Р°С‚".
 '===============================================================
 '===============================================================
-' Добавление новой записи ФИО (без дубликатов) в "ДСО" и перенос атрибутов
+' Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕР№ Р·Р°РїРёСЃРё Р¤РРћ (Р±РµР· РґСѓР±Р»РёРєР°С‚РѕРІ) РІ "Р”РЎРћ" Рё РїРµСЂРµРЅРѕСЃ Р°С‚СЂРёР±СѓС‚РѕРІ
 Private Sub AddSearchResultToDSO_LastRow()
     If lstResults.ListCount = 0 Or lstResults.ListIndex = -1 Then Exit Sub
 
     Dim wsDSO As Worksheet
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
 
-    ' Получаем личный номер и ФИО из списка (или другие ключи)
+    ' РџРѕР»СѓС‡Р°РµРј Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ Рё Р¤РРћ РёР· СЃРїРёСЃРєР° (РёР»Рё РґСЂСѓРіРёРµ РєР»СЋС‡Рё)
     Dim fields As Variant, fioVal As String, lnVal As String
     fields = Split(lstResults.List(lstResults.ListIndex), vbTab)
     fioVal = fields(1)
     lnVal = fields(0)
 
-    ' Проверяем на дубли в ДСО
+    ' РџСЂРѕРІРµСЂСЏРµРј РЅР° РґСѓР±Р»Рё РІ Р”РЎРћ
     Dim exists As Boolean, lastRowDSO As Long, i As Long
     exists = False
     lastRowDSO = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
@@ -514,24 +514,24 @@ Private Sub AddSearchResultToDSO_LastRow()
     Next i
 
     If exists Then
-        MsgBox "ФИО или личный номер уже есть на листе ДСО! Добавление невозможно.", vbInformation
+        MsgBox "Р¤РРћ РёР»Рё Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ СѓР¶Рµ РµСЃС‚СЊ РЅР° Р»РёСЃС‚Рµ Р”РЎРћ! Р”РѕР±Р°РІР»РµРЅРёРµ РЅРµРІРѕР·РјРѕР¶РЅРѕ.", vbInformation
         Exit Sub
     End If
 
-    ' Получаем все данные сотрудника централизованно
+    ' РџРѕР»СѓС‡Р°РµРј РІСЃРµ РґР°РЅРЅС‹Рµ СЃРѕС‚СЂСѓРґРЅРёРєР° С†РµРЅС‚СЂР°Р»РёР·РѕРІР°РЅРЅРѕ
     Dim staffInfo As Object
-    Set staffInfo = GetStaffData(lnVal, True) ' по личному номеру
+    Set staffInfo = GetStaffData(lnVal, True) ' РїРѕ Р»РёС‡РЅРѕРјСѓ РЅРѕРјРµСЂСѓ
 
     lastRowDSO = lastRowDSO + 1
     wsDSO.Cells(lastRowDSO, 1).value = lastRowDSO - 1
-    wsDSO.Cells(lastRowDSO, 2).value = staffInfo("Лицо")
-    wsDSO.Cells(lastRowDSO, 3).value = staffInfo("Личный номер")
-'    wsDSO.Cells(lastRowDSO, 5).Value = staffInfo("Воинское звание")
-'    wsDSO.Cells(lastRowDSO, 6).Value = staffInfo("Должность")
-'    wsDSO.Cells(lastRowDSO, 7).Value = staffInfo("Часть")
-    ' ...дополнительно любые другие поля из staffInfo
+    wsDSO.Cells(lastRowDSO, 2).value = staffInfo("Р›РёС†Рѕ")
+    wsDSO.Cells(lastRowDSO, 3).value = staffInfo("Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ")
+'    wsDSO.Cells(lastRowDSO, 5).Value = staffInfo("Р’РѕРёРЅСЃРєРѕРµ Р·РІР°РЅРёРµ")
+'    wsDSO.Cells(lastRowDSO, 6).Value = staffInfo("Р”РѕР»Р¶РЅРѕСЃС‚СЊ")
+'    wsDSO.Cells(lastRowDSO, 7).Value = staffInfo("Р§Р°СЃС‚СЊ")
+    ' ...РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ Р»СЋР±С‹Рµ РґСЂСѓРіРёРµ РїРѕР»СЏ РёР· staffInfo
 
-    MsgBox "Данные успешно добавлены в новую строку " & lastRowDSO & " листа ДСО.", vbInformation
+    MsgBox "Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅС‹ РІ РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ " & lastRowDSO & " Р»РёСЃС‚Р° Р”РЎРћ.", vbInformation
 
     wsDSO.Activate
     wsDSO.Cells(lastRowDSO, 2).Select

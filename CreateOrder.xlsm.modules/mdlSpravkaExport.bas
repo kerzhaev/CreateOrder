@@ -1,19 +1,19 @@
 Attribute VB_Name = "mdlSpravkaExport"
 '===============================================================================
-' Модуль mdlSpravkaExport для создания справки о нахождении в зоне СВО на основе шаблона
-' Версия: 2.2.2 (WordSafe, контроль процессов)
+' Module mdlSpravkaExport for creating a certificate of presence in the SVO zone based on a template
+' Version: 2.2.2 (WordSafe, process control)
 '===============================================================================
 
 Option Explicit
 
 '/**
- '* Процедура создания справок о нахождении военнослужащего в зоне СВО с безопасным управлением экземплярами Word.
- '* Гарантирует корректное закрытие документа и приложения Word, удаляет "висячие" процессы Word.
+ ' Procedure for creating certificates of presence of a serviceman in the SVO zone with safe Word instance management.
+ ' Guarantees correct closing of the document and Word application, removes "hanging" Word processes.
  '*/
 Sub ExportToWordSpravkaFromTemplate()
     If mdlHelper.hasCriticalErrors() Then
-        MsgBox "Экспорт справок заблокирован из-за критических ошибок в данных!" & vbCrLf & _
-               "Исправьте все ошибки (красные ячейки) в листе ДСО.", vbCritical, "Экспорт невозможен"
+        MsgBox "Р­РєСЃРїРѕСЂС‚ СЃРїСЂР°РІРѕРє Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ РёР·-Р·Р° РєСЂРёС‚РёС‡РµСЃРєРёС… РѕС€РёР±РѕРє РІ РґР°РЅРЅС‹С…!" & vbCrLf & _
+               "РСЃРїСЂР°РІСЊС‚Рµ РІСЃРµ РѕС€РёР±РєРё (РєСЂР°СЃРЅС‹Рµ СЏС‡РµР№РєРё) РІ Р»РёСЃС‚Рµ Р”РЎРћ.", vbCritical, "Р­РєСЃРїРѕСЂС‚ РЅРµРІРѕР·РјРѕР¶РµРЅ"
         Exit Sub
     End If
 
@@ -41,15 +41,15 @@ Sub ExportToWordSpravkaFromTemplate()
     On Error GoTo ErrorHandler
 
     Application.ScreenUpdating = False
-    Application.StatusBar = "Создание справок ДСО..."
+    Application.StatusBar = "РЎРѕР·РґР°РЅРёРµ СЃРїСЂР°РІРѕРє Р”РЎРћ..."
 
-    templatePath = ThisWorkbook.Path & "\Шаблон_Справка.docx"
+    templatePath = ThisWorkbook.Path & "\РЁР°Р±Р»РѕРЅ_РЎРїСЂР°РІРєР°.docx"
     If dir(templatePath) = "" Then
-        MsgBox "Файл шаблона не найден: " & templatePath, vbCritical
+        MsgBox "Р¤Р°Р№Р» С€Р°Р±Р»РѕРЅР° РЅРµ РЅР°Р№РґРµРЅ: " & templatePath, vbCritical
         GoTo CleanUp
     End If
 
-    ' === КОРРЕКТНО создаём экземпляр Word ===
+    ' === CORRECTLY create Word instance ===
     On Error Resume Next
     Set wdApp = GetObject(, "Word.Application")
     If wdApp Is Nothing Then
@@ -61,17 +61,17 @@ Sub ExportToWordSpravkaFromTemplate()
     On Error GoTo 0
 
     If wdApp Is Nothing Then
-        MsgBox "Не удалось создать экземпляр Word. Операция невозможна.", vbCritical
+        MsgBox "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЌРєР·РµРјРїР»СЏСЂ Word. РћРїРµСЂР°С†РёСЏ РЅРµРІРѕР·РјРѕР¶РЅР°.", vbCritical
         GoTo CleanUp
     End If
 
     wdApp.Visible = False
 
-    Set wsMain = ThisWorkbook.Sheets("ДСО")
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsMain = ThisWorkbook.Sheets("Р”РЎРћ")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
 
     If Not mdlHelper.FindColumnNumbers(wsStaff, colLichniyNomer, colZvanie, colFIO, colDolzhnost, colVoinskayaChast) Then
-        MsgBox "Ошибка: Не удалось найти необходимые столбцы в листе 'Штат'.", vbCritical
+        MsgBox "РћС€РёР±РєР°: РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё РЅРµРѕР±С…РѕРґРёРјС‹Рµ СЃС‚РѕР»Р±С†С‹ РІ Р»РёСЃС‚Рµ 'РЁС‚Р°С‚'.", vbCritical
         GoTo CleanUp
     End If
 
@@ -79,7 +79,7 @@ Sub ExportToWordSpravkaFromTemplate()
     lastRowMain = wsMain.Cells(wsMain.Rows.count, "C").End(xlUp).Row
 
     For i = 2 To lastRowMain
-        Application.StatusBar = "Создание справки " & (i - 1) & " из " & (lastRowMain - 1)
+        Application.StatusBar = "РЎРѕР·РґР°РЅРёРµ СЃРїСЂР°РІРєРё " & (i - 1) & " РёР· " & (lastRowMain - 1)
         currentFIO = Trim(wsMain.Cells(i, 2).value)
         currentLichniyNomer = Trim(wsMain.Cells(i, 3).value)
         If currentLichniyNomer <> "" Then
@@ -90,8 +90,8 @@ Sub ExportToWordSpravkaFromTemplate()
                 mdlHelper.CollectAllPersonPeriods wsMain, i, periodList
                 For j = 1 To periodList.count
                     If periodList(j)(2) < periodList(j)(1) Then
-                        MsgBox "Обнаружена ошибка: дата окончания меньше даты начала. Исправьте периоды для " & currentFIO & " (" & currentLichniyNomer & ")." & vbCrLf & _
-                        "Экспорт не будет выполнен!", vbCritical, "Ошибка данных"
+                        MsgBox "РћР±РЅР°СЂСѓР¶РµРЅР° РѕС€РёР±РєР°: РґР°С‚Р° РѕРєРѕРЅС‡Р°РЅРёСЏ РјРµРЅСЊС€Рµ РґР°С‚С‹ РЅР°С‡Р°Р»Р°. РСЃРїСЂР°РІСЊС‚Рµ РїРµСЂРёРѕРґС‹ РґР»СЏ " & currentFIO & " (" & currentLichniyNomer & ")." & vbCrLf & _
+                        "Р­РєСЃРїРѕСЂС‚ РЅРµ Р±СѓРґРµС‚ РІС‹РїРѕР»РЅРµРЅ!", vbCritical, "РћС€РёР±РєР° РґР°РЅРЅС‹С…"
                         GoTo CleanUp
                     End If
                 Next j
@@ -138,48 +138,48 @@ Sub ExportToWordSpravkaFromTemplate()
                         hasValidPeriods = True
                         If firstDate = "" Then firstDate = Format(periodArr(j, 1), "dd.mm.yyyy")
                         lastDate = Format(periodArr(j, 2), "dd.mm.yyyy")
-                        periodsText = periodsText & "- с " & Format(periodArr(j, 1), "dd.mm.yyyy") & _
-                            " по " & Format(periodArr(j, 2), "dd.mm.yyyy")
+                        periodsText = periodsText & "- СЃ " & Format(periodArr(j, 1), "dd.mm.yyyy") & _
+                            " РїРѕ " & Format(periodArr(j, 2), "dd.mm.yyyy")
                         If periodArr(j, 2) < cutoffDate Then
-                            periodsText = periodsText & " (НЕ АКТУАЛЕН — старше 3 лет + 1 месяц!)"
+                            periodsText = periodsText & " (РќР• РђРљРўРЈРђР›Р•Рќ вЂ” СЃС‚Р°СЂС€Рµ 3 Р»РµС‚ + 1 РјРµСЃСЏС†!)"
                         End If
                         periodsText = periodsText & vbCrLf
                     Next j
                 End If
 
                 If Not hasValidPeriods Then
-                    periodsText = "Нет актуальных периодов службы в зоне СВО." & vbCrLf
+                    periodsText = "РќРµС‚ Р°РєС‚СѓР°Р»СЊРЅС‹С… РїРµСЂРёРѕРґРѕРІ СЃР»СѓР¶Р±С‹ РІ Р·РѕРЅРµ РЎР’Рћ." & vbCrLf
                 End If
 
                 With wdDoc.Content.Find
                     .ClearFormatting
                     .Replacement.ClearFormatting
 
-                    .text = "[ЗВАНИЕ]"
+                    .text = "[Р—Р’РђРќРР•]"
                     .Replacement.text = mdlHelper.GetZvanieImenitelny(zvanie)
                     .Execute Replace:=2
 
-                    .text = "[ФИО]"
+                    .text = "[Р¤РРћ]"
                     .Replacement.text = fio
                     .Execute Replace:=2
 
-                    .text = "[ЛИЧНЫЙ_НОМЕР]"
+                    .text = "[Р›РР§РќР«Р™_РќРћРњР•Р ]"
                     .Replacement.text = lichniyNomer
                     .Execute Replace:=2
 
-                    .text = "[ДОЛЖНОСТЬ]"
+                    .text = "[Р”РћР›Р–РќРћРЎРўР¬]"
                     .Replacement.text = mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast)
                     .Execute Replace:=2
                 End With
 
-                ' === Вставка periodsText через Range.InsertAfter кусками по 230 символов ===
+                ' === Inserting periodsText via Range.InsertAfter in chunks of 230 characters ===
                 Dim rng As Object
                 Set rng = wdDoc.Content
                 With rng.Find
-                    .text = "[ПЕРИОДЫ]"
+                    .text = "[РџР•Р РРћР”Р«]"
                     If .Execute Then
                         rng.Select
-                        rng.text = "" ' Очищаем плейсхолдер
+                        rng.text = "" ' Clear placeholder
                         Dim partLen As Integer, startPos As Integer, periodChunk As String
                         partLen = 230
                         For startPos = 1 To Len(periodsText) Step partLen
@@ -192,11 +192,11 @@ Sub ExportToWordSpravkaFromTemplate()
                 Dim cleanFIO As String, periodForFileName As String
                 cleanFIO = Replace(Replace(Replace(fio, " ", "_"), ".", ""), ",", "")
                 If firstDate <> "" And lastDate <> "" Then
-                    periodForFileName = firstDate & "_по_" & lastDate
+                    periodForFileName = firstDate & "_РїРѕ_" & lastDate
                 Else
-                    periodForFileName = "нет_актуальных_периодов"
+                    periodForFileName = "РЅРµС‚_Р°РєС‚СѓР°Р»СЊРЅС‹С…_РїРµСЂРёРѕРґРѕРІ"
                 End If
-                fileName = "СправкаДСО_" & lichniyNomer & "_" & cleanFIO & "_" & periodForFileName & ".docx"
+                fileName = "РЎРїСЂР°РІРєР°Р”РЎРћ_" & lichniyNomer & "_" & cleanFIO & "_" & periodForFileName & ".docx"
                 savePath = ThisWorkbook.Path & "\" & fileName
 
                 Call mdlHelper.SaveWordDocumentSafe(wdDoc, savePath)
@@ -206,11 +206,11 @@ Sub ExportToWordSpravkaFromTemplate()
         End If
     Next i
 
-    MsgBox "Справки созданы и сохранены в папке: " & ThisWorkbook.Path, vbInformation, "Справки готовы"
+    MsgBox "РЎРїСЂР°РІРєРё СЃРѕР·РґР°РЅС‹ Рё СЃРѕС…СЂР°РЅРµРЅС‹ РІ РїР°РїРєРµ: " & ThisWorkbook.Path, vbInformation, "РЎРїСЂР°РІРєРё РіРѕС‚РѕРІС‹"
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка при создании справок: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё СЃРїСЂР°РІРѕРє: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
     If Not wdDoc Is Nothing Then
         wdDoc.Close False
         Set wdDoc = Nothing
@@ -219,13 +219,13 @@ ErrorHandler:
 CleanUp:
     Application.ScreenUpdating = True
     Application.StatusBar = False
-    ' Дополнительно: Принудительный сброс висящих экземпляров Word
+    ' Additionally: Forced reset of hanging Word instances
     On Error Resume Next
     If Not wdApp Is Nothing Then
         If wordWasNotRunning Then
             wdApp.Quit
         Else
-            ' Убеждаемся, что нет открытых документов
+            ' Ensure no open documents
             If wdApp.Documents.count = 0 Then
                 wdApp.Quit
             End If
@@ -233,7 +233,7 @@ CleanUp:
         Set wdApp = Nothing
     End If
 
-    ' Принудительное завершение посторонних процессов Word через WMI
+    ' Forced termination of extraneous Word processes via WMI
     Dim wmi As Object, procs As Object, proc As Object
     Set wmi = GetObject("winmgmts:")
     Set procs = wmi.ExecQuery("SELECT * FROM Win32_Process WHERE Name='WINWORD.EXE'")
@@ -246,5 +246,4 @@ CleanUp:
     Set wsMain = Nothing
     Set wsStaff = Nothing
 End Sub
-
 

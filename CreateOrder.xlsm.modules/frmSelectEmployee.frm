@@ -16,7 +16,7 @@ Attribute VB_Exposed = False
 
 'version 5#
 'Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmSelectEmployee
-'   Caption = "Выбор сотрудника"
+'   Caption = "Р’С‹Р±РѕСЂ СЃРѕС‚СЂСѓРґРЅРёРєР°"
 '   ClientHeight = 6000
 '   ClientLeft = 120
 '   ClientTop = 465
@@ -31,30 +31,30 @@ Attribute VB_Exposed = False
 'Attribute VB_Exposed = False
 
 ' =====================================================================
-' Форма выбора сотрудника для заполнения листа "Выплаты_Без_Периодов"
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' Р¤РѕСЂРјР° РІС‹Р±РѕСЂР° СЃРѕС‚СЂСѓРґРЅРёРєР° РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ Р»РёСЃС‚Р° "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
+' РђРІС‚РѕСЂ: РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
 ' =====================================================================
 
 Option Explicit
 
-' === Публичные переменные для передачи результата ===
-Public selectedLichniyNomer As String     ' Выбранный личный номер
-Public selectedFIO As String              ' Выбранное ФИО
-Public isCancelled As Boolean             ' Флаг отмены
+' === РџСѓР±Р»РёС‡РЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РїРµСЂРµРґР°С‡Рё СЂРµР·СѓР»СЊС‚Р°С‚Р° ===
+Public selectedLichniyNomer As String     ' Р’С‹Р±СЂР°РЅРЅС‹Р№ Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ
+Public selectedFIO As String              ' Р’С‹Р±СЂР°РЅРЅРѕРµ Р¤РРћ
+Public isCancelled As Boolean             ' Р¤Р»Р°Рі РѕС‚РјРµРЅС‹
 
-' Примечание: Форма требует создания элементов управления в дизайнере Excel:
-' - txtSearch (TextBox) - поле поиска
-' - lstResults (ListBox) - список результатов, ColumnCount = 4
-' - lblStatus (Label) - статус (количество найденных)
-' - lblFIO (Label) - ФИО выбранного сотрудника
-' - lblZvanie (Label) - звание
-' - lblDolzhnost (Label) - должность
-' - btnSelect (CommandButton) - кнопка "Выбрать"
-' - btnCancel (CommandButton) - кнопка "Отмена"
+' РџСЂРёРјРµС‡Р°РЅРёРµ: Р¤РѕСЂРјР° С‚СЂРµР±СѓРµС‚ СЃРѕР·РґР°РЅРёСЏ СЌР»РµРјРµРЅС‚РѕРІ СѓРїСЂР°РІР»РµРЅРёСЏ РІ РґРёР·Р°Р№РЅРµСЂРµ Excel:
+' - txtSearch (TextBox) - РїРѕР»Рµ РїРѕРёСЃРєР°
+' - lstResults (ListBox) - СЃРїРёСЃРѕРє СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ, ColumnCount = 4
+' - lblStatus (Label) - СЃС‚Р°С‚СѓСЃ (РєРѕР»РёС‡РµСЃС‚РІРѕ РЅР°Р№РґРµРЅРЅС‹С…)
+' - lblFIO (Label) - Р¤РРћ РІС‹Р±СЂР°РЅРЅРѕРіРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°
+' - lblZvanie (Label) - Р·РІР°РЅРёРµ
+' - lblDolzhnost (Label) - РґРѕР»Р¶РЅРѕСЃС‚СЊ
+' - btnSelect (CommandButton) - РєРЅРѕРїРєР° "Р’С‹Р±СЂР°С‚СЊ"
+' - btnCancel (CommandButton) - РєРЅРѕРїРєР° "РћС‚РјРµРЅР°"
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Инициализация формы
+' @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
+' @description РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С„РѕСЂРјС‹
 ' =============================================
 Private Sub UserForm_Initialize()
     On Error GoTo ErrorHandler
@@ -65,25 +65,25 @@ Private Sub UserForm_Initialize()
     selectedLichniyNomer = ""
     selectedFIO = ""
     
-    ' Настройка ListBox
+    ' РќР°СЃС‚СЂРѕР№РєР° ListBox
     lstResults.ColumnCount = 4
     lstResults.ColumnWidths = "80 pt;150 pt;100 pt;200 pt"
     lstResults.Clear
     
     lblStatus.Caption = ""
-    lblFIO.Caption = "ФИО:"
-    lblZvanie.Caption = "Звание:"
-    lblDolzhnost.Caption = "Должность:"
+    lblFIO.Caption = "Р¤РРћ:"
+    lblZvanie.Caption = "Р—РІР°РЅРёРµ:"
+    lblDolzhnost.Caption = "Р”РѕР»Р¶РЅРѕСЃС‚СЊ:"
     
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при инициализации формы: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё С„РѕСЂРјС‹: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработка изменения текста поиска
+' @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
+' @description РћР±СЂР°Р±РѕС‚РєР° РёР·РјРµРЅРµРЅРёСЏ С‚РµРєСЃС‚Р° РїРѕРёСЃРєР°
 ' =============================================
 Private Sub txtSearch_Change()
     On Error GoTo ErrorHandler
@@ -98,11 +98,11 @@ Private Sub txtSearch_Change()
     Dim colTableNumber As Long
     Dim testValue As Variant
     
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
     
     If mdlHelper.colFIO_Global <= 0 Or mdlHelper.colFIO_Global > wsStaff.Columns.count Or _
        mdlHelper.colLichniyNomer_Global <= 0 Or mdlHelper.colLichniyNomer_Global > wsStaff.Columns.count Then
-        MsgBox "Ошибка: Столбцы листа не инициализированы. Проверьте структуру листа 'Штат' и перезапустите!", vbCritical
+        MsgBox "РћС€РёР±РєР°: РЎС‚РѕР»Р±С†С‹ Р»РёСЃС‚Р° РЅРµ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅС‹. РџСЂРѕРІРµСЂСЊС‚Рµ СЃС‚СЂСѓРєС‚СѓСЂСѓ Р»РёСЃС‚Р° 'РЁС‚Р°С‚' Рё РїРµСЂРµР·Р°РїСѓСЃС‚РёС‚Рµ!", vbCritical
         Exit Sub
     End If
     
@@ -110,7 +110,7 @@ Private Sub txtSearch_Change()
     lstResults.Clear
     
     If Len(query) < 2 Then
-        lstResults.AddItem "Введите минимум 2 символа для поиска..."
+        lstResults.AddItem "Р’РІРµРґРёС‚Рµ РјРёРЅРёРјСѓРј 2 СЃРёРјРІРѕР»Р° РґР»СЏ РїРѕРёСЃРєР°..."
         lblStatus.Caption = ""
         Exit Sub
     End If
@@ -118,26 +118,26 @@ Private Sub txtSearch_Change()
     lastRow = wsStaff.Cells(wsStaff.Rows.count, mdlHelper.colFIO_Global).End(xlUp).Row
     foundCount = 0
     
-    ' Получаем номер колонки с табельными номерами (если есть)
+    ' РџРѕР»СѓС‡Р°РµРј РЅРѕРјРµСЂ РєРѕР»РѕРЅРєРё СЃ С‚Р°Р±РµР»СЊРЅС‹РјРё РЅРѕРјРµСЂР°РјРё (РµСЃР»Рё РµСЃС‚СЊ)
     colTableNumber = mdlHelper.FindTableNumberColumn(wsStaff)
     
     For i = 2 To lastRow
         Dim matchFound As Boolean
         matchFound = False
         
-        ' Поиск по ФИО (частичное совпадение)
+        ' РџРѕРёСЃРє РїРѕ Р¤РРћ (С‡Р°СЃС‚РёС‡РЅРѕРµ СЃРѕРІРїР°РґРµРЅРёРµ)
         If InStr(LCase(wsStaff.Cells(i, mdlHelper.colFIO_Global).value), query) > 0 Then
             matchFound = True
         End If
         
-        ' Поиск по личному номеру (частичное совпадение)
+        ' РџРѕРёСЃРє РїРѕ Р»РёС‡РЅРѕРјСѓ РЅРѕРјРµСЂСѓ (С‡Р°СЃС‚РёС‡РЅРѕРµ СЃРѕРІРїР°РґРµРЅРёРµ)
         If Not matchFound Then
             If InStr(LCase(wsStaff.Cells(i, mdlHelper.colLichniyNomer_Global).value), query) > 0 Then
                 matchFound = True
             End If
         End If
         
-        ' Поиск по табельному номеру (точное совпадение, если колонка найдена)
+        ' РџРѕРёСЃРє РїРѕ С‚Р°Р±РµР»СЊРЅРѕРјСѓ РЅРѕРјРµСЂСѓ (С‚РѕС‡РЅРѕРµ СЃРѕРІРїР°РґРµРЅРёРµ, РµСЃР»Рё РєРѕР»РѕРЅРєР° РЅР°Р№РґРµРЅР°)
         If Not matchFound And colTableNumber > 0 Then
             testValue = wsStaff.Cells(i, colTableNumber).value
             If Not IsEmpty(testValue) And IsNumeric(testValue) Then
@@ -158,22 +158,22 @@ Private Sub txtSearch_Change()
     Next i
     
     If foundCount = 0 Then
-        lstResults.AddItem "Ничего не найдено."
+        lstResults.AddItem "РќРёС‡РµРіРѕ РЅРµ РЅР°Р№РґРµРЅРѕ."
         lblStatus.Caption = ""
     Else
-        lblStatus.Caption = "Найдено: " & foundCount
+        lblStatus.Caption = "РќР°Р№РґРµРЅРѕ: " & foundCount
     End If
     
     Exit Sub
     
 ErrorHandler:
-    lstResults.AddItem "Ошибка поиска: " & Err.Description
+    lstResults.AddItem "РћС€РёР±РєР° РїРѕРёСЃРєР°: " & Err.Description
     lblStatus.Caption = ""
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработка клика по списку результатов
+' @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
+' @description РћР±СЂР°Р±РѕС‚РєР° РєР»РёРєР° РїРѕ СЃРїРёСЃРєСѓ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
 ' =============================================
 Private Sub lstResults_Click()
     On Error GoTo ErrorHandler
@@ -191,15 +191,15 @@ Private Sub lstResults_Click()
     lichniyNomer = fields(0)
     
     Call mdlHelper.EnsureStaffColumnsInitialized
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
     lastRow = wsStaff.Cells(wsStaff.Rows.count, mdlHelper.colLichniyNomer_Global).End(xlUp).Row
     
-    ' Находим данные сотрудника
+    ' РќР°С…РѕРґРёРј РґР°РЅРЅС‹Рµ СЃРѕС‚СЂСѓРґРЅРёРєР°
     For i = 2 To lastRow
         If Trim(wsStaff.Cells(i, mdlHelper.colLichniyNomer_Global).value) = Trim(lichniyNomer) Then
-            lblFIO.Caption = "ФИО: " & wsStaff.Cells(i, mdlHelper.colFIO_Global).value
-            lblZvanie.Caption = "Звание: " & wsStaff.Cells(i, mdlHelper.colZvanie_Global).value
-            lblDolzhnost.Caption = "Должность: " & wsStaff.Cells(i, mdlHelper.colDolzhnost_Global).value
+            lblFIO.Caption = "Р¤РРћ: " & wsStaff.Cells(i, mdlHelper.colFIO_Global).value
+            lblZvanie.Caption = "Р—РІР°РЅРёРµ: " & wsStaff.Cells(i, mdlHelper.colZvanie_Global).value
+            lblDolzhnost.Caption = "Р”РѕР»Р¶РЅРѕСЃС‚СЊ: " & wsStaff.Cells(i, mdlHelper.colDolzhnost_Global).value
             Exit For
         End If
     Next i
@@ -207,12 +207,12 @@ Private Sub lstResults_Click()
     Exit Sub
     
 ErrorHandler:
-    ' Игнорируем ошибки при клике
+    ' РРіРЅРѕСЂРёСЂСѓРµРј РѕС€РёР±РєРё РїСЂРё РєР»РёРєРµ
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработка двойного клика по списку (выбор сотрудника)
+' @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
+' @description РћР±СЂР°Р±РѕС‚РєР° РґРІРѕР№РЅРѕРіРѕ РєР»РёРєР° РїРѕ СЃРїРёСЃРєСѓ (РІС‹Р±РѕСЂ СЃРѕС‚СЂСѓРґРЅРёРєР°)
 ' =============================================
 Private Sub lstResults_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
     On Error GoTo ErrorHandler
@@ -226,18 +226,18 @@ Private Sub lstResults_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
     Exit Sub
     
 ErrorHandler:
-    ' Игнорируем ошибки
+    ' РРіРЅРѕСЂРёСЂСѓРµРј РѕС€РёР±РєРё
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработка кнопки "Выбрать"
+' @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
+' @description РћР±СЂР°Р±РѕС‚РєР° РєРЅРѕРїРєРё "Р’С‹Р±СЂР°С‚СЊ"
 ' =============================================
 Private Sub btnSelect_Click()
     On Error GoTo ErrorHandler
     
     If lstResults.ListCount = 0 Or lstResults.ListIndex = -1 Then
-        MsgBox "Выберите сотрудника из списка.", vbExclamation, "Внимание"
+        MsgBox "Р’С‹Р±РµСЂРёС‚Рµ СЃРѕС‚СЂСѓРґРЅРёРєР° РёР· СЃРїРёСЃРєР°.", vbExclamation, "Р’РЅРёРјР°РЅРёРµ"
         Exit Sub
     End If
     
@@ -253,12 +253,12 @@ Private Sub btnSelect_Click()
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при выборе сотрудника: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РІС‹Р±РѕСЂРµ СЃРѕС‚СЂСѓРґРЅРёРєР°: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработка кнопки "Отмена"
+' @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
+' @description РћР±СЂР°Р±РѕС‚РєР° РєРЅРѕРїРєРё "РћС‚РјРµРЅР°"
 ' =============================================
 Private Sub btnCancel_Click()
     On Error GoTo ErrorHandler
@@ -272,7 +272,7 @@ Private Sub btnCancel_Click()
     Exit Sub
     
 ErrorHandler:
-    ' Игнорируем ошибки
+    ' РРіРЅРѕСЂРёСЂСѓРµРј РѕС€РёР±РєРё
 End Sub
 
 

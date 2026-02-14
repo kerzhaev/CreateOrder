@@ -1,42 +1,42 @@
 Attribute VB_Name = "mdlPaymentTypes"
 ' ===============================================================================
-' Модуль mdlPaymentTypes
-' Версия: 1.0.0
-' Дата: 01.12.2025
-' Описание: Конфигурация типов выплат для системы надбавок без периодов
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' Module mdlPaymentTypes
+' Version: 1.0.0
+' Date: 14.02.2026
+' Description: Configuration of payment types for the system of allowances without periods
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
 ' ===============================================================================
 
 Option Explicit
 
-' Константы
-Public Const DEFAULT_TEMPLATE As String = "Шаблон_Универсальный.docx"
+' Constants
+Public Const DEFAULT_TEMPLATE As String = "РЁР°Р±Р»РѕРЅ_РЈРЅРёРІРµСЂСЃР°Р»СЊРЅС‹Р№.docx"
 
-' Тип для конфигурации типа выплаты
+' Type for payment type configuration
 Public Type PaymentTypeConfig
-    typeName As String              ' "Водители СдЕ"
+    typeName As String              ' "Drivers CDE"
     TypeCode As String              ' "DRIVER_SDE"
-    WordTemplate As String          ' "Шаблон_Водители.docx"
-    Description As String           ' Описание
+    WordTemplate As String          ' "РЁР°Р±Р»РѕРЅ_Р’РѕРґРёС‚РµР»Рё.docx"
+    Description As String           ' Description
 End Type
 
-' Тип для данных о выплате без периодов
+' Type for payment data without periods
 Public Type PaymentWithoutPeriod
     fio As String
     lichniyNomer As String
-    Rank As String                  ' Из листа "Штат"
-    Position As String              ' Из листа "Штат"
-    VoinskayaChast As String        ' Из листа "Штат"
+    Rank As String                  ' From sheet "Staff" (Shtat)
+    Position As String              ' From sheet "Staff" (Shtat)
+    VoinskayaChast As String        ' From sheet "Staff" (Shtat)
     paymentType As String
     amount As String
     foundation As String
 End Type
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Получение конфигурации типа выплаты из справочника
-' @param paymentType As String - название типа выплаты
-' @return PaymentTypeConfig - конфигурация типа выплаты
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Get payment type configuration from reference
+' @param paymentType As String - payment type name
+' @return PaymentTypeConfig - payment type configuration
 ' =============================================
 Public Function GetPaymentTypeConfig(ByVal paymentType As String) As PaymentTypeConfig
     On Error GoTo ErrorHandler
@@ -44,40 +44,40 @@ Public Function GetPaymentTypeConfig(ByVal paymentType As String) As PaymentType
     Dim configDict As Object
     Dim config As PaymentTypeConfig
     
-    ' Получаем конфигурацию из справочника
+    ' Get configuration from reference
     Set configDict = mdlReferenceData.GetPaymentTypeConfig(paymentType)
     
-    ' Если конфигурация найдена
+    ' If configuration is found
     If configDict.count > 0 Then
         config.typeName = CStr(configDict("TypeName"))
         config.TypeCode = CStr(configDict("TypeCode"))
         config.WordTemplate = CStr(configDict("WordTemplate"))
         config.Description = CStr(configDict("Description"))
     Else
-        ' Конфигурация по умолчанию
+        ' Default configuration
         config.typeName = paymentType
         config.TypeCode = ""
         config.WordTemplate = DEFAULT_TEMPLATE
-        config.Description = "Тип выплаты: " & paymentType
+        config.Description = "РўРёРї РІС‹РїР»Р°С‚С‹: " & paymentType
     End If
     
     GetPaymentTypeConfig = config
     Exit Function
     
 ErrorHandler:
-    ' Возвращаем конфигурацию по умолчанию при ошибке
+    ' Return default configuration on error
     config.typeName = paymentType
     config.TypeCode = ""
     config.WordTemplate = DEFAULT_TEMPLATE
-    config.Description = "Тип выплаты: " & paymentType
+    config.Description = "РўРёРї РІС‹РїР»Р°С‚С‹: " & paymentType
     GetPaymentTypeConfig = config
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Получение полного пути к шаблону Word
-' @param templateName As String - имя файла шаблона
-' @return String - полный путь к шаблону или пустая строка если файл не найден
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Get full path to Word template
+' @param templateName As String - template file name
+' @return String - full path to template or empty string if file not found
 ' =============================================
 Public Function GetTemplatePath(ByVal templateName As String) As String
     On Error GoTo ErrorHandler
@@ -92,7 +92,7 @@ Public Function GetTemplatePath(ByVal templateName As String) As String
     
     filePath = basePath & templateName
     
-    ' Проверяем существование файла
+    ' Check file existence
     If dir(filePath) <> "" Then
         GetTemplatePath = filePath
     Else
@@ -106,17 +106,17 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Получение пути к шаблону с учетом приоритета (тип -> универсальный -> отсутствует)
-' @param config As PaymentTypeConfig - конфигурация типа выплаты
-' @return String - полный путь к шаблону или пустая строка если шаблоны отсутствуют
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Get template path with priority (type -> universal -> missing)
+' @param config As PaymentTypeConfig - payment type configuration
+' @return String - full path to template or empty string if templates are missing
 ' =============================================
 Public Function GetTemplatePathWithFallback(ByRef config As PaymentTypeConfig) As String
     On Error GoTo ErrorHandler
     
     Dim templatePath As String
     
-    ' 1. Пробуем шаблон для типа выплаты
+    ' 1. Try template for payment type
     If config.WordTemplate <> "" Then
         templatePath = GetTemplatePath(config.WordTemplate)
         If templatePath <> "" Then
@@ -125,18 +125,17 @@ Public Function GetTemplatePathWithFallback(ByRef config As PaymentTypeConfig) A
         End If
     End If
     
-    ' 2. Пробуем единый универсальный шаблон
+    ' 2. Try single universal template
     templatePath = GetTemplatePath(DEFAULT_TEMPLATE)
     If templatePath <> "" Then
         GetTemplatePathWithFallback = templatePath
         Exit Function
     End If
     
-    ' 3. Шаблоны отсутствуют
+    ' 3. Templates are missing
     GetTemplatePathWithFallback = ""
     Exit Function
     
 ErrorHandler:
     GetTemplatePathWithFallback = ""
 End Function
-

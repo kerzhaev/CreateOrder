@@ -1,108 +1,113 @@
 Attribute VB_Name = "mdlHelper"
 ' ==============================================================================
-' Модуль mdlHelper
-' Универсальные вспомогательные функции и процедуры для использования во всех частях проекта
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' Дата: 31.10.2025
-' Описание: Все функции и процедуры объявлены как Public для реиспользования
+' Module: mdlHelper
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' Date: 14.02.2026
+' Description: Universal utility functions and procedures for the project.
+'              Contains logic for staff lookup, declension (Russian grammar),
+'              and date handling.
 ' ==============================================================================
-
 
 Option Explicit
 
-
-
+' Global variables for column indexes (Cached for performance)
 Public colFIO_Global As Long
 Public colLichniyNomer_Global As Long
 Public colZvanie_Global As Long
 Public colDolzhnost_Global As Long
 Public colVoinskayaChast_Global As Long
 
+' /**
+'  * Initializes column indexes for the "Staff" (Shtat) sheet.
+'  * Must be called before accessing global column variables.
+'  */
 Public Sub InitStaffColumnIndexes()
     Dim wsStaff As Worksheet
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚") ' Sheet: Staff
+    
     If Not FindColumnNumbers(wsStaff, colLichniyNomer_Global, colZvanie_Global, colFIO_Global, colDolzhnost_Global, colVoinskayaChast_Global) Then
-        MsgBox "Корректные индексы столбцов не удалось определить. Работа программы невозможна.", vbCritical
+        MsgBox "РљРѕСЂСЂРµРєС‚РЅС‹Рµ РёРЅРґРµРєСЃС‹ СЃС‚РѕР»Р±С†РѕРІ РЅРµ СѓРґР°Р»РѕСЃСЊ РѕРїСЂРµРґРµР»РёС‚СЊ. Р Р°Р±РѕС‚Р° РїСЂРѕРіСЂР°РјРјС‹ РЅРµРІРѕР·РјРѕР¶РЅР°.", vbCritical, "РћС€РёР±РєР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё"
         End
     End If
 End Sub
 
-' Поиск строки с персональными данными по личному номеру
+' /**
+'  * Finds a row number containing specific personal data (Optimized).
+'  * Uses Application.Match for high performance instead of looping.
+'  *
+'  * @param ws Worksheet - Target worksheet
+'  * @param lichniyNomer String - Value to search for
+'  * @param colNum Long - Column index to search in
+'  * @return Long - Row number or 0 if not found
+'  */
 Public Function FindStaffRow(ws As Worksheet, lichniyNomer As String, colNum As Long) As Long
-    Dim lastRow As Long
-    Dim i As Long
-    lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
-    For i = 2 To lastRow
-        If Trim(CStr(ws.Cells(i, colNum).value)) = lichniyNomer Then
-            FindStaffRow = i
-            Exit Function
-        End If
-    Next i
-    FindStaffRow = 0
+    Dim res As Variant
+    
+    ' Optimization: Use Excel's native Match function
+    res = Application.Match(lichniyNomer, ws.Columns(colNum), 0)
+    
+    If IsError(res) Then
+        FindStaffRow = 0
+    Else
+        FindStaffRow = CLng(res)
+    End If
 End Function
 
-'/**
-' * Универсальная функция определения индексов нужных столбцов на листе "Штат".
-' * Автоматически выбирает:
-' *   - "Лицо" (ФИО) — только первый полностью текстовый столбец с пробелами;
-' *   - "Штатная должность" — только первый чисто текстовый столбец;
-' *   - "Личный номер", "Воинское звание", "Часть" — по заголовкам.
-' * Если нужный столбец не найден, сообщает пользователю.
-' *
-' * @param ws Worksheet — лист "Штат"
-' * @param colLichniyNomer Long (ByRef)
-' * @param colZvanie Long (ByRef)
-' * @param colFIO Long (ByRef)
-' * @param colDolzhnost Long (ByRef)
-' * @param colVoinskayaChast Long (ByRef)
-' * @return Boolean — True, если все индексы успешно определены, иначе False
-' */
+' /**
+'  * Universal function to determine column indexes on the "Staff" sheet.
+'  * Logic:
+'  *   - "Name" (FIO): First text-only column with spaces.
+'  *   - "Position": First text-only column.
+'  *   - "ID", "Rank", "Unit": By header keywords.
+'  *
+'  * @return Boolean - True if all critical columns are found.
+'  */
 Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long, ByRef colZvanie As Long, ByRef colFIO As Long, ByRef colDolzhnost As Long, ByRef colVoinskayaChast As Long) As Boolean
     Dim lastCol As Long, i As Long, headerText As String
     Dim foundFIO As Boolean, foundDolzhnost As Boolean
     Dim msgErr As String
 
+    ' Reset variables
     colLichniyNomer = 0: colZvanie = 0: colFIO = 0: colDolzhnost = 0: colVoinskayaChast = 0
     foundFIO = False: foundDolzhnost = False
     msgErr = ""
 
     lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
 
-    ' Личный номер (по заголовку, не по типу)
+    ' 1. Find Personal ID (by header)
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
-        If InStr(headerText, "личный номер") > 0 Then
+        If InStr(headerText, "Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ") > 0 Then
             colLichniyNomer = i
             Exit For
         End If
     Next i
-    If colLichniyNomer = 0 Then msgErr = msgErr & "Не найден столбец 'Личный номер'." & vbCrLf
+    If colLichniyNomer = 0 Then msgErr = msgErr & "РќРµ РЅР°Р№РґРµРЅ СЃС‚РѕР»Р±РµС† 'Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ'." & vbCrLf
 
-    ' Воинское звание (по заголовку)
+    ' 2. Find Rank (by header)
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
-        If InStr(headerText, "воинское звание") > 0 Then
+        If InStr(headerText, "РІРѕРёРЅСЃРєРѕРµ Р·РІР°РЅРёРµ") > 0 Then
             colZvanie = i
             Exit For
         End If
     Next i
-    If colZvanie = 0 Then msgErr = msgErr & "Не найден столбец 'Воинское звание'." & vbCrLf
+    If colZvanie = 0 Then msgErr = msgErr & "РќРµ РЅР°Р№РґРµРЅ СЃС‚РѕР»Р±РµС† 'Р’РѕРёРЅСЃРєРѕРµ Р·РІР°РЅРёРµ'." & vbCrLf
 
-       ' Часть (по заголовку "часть" или "раздел персонала")
+    ' 3. Find Unit (by header)
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
-        If InStr(headerText, "часть") > 0 Or InStr(headerText, "раздел персонала") > 0 Then
+        If InStr(headerText, "С‡Р°СЃС‚СЊ") > 0 Or InStr(headerText, "СЂР°Р·РґРµР» РїРµСЂСЃРѕРЅР°Р»Р°") > 0 Then
             colVoinskayaChast = i
             Exit For
         End If
     Next i
-    If colVoinskayaChast = 0 Then msgErr = msgErr & "Не найден столбец 'Часть' или 'Раздел персонала'." & vbCrLf
+    If colVoinskayaChast = 0 Then msgErr = msgErr & "РќРµ РЅР°Р№РґРµРЅ СЃС‚РѕР»Р±РµС† 'Р§Р°СЃС‚СЊ' РёР»Рё 'Р Р°Р·РґРµР» РїРµСЂСЃРѕРЅР°Р»Р°'." & vbCrLf
 
-
-    ' Поиск ФИО (столбец с названием "лицо", только полностью текстовый, с пробелами)
+    ' 4. Find FIO (Name) - heuristic check
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
-        If headerText = "лицо" Then
+        If headerText = "Р»РёС†Рѕ" Then
             If IsTextFIOColumn(ws, i) Then
                 colFIO = i
                 foundFIO = True
@@ -110,12 +115,12 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
             End If
         End If
     Next i
-    If Not foundFIO Then msgErr = msgErr & "Не найден корректный столбец 'Лицо' (ФИО)." & vbCrLf
+    If Not foundFIO Then msgErr = msgErr & "РќРµ РЅР°Р№РґРµРЅ РєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚РѕР»Р±РµС† 'Р›РёС†Рѕ' (Р¤РРћ)." & vbCrLf
 
-    ' Поиск штатной должности (столбец с названием "штатная должность", только чисто текстовый)
+    ' 5. Find Position - heuristic check
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
-        If InStr(headerText, "штатная должность") > 0 Then
+        If InStr(headerText, "С€С‚Р°С‚РЅР°СЏ РґРѕР»Р¶РЅРѕСЃС‚СЊ") > 0 Then
             If IsTextColumn(ws, i) Then
                 colDolzhnost = i
                 foundDolzhnost = True
@@ -123,28 +128,30 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
             End If
         End If
     Next i
-    If Not foundDolzhnost Then msgErr = msgErr & "Не найден корректный столбец 'Штатная должность'." & vbCrLf
+    If Not foundDolzhnost Then msgErr = msgErr & "РќРµ РЅР°Р№РґРµРЅ РєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚РѕР»Р±РµС† 'РЁС‚Р°С‚РЅР°СЏ РґРѕР»Р¶РЅРѕСЃС‚СЊ'." & vbCrLf
 
-    ' Итоговая проверка
+    ' Validate results
     If colLichniyNomer > 0 And colZvanie > 0 And colFIO > 0 And colDolzhnost > 0 And colVoinskayaChast > 0 Then
         FindColumnNumbers = True
     Else
         FindColumnNumbers = False
-        MsgBox "Ошибка при определении столбцов на листе 'Штат':" & vbCrLf & msgErr, vbCritical, "Ошибка структуры"
+        MsgBox "РћС€РёР±РєР° РїСЂРё РѕРїСЂРµРґРµР»РµРЅРёРё СЃС‚РѕР»Р±С†РѕРІ РЅР° Р»РёСЃС‚Рµ 'РЁС‚Р°С‚':" & vbCrLf & msgErr, vbCritical, "РћС€РёР±РєР° СЃС‚СЂСѓРєС‚СѓСЂС‹"
     End If
 End Function
 
-'/**
-'* Проверяет, является ли столбец ФИО полностью текстовым с пробелом (для выбора однозначного столбца ФИО).
-'* @param ws Worksheet
-'* @param colNum Long
-'* @return Boolean
-'*/
+' /**
+'  * Checks if a column likely contains FIO (Full Name).
+'  * Heuristic: Mostly text, contains spaces, not numeric.
+'  */
 Private Function IsTextFIOColumn(ws As Worksheet, colNum As Long) As Boolean
     Dim lastRow As Long, i As Long, value As String
     Dim textCount As Long, totalCount As Long
+    
     lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
-    For i = 2 To lastRow
+    ' Optimize: Check first 50 rows only to speed up init
+    Dim checkLimit As Long: checkLimit = IIf(lastRow > 50, 50, lastRow)
+    
+    For i = 2 To checkLimit
         value = Trim(ws.Cells(i, colNum).value)
         If value <> "" Then
             totalCount = totalCount + 1
@@ -153,6 +160,7 @@ Private Function IsTextFIOColumn(ws As Worksheet, colNum As Long) As Boolean
             End If
         End If
     Next i
+    
     If totalCount > 0 Then
         IsTextFIOColumn = (textCount / totalCount) > 0.7
     Else
@@ -160,36 +168,46 @@ Private Function IsTextFIOColumn(ws As Worksheet, colNum As Long) As Boolean
     End If
 End Function
 
-
-
-
-' Извлечение номера войсковой части из текстовой строки
+' /**
+'  * Extracts the Unit Number from a text string.
+'  * Example: "Unit 12345 text" -> "12345"
+'  */
 Public Function ExtractVoinskayaChast(inputText As String) As String
     Dim text As String, i As Long, result As String, inNumber As Boolean
     text = Trim(inputText): result = "": inNumber = False
+    
     For i = 1 To Len(text)
         If IsNumeric(Mid(text, i, 1)) Then
             result = result & Mid(text, i, 1): inNumber = True
         Else
-            If inNumber And Len(result) >= 4 Then ExtractVoinskayaChast = result: Exit Function
+            If inNumber And Len(result) >= 4 Then
+                ExtractVoinskayaChast = result
+                Exit Function
+            End If
             If inNumber Then result = "": inNumber = False
         End If
     Next i
+    
     If Len(result) >= 4 Then ExtractVoinskayaChast = result Else ExtractVoinskayaChast = inputText
 End Function
 
-' Проверка актуальности периода (по дате окончания)
+' /**
+'  * Checks if the period is considered "Actual" (recent).
+'  */
 Public Function IsPeriodActual(dateEnd As Date) As Boolean
     IsPeriodActual = (dateEnd >= GetExportCutoffDate())
 End Function
 
-' Расчет граничной даты для фильтрации актуальных периодов (3 года + 1 месяц назад)
+' /**
+'  * Calculates the cutoff date for export (3 years + 1 month back).
+'  */
 Public Function GetExportCutoffDate() As Date
     Dim currentDate As Date, cutoffYear As Integer, cutoffMonth As Integer, cutoffDay As Integer
     currentDate = Date
     cutoffYear = Year(currentDate) - 3
     cutoffMonth = Month(currentDate) - 1
     cutoffDay = Day(currentDate)
+    
     If cutoffMonth <= 0 Then
         cutoffMonth = cutoffMonth + 12
         cutoffYear = cutoffYear - 1
@@ -197,11 +215,14 @@ Public Function GetExportCutoffDate() As Date
     GetExportCutoffDate = DateSerial(cutoffYear, cutoffMonth, cutoffDay)
 End Function
 
-' Проверка, является ли столбец числовым (80%+ числовых значений)
+' /**
+'  * Checks if a column is numeric (>80% numbers).
+'  */
 Public Function IsNumericColumn(ws As Worksheet, colNum As Long) As Boolean
     Dim i As Long, numericCount As Long, totalCount As Long, cellValue As String, lastRow As Long, checkRows As Long
     lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
     checkRows = IIf(lastRow - 1 > 10, 10, lastRow - 1)
+    
     For i = 2 To 2 + checkRows - 1
         cellValue = Trim(ws.Cells(i, colNum).value)
         If cellValue <> "" Then
@@ -209,14 +230,18 @@ Public Function IsNumericColumn(ws As Worksheet, colNum As Long) As Boolean
             If IsNumeric(cellValue) Then numericCount = numericCount + 1
         End If
     Next i
+    
     If totalCount > 0 Then IsNumericColumn = (numericCount / totalCount) > 0.8 Else IsNumericColumn = False
 End Function
 
-' Проверка, является ли столбец текстовым (70%+ содержат буквы)
+' /**
+'  * Checks if a column is textual (>70% letters).
+'  */
 Public Function IsTextColumn(ws As Worksheet, colNum As Long) As Boolean
     Dim i As Long, textCount As Long, totalCount As Long, cellValue As String, lastRow As Long, checkRows As Long
     lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
     checkRows = IIf(lastRow - 1 > 20, 20, lastRow - 1)
+    
     For i = 2 To 2 + checkRows - 1
         cellValue = Trim(ws.Cells(i, colNum).value)
         If cellValue <> "" Then
@@ -224,25 +249,32 @@ Public Function IsTextColumn(ws As Worksheet, colNum As Long) As Boolean
             If ContainsLetters(cellValue) And Not IsNumeric(cellValue) Then textCount = textCount + 1
         End If
     Next i
+    
     If totalCount > 0 Then IsTextColumn = (textCount / totalCount) > 0.7 Else IsTextColumn = False
 End Function
 
-' Проверка, является ли столбец с "войсковой частью"
+' /**
+'  * Checks if a column contains "Voinskaya chast" (Unit).
+'  */
 Public Function IsVoinskayaChastColumn(ws As Worksheet, colNum As Long) As Boolean
     Dim i As Long, voinskayaChastCount As Long, totalCount As Long, cellValue As String, lastRow As Long, checkRows As Long
     lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
     checkRows = IIf(lastRow - 1 > 10, 10, lastRow - 1)
+    
     For i = 2 To 2 + checkRows - 1
         cellValue = LCase(Trim(ws.Cells(i, colNum).value))
         If cellValue <> "" Then
             totalCount = totalCount + 1
-            If InStr(cellValue, "войсковая часть") > 0 And ContainsNumbers(cellValue) Then voinskayaChastCount = voinskayaChastCount + 1
+            If InStr(cellValue, "РІРѕР№СЃРєРѕРІР°СЏ С‡Р°СЃС‚СЊ") > 0 And ContainsNumbers(cellValue) Then voinskayaChastCount = voinskayaChastCount + 1
         End If
     Next i
+    
     If totalCount > 0 Then IsVoinskayaChastColumn = (voinskayaChastCount / totalCount) > 0.7 Else IsVoinskayaChastColumn = False
 End Function
 
-' Проверка наличия цифр в строке
+' /**
+'  * Helper: String contains numbers?
+'  */
 Public Function ContainsNumbers(text As String) As Boolean
     Dim i As Long, char As String
     For i = 1 To Len(text)
@@ -252,32 +284,42 @@ Public Function ContainsNumbers(text As String) As Boolean
     ContainsNumbers = False
 End Function
 
-' Проверка наличия букв в строке
+' /**
+'  * Helper: String contains letters?
+'  */
 Public Function ContainsLetters(text As String) As Boolean
     Dim i As Long, char As String
     For i = 1 To Len(text)
         char = Mid(text, i, 1)
-        If (char >= "А" And char <= "я") Or (char >= "A" And char <= "z") Then
+        If (char >= "Рђ" And char <= "СЏ") Or (char >= "A" And char <= "z") Then
             ContainsLetters = True: Exit Function
         End If
     Next i
     ContainsLetters = False
 End Function
 
-' Сбор всех пар (начало/конец/дней) для военнослужащего с листа periods — коллекция, куда добавляются данные
+' /**
+'  * Collects all period pairs (Start/End/Days) for a person from "DSO" sheet.
+'  * Returns a Collection of Collections.
+'  */
 Public Sub CollectAllPersonPeriods(ws As Worksheet, rowNum As Long, periods As Collection)
     Dim lastCol As Long, j As Long, dateStart As Date, dateEnd As Date
     On Error GoTo ErrorHandler
+    
     lastCol = ws.Cells(rowNum, ws.Columns.count).End(xlToLeft).Column
-    j = 5
+    j = 5 ' Start from column E
+    
     Do While j + 1 <= lastCol
         If ws.Cells(rowNum, j).value <> "" And ws.Cells(rowNum, j + 1).value <> "" Then
             dateStart = DateValue(ws.Cells(rowNum, j).value)
             dateEnd = DateValue(ws.Cells(rowNum, j + 1).value)
+            
             If IsDate(dateStart) And IsDate(dateEnd) Then
                 Dim DaysCount As Long: DaysCount = DateDiff("d", dateStart, dateEnd) + 1
                 Dim newPeriod As Collection: Set newPeriod = New Collection
-                newPeriod.Add dateStart: newPeriod.Add dateEnd: newPeriod.Add DaysCount
+                newPeriod.Add dateStart
+                newPeriod.Add dateEnd
+                newPeriod.Add DaysCount
                 periods.Add newPeriod
             End If
         End If
@@ -288,7 +330,9 @@ ErrorHandler:
     Resume Next
 End Sub
 
-' Проверка наличия некорректных пар периодов (конец < начало)
+' /**
+'  * Checks if any period pair is invalid (End < Start).
+'  */
 Public Function HasInvalidPair(periods As Collection) As Boolean
     Dim p As Collection
     For Each p In periods
@@ -297,13 +341,18 @@ Public Function HasInvalidPair(periods As Collection) As Boolean
     HasInvalidPair = False
 End Function
 
-' Сортировка коллекции периодов по дате начала (возвращает новую коллекцию)
+' /**
+'  * Sorts a collection of periods by Start Date.
+'  */
 Public Function SortPeriodsByDateStart(periods As Collection) As Collection
     Dim arr() As Variant, i As Long, j As Long, n As Long
     n = periods.count
     If n <= 1 Then Set SortPeriodsByDateStart = periods: Exit Function
+    
     ReDim arr(1 To n)
     For i = 1 To n: Set arr(i) = periods(i): Next i
+    
+    ' Bubble sort (acceptable for small N periods)
     For i = 1 To n - 1
         For j = i + 1 To n
             If arr(i)(1) > arr(j)(1) Then
@@ -312,19 +361,25 @@ Public Function SortPeriodsByDateStart(periods As Collection) As Collection
             End If
         Next j
     Next i
+    
     Dim resCol As Collection: Set resCol = New Collection
     For i = 1 To n: resCol.Add arr(i): Next i
     Set SortPeriodsByDateStart = resCol
 End Function
 
-' Проверка наличия критических ошибок на листе ДСО (ярко-красные ячейки)
+' /**
+'  * Checks "DSO" sheet for critical errors (Red cells).
+'  */
 Public Function hasCriticalErrors() As Boolean
     On Error Resume Next
-    Dim ws As Worksheet: Set ws = ThisWorkbook.Sheets("ДСО")
+    Dim ws As Worksheet: Set ws = ThisWorkbook.Sheets("Р”РЎРћ")
     If ws Is Nothing Then hasCriticalErrors = True: Exit Function
+    
     Dim lastRow As Long: lastRow = ws.Cells(ws.Rows.count, "C").End(xlUp).Row
     Dim lastCol As Long: lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
     Dim i As Long, j As Long
+    
+    ' Loop is unavoidable here as we check formatting (color)
     For i = 2 To lastRow
         For j = 5 To lastCol Step 2
             If ws.Cells(i, j).Interior.Color = RGB(255, 100, 100) Or ws.Cells(i, j).Interior.Color = RGB(255, 200, 200) Then
@@ -335,23 +390,30 @@ Public Function hasCriticalErrors() As Boolean
     hasCriticalErrors = False
 End Function
 
-' Проверка строки на критические ошибки дат
+' /**
+'  * Checks a specific row for date errors (End < Start).
+'  */
 Public Function CheckRowForDateErrors(ws As Worksheet, rowNum As Long) As Boolean
-    Dim lastCol As Long, j As Long, startValue As String, endValue As String, dateStart As Date, dateEnd As Date, hasErrors As Boolean
+    Dim lastCol As Long, j As Long, startValue As String, endValue As String
+    Dim dateStart As Date, dateEnd As Date, hasErrors As Boolean
+    
     On Error GoTo ErrorHandler
     hasErrors = False
     lastCol = ws.Cells(rowNum, ws.Columns.count).End(xlToLeft).Column
     If lastCol > 50 Then lastCol = 50
+    
     j = 5
     Do While j + 1 <= lastCol
         startValue = Trim(ws.Cells(rowNum, j).text)
         endValue = Trim(ws.Cells(rowNum, j + 1).text)
+        
         If startValue <> "" And endValue <> "" Then
             On Error Resume Next
             dateStart = DateValue(startValue)
             dateEnd = DateValue(endValue)
             Err.Clear
             On Error GoTo ErrorHandler
+            
             If IsDate(startValue) And IsDate(endValue) Then
                 dateStart = DateValue(startValue)
                 dateEnd = DateValue(endValue)
@@ -368,30 +430,35 @@ ErrorHandler:
     CheckRowForDateErrors = True
 End Function
 
+' ==========================================================
+' RUSSIAN LANGUAGE GRAMMAR FUNCTIONS
+' (Declensions for Names, Ranks, Positions)
+' ==========================================================
+
 Public Function SklonitZvanie(zvanie As String) As String
     Dim result As String
     Dim lowerZvanie As String
     lowerZvanie = LCase(Trim(zvanie))
     Select Case lowerZvanie
-        Case "рядовой": result = "Рядовому"
-        Case "ефрейтор": result = "Ефрейтору"
-        Case "младший сержант": result = "Младшему сержанту"
-        Case "сержант": result = "Сержанту"
-        Case "старший сержант": result = "Старшему сержанту"
-        Case "старшина": result = "Старшине"
-        Case "прапорщик": result = "Прапорщику"
-        Case "старший прапорщик": result = "Старшему прапорщику"
-        Case "младший лейтенант": result = "Младшему лейтенанту"
-        Case "лейтенант": result = "Лейтенанту"
-        Case "старший лейтенант": result = "Старшему лейтенанту"
-        Case "капитан": result = "Капитану"
-        Case "майор": result = "Майору"
-        Case "подполковник": result = "Подполковнику"
-        Case "полковник": result = "Полковнику"
-        Case "генерал-майор": result = "Генерал-майору"
-        Case "генерал-лейтенант": result = "Генерал-лейтенанту"
-        Case "генерал-полковник": result = "Генерал-полковнику"
-        Case "генерал армии": result = "Генералу армии"
+        Case "СЂСЏРґРѕРІРѕР№": result = "Р СЏРґРѕРІРѕРјСѓ"
+        Case "РµС„СЂРµР№С‚РѕСЂ": result = "Р•С„СЂРµР№С‚РѕСЂСѓ"
+        Case "РјР»Р°РґС€РёР№ СЃРµСЂР¶Р°РЅС‚": result = "РњР»Р°РґС€РµРјСѓ СЃРµСЂР¶Р°РЅС‚Сѓ"
+        Case "СЃРµСЂР¶Р°РЅС‚": result = "РЎРµСЂР¶Р°РЅС‚Сѓ"
+        Case "СЃС‚Р°СЂС€РёР№ СЃРµСЂР¶Р°РЅС‚": result = "РЎС‚Р°СЂС€РµРјСѓ СЃРµСЂР¶Р°РЅС‚Сѓ"
+        Case "СЃС‚Р°СЂС€РёРЅР°": result = "РЎС‚Р°СЂС€РёРЅРµ"
+        Case "РїСЂР°РїРѕСЂС‰РёРє": result = "РџСЂР°РїРѕСЂС‰РёРєСѓ"
+        Case "СЃС‚Р°СЂС€РёР№ РїСЂР°РїРѕСЂС‰РёРє": result = "РЎС‚Р°СЂС€РµРјСѓ РїСЂР°РїРѕСЂС‰РёРєСѓ"
+        Case "РјР»Р°РґС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚": result = "РњР»Р°РґС€РµРјСѓ Р»РµР№С‚РµРЅР°РЅС‚Сѓ"
+        Case "Р»РµР№С‚РµРЅР°РЅС‚": result = "Р›РµР№С‚РµРЅР°РЅС‚Сѓ"
+        Case "СЃС‚Р°СЂС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚": result = "РЎС‚Р°СЂС€РµРјСѓ Р»РµР№С‚РµРЅР°РЅС‚Сѓ"
+        Case "РєР°РїРёС‚Р°РЅ": result = "РљР°РїРёС‚Р°РЅСѓ"
+        Case "РјР°Р№РѕСЂ": result = "РњР°Р№РѕСЂСѓ"
+        Case "РїРѕРґРїРѕР»РєРѕРІРЅРёРє": result = "РџРѕРґРїРѕР»РєРѕРІРЅРёРєСѓ"
+        Case "РїРѕР»РєРѕРІРЅРёРє": result = "РџРѕР»РєРѕРІРЅРёРєСѓ"
+        Case "РіРµРЅРµСЂР°Р»-РјР°Р№РѕСЂ": result = "Р“РµРЅРµСЂР°Р»-РјР°Р№РѕСЂСѓ"
+        Case "РіРµРЅРµСЂР°Р»-Р»РµР№С‚РµРЅР°РЅС‚": result = "Р“РµРЅРµСЂР°Р»-Р»РµР№С‚РµРЅР°РЅС‚Сѓ"
+        Case "РіРµРЅРµСЂР°Р»-РїРѕР»РєРѕРІРЅРёРє": result = "Р“РµРЅРµСЂР°Р»-РїРѕР»РєРѕРІРЅРёРєСѓ"
+        Case "РіРµРЅРµСЂР°Р» Р°СЂРјРёРё": result = "Р“РµРЅРµСЂР°Р»Сѓ Р°СЂРјРёРё"
         Case Else
             result = UCase(Left(zvanie, 1)) & LCase(Mid(zvanie, 2))
     End Select
@@ -400,16 +467,20 @@ End Function
 
 Public Function SklonitDolzhnost(dolzhnost As String, VoinskayaChast As String) As String
     Dim keepWords As Variant, cutWords As Variant
-    keepWords = Array("роты", "взвода", "отделения", "расчета", "группы", "команды", "экипажа")
-    cutWords = Array("отдельного", "гвардейской", "общевойсковой", "мотострелковой", "танковой", "воздушно-десантной", "артиллерийской", "инженерной", "связи", "десантно-штурмовой", "батальона", "полка", "бригады", "дивизии", "корпуса", "армии", "округа")
+    ' Dictionary of words to keep or cut
+    keepWords = Array("СЂРѕС‚С‹", "РІР·РІРѕРґР°", "РѕС‚РґРµР»РµРЅРёСЏ", "СЂР°СЃС‡РµС‚Р°", "РіСЂСѓРїРїС‹", "РєРѕРјР°РЅРґС‹", "СЌРєРёРїР°Р¶Р°")
+    cutWords = Array("РѕС‚РґРµР»СЊРЅРѕРіРѕ", "РіРІР°СЂРґРµР№СЃРєРѕР№", "РѕР±С‰РµРІРѕР№СЃРєРѕРІРѕР№", "РјРѕС‚РѕСЃС‚СЂРµР»РєРѕРІРѕР№", "С‚Р°РЅРєРѕРІРѕР№", "РІРѕР·РґСѓС€РЅРѕ-РґРµСЃР°РЅС‚РЅРѕР№", "Р°СЂС‚РёР»Р»РµСЂРёР№СЃРєРѕР№", "РёРЅР¶РµРЅРµСЂРЅРѕР№", "СЃРІСЏР·Рё", "РґРµСЃР°РЅС‚РЅРѕ-С€С‚СѓСЂРјРѕРІРѕР№", "Р±Р°С‚Р°Р»СЊРѕРЅР°", "РїРѕР»РєР°", "Р±СЂРёРіР°РґС‹", "РґРёРІРёР·РёРё", "РєРѕСЂРїСѓСЃР°", "Р°СЂРјРёРё", "РѕРєСЂСѓРіР°")
+    
     Dim dolzhnostLower As String, result As String, lastKeepPos As Long, lastKeepWord As String
     Dim i As Long, pos As Long
     dolzhnostLower = LCase(dolzhnost)
     lastKeepPos = -1: lastKeepWord = ""
+    
     For i = LBound(keepWords) To UBound(keepWords)
         pos = InStrRev(dolzhnostLower, keepWords(i))
         If pos > lastKeepPos Then lastKeepPos = pos: lastKeepWord = keepWords(i)
     Next i
+    
     If lastKeepPos > 0 Then
         Dim endKeepPos As Long, cutPosition As Long
         endKeepPos = lastKeepPos + Len(lastKeepWord) - 1
@@ -426,9 +497,9 @@ Public Function SklonitDolzhnost(dolzhnost As String, VoinskayaChast As String) 
                 char = Mid(dolzhnostLower, i, 1)
                 If IsNumeric(char) Or char = " " Then startCutPosition = i Else Exit For
             Next i
-            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " войсковой части " & VoinskayaChast
+            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " РІРѕР№СЃРєРѕРІРѕР№ С‡Р°СЃС‚Рё " & VoinskayaChast
         Else
-            result = LCase(Trim(Left(dolzhnost, endKeepPos))) & " войсковой части " & VoinskayaChast
+            result = LCase(Trim(Left(dolzhnost, endKeepPos))) & " РІРѕР№СЃРєРѕРІРѕР№ С‡Р°СЃС‚Рё " & VoinskayaChast
         End If
     Else
         cutPosition = 0
@@ -439,12 +510,13 @@ Public Function SklonitDolzhnost(dolzhnost As String, VoinskayaChast As String) 
         If cutPosition > 0 Then
             startCutPosition = cutPosition
             For i = cutPosition - 1 To 1 Step -1
-                char = Mid(dolzhnostLower, i, 1)
-                If IsNumeric(char) Or char = " " Then startCutPosition = i Else Exit For
+                Dim char2 As String
+                char2 = Mid(dolzhnostLower, i, 1)
+                If IsNumeric(char2) Or char2 = " " Then startCutPosition = i Else Exit For
             Next i
-            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " войсковой части " & VoinskayaChast
+            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " РІРѕР№СЃРєРѕРІРѕР№ С‡Р°СЃС‚Рё " & VoinskayaChast
         Else
-            result = LCase(dolzhnost) & " войсковой части " & VoinskayaChast
+            result = LCase(dolzhnost) & " РІРѕР№СЃРєРѕРІРѕР№ С‡Р°СЃС‚Рё " & VoinskayaChast
         End If
     End If
     result = SklonitVoennayaDolzhnost(result)
@@ -454,22 +526,24 @@ End Function
 Public Function SklonitVoennayaDolzhnost(dolzhnost As String) As String
     Dim result As String
     result = dolzhnost
-    result = Replace(result, "механик-радиотелефонист", "механику-радиотелефонисту")
-    result = Replace(result, "разведчик-оператор", "разведчику-оператору")
-    result = Replace(result, "командир ", "командиру ")
-    result = Replace(result, "заместитель командира ", "заместителю командира ")
-    result = Replace(result, "начальник ", "начальнику ")
-    result = Replace(result, "заместитель начальника ", "заместителю начальника ")
-    If Left(result, 8) = "старший " Then result = "старшему " & Mid(result, 9)
-    If Left(result, 8) = "младший " Then result = "младшему " & Mid(result, 9)
-    result = Replace(result, "механик", "механику")
-    result = Replace(result, "радиотелефонист", "радиотелефонисту")
-    result = Replace(result, "разведчик", "разведчику")
-    result = Replace(result, "оператор", "оператору")
-    result = Replace(result, "водитель", "водителю")
-    result = Replace(result, "наводчик", "наводчику")
-    result = Replace(result, "инструктор", "инструктору")
-    result = Replace(result, "техник", "технику")
+    ' Hardcoded grammar rules for military positions
+    result = Replace(result, "РјРµС…Р°РЅРёРє-СЂР°РґРёРѕС‚РµР»РµС„РѕРЅРёСЃС‚", "РјРµС…Р°РЅРёРєСѓ-СЂР°РґРёРѕС‚РµР»РµС„РѕРЅРёСЃС‚Сѓ")
+    result = Replace(result, "СЂР°Р·РІРµРґС‡РёРє-РѕРїРµСЂР°С‚РѕСЂ", "СЂР°Р·РІРµРґС‡РёРєСѓ-РѕРїРµСЂР°С‚РѕСЂСѓ")
+    result = Replace(result, "РєРѕРјР°РЅРґРёСЂ ", "РєРѕРјР°РЅРґРёСЂСѓ ")
+    result = Replace(result, "Р·Р°РјРµСЃС‚РёС‚РµР»СЊ РєРѕРјР°РЅРґРёСЂР° ", "Р·Р°РјРµСЃС‚РёС‚РµР»СЋ РєРѕРјР°РЅРґРёСЂР° ")
+    result = Replace(result, "РЅР°С‡Р°Р»СЊРЅРёРє ", "РЅР°С‡Р°Р»СЊРЅРёРєСѓ ")
+    result = Replace(result, "Р·Р°РјРµСЃС‚РёС‚РµР»СЊ РЅР°С‡Р°Р»СЊРЅРёРєР° ", "Р·Р°РјРµСЃС‚РёС‚РµР»СЋ РЅР°С‡Р°Р»СЊРЅРёРєР° ")
+    If Left(result, 8) = "СЃС‚Р°СЂС€РёР№ " Then result = "СЃС‚Р°СЂС€РµРјСѓ " & Mid(result, 9)
+    If Left(result, 8) = "РјР»Р°РґС€РёР№ " Then result = "РјР»Р°РґС€РµРјСѓ " & Mid(result, 9)
+    
+    result = Replace(result, "РјРµС…Р°РЅРёРє", "РјРµС…Р°РЅРёРєСѓ")
+    result = Replace(result, "СЂР°РґРёРѕС‚РµР»РµС„РѕРЅРёСЃС‚", "СЂР°РґРёРѕС‚РµР»РµС„РѕРЅРёСЃС‚Сѓ")
+    result = Replace(result, "СЂР°Р·РІРµРґС‡РёРє", "СЂР°Р·РІРµРґС‡РёРєСѓ")
+    result = Replace(result, "РѕРїРµСЂР°С‚РѕСЂ", "РѕРїРµСЂР°С‚РѕСЂСѓ")
+    result = Replace(result, "РІРѕРґРёС‚РµР»СЊ", "РІРѕРґРёС‚РµР»СЋ")
+    result = Replace(result, "РЅР°РІРѕРґС‡РёРє", "РЅР°РІРѕРґС‡РёРєСѓ")
+    result = Replace(result, "РёРЅСЃС‚СЂСѓРєС‚РѕСЂ", "РёРЅСЃС‚СЂСѓРєС‚РѕСЂСѓ")
+    result = Replace(result, "С‚РµС…РЅРёРє", "С‚РµС…РЅРёРєСѓ")
     SklonitVoennayaDolzhnost = result
 End Function
 
@@ -481,7 +555,7 @@ Public Function SklonitFIO(fio As String) As String
         familiya = parts(0)
         imya = parts(1)
         otchestvo = parts(2)
-        isWoman = (Right(LCase(otchestvo), 2) = "на")
+        isWoman = (Right(LCase(otchestvo), 2) = "РЅР°")
         familiya = SklonitFamiliya(familiya, isWoman)
         imya = SklonitImya(imya, isWoman)
         otchestvo = SklonitOtchestvo(otchestvo, isWoman)
@@ -496,22 +570,22 @@ Public Function SklonitFamiliya(familiya As String, isWoman As Boolean) As Strin
     Dim result As String
     result = familiya
     If isWoman Then
-        If Right(familiya, 2) = "на" Then
-            result = Left(familiya, Len(familiya) - 1) & "е"
-        ElseIf Right(familiya, 1) = "а" Then
-            result = Left(familiya, Len(familiya) - 1) & "е"
-        ElseIf Right(familiya, 1) = "я" Then
-            result = Left(familiya, Len(familiya) - 1) & "е"
+        If Right(familiya, 2) = "РЅР°" Then
+            result = Left(familiya, Len(familiya) - 1) & "Рµ"
+        ElseIf Right(familiya, 1) = "Р°" Then
+            result = Left(familiya, Len(familiya) - 1) & "Рµ"
+        ElseIf Right(familiya, 1) = "СЏ" Then
+            result = Left(familiya, Len(familiya) - 1) & "Рµ"
         End If
     Else
-        If Right(familiya, 2) = "ов" Or Right(familiya, 2) = "ёв" Or Right(familiya, 2) = "ин" Then
-            result = familiya & "у"
-        ElseIf Right(familiya, 2) = "ий" Then
-            result = Left(familiya, Len(familiya) - 2) & "ому"
-        ElseIf Right(familiya, 1) = "а" Then
-            result = Left(familiya, Len(familiya) - 1) & "е"
-        ElseIf Right(familiya, 1) = "я" Then
-            result = Left(familiya, Len(familiya) - 1) & "е"
+        If Right(familiya, 2) = "РѕРІ" Or Right(familiya, 2) = "С‘РІ" Or Right(familiya, 2) = "РёРЅ" Then
+            result = familiya & "Сѓ"
+        ElseIf Right(familiya, 2) = "РёР№" Then
+            result = Left(familiya, Len(familiya) - 2) & "РѕРјСѓ"
+        ElseIf Right(familiya, 1) = "Р°" Then
+            result = Left(familiya, Len(familiya) - 1) & "Рµ"
+        ElseIf Right(familiya, 1) = "СЏ" Then
+            result = Left(familiya, Len(familiya) - 1) & "Рµ"
         End If
     End If
     SklonitFamiliya = result
@@ -522,24 +596,24 @@ Public Function SklonitImya(imya As String, isWoman As Boolean) As String
     Dim result As String
     result = imya
     If isWoman Then
-        If Right(imya, 1) = "а" Then
-            result = Left(imya, Len(imya) - 1) & "е"
-        ElseIf Right(imya, 1) = "я" Then
-            result = Left(imya, Len(imya) - 1) & "е"
-        ElseIf Right(imya, 1) = "ь" Then
-            result = Left(imya, Len(imya) - 1) & "и"
-        ElseIf Right(imya, 1) = "и" Then
+        If Right(imya, 1) = "Р°" Then
+            result = Left(imya, Len(imya) - 1) & "Рµ"
+        ElseIf Right(imya, 1) = "СЏ" Then
+            result = Left(imya, Len(imya) - 1) & "Рµ"
+        ElseIf Right(imya, 1) = "СЊ" Then
+            result = Left(imya, Len(imya) - 1) & "Рё"
+        ElseIf Right(imya, 1) = "Рё" Then
             result = imya
         End If
     Else
-        If Right(imya, 1) = "р" Or Right(imya, 1) = "л" Or Right(imya, 1) = "н" Or Right(imya, 1) = "м" Then
-            result = imya & "у"
-        ElseIf Right(imya, 1) = "й" Then
-            result = Left(imya, Len(imya) - 1) & "ю"
-        ElseIf Right(imya, 1) = "а" Then
-            result = Left(imya, Len(imya) - 1) & "е"
-        ElseIf Right(imya, 1) = "я" Then
-            result = Left(imya, Len(imya) - 1) & "е"
+        If Right(imya, 1) = "СЂ" Or Right(imya, 1) = "Р»" Or Right(imya, 1) = "РЅ" Or Right(imya, 1) = "Рј" Then
+            result = imya & "Сѓ"
+        ElseIf Right(imya, 1) = "Р№" Then
+            result = Left(imya, Len(imya) - 1) & "СЋ"
+        ElseIf Right(imya, 1) = "Р°" Then
+            result = Left(imya, Len(imya) - 1) & "Рµ"
+        ElseIf Right(imya, 1) = "СЏ" Then
+            result = Left(imya, Len(imya) - 1) & "Рµ"
         End If
     End If
     SklonitImya = result
@@ -550,18 +624,18 @@ Public Function SklonitOtchestvo(otchestvo As String, isWoman As Boolean) As Str
     Dim result As String
     result = otchestvo
     If isWoman Then
-        If Right(otchestvo, 2) = "на" Then result = Left(otchestvo, Len(otchestvo) - 1) & "е"
+        If Right(otchestvo, 2) = "РЅР°" Then result = Left(otchestvo, Len(otchestvo) - 1) & "Рµ"
     Else
-        If Right(otchestvo, 2) = "ич" Then result = otchestvo & "у"
+        If Right(otchestvo, 2) = "РёС‡" Then result = otchestvo & "Сѓ"
     End If
     SklonitOtchestvo = result
 End Function
 
 Public Function GetDolzhnostImenitelny(dolzhnost As String, VoinskayaChast As String) As String
     Dim keepWords As Variant
-    keepWords = Array("роты", "взвода", "отделения", "расчета", "группы", "команды", "экипажа")
+    keepWords = Array("СЂРѕС‚С‹", "РІР·РІРѕРґР°", "РѕС‚РґРµР»РµРЅРёСЏ", "СЂР°СЃС‡РµС‚Р°", "РіСЂСѓРїРїС‹", "РєРѕРјР°РЅРґС‹", "СЌРєРёРїР°Р¶Р°")
     Dim cutWords As Variant
-    cutWords = Array("отдельного", "гвардейской", "общевойсковой", "мотострелковой", "танковой", "воздушно-десантной", "артиллерийской", "инженерной", "связи", "десантно-штурмовой", "батальона", "полка", "бригады", "дивизии", "корпуса", "армии", "округа")
+    cutWords = Array("РѕС‚РґРµР»СЊРЅРѕРіРѕ", "РіРІР°СЂРґРµР№СЃРєРѕР№", "РѕР±С‰РµРІРѕР№СЃРєРѕРІРѕР№", "РјРѕС‚РѕСЃС‚СЂРµР»РєРѕРІРѕР№", "С‚Р°РЅРєРѕРІРѕР№", "РІРѕР·РґСѓС€РЅРѕ-РґРµСЃР°РЅС‚РЅРѕР№", "Р°СЂС‚РёР»Р»РµСЂРёР№СЃРєРѕР№", "РёРЅР¶РµРЅРµСЂРЅРѕР№", "СЃРІСЏР·Рё", "РґРµСЃР°РЅС‚РЅРѕ-С€С‚СѓСЂРјРѕРІРѕР№", "Р±Р°С‚Р°Р»СЊРѕРЅР°", "РїРѕР»РєР°", "Р±СЂРёРіР°РґС‹", "РґРёРІРёР·РёРё", "РєРѕСЂРїСѓСЃР°", "Р°СЂРјРёРё", "РѕРєСЂСѓРіР°")
     Dim dolzhnostLower As String
     Dim result As String
     Dim lastKeepPos As Long
@@ -603,9 +677,9 @@ Public Function GetDolzhnostImenitelny(dolzhnost As String, VoinskayaChast As St
                     Exit For
                 End If
             Next i
-            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " войсковой части " & VoinskayaChast
+            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " РІРѕР№СЃРєРѕРІРѕР№ С‡Р°СЃС‚Рё " & VoinskayaChast
         Else
-            result = LCase(Trim(Left(dolzhnost, endKeepPos))) & " войсковой части " & VoinskayaChast
+            result = LCase(Trim(Left(dolzhnost, endKeepPos))) & " РІРѕР№СЃРєРѕРІРѕР№ С‡Р°СЃС‚Рё " & VoinskayaChast
         End If
     Else
         cutPosition = 0
@@ -620,16 +694,17 @@ Public Function GetDolzhnostImenitelny(dolzhnost As String, VoinskayaChast As St
         If cutPosition > 0 Then
             startCutPosition = cutPosition
             For i = cutPosition - 1 To 1 Step -1
-                char = Mid(dolzhnostLower, i, 1)
-                If IsNumeric(char) Or char = " " Then
+                Dim char2 As String
+                char2 = Mid(dolzhnostLower, i, 1)
+                If IsNumeric(char2) Or char2 = " " Then
                     startCutPosition = i
                 Else
                     Exit For
                 End If
             Next i
-            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " войсковой части " & VoinskayaChast
+            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " РІРѕР№СЃРєРѕРІРѕР№ С‡Р°СЃС‚Рё " & VoinskayaChast
         Else
-            result = LCase(dolzhnost) & " войсковой части " & VoinskayaChast
+            result = LCase(dolzhnost) & " РІРѕР№СЃРєРѕРІРѕР№ С‡Р°СЃС‚Рё " & VoinskayaChast
         End If
     End If
     GetDolzhnostImenitelny = result
@@ -640,25 +715,25 @@ Public Function GetZvanieImenitelny(zvanie As String) As String
     Dim lowerZvanie As String
     lowerZvanie = LCase(Trim(zvanie))
     Select Case lowerZvanie
-        Case "рядовой": result = "рядовой"
-        Case "ефрейтор": result = "ефрейтор"
-        Case "младший сержант": result = "младший сержант"
-        Case "сержант": result = "сержант"
-        Case "старший сержант": result = "старший сержант"
-        Case "старшина": result = "старшина"
-        Case "прапорщик": result = "прапорщик"
-        Case "старший прапорщик": result = "старший прапорщик"
-        Case "младший лейтенант": result = "младший лейтенант"
-        Case "лейтенант": result = "лейтенант"
-        Case "старший лейтенант": result = "старший лейтенант"
-        Case "капитан": result = "капитан"
-        Case "майор": result = "майор"
-        Case "подполковник": result = "подполковник"
-        Case "полковник": result = "полковник"
-        Case "генерал-майор": result = "генерал-майор"
-        Case "генерал-лейтенант": result = "генерал-лейтенант"
-        Case "генерал-полковник": result = "генерал-полковник"
-        Case "генерал армии": result = "генерал армии"
+        Case "СЂСЏРґРѕРІРѕР№": result = "СЂСЏРґРѕРІРѕР№"
+        Case "РµС„СЂРµР№С‚РѕСЂ": result = "РµС„СЂРµР№С‚РѕСЂ"
+        Case "РјР»Р°РґС€РёР№ СЃРµСЂР¶Р°РЅС‚": result = "РјР»Р°РґС€РёР№ СЃРµСЂР¶Р°РЅС‚"
+        Case "СЃРµСЂР¶Р°РЅС‚": result = "СЃРµСЂР¶Р°РЅС‚"
+        Case "СЃС‚Р°СЂС€РёР№ СЃРµСЂР¶Р°РЅС‚": result = "СЃС‚Р°СЂС€РёР№ СЃРµСЂР¶Р°РЅС‚"
+        Case "СЃС‚Р°СЂС€РёРЅР°": result = "СЃС‚Р°СЂС€РёРЅР°"
+        Case "РїСЂР°РїРѕСЂС‰РёРє": result = "РїСЂР°РїРѕСЂС‰РёРє"
+        Case "СЃС‚Р°СЂС€РёР№ РїСЂР°РїРѕСЂС‰РёРє": result = "СЃС‚Р°СЂС€РёР№ РїСЂР°РїРѕСЂС‰РёРє"
+        Case "РјР»Р°РґС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚": result = "РјР»Р°РґС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚"
+        Case "Р»РµР№С‚РµРЅР°РЅС‚": result = "Р»РµР№С‚РµРЅР°РЅС‚"
+        Case "СЃС‚Р°СЂС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚": result = "СЃС‚Р°СЂС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚"
+        Case "РєР°РїРёС‚Р°РЅ": result = "РєР°РїРёС‚Р°РЅ"
+        Case "РјР°Р№РѕСЂ": result = "РјР°Р№РѕСЂ"
+        Case "РїРѕРґРїРѕР»РєРѕРІРЅРёРє": result = "РїРѕРґРїРѕР»РєРѕРІРЅРёРє"
+        Case "РїРѕР»РєРѕРІРЅРёРє": result = "РїРѕР»РєРѕРІРЅРёРє"
+        Case "РіРµРЅРµСЂР°Р»-РјР°Р№РѕСЂ": result = "РіРµРЅРµСЂР°Р»-РјР°Р№РѕСЂ"
+        Case "РіРµРЅРµСЂР°Р»-Р»РµР№С‚РµРЅР°РЅС‚": result = "РіРµРЅРµСЂР°Р»-Р»РµР№С‚РµРЅР°РЅС‚"
+        Case "РіРµРЅРµСЂР°Р»-РїРѕР»РєРѕРІРЅРёРє": result = "РіРµРЅРµСЂР°Р»-РїРѕР»РєРѕРІРЅРёРє"
+        Case "РіРµРЅРµСЂР°Р» Р°СЂРјРёРё": result = "РіРµРЅРµСЂР°Р» Р°СЂРјРёРё"
         Case Else: result = LCase(zvanie)
     End Select
     GetZvanieImenitelny = result
@@ -669,45 +744,45 @@ Public Function GetZvanieSkrasheno(zvanie As String) As String
     Dim lowerZvanie As String
     lowerZvanie = LCase(Trim(zvanie))
     Select Case lowerZvanie
-        Case "рядовой": result = "рядовому"
-        Case "ефрейтор": result = "ефрейтору"
-        Case "младший сержант": result = "мл. сержанту"
-        Case "сержант": result = "сержанту"
-        Case "старший сержант": result = "ст. сержанту"
-        Case "старшина": result = "старшине"
-        Case "прапорщик": result = "прапорщику"
-        Case "старший прапорщик": result = "ст. прапорщику"
-        Case "младший лейтенант": result = "мл. лейтенанту"
-        Case "лейтенант": result = "лейтенанту"
-        Case "старший лейтенант": result = "ст. лейтенанту"
-        Case "капитан": result = "капитану"
-        Case "майор": result = "майору"
-        Case "подполковник": result = "подполковнику"
-        Case "полковник": result = "полковнику"
-        Case "генерал-майор": result = "генерал-майору"
-        Case "генерал-лейтенант": result = "генерал-лейтенанту"
-        Case "генерал-полковник": result = "генерал-полковнику"
-        Case "генерал армии": result = "генералу армии"
-        Case Else: result = LCase(zvanie) & "у"
+        Case "СЂСЏРґРѕРІРѕР№": result = "СЂСЏРґРѕРІРѕРјСѓ"
+        Case "РµС„СЂРµР№С‚РѕСЂ": result = "РµС„СЂРµР№С‚РѕСЂСѓ"
+        Case "РјР»Р°РґС€РёР№ СЃРµСЂР¶Р°РЅС‚": result = "РјР». СЃРµСЂР¶Р°РЅС‚Сѓ"
+        Case "СЃРµСЂР¶Р°РЅС‚": result = "СЃРµСЂР¶Р°РЅС‚Сѓ"
+        Case "СЃС‚Р°СЂС€РёР№ СЃРµСЂР¶Р°РЅС‚": result = "СЃС‚. СЃРµСЂР¶Р°РЅС‚Сѓ"
+        Case "СЃС‚Р°СЂС€РёРЅР°": result = "СЃС‚Р°СЂС€РёРЅРµ"
+        Case "РїСЂР°РїРѕСЂС‰РёРє": result = "РїСЂР°РїРѕСЂС‰РёРєСѓ"
+        Case "СЃС‚Р°СЂС€РёР№ РїСЂР°РїРѕСЂС‰РёРє": result = "СЃС‚. РїСЂР°РїРѕСЂС‰РёРєСѓ"
+        Case "РјР»Р°РґС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚": result = "РјР». Р»РµР№С‚РµРЅР°РЅС‚Сѓ"
+        Case "Р»РµР№С‚РµРЅР°РЅС‚": result = "Р»РµР№С‚РµРЅР°РЅС‚Сѓ"
+        Case "СЃС‚Р°СЂС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚": result = "СЃС‚. Р»РµР№С‚РµРЅР°РЅС‚Сѓ"
+        Case "РєР°РїРёС‚Р°РЅ": result = "РєР°РїРёС‚Р°РЅСѓ"
+        Case "РјР°Р№РѕСЂ": result = "РјР°Р№РѕСЂСѓ"
+        Case "РїРѕРґРїРѕР»РєРѕРІРЅРёРє": result = "РїРѕРґРїРѕР»РєРѕРІРЅРёРєСѓ"
+        Case "РїРѕР»РєРѕРІРЅРёРє": result = "РїРѕР»РєРѕРІРЅРёРєСѓ"
+        Case "РіРµРЅРµСЂР°Р»-РјР°Р№РѕСЂ": result = "РіРµРЅРµСЂР°Р»-РјР°Р№РѕСЂСѓ"
+        Case "РіРµРЅРµСЂР°Р»-Р»РµР№С‚РµРЅР°РЅС‚": result = "РіРµРЅРµСЂР°Р»-Р»РµР№С‚РµРЅР°РЅС‚Сѓ"
+        Case "РіРµРЅРµСЂР°Р»-РїРѕР»РєРѕРІРЅРёРє": result = "РіРµРЅРµСЂР°Р»-РїРѕР»РєРѕРІРЅРёРєСѓ"
+        Case "РіРµРЅРµСЂР°Р» Р°СЂРјРёРё": result = "РіРµРЅРµСЂР°Р»Сѓ Р°СЂРјРёРё"
+        Case Else: result = LCase(zvanie) & "Сѓ"
     End Select
     GetZvanieSkrasheno = result
 End Function
 
 Public Function GetMonthNameRussian(monthNumber As Integer) As String
     Select Case monthNumber
-        Case 1: GetMonthNameRussian = "января"
-        Case 2: GetMonthNameRussian = "февраля"
-        Case 3: GetMonthNameRussian = "марта"
-        Case 4: GetMonthNameRussian = "апреля"
-        Case 5: GetMonthNameRussian = "мая"
-        Case 6: GetMonthNameRussian = "июня"
-        Case 7: GetMonthNameRussian = "июля"
-        Case 8: GetMonthNameRussian = "августа"
-        Case 9: GetMonthNameRussian = "сентября"
-        Case 10: GetMonthNameRussian = "октября"
-        Case 11: GetMonthNameRussian = "ноября"
-        Case 12: GetMonthNameRussian = "декабря"
-        Case Else: GetMonthNameRussian = "неизвестного месяца"
+        Case 1: GetMonthNameRussian = "СЏРЅРІР°СЂСЏ"
+        Case 2: GetMonthNameRussian = "С„РµРІСЂР°Р»СЏ"
+        Case 3: GetMonthNameRussian = "РјР°СЂС‚Р°"
+        Case 4: GetMonthNameRussian = "Р°РїСЂРµР»СЏ"
+        Case 5: GetMonthNameRussian = "РјР°СЏ"
+        Case 6: GetMonthNameRussian = "РёСЋРЅСЏ"
+        Case 7: GetMonthNameRussian = "РёСЋР»СЏ"
+        Case 8: GetMonthNameRussian = "Р°РІРіСѓСЃС‚Р°"
+        Case 9: GetMonthNameRussian = "СЃРµРЅС‚СЏР±СЂСЏ"
+        Case 10: GetMonthNameRussian = "РѕРєС‚СЏР±СЂСЏ"
+        Case 11: GetMonthNameRussian = "РЅРѕСЏР±СЂСЏ"
+        Case 12: GetMonthNameRussian = "РґРµРєР°Р±СЂСЏ"
+        Case Else: GetMonthNameRussian = "РЅРµРёР·РІРµСЃС‚РЅРѕРіРѕ РјРµСЃСЏС†Р°"
     End Select
 End Function
 
@@ -719,7 +794,7 @@ Public Function GetFIOWithInitials(fio As String) As String
         familiya = parts(0)
         imya = parts(1)
         otchestvo = parts(2)
-        isWoman = (Right(LCase(otchestvo), 2) = "на")
+        isWoman = (Right(LCase(otchestvo), 2) = "РЅР°")
         Dim firstInitial As String, secondInitial As String
         firstInitial = UCase(Left(imya, 1))
         secondInitial = UCase(Left(otchestvo, 1))
@@ -755,34 +830,38 @@ Public Function GetZvanieImenitelnyForSignature(zvanie As String) As String
     Dim lowerZvanie As String
     lowerZvanie = LCase(Trim(zvanie))
     Select Case lowerZvanie
-        Case "рядовой": result = "Рядовой"
-        Case "ефрейтор": result = "Ефрейтор"
-        Case "младший сержант": result = "Младший сержант"
-        Case "сержант": result = "Сержант"
-        Case "старший сержант": result = "Старший сержант"
-        Case "старшина": result = "Старшина"
-        Case "прапорщик": result = "Прапорщик"
-        Case "старший прапорщик": result = "Старший прапорщик"
-        Case "младший лейтенант": result = "Младший лейтенант"
-        Case "лейтенант": result = "Лейтенант"
-        Case "старший лейтенант": result = "Старший лейтенант"
-        Case "капитан": result = "Капитан"
-        Case "майор": result = "Майор"
-        Case "подполковник": result = "Подполковник"
-        Case "полковник": result = "Полковник"
-        Case "генерал-майор": result = "Генерал-майор"
-        Case "генерал-лейтенант": result = "Генерал-лейтенант"
-        Case "генерал-полковник": result = "Генерал-полковник"
-        Case "генерал армии": result = "Генерал армии"
+        Case "СЂСЏРґРѕРІРѕР№": result = "Р СЏРґРѕРІРѕР№"
+        Case "РµС„СЂРµР№С‚РѕСЂ": result = "Р•С„СЂРµР№С‚РѕСЂ"
+        Case "РјР»Р°РґС€РёР№ СЃРµСЂР¶Р°РЅС‚": result = "РњР»Р°РґС€РёР№ СЃРµСЂР¶Р°РЅС‚"
+        Case "СЃРµСЂР¶Р°РЅС‚": result = "РЎРµСЂР¶Р°РЅС‚"
+        Case "СЃС‚Р°СЂС€РёР№ СЃРµСЂР¶Р°РЅС‚": result = "РЎС‚Р°СЂС€РёР№ СЃРµСЂР¶Р°РЅС‚"
+        Case "СЃС‚Р°СЂС€РёРЅР°": result = "РЎС‚Р°СЂС€РёРЅР°"
+        Case "РїСЂР°РїРѕСЂС‰РёРє": result = "РџСЂР°РїРѕСЂС‰РёРє"
+        Case "СЃС‚Р°СЂС€РёР№ РїСЂР°РїРѕСЂС‰РёРє": result = "РЎС‚Р°СЂС€РёР№ РїСЂР°РїРѕСЂС‰РёРє"
+        Case "РјР»Р°РґС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚": result = "РњР»Р°РґС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚"
+        Case "Р»РµР№С‚РµРЅР°РЅС‚": result = "Р›РµР№С‚РµРЅР°РЅС‚"
+        Case "СЃС‚Р°СЂС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚": result = "РЎС‚Р°СЂС€РёР№ Р»РµР№С‚РµРЅР°РЅС‚"
+        Case "РєР°РїРёС‚Р°РЅ": result = "РљР°РїРёС‚Р°РЅ"
+        Case "РјР°Р№РѕСЂ": result = "РњР°Р№РѕСЂ"
+        Case "РїРѕРґРїРѕР»РєРѕРІРЅРёРє": result = "РџРѕРґРїРѕР»РєРѕРІРЅРёРє"
+        Case "РїРѕР»РєРѕРІРЅРёРє": result = "РџРѕР»РєРѕРІРЅРёРє"
+        Case "РіРµРЅРµСЂР°Р»-РјР°Р№РѕСЂ": result = "Р“РµРЅРµСЂР°Р»-РјР°Р№РѕСЂ"
+        Case "РіРµРЅРµСЂР°Р»-Р»РµР№С‚РµРЅР°РЅС‚": result = "Р“РµРЅРµСЂР°Р»-Р»РµР№С‚РµРЅР°РЅС‚"
+        Case "РіРµРЅРµСЂР°Р»-РїРѕР»РєРѕРІРЅРёРє": result = "Р“РµРЅРµСЂР°Р»-РїРѕР»РєРѕРІРЅРёРє"
+        Case "РіРµРЅРµСЂР°Р» Р°СЂРјРёРё": result = "Р“РµРЅРµСЂР°Р» Р°СЂРјРёРё"
         Case Else: result = UCase(Left(zvanie, 1)) & LCase(Mid(zvanie, 2))
     End Select
     GetZvanieImenitelnyForSignature = result
 End Function
 
-'==========================================================
-' Находит номер столбца по заголовку (поиск по первой строке)
-' Возвращает индекс столбца (Integer) или -1, если не найден
-'==========================================================
+' ==========================================================
+' GENERAL UTILITIES
+' ==========================================================
+
+' /**
+'  * Finds a column index by header name (in the first row).
+'  * @return Integer - Column index or -1 if not found.
+'  */
 Public Function FindColumn(ws As Worksheet, headerName As String) As Integer
     Dim i As Integer, lastCol As Integer
     lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
@@ -792,19 +871,17 @@ Public Function FindColumn(ws As Worksheet, headerName As String) As Integer
             Exit Function
         End If
     Next i
-    FindColumn = -1 ' не найден
+    FindColumn = -1 ' Not found
 End Function
 
-'===============================================================
-'/**
-'* Возвращает все данные сотрудника из листа "Штат" с поиском по "Личный номер" или "ФИО"
-'* Работает только с индексами, определёнными FindColumnNumbers (со строгой проверкой типов).
-'* Если данные не найдены — выдаёт ошибку.
-'*
-'* @param queryValue String — значение для поиска
-'* @param byLichniyNomer Boolean — искать по личному номеру (True) или по ФИО (False)
-'* @return Object (Scripting.Dictionary) — ключи "Лицо", "Личный номер", "Воинское звание", "Часть", "Штатная должность"
-'*/
+' /**
+'  * Retrieves all staff data (Dictionary) searching by ID or Name.
+'  * Optimized to use Match instead of looping.
+'  *
+'  * @param queryValue String - Value to search
+'  * @param byLichniyNomer Boolean - True=Search by ID, False=Search by Name
+'  * @return Object (Dictionary)
+'  */
 Public Function GetStaffData(queryValue As String, Optional byLichniyNomer As Boolean = True) As Object
 
     Call EnsureStaffColumnsInitialized
@@ -813,9 +890,10 @@ Public Function GetStaffData(queryValue As String, Optional byLichniyNomer As Bo
     Dim colLichniyNomer As Long, colZvanie As Long, colFIO As Long, colDolzhnost As Long, colVoinskayaChast As Long
     Dim foundOk As Boolean
     Dim resultDict As Object
-    Dim lastRow As Long, i As Long
+    Dim searchCol As Long
+    Dim rowIndex As Long
 
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
 
     foundOk = FindColumnNumbers(wsStaff, colLichniyNomer, colZvanie, colFIO, colDolzhnost, colVoinskayaChast)
     If Not foundOk Then
@@ -823,66 +901,57 @@ Public Function GetStaffData(queryValue As String, Optional byLichniyNomer As Bo
         Exit Function
     End If
 
-    lastRow = wsStaff.Cells(wsStaff.Rows.count, colLichniyNomer).End(xlUp).Row
     Set resultDict = CreateObject("Scripting.Dictionary")
-    For i = 2 To lastRow
-        If byLichniyNomer Then
-            If Trim(wsStaff.Cells(i, colLichniyNomer).value) = Trim(queryValue) Then
-                resultDict("Лицо") = wsStaff.Cells(i, colFIO).value
-                resultDict("Личный номер") = wsStaff.Cells(i, colLichniyNomer).value
-                resultDict("Воинское звание") = wsStaff.Cells(i, colZvanie).value
-                resultDict("Часть") = wsStaff.Cells(i, colVoinskayaChast).value
-                resultDict("Штатная должность") = wsStaff.Cells(i, colDolzhnost).value
-                Set GetStaffData = resultDict
-                Exit Function
-            End If
-        Else
-            If Trim(wsStaff.Cells(i, colFIO).value) = Trim(queryValue) Then
-                resultDict("Лицо") = wsStaff.Cells(i, colFIO).value
-                resultDict("Личный номер") = wsStaff.Cells(i, colLichniyNomer).value
-                resultDict("Воинское звание") = wsStaff.Cells(i, colZvanie).value
-                resultDict("Часть") = wsStaff.Cells(i, colVoinskayaChast).value
-                resultDict("Штатная должность") = wsStaff.Cells(i, colDolzhnost).value
-                Set GetStaffData = resultDict
-                Exit Function
-            End If
-        End If
-    Next i
 
-    MsgBox "Данные сотрудника не найдены по запросу: '" & queryValue & "'.", vbExclamation, "Ошибка поиска"
+    ' Determine which column to search
+    If byLichniyNomer Then
+        searchCol = colLichniyNomer
+    Else
+        searchCol = colFIO
+    End If
+
+    ' Optimize: Use Match instead of Loop
+    rowIndex = FindStaffRow(wsStaff, queryValue, searchCol)
+
+    If rowIndex > 0 Then
+        resultDict("Р›РёС†Рѕ") = wsStaff.Cells(rowIndex, colFIO).value
+        resultDict("Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ") = wsStaff.Cells(rowIndex, colLichniyNomer).value
+        resultDict("Р’РѕРёРЅСЃРєРѕРµ Р·РІР°РЅРёРµ") = wsStaff.Cells(rowIndex, colZvanie).value
+        resultDict("Р§Р°СЃС‚СЊ") = wsStaff.Cells(rowIndex, colVoinskayaChast).value
+        resultDict("РЁС‚Р°С‚РЅР°СЏ РґРѕР»Р¶РЅРѕСЃС‚СЊ") = wsStaff.Cells(rowIndex, colDolzhnost).value
+        Set GetStaffData = resultDict
+        Exit Function
+    End If
+
+    ' Not found
+    MsgBox "Р”Р°РЅРЅС‹Рµ СЃРѕС‚СЂСѓРґРЅРёРєР° РЅРµ РЅР°Р№РґРµРЅС‹ РїРѕ Р·Р°РїСЂРѕСЃСѓ: '" & queryValue & "'.", vbExclamation, "РћС€РёР±РєР° РїРѕРёСЃРєР°"
     Set GetStaffData = CreateObject("Scripting.Dictionary")
 End Function
 
-'/**
-'* FindTableNumberColumn — Поиск колонки "Лицо" с табельными номерами (числовые значения)
-'* @param ws As Worksheet — лист "Штат"
-'* @return Long — номер колонки или 0, если не найдена
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-'*/
+' /**
+'  * Finds the "Table Number" column (Column "Name" with numeric values).
+'  */
 Public Function FindTableNumberColumn(ws As Worksheet) As Long
     On Error GoTo ErrorHandler
     
     Dim lastCol As Long, i As Long
     Dim headerText As String
     Dim testValue As Variant
-    Dim hasNumericValues As Boolean
     Dim numericCount As Long, totalCount As Long
     
     lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
     FindTableNumberColumn = 0
     
-    ' Ищем колонку с заголовком "Лицо" и числовыми значениями
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
-        If headerText = "лицо" Then
-            ' Проверяем, содержит ли колонка числовые значения
-            hasNumericValues = False
+        If headerText = "Р»РёС†Рѕ" Then
+            ' Check if column contains numeric values (first 20 rows)
             numericCount = 0
             totalCount = 0
             Dim lastRow As Long, j As Long
             lastRow = ws.Cells(ws.Rows.count, i).End(xlUp).Row
             If lastRow > 1 Then
-                For j = 2 To Application.WorksheetFunction.Min(lastRow, 20) ' Проверяем первые 20 строк
+                For j = 2 To Application.WorksheetFunction.Min(lastRow, 20)
                     testValue = ws.Cells(j, i).value
                     If Not IsEmpty(testValue) Then
                         totalCount = totalCount + 1
@@ -891,7 +960,7 @@ Public Function FindTableNumberColumn(ws As Worksheet) As Long
                         End If
                     End If
                 Next j
-                ' Если больше половины значений числовые - это колонка табельных номеров
+                ' If >50% numeric, assume it's Table Number
                 If totalCount > 0 And numericCount > totalCount / 2 Then
                     FindTableNumberColumn = i
                     Exit Function
@@ -901,17 +970,13 @@ Public Function FindTableNumberColumn(ws As Worksheet) As Long
     Next i
     
     Exit Function
-    
 ErrorHandler:
     FindTableNumberColumn = 0
 End Function
 
-'/**
-'* GetStaffDataByTableNumber — Поиск сотрудника по табельному номеру (колонка "Лицо" с числовыми значениями)
-'* @param tableNumber As String — табельный номер для поиска
-'* @return Object (Scripting.Dictionary) — словарь с данными: "Лицо", "Личный номер", "Воинское звание", "Часть", "Штатная должность"
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-'*/
+' /**
+'  * Searches staff by Table Number.
+'  */
 Public Function GetStaffDataByTableNumber(tableNumber As String) As Object
     On Error GoTo ErrorHandler
     
@@ -921,42 +986,38 @@ Public Function GetStaffDataByTableNumber(tableNumber As String) As Object
     Dim colTableNumber As Long
     Dim colLichniyNomer As Long, colZvanie As Long, colFIO As Long, colDolzhnost As Long, colVoinskayaChast As Long
     Dim resultDict As Object
-    Dim lastRow As Long, i As Long
+    Dim rowIndex As Long
     Dim foundOk As Boolean
     
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
     
-    ' Определяем колонки
     foundOk = FindColumnNumbers(wsStaff, colLichniyNomer, colZvanie, colFIO, colDolzhnost, colVoinskayaChast)
     If Not foundOk Then
         Set GetStaffDataByTableNumber = CreateObject("Scripting.Dictionary")
         Exit Function
     End If
     
-    ' Ищем колонку с табельными номерами
     colTableNumber = FindTableNumberColumn(wsStaff)
     If colTableNumber = 0 Then
         Set GetStaffDataByTableNumber = CreateObject("Scripting.Dictionary")
         Exit Function
     End If
     
-    lastRow = wsStaff.Cells(wsStaff.Rows.count, colTableNumber).End(xlUp).Row
     Set resultDict = CreateObject("Scripting.Dictionary")
     
-    ' Ищем по табельному номеру (точное совпадение)
-    For i = 2 To lastRow
-        If Trim(CStr(wsStaff.Cells(i, colTableNumber).value)) = Trim(tableNumber) Then
-            resultDict("Лицо") = wsStaff.Cells(i, colFIO).value
-            resultDict("Личный номер") = wsStaff.Cells(i, colLichniyNomer).value
-            resultDict("Воинское звание") = wsStaff.Cells(i, colZvanie).value
-            resultDict("Часть") = wsStaff.Cells(i, colVoinskayaChast).value
-            resultDict("Штатная должность") = wsStaff.Cells(i, colDolzhnost).value
-            Set GetStaffDataByTableNumber = resultDict
-            Exit Function
-        End If
-    Next i
+    ' Optimize: Use Match
+    rowIndex = FindStaffRow(wsStaff, tableNumber, colTableNumber)
     
-    ' Не найдено
+    If rowIndex > 0 Then
+        resultDict("Р›РёС†Рѕ") = wsStaff.Cells(rowIndex, colFIO).value
+        resultDict("Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ") = wsStaff.Cells(rowIndex, colLichniyNomer).value
+        resultDict("Р’РѕРёРЅСЃРєРѕРµ Р·РІР°РЅРёРµ") = wsStaff.Cells(rowIndex, colZvanie).value
+        resultDict("Р§Р°СЃС‚СЊ") = wsStaff.Cells(rowIndex, colVoinskayaChast).value
+        resultDict("РЁС‚Р°С‚РЅР°СЏ РґРѕР»Р¶РЅРѕСЃС‚СЊ") = wsStaff.Cells(rowIndex, colDolzhnost).value
+        Set GetStaffDataByTableNumber = resultDict
+        Exit Function
+    End If
+    
     Set GetStaffDataByTableNumber = CreateObject("Scripting.Dictionary")
     Exit Function
     
@@ -964,13 +1025,9 @@ ErrorHandler:
     Set GetStaffDataByTableNumber = CreateObject("Scripting.Dictionary")
 End Function
 
-'/**
-'* FindEmployeeByAnyNumber — Универсальный поиск сотрудника по личному или табельному номеру
-'* Сначала пытается найти по личному номеру, затем по табельному
-'* @param number As String — номер (личный или табельный)
-'* @return Object (Scripting.Dictionary) — словарь с данными сотрудника или пустой словарь
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-'*/
+' /**
+'  * Universal Search: First by ID, then by Table Number.
+'  */
 Public Function FindEmployeeByAnyNumber(number As String) As Object
     On Error GoTo ErrorHandler
     
@@ -983,21 +1040,21 @@ Public Function FindEmployeeByAnyNumber(number As String) As Object
         Exit Function
     End If
     
-    ' Сначала пытаемся найти по личному номеру
+    ' 1. Try by Personal ID
     Set staffData = GetStaffData(numberTrimmed, True)
     If staffData.count > 0 Then
         Set FindEmployeeByAnyNumber = staffData
         Exit Function
     End If
     
-    ' Если не найдено, пытаемся найти по табельному номеру
+    ' 2. Try by Table Number
     Set staffData = GetStaffDataByTableNumber(numberTrimmed)
     If staffData.count > 0 Then
         Set FindEmployeeByAnyNumber = staffData
         Exit Function
     End If
     
-    ' Не найдено ни по одному типу номера
+    ' Not found
     Set FindEmployeeByAnyNumber = CreateObject("Scripting.Dictionary")
     Exit Function
     
@@ -1005,48 +1062,40 @@ ErrorHandler:
     Set FindEmployeeByAnyNumber = CreateObject("Scripting.Dictionary")
 End Function
 
-'/**
-'* EnsureStaffColumnsInitialized — Гарантирует, что индексы столбцов инициализированы
-'* Если переменные сброшены (равны 0), вызывает InitStaffColumnIndexes заново.
-'* Вставлять этот вызов в начале любой процедуры, использующей глобальные индексы.
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-'*/
+' /**
+'  * Ensures global column indexes are set.
+'  */
 Public Sub EnsureStaffColumnsInitialized()
-    ' Проверяем, сброшены ли переменные (хотя бы одна критическая равна 0)
     If colLichniyNomer_Global = 0 Or colFIO_Global = 0 Then
         InitStaffColumnIndexes
     End If
 End Sub
 
-'==========================================================
-' ФУНКЦИИ СОВМЕСТИМОСТИ С EXCEL 2010/2016
-'==========================================================
+' ==========================================================
+' EXCEL 2010/2016 COMPATIBILITY
+' ==========================================================
 
-'/**
-'* SaveWordDocumentSafe — универсальная функция сохранения Word документа
-'* Поддерживает Excel 2010+ с автоматическим fallback на старые методы
-'* @param wdDoc Object — объект Word.Document
-'* @param filePath String — путь для сохранения
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-'*/
+' /**
+'  * Saves Word Document safely (handles diff versions).
+'  */
 Public Sub SaveWordDocumentSafe(wdDoc As Object, filePath As String)
     On Error Resume Next
     
-    ' Пробуем использовать SaveAs2 (Word 2010+)
+    ' Try SaveAs2 (Word 2010+)
     wdDoc.SaveAs2 filePath
     
-    ' Если ошибка, используем старый метод SaveAs
+    ' Fallback to SaveAs
     If Err.number <> 0 Then
         Err.Clear
         On Error Resume Next
-        ' Определяем формат по расширению
         Dim fileFormat As Long
+        ' Determine format code
         If Right(LCase(filePath), 5) = ".docx" Then
             fileFormat = 16 ' wdFormatXMLDocument
         ElseIf Right(LCase(filePath), 4) = ".doc" Then
             fileFormat = 0 ' wdFormatDocument
         Else
-            fileFormat = 16 ' По умолчанию docx
+            fileFormat = 16
         End If
         
         wdDoc.SaveAs filePath, fileFormat
@@ -1055,16 +1104,13 @@ Public Sub SaveWordDocumentSafe(wdDoc As Object, filePath As String)
     On Error GoTo 0
 End Sub
 
-'/**
-'* CheckExcelVersion — проверка минимальной версии Excel (2010+)
-'* @return Boolean — True если версия подходит, False если нет
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-'*/
+' /**
+'  * Checks minimal Excel version (2010+ required).
+'  */
 Public Function CheckExcelVersion() As Boolean
     Dim version As String
     version = Application.version
     
-    ' Excel 2010 = 14.0, Excel 2016 = 16.0
     Dim majorVersion As Integer
     Dim dotPos As Integer
     dotPos = InStr(version, ".")
@@ -1076,33 +1122,31 @@ Public Function CheckExcelVersion() As Boolean
     End If
     
     If majorVersion < 14 Then
-        MsgBox "Требуется Microsoft Excel 2010 или выше. " & _
-               "Текущая версия: " & version, vbCritical
+        MsgBox "РўСЂРµР±СѓРµС‚СЃСЏ Microsoft Excel 2010 РёР»Рё РІС‹С€Рµ. " & _
+               "РўРµРєСѓС‰Р°СЏ РІРµСЂСЃРёСЏ: " & version, vbCritical
         CheckExcelVersion = False
     Else
         CheckExcelVersion = True
     End If
 End Function
 
-'/**
-'* CreateWordAppSafely — безопасное создание Word приложения с обработкой ошибок
-'* @return Object — объект Word.Application или Nothing при ошибке
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-'*/
+' /**
+'  * Safely creates or gets Word Application instance.
+'  */
 Public Function CreateWordAppSafely() As Object
     Dim wdApp As Object
     
     On Error Resume Next
-    ' Пробуем получить существующий экземпляр
+    ' Try to get existing instance
     Set wdApp = GetObject(, "Word.Application")
     
     If wdApp Is Nothing Then
-        ' Создаем новый экземпляр
+        ' Create new instance
         Set wdApp = CreateObject("Word.Application")
         
         If wdApp Is Nothing Then
-            MsgBox "Не удалось создать экземпляр Microsoft Word. " & _
-                   "Убедитесь, что Word установлен и доступен.", vbCritical
+            MsgBox "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЌРєР·РµРјРїР»СЏСЂ Microsoft Word. " & _
+                   "РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ Word СѓСЃС‚Р°РЅРѕРІР»РµРЅ Рё РґРѕСЃС‚СѓРїРµРЅ.", vbCritical, "РћС€РёР±РєР° Word"
             Set CreateWordAppSafely = Nothing
             Exit Function
         End If
@@ -1112,11 +1156,9 @@ Public Function CreateWordAppSafely() As Object
     Set CreateWordAppSafely = wdApp
 End Function
 
-'/**
-'* IsWordAvailable — проверка доступности Microsoft Word
-'* @return Boolean — True если Word доступен, False если нет
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-'*/
+' /**
+'  * checks if Word is available on the system.
+'  */
 Public Function IsWordAvailable() As Boolean
     On Error Resume Next
     Dim wdApp As Object

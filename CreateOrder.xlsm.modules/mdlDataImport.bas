@@ -1,193 +1,187 @@
 Attribute VB_Name = "mdlDataImport"
-' === СНАПШОТ ВЕРСИИ === 12.07.2025 20:45 ===
-' Рабочая версия сохранена: 12.07.2025 20:45
+' ==============================================================================
+' Module: mdlDataImport
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' Date: 14.02.2026
+' Description: Imports data from an external Excel file into the "Staff" (Shtat) sheet.
+'              Replaces all existing data on the target sheet.
+' ==============================================================================
 
 Option Explicit
 
-' Модуль mdlDataImport для импорта данных на лист "Штат"
-' Версия: 1.0.0
-' Дата: 09.07.2025
-' Описание: Загружает данные из внешнего Excel файла на лист "Штат" с полной заменой
-
+' /**
+'  * Main procedure to import data to "Staff" sheet.
+'  * Opens a file dialog, reads source data, and overwrites the "Staff" sheet.
+'  */
 Sub ImportDataToStaff()
-    Dim sourceFile As String
+    Dim sourceFile As Variant
     Dim sourceWorkbook As Workbook
     Dim sourceWorksheet As Worksheet
     Dim targetWorksheet As Worksheet
     Dim lastRow As Long
     Dim lastCol As Long
-    Dim selectedSheet As String
+    Dim selectedSheetIndex As Integer
     
     On Error GoTo ErrorHandler
     
-    ' Отключаем обновление экрана для ускорения
+    ' Optimization: Turn off updates
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
+    Application.Calculation = xlCalculationManual
     
-    ' Диалог выбора файла
+    ' 1. Select File
     sourceFile = Application.GetOpenFilename( _
         FileFilter:="Excel Files (*.xlsx;*.xlsm;*.xls), *.xlsx;*.xlsm;*.xls", _
-        Title:="Выберите файл для импорта данных на лист 'Штат'")
+        Title:="Р’С‹Р±РµСЂРёС‚Рµ С„Р°Р№Р» РґР»СЏ РёРјРїРѕСЂС‚Р° РґР°РЅРЅС‹С… РЅР° Р»РёСЃС‚ 'РЁС‚Р°С‚'")
     
-    ' Проверяем, выбрал ли пользователь файл
-    If sourceFile = "False" Then
-        MsgBox "Импорт отменен пользователем.", vbInformation, "Импорт данных"
+    If sourceFile = False Then
+        MsgBox "РРјРїРѕСЂС‚ РѕС‚РјРµРЅРµРЅ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј.", vbInformation, "РРјРїРѕСЂС‚ РґР°РЅРЅС‹С…"
         GoTo CleanUp
     End If
     
-    ' Открываем исходный файл
+    ' 2. Open Source File
     Set sourceWorkbook = Workbooks.Open(sourceFile, ReadOnly:=True)
     
-    ' Если в файле несколько листов, даем пользователю выбрать
+    ' 3. Select Worksheet
     If sourceWorkbook.Worksheets.count > 1 Then
-        selectedSheet = SelectWorksheetFromFile(sourceWorkbook)
-        If selectedSheet = "" Then
+        selectedSheetIndex = SelectWorksheetFromFile(sourceWorkbook)
+        If selectedSheetIndex = 0 Then
             sourceWorkbook.Close False
-            MsgBox "Импорт отменен - лист не выбран.", vbInformation, "Импорт данных"
+            MsgBox "РРјРїРѕСЂС‚ РѕС‚РјРµРЅРµРЅ - Р»РёСЃС‚ РЅРµ РІС‹Р±СЂР°РЅ.", vbInformation, "РРјРїРѕСЂС‚ РґР°РЅРЅС‹С…"
             GoTo CleanUp
         End If
-        Set sourceWorksheet = sourceWorkbook.Worksheets(selectedSheet)
+        Set sourceWorksheet = sourceWorkbook.Worksheets(selectedSheetIndex)
     Else
         Set sourceWorksheet = sourceWorkbook.Worksheets(1)
     End If
     
-    ' Проверяем наличие листа "Штат" в текущей книге
+    ' 4. Prepare Target Sheet
     Set targetWorksheet = GetOrCreateStaffWorksheet()
     
-    ' Очищаем лист "Штат"
-    targetWorksheet.Cells.Clear
-    
-    ' Определяем диапазон данных в исходном файле
+    ' Determine data range
     lastRow = sourceWorksheet.Cells(sourceWorksheet.Rows.count, 1).End(xlUp).Row
     lastCol = sourceWorksheet.Cells(1, sourceWorksheet.Columns.count).End(xlToLeft).Column
     
-    ' Проверяем, есть ли данные для копирования
-    If lastRow = 1 And sourceWorksheet.Cells(1, 1).value = "" Then
+    ' Check if empty
+    If lastRow < 1 Or (lastRow = 1 And sourceWorksheet.Cells(1, 1).value = "") Then
         sourceWorkbook.Close False
-        MsgBox "Выбранный лист пуст - нет данных для импорта.", vbExclamation, "Импорт данных"
+        MsgBox "Р’С‹Р±СЂР°РЅРЅС‹Р№ Р»РёСЃС‚ РїСѓСЃС‚ - РЅРµС‚ РґР°РЅРЅС‹С… РґР»СЏ РёРјРїРѕСЂС‚Р°.", vbExclamation, "РРјРїРѕСЂС‚ РґР°РЅРЅС‹С…"
         GoTo CleanUp
     End If
     
-    ' Копируем данные
+    ' 5. Perform Import (Copy/Paste to preserve formatting)
+    ' Clear target first
+    targetWorksheet.Cells.Clear
+    
+    ' Copy specific range (more efficient than copying whole columns)
     sourceWorksheet.Range(sourceWorksheet.Cells(1, 1), sourceWorksheet.Cells(lastRow, lastCol)).Copy
     targetWorksheet.Cells(1, 1).PasteSpecial xlPasteAll
     
-    ' Автоподбор ширины столбцов
-    targetWorksheet.Columns.AutoFit
-    
-    ' Закрываем исходный файл
-    sourceWorkbook.Close False
-    
-    ' Очищаем буфер обмена
+    ' Cleanup UI
+    targetWorksheet.Range("A1").Select
     Application.CutCopyMode = False
     
-    ' Сообщаем об успешном импорте
-    MsgBox "Данные успешно импортированы на лист 'Штат'!" & vbCrLf & _
-           "Импортировано строк: " & lastRow & vbCrLf & _
-           "Импортировано столбцов: " & lastCol, vbInformation, "Импорт завершен"
+    ' Close Source
+    sourceWorkbook.Close False
+    
+    ' 6. Finalize
+    MsgBox "Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ РёРјРїРѕСЂС‚РёСЂРѕРІР°РЅС‹ РЅР° Р»РёСЃС‚ 'РЁС‚Р°С‚'!" & vbCrLf & _
+           "РћР±СЂР°Р±РѕС‚Р°РЅРѕ СЃС‚СЂРѕРє: " & lastRow & vbCrLf & _
+           "РЎС‚РѕР»Р±С†РѕРІ: " & lastCol, vbInformation, "РЈСЃРїРµС…"
+    
+    ' Re-initialize column indexes (critical step!)
+    Call mdlHelper.InitStaffColumnIndexes
     
     GoTo CleanUp
     
 ErrorHandler:
-    ' Обработка ошибок
     If Not sourceWorkbook Is Nothing Then
+        ' Close without saving if error occurred while open
+        On Error Resume Next
         sourceWorkbook.Close False
+        On Error GoTo 0
     End If
-    MsgBox "Ошибка при импорте данных: " & Err.Description, vbCritical, "Ошибка импорта"
+    MsgBox "РљСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ: " & Err.Description, vbCritical, "РћС€РёР±РєР° " & Err.number
     
 CleanUp:
-    ' Восстанавливаем настройки
     Application.ScreenUpdating = True
     Application.DisplayAlerts = True
+    Application.Calculation = xlCalculationAutomatic
     Application.CutCopyMode = False
     
-    ' Очищаем переменные
     Set sourceWorkbook = Nothing
     Set sourceWorksheet = Nothing
     Set targetWorksheet = Nothing
-    
-    Call mdlHelper.InitStaffColumnIndexes
 End Sub
 
-' Функция для выбора листа из файла с несколькими листами
-' Версия: 1.0.0
-' Дата: 09.07.2025
-' Описание: Показывает диалог выбора листа, если в файле несколько листов
-Function SelectWorksheetFromFile(wb As Workbook) As String
-    Dim sheetNames As String
-    Dim selectedSheet As String
+' /**
+'  * Helper: Dialog to select a specific worksheet if multiple exist.
+'  * Returns 0 if cancelled, or Index (1..N) if selected.
+'  */
+Function SelectWorksheetFromFile(wb As Workbook) As Integer
+    Dim sheetList As String
     Dim ws As Worksheet
     Dim i As Integer
+    Dim userInput As String
     
-    ' Формируем список листов
-    sheetNames = "Выберите лист для импорта:" & vbCrLf & vbCrLf
+    ' Build list
+    sheetList = "Р’ С„Р°Р№Р»Рµ РЅР°Р№РґРµРЅРѕ РЅРµСЃРєРѕР»СЊРєРѕ Р»РёСЃС‚РѕРІ:" & vbCrLf & vbCrLf
     i = 1
     For Each ws In wb.Worksheets
-        sheetNames = sheetNames & i & ". " & ws.Name & vbCrLf
+        ' Limit list to 20 sheets to prevent msgbox overflow
+        If i <= 20 Then
+            sheetList = sheetList & i & ". " & ws.Name & vbCrLf
+        End If
         i = i + 1
     Next ws
     
-    ' Запрашиваем номер листа у пользователя
-    Dim userInput As String
-    userInput = InputBox(sheetNames & vbCrLf & "Введите номер листа (1-" & wb.Worksheets.count & "):", _
-                        "Выбор листа для импорта", "1")
+    If i > 21 Then sheetList = sheetList & "... Рё РµС‰Рµ " & (i - 21) & " Р»РёСЃС‚РѕРІ."
     
-    ' Проверяем ввод пользователя
-    If userInput = "" Then
-        SelectWorksheetFromFile = ""
+    ' Prompt
+    userInput = InputBox(sheetList & vbCrLf & "Р’РІРµРґРёС‚Рµ РќРћРњР•Р  Р»РёСЃС‚Р° РґР»СЏ РёРјРїРѕСЂС‚Р° (1-" & wb.Worksheets.count & "):", _
+                        "Р’С‹Р±РѕСЂ РёСЃС‚РѕС‡РЅРёРєР°", "1")
+    
+    ' Validation
+    If userInput = "" Or Not IsNumeric(userInput) Then
+        SelectWorksheetFromFile = 0
         Exit Function
     End If
     
-    Dim sheetNumber As Integer
-    If IsNumeric(userInput) Then
-        sheetNumber = CInt(userInput)
-        If sheetNumber >= 1 And sheetNumber <= wb.Worksheets.count Then
-            SelectWorksheetFromFile = wb.Worksheets(sheetNumber).Name
-        Else
-            MsgBox "Неверный номер листа. Выберите число от 1 до " & wb.Worksheets.count, vbExclamation
-            SelectWorksheetFromFile = ""
-        End If
+    Dim val As Integer
+    val = CInt(userInput)
+    
+    If val >= 1 And val <= wb.Worksheets.count Then
+        SelectWorksheetFromFile = val
     Else
-        MsgBox "Введите корректный номер листа.", vbExclamation
-        SelectWorksheetFromFile = ""
+        MsgBox "РќРµРІРµСЂРЅС‹Р№ РЅРѕРјРµСЂ Р»РёСЃС‚Р°!", vbExclamation
+        SelectWorksheetFromFile = 0
     End If
 End Function
 
-' Функция для получения или создания листа "Штат"
-' Версия: 1.0.0
-' Дата: 09.07.2025
-' Описание: Возвращает лист "Штат", создает его если не существует
-' Функция для получения или создания листа "Штат"
+' /**
+'  * Helper: Gets the "Staff" (Shtat) worksheet or creates it if missing.
+'  */
 Function GetOrCreateStaffWorksheet() As Worksheet
     Dim ws As Worksheet
-    Dim staffExists As Boolean
     
-    staffExists = False
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets("РЁС‚Р°С‚")
+    On Error GoTo 0
     
-    ' Проверяем существование листа "Штат"
-    For Each ws In ThisWorkbook.Worksheets
-        If ws.Name = "Штат" Then
-            Set GetOrCreateStaffWorksheet = ws
-            staffExists = True
-            Exit For
-        End If
-    Next ws
-    
-    ' Создаем лист "Штат", если он не существует
-    If Not staffExists Then
-        Set GetOrCreateStaffWorksheet = ThisWorkbook.Worksheets.Add
-        GetOrCreateStaffWorksheet.Name = "Штат"
-        MsgBox "Лист 'Штат' не существовал и был создан.", vbInformation, "Создание листа"
+    If ws Is Nothing Then
+        Set ws = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Worksheets(ThisWorkbook.Worksheets.count))
+        ws.Name = "РЁС‚Р°С‚"
+        MsgBox "Р›РёСЃС‚ 'РЁС‚Р°С‚' РЅРµ Р±С‹Р» РЅР°Р№РґРµРЅ Рё СЃРѕР·РґР°РЅ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё.", vbInformation, "РЎРёСЃС‚РµРјР°"
     End If
+    
+    Set GetOrCreateStaffWorksheet = ws
 End Function
 
-
-' Функция для предварительного просмотра данных перед импортом
-' Версия: 1.0.0
-' Дата: 09.07.2025
-' Описание: Показывает превью первых 5 строк данных для подтверждения импорта
+' /**
+'  * Helper: Preview the first 5 rows of a selected file without importing.
+'  */
 Sub PreviewImportData()
-    Dim sourceFile As String
+    Dim sourceFile As Variant
     Dim sourceWorkbook As Workbook
     Dim sourceWorksheet As Worksheet
     Dim previewText As String
@@ -198,45 +192,48 @@ Sub PreviewImportData()
     
     Application.ScreenUpdating = False
     
-    ' Диалог выбора файла
     sourceFile = Application.GetOpenFilename( _
         FileFilter:="Excel Files (*.xlsx;*.xlsm;*.xls), *.xlsx;*.xlsm;*.xls", _
-        Title:="Выберите файл для предварительного просмотра")
+        Title:="Р’С‹Р±РµСЂРёС‚Рµ С„Р°Р№Р» РґР»СЏ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅРѕРіРѕ РїСЂРѕСЃРјРѕС‚СЂР°")
     
-    If sourceFile = "False" Then Exit Sub
+    If sourceFile = False Then
+        Application.ScreenUpdating = True
+        Exit Sub
+    End If
     
-    ' Открываем файл для просмотра
     Set sourceWorkbook = Workbooks.Open(sourceFile, ReadOnly:=True)
     Set sourceWorksheet = sourceWorkbook.Worksheets(1)
     
-    ' Формируем превью (первые 5 строк и 5 столбцов)
-    maxRows = IIf(sourceWorksheet.Cells(sourceWorksheet.Rows.count, 1).End(xlUp).Row > 5, 5, sourceWorksheet.Cells(sourceWorksheet.Rows.count, 1).End(xlUp).Row)
-    maxCols = IIf(sourceWorksheet.Cells(1, sourceWorksheet.Columns.count).End(xlToLeft).Column > 5, 5, sourceWorksheet.Cells(1, sourceWorksheet.Columns.count).End(xlToLeft).Column)
+    ' Preview bounds
+    Dim lr As Long, lc As Long
+    lr = sourceWorksheet.Cells(sourceWorksheet.Rows.count, 1).End(xlUp).Row
+    lc = sourceWorksheet.Cells(1, sourceWorksheet.Columns.count).End(xlToLeft).Column
     
-    previewText = "=== ПРЕДВАРИТЕЛЬНЫЙ ПРОСМОТР ДАННЫХ ===" & vbCrLf & vbCrLf
-    previewText = previewText & "Файл: " & sourceWorkbook.Name & vbCrLf
-    previewText = previewText & "Лист: " & sourceWorksheet.Name & vbCrLf & vbCrLf
+    maxRows = IIf(lr > 5, 5, lr)
+    maxCols = IIf(lc > 5, 5, lc)
+    
+    previewText = "=== РџР Р•Р”РџР РћРЎРњРћРўР  (РџРµСЂРІС‹Рµ 5 СЃС‚СЂРѕРє) ===" & vbCrLf & vbCrLf
+    previewText = previewText & "Р¤Р°Р№Р»: " & sourceWorkbook.Name & vbCrLf
+    previewText = previewText & "Р›РёСЃС‚: " & sourceWorksheet.Name & vbCrLf & vbCrLf
     
     For i = 1 To maxRows
         For j = 1 To maxCols
-            previewText = previewText & sourceWorksheet.Cells(i, j).value & vbTab
+            previewText = previewText & Left(CStr(sourceWorksheet.Cells(i, j).value), 15) & vbTab
         Next j
         previewText = previewText & vbCrLf
     Next i
     
-    If maxRows = 5 Then previewText = previewText & "... (показаны первые 5 строк)"
-    
     sourceWorkbook.Close False
     
-    MsgBox previewText, vbInformation, "Предварительный просмотр"
+    MsgBox previewText, vbInformation, "Р”Р°РЅРЅС‹Рµ С„Р°Р№Р»Р°"
     
-    Application.ScreenUpdating = True
-    Exit Sub
+    GoTo CleanUp
     
 ErrorHandler:
     If Not sourceWorkbook Is Nothing Then sourceWorkbook.Close False
+    MsgBox "РћС€РёР±РєР° С‡С‚РµРЅРёСЏ С„Р°Р№Р»Р°: " & Err.Description, vbCritical
+    
+CleanUp:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при просмотре файла: " & Err.Description, vbCritical
 End Sub
-
 

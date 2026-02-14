@@ -9,6 +9,8 @@ thumbs.db
 desktop.ini
 .DS_Store
 
+# .frx files are binary data for UserForms and MUST be tracked.
+
 # Папка с историей чатов Cursor (она может быть огромной, нам она в гите не нужна)
 .cursor/
 

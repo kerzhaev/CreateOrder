@@ -1,10 +1,10 @@
 Attribute VB_Name = "mdlMainExport"
 ' ===============================================================================
-' модуль mdlMainExport
-' Версия: 5.4.0
-'Дата: 30.10.2025
-' Описание: Экспорт основного приказа c заполнителями для отсутствующих сотрудников,
-' файл сохраняется как "Основной приказ.docx" в папке с макросом и сразу открывается
+' Module mdlMainExport
+' Version: 5.4.0
+' Date: 30.10.2025
+' Description: Export of the main order with placeholders for missing employees,
+' the file is saved as "РћСЃРЅРѕРІРЅРѕР№ РїСЂРёРєР°Р·.docx" in the macro folder and opens immediately
 ' ===============================================================================
 
 Option Explicit
@@ -37,16 +37,16 @@ Sub ExportToWordFromStaffByLichniyNomer()
     
     Call mdlHelper.InitStaffColumnIndexes
 
-    Set wsMain = ThisWorkbook.Sheets("ДСО")
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsMain = ThisWorkbook.Sheets("Р”РЎРћ")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
 
     If Not mdlHelper.FindColumnNumbers(wsStaff, colLichniyNomer, colZvanie, colFIO, colDolzhnost, colVoinskayaChast) Then
-        MsgBox "Ошибка: Не удалось найти необходимые столбцы в листе 'Штат'. Проверьте заголовки.", vbCritical
+        MsgBox "РћС€РёР±РєР°: РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё РЅРµРѕР±С…РѕРґРёРјС‹Рµ СЃС‚РѕР»Р±С†С‹ РІ Р»РёСЃС‚Рµ 'РЁС‚Р°С‚'. РџСЂРѕРІРµСЂСЊС‚Рµ Р·Р°РіРѕР»РѕРІРєРё.", vbCritical
         Exit Sub
     End If
 
     cutoffDate = mdlHelper.GetExportCutoffDate()
-    lastRowMain = wsMain.Cells(wsMain.Rows.count, "C").End(xlUp).Row ' Поиск по столбцу C (Личный номер)
+    lastRowMain = wsMain.Cells(wsMain.Rows.count, "C").End(xlUp).Row ' Search by column C (Personal Number)
 
     Set wdApp = CreateObject("Word.Application")
     wdVisibleState = wdApp.Visible
@@ -54,9 +54,9 @@ Sub ExportToWordFromStaffByLichniyNomer()
     Set wdDoc = wdApp.Documents.Add
 
     For i = 2 To lastRowMain
-        currentFIO = wsMain.Cells(i, 2).value ' ФИО из столбца B
-        currentLichniyNomer = wsMain.Cells(i, 3).value ' Личный номер из столбца C
-        osnovanie = wsMain.Cells(i, 4).value ' Основание
+        currentFIO = wsMain.Cells(i, 2).value ' FIO from column B
+        currentLichniyNomer = wsMain.Cells(i, 3).value ' Personal Number from column C
+        osnovanie = wsMain.Cells(i, 4).value ' Foundation
 
         staffRow = mdlHelper.FindStaffRow(wsStaff, currentLichniyNomer, colLichniyNomer)
         If staffRow > 0 Then
@@ -66,33 +66,33 @@ Sub ExportToWordFromStaffByLichniyNomer()
             dolzhnost = wsStaff.Cells(staffRow, colDolzhnost).value
             VoinskayaChast = mdlHelper.ExtractVoinskayaChast(wsStaff.Cells(staffRow, colVoinskayaChast).value)
         Else
-            lichniyNomer = "Заполните личный номер"
-            zvanie = "Заполните воинское звание"
+            lichniyNomer = "Р—Р°РїРѕР»РЅРёС‚Рµ Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ"
+            zvanie = "Р—Р°РїРѕР»РЅРёС‚Рµ РІРѕРёРЅСЃРєРѕРµ Р·РІР°РЅРёРµ"
             fio = currentFIO
-            dolzhnost = "Заполните воинскую должность"
-            VoinskayaChast = "Заполните наименование части"
+            dolzhnost = "Р—Р°РїРѕР»РЅРёС‚Рµ РІРѕРёРЅСЃРєСѓСЋ РґРѕР»Р¶РЅРѕСЃС‚СЊ"
+            VoinskayaChast = "Р—Р°РїРѕР»РЅРёС‚Рµ РЅР°РёРјРµРЅРѕРІР°РЅРёРµ С‡Р°СЃС‚Рё"
         End If
 
         textLine = wsMain.Cells(i, 1).value & ". " & mdlHelper.SklonitZvanie(zvanie) & " " & _
-                              mdlHelper.SklonitFIO(fio) & ", личный номер " & lichniyNomer & ", " & _
+                              mdlHelper.SklonitFIO(fio) & ", Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ " & lichniyNomer & ", " & _
                               mdlHelper.SklonitDolzhnost(dolzhnost, VoinskayaChast) & vbCrLf
 
-        ' Сбор всех периодов для строки
+        ' Collection of all periods for the row
         Set periodList = New Collection
         mdlHelper.CollectAllPersonPeriods wsMain, i, periodList
 
-        ' Проверка на ошибочные пары (разрешены совпадающие даты — только < запрещено)
+        ' Check for erroneous pairs (matching dates allowed вЂ” only < is forbidden)
         For j = 1 To periodList.count
             If periodList(j)(2) < periodList(j)(1) Then
-                MsgBox "Обнаружена ошибка: дата окончания меньше даты начала. Исправьте периоды для " & fio & " (" & lichniyNomer & ")." & vbCrLf & _
-                "Экспорт не будет выполнен!", vbCritical, "Ошибка данных"
+                MsgBox "РћР±РЅР°СЂСѓР¶РµРЅР° РѕС€РёР±РєР°: РґР°С‚Р° РѕРєРѕРЅС‡Р°РЅРёСЏ РјРµРЅСЊС€Рµ РґР°С‚С‹ РЅР°С‡Р°Р»Р°. РСЃРїСЂР°РІСЊС‚Рµ РїРµСЂРёРѕРґС‹ РґР»СЏ " & fio & " (" & lichniyNomer & ")." & vbCrLf & _
+                "Р­РєСЃРїРѕСЂС‚ РЅРµ Р±СѓРґРµС‚ РІС‹РїРѕР»РЅРµРЅ!", vbCritical, "РћС€РёР±РєР° РґР°РЅРЅС‹С…"
                 wdDoc.Close False
                 wdApp.Quit
                 Exit Sub
             End If
         Next j
 
-        ' Сортировка и сборка массивов периодов
+        ' Sorting and assembling period arrays
         If periodList.count > 0 Then
             ReDim periodArr(1 To periodList.count, 1 To 3)
             For j = 1 To periodList.count
@@ -100,7 +100,7 @@ Sub ExportToWordFromStaffByLichniyNomer()
                 periodArr(j, 2) = periodList(j)(2)
                 periodArr(j, 3) = periodList(j)(3)
             Next j
-            ' Сортировка пузырьком
+            ' Bubble sort
             Dim swap As Boolean
             Do
                 swap = False
@@ -131,42 +131,41 @@ Sub ExportToWordFromStaffByLichniyNomer()
                     daysList = daysList & "+" & periodArr(j, 3)
                 End If
 
-                textLine = textLine & "- с " & Format(periodArr(j, 1), "dd.mm.yyyy") & " по " & _
-                                Format(periodArr(j, 2), "dd.mm.yyyy") & " в количестве " & periodArr(j, 3) & " суток"
+                textLine = textLine & "- СЃ " & Format(periodArr(j, 1), "dd.mm.yyyy") & " РїРѕ " & _
+                                Format(periodArr(j, 2), "dd.mm.yyyy") & " РІ РєРѕР»РёС‡РµСЃС‚РІРµ " & periodArr(j, 3) & " СЃСѓС‚РѕРє"
                 If periodArr(j, 2) < cutoffDate Then
-                    textLine = textLine & " (НЕ АКТУАЛЕН — старше 3 лет + 1 месяц!)"
+                    textLine = textLine & " (РќР• РђРљРўРЈРђР›Р•Рќ вЂ” СЃС‚Р°СЂС€Рµ 3 Р»РµС‚ + 1 РјРµСЃСЏС†!)"
                 End If
                 textLine = textLine & vbCrLf
             Next j
 
             If totalDays > 0 Then
                 restDays = Int(totalDays / 3) * 2
-                textLine = textLine & "(" & daysList & ") = " & totalDays & " суток привлечения /3*2 = " & restDays & " суток отдыха" & vbCrLf
+                textLine = textLine & "(" & daysList & ") = " & totalDays & " СЃСѓС‚РѕРє РїСЂРёРІР»РµС‡РµРЅРёСЏ /3*2 = " & restDays & " СЃСѓС‚РѕРє РѕС‚РґС‹С…Р°" & vbCrLf
             End If
         Else
-            textLine = textLine & "Нет периодов для вывода." & vbCrLf
+            textLine = textLine & "РќРµС‚ РїРµСЂРёРѕРґРѕРІ РґР»СЏ РІС‹РІРѕРґР°." & vbCrLf
         End If
 
         If osnovanie <> "" Then
-            textLine = textLine & "Основание: " & osnovanie & vbCrLf
+            textLine = textLine & "РћСЃРЅРѕРІР°РЅРёРµ: " & osnovanie & vbCrLf
         End If
         textLine = textLine & vbCrLf
         wdDoc.Content.InsertAfter textLine
     Next i
 
-    fileName = "Основной приказ.docx"
+    fileName = "РћСЃРЅРѕРІРЅРѕР№ РїСЂРёРєР°Р·.docx"
     savePath = ThisWorkbook.Path & "\" & fileName
     Call mdlHelper.SaveWordDocumentSafe(wdDoc, savePath)
     wdDoc.Activate
     wdApp.Visible = True
 
-    MsgBox "Основной приказ успешно создан и открыт для просмотра: " & savePath, vbInformation
+    MsgBox "РћСЃРЅРѕРІРЅРѕР№ РїСЂРёРєР°Р· СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ Рё РѕС‚РєСЂС‹С‚ РґР»СЏ РїСЂРѕСЃРјРѕС‚СЂР°: " & savePath, vbInformation
     Exit Sub
 
 ErrorHandler:
-    MsgBox "Ошибка экспорта: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р°: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
     If Not wdDoc Is Nothing Then wdDoc.Close False
 
 End Sub
-
 

@@ -1,10 +1,10 @@
 Attribute VB_Name = "mdlRaportExport"
 ' ===============================================================================
-' модуль mdlRaportExport
-' Версия: 1.6.0
-' Дата: 29.10.2025
-' Описание: Экспорт рапортов, корректная вставка periodsText через Range для больших строк.
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' Module mdlRaportExport
+' Version: 1.6.0
+' Date: 14.02.2026
+' Description: Export of reports (raports), correct insertion of periodsText via Range for large strings.
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
 ' ===============================================================================
 
 Option Explicit
@@ -36,19 +36,19 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
     Dim hasAnyPeriods As Boolean
 
     If mdlHelper.hasCriticalErrors() Then
-        MsgBox "Экспорт рапортов заблокирован из-за критических ошибок в данных!" & vbCrLf & _
-               "Исправьте все ошибки (красные ячейки) в листе ДСО.", vbCritical, "Экспорт невозможен"
+        MsgBox "Р­РєСЃРїРѕСЂС‚ СЂР°РїРѕСЂС‚РѕРІ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ РёР·-Р·Р° РєСЂРёС‚РёС‡РµСЃРєРёС… РѕС€РёР±РѕРє РІ РґР°РЅРЅС‹С…!" & vbCrLf & _
+               "РСЃРїСЂР°РІСЊС‚Рµ РІСЃРµ РѕС€РёР±РєРё (РєСЂР°СЃРЅС‹Рµ СЏС‡РµР№РєРё) РІ Р»РёСЃС‚Рµ Р”РЎРћ.", vbCritical, "Р­РєСЃРїРѕСЂС‚ РЅРµРІРѕР·РјРѕР¶РµРЅ"
         Exit Sub
     End If
 
     On Error GoTo ErrorHandler
 
     Application.ScreenUpdating = False
-    Application.StatusBar = "Создание рапортов..."
+    Application.StatusBar = "РЎРѕР·РґР°РЅРёРµ СЂР°РїРѕСЂС‚РѕРІ..."
 
-    templatePath = ThisWorkbook.Path & "\Шаблон_Рапорт.docx"
+    templatePath = ThisWorkbook.Path & "\РЁР°Р±Р»РѕРЅ_Р Р°РїРѕСЂС‚.docx"
     If dir(templatePath) = "" Then
-        MsgBox "Файл шаблона не найден: " & templatePath, vbCritical
+        MsgBox "Р¤Р°Р№Р» С€Р°Р±Р»РѕРЅР° РЅРµ РЅР°Р№РґРµРЅ: " & templatePath, vbCritical
         GoTo CleanUp
     End If
 
@@ -62,13 +62,13 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
     End If
     On Error GoTo 0
 
-    wdApp.Visible = False ' Для пакетной работы — скрываем Word
+    wdApp.Visible = False ' Hide Word for batch processing
 
-    Set wsMain = ThisWorkbook.Sheets("ДСО")
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsMain = ThisWorkbook.Sheets("Р”РЎРћ")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
 
     If Not mdlHelper.FindColumnNumbers(wsStaff, colLichniyNomer, colZvanie, colFIO, colDolzhnost, colVoinskayaChast) Then
-        MsgBox "Ошибка: Не удалось найти необходимые столбцы в листе 'Штат'.", vbCritical
+        MsgBox "РћС€РёР±РєР°: РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё РЅРµРѕР±С…РѕРґРёРјС‹Рµ СЃС‚РѕР»Р±С†С‹ РІ Р»РёСЃС‚Рµ 'РЁС‚Р°С‚'.", vbCritical
         GoTo CleanUp
     End If
 
@@ -76,7 +76,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
     lastRowMain = wsMain.Cells(wsMain.Rows.count, "C").End(xlUp).Row
 
     For i = 2 To lastRowMain
-        Application.StatusBar = "Создание рапорта " & (i - 1) & " из " & (lastRowMain - 1)
+        Application.StatusBar = "РЎРѕР·РґР°РЅРёРµ СЂР°РїРѕСЂС‚Р° " & (i - 1) & " РёР· " & (lastRowMain - 1)
 
         currentFIO = Trim(wsMain.Cells(i, 2).value)
         currentLichniyNomer = Trim(wsMain.Cells(i, 3).value)
@@ -87,28 +87,28 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
             If staffRow > 0 Then
                 Set wdDoc = wdApp.Documents.Open(templatePath)
 
-                ' Получаем персональные данные
+                ' Get personal data
                 lichniyNomer = wsStaff.Cells(staffRow, colLichniyNomer).value
                 zvanie = wsStaff.Cells(staffRow, colZvanie).value
                 fio = wsStaff.Cells(staffRow, colFIO).value
                 dolzhnost = wsStaff.Cells(staffRow, colDolzhnost).value
                 VoinskayaChast = mdlHelper.ExtractVoinskayaChast(wsStaff.Cells(staffRow, colVoinskayaChast).value)
 
-                ' Сбор всех периодов для строки
+                ' Collect all periods for the row
                 Set periodList = New Collection
                 mdlHelper.CollectAllPersonPeriods wsMain, i, periodList
 
-                ' Проверка ошибок (конец < начало)
+                ' Check for errors (end < start)
                 For j = 1 To periodList.count
                     If periodList(j)(2) < periodList(j)(1) Then
-                        MsgBox "Обнаружена ошибка: дата окончания меньше даты начала. Исправьте периоды для " & fio & " (" & lichniyNomer & ")." & vbCrLf & _
-                        "Экспорт не будет выполнен!", vbCritical, "Ошибка данных"
+                        MsgBox "РћР±РЅР°СЂСѓР¶РµРЅР° РѕС€РёР±РєР°: РґР°С‚Р° РѕРєРѕРЅС‡Р°РЅРёСЏ РјРµРЅСЊС€Рµ РґР°С‚С‹ РЅР°С‡Р°Р»Р°. РСЃРїСЂР°РІСЊС‚Рµ РїРµСЂРёРѕРґС‹ РґР»СЏ " & fio & " (" & lichniyNomer & ")." & vbCrLf & _
+                        "Р­РєСЃРїРѕСЂС‚ РЅРµ Р±СѓРґРµС‚ РІС‹РїРѕР»РЅРµРЅ!", vbCritical, "РћС€РёР±РєР° РґР°РЅРЅС‹С…"
                         If Not wdDoc Is Nothing Then wdDoc.Close False
                         GoTo CleanUp
                     End If
                 Next j
 
-                ' Конвертация в массив и сортировка по дате начала
+                ' Convert to array and sort by start date
                 If periodList.count > 0 Then
                     ReDim periodArr(1 To periodList.count, 1 To 3)
                     For j = 1 To periodList.count
@@ -146,15 +146,15 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                         hasAnyPeriods = True
                         If firstDate = "" Then firstDate = Format(periodArr(j, 1), "dd.mm.yyyy")
                         lastDate = Format(periodArr(j, 2), "dd.mm.yyyy")
-                        periodsText = periodsText & "- с " & Format(periodArr(j, 1), "dd.mm.yyyy") & _
-                            " по " & Format(periodArr(j, 2), "dd.mm.yyyy") & " (" & periodArr(j, 3) & " сут.)"
+                        periodsText = periodsText & "- СЃ " & Format(periodArr(j, 1), "dd.mm.yyyy") & _
+                            " РїРѕ " & Format(periodArr(j, 2), "dd.mm.yyyy") & " (" & periodArr(j, 3) & " СЃСѓС‚.)"
                         If periodArr(j, 2) < cutoffDate Then
-                            periodsText = periodsText & " (НЕ АКТУАЛЕН — старше 3 лет + 1 месяц!)"
+                            periodsText = periodsText & " (РќР• РђРљРўРЈРђР›Р•Рќ вЂ” СЃС‚Р°СЂС€Рµ 3 Р»РµС‚ + 1 РјРµСЃСЏС†!)"
                         End If
                         periodsText = periodsText & vbCrLf
                     Next j
 
-                    ' Подсчитываем итоговое количество суток и расчет отдыха
+                    ' Calculate total days and rest calculation
                     Dim totalDays As Long, restDays As Long, daysList As String
                     Dim periodForRaport As String, calculationText As String
                     totalDays = 0
@@ -169,106 +169,106 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                     Next j
                     If totalDays > 0 Then
                         restDays = Int(totalDays / 3) * 2
-                        periodsText = periodsText & "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха." & vbCrLf
-                        calculationText = "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха."
+                        periodsText = periodsText & "(" & daysList & ") = " & totalDays & " СЃСѓС‚РѕРє РїСЂРёРІР»РµС‡РµРЅРёСЏ/3*2 = " & restDays & " СЃСѓС‚РѕРє РѕС‚РґС‹С…Р°." & vbCrLf
+                        calculationText = "(" & daysList & ") = " & totalDays & " СЃСѓС‚РѕРє РїСЂРёРІР»РµС‡РµРЅРёСЏ/3*2 = " & restDays & " СЃСѓС‚РѕРє РѕС‚РґС‹С…Р°."
                     Else
-                        periodsText = periodsText & "Нет актуальных периодов для расчета." & vbCrLf
-                        calculationText = "Нет актуальных периодов для расчета."
+                        periodsText = periodsText & "РќРµС‚ Р°РєС‚СѓР°Р»СЊРЅС‹С… РїРµСЂРёРѕРґРѕРІ РґР»СЏ СЂР°СЃС‡РµС‚Р°." & vbCrLf
+                        calculationText = "РќРµС‚ Р°РєС‚СѓР°Р»СЊРЅС‹С… РїРµСЂРёРѕРґРѕРІ РґР»СЏ СЂР°СЃС‡РµС‚Р°."
                     End If
                     
-                    ' Формируем строку периода участия
+                    ' Form participation period string
                     If firstDate <> "" And lastDate <> "" Then
-                        periodForRaport = "с " & firstDate & " по " & lastDate
+                        periodForRaport = "СЃ " & firstDate & " РїРѕ " & lastDate
                     Else
-                        periodForRaport = "период не указан"
+                        periodForRaport = "РїРµСЂРёРѕРґ РЅРµ СѓРєР°Р·Р°РЅ"
                     End If
                 Else
-                    periodsText = "Нет актуальных периодов для расчета." & vbCrLf
-                    firstDate = "нет"
-                    lastDate = "периодов"
-                    periodForRaport = "период не указан"
-                    calculationText = "Нет актуальных периодов для расчета."
+                    periodsText = "РќРµС‚ Р°РєС‚СѓР°Р»СЊРЅС‹С… РїРµСЂРёРѕРґРѕРІ РґР»СЏ СЂР°СЃС‡РµС‚Р°." & vbCrLf
+                    firstDate = "РЅРµС‚"
+                    lastDate = "РїРµСЂРёРѕРґРѕРІ"
+                    periodForRaport = "РїРµСЂРёРѕРґ РЅРµ СѓРєР°Р·Р°РЅ"
+                    calculationText = "РќРµС‚ Р°РєС‚СѓР°Р»СЊРЅС‹С… РїРµСЂРёРѕРґРѕРІ РґР»СЏ СЂР°СЃС‡РµС‚Р°."
                 End If
 
-                ' Замена коротких плейсхолдеров Find+Replace как обычно
+                ' Replace short placeholders Find+Replace as usual
                 With wdDoc.Content.Find
                     .ClearFormatting
                     .Replacement.ClearFormatting
-                    .text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
+                    .text = "[Р¤РРћ_РРњР•РќРРўР•Р›Р¬РќР«Р™]"
                     .Replacement.text = fio
                     .Execute Replace:=2
-                    .text = "[ЛИЧНЫЙ_НОМЕР]"
+                    .text = "[Р›РР§РќР«Р™_РќРћРњР•Р ]"
                     .Replacement.text = lichniyNomer
                     .Execute Replace:=2
                     .ClearFormatting
                     .Replacement.ClearFormatting
-                    .text = "[ЗВАНИЕ_СОКРАЩЕННО]"
+                    .text = "[Р—Р’РђРќРР•_РЎРћРљР РђР©Р•РќРќРћ]"
                     .Replacement.text = mdlHelper.GetZvanieSkrasheno(zvanie)
                     .Execute Replace:=2
                 
-                    .text = "[ФИО_ИНИЦИАЛЫ]"
+                    .text = "[Р¤РРћ_РРќРР¦РРђР›Р«]"
                     .Replacement.text = mdlHelper.GetFIOWithInitials(fio)
                     .Execute Replace:=2
                 
-                    .text = "[ДОЛЖНОСТЬ]"
+                    .text = "[Р”РћР›Р–РќРћРЎРўР¬]"
                     .Replacement.text = mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast)
                     .Execute Replace:=2
                 
-                    .text = "[ПЕРИОД_УЧАСТИЯ]"
+                    .text = "[РџР•Р РРћР”_РЈР§РђРЎРўРРЇ]"
                     .Replacement.text = periodForRaport
                     .Execute Replace:=2
                 
-                    .text = "[РАСЧЕТ]"
+                    .text = "[Р РђРЎР§Р•Рў]"
                     .Replacement.text = calculationText
                     .Execute Replace:=2
                 
-                    .text = "[ЗВАНИЕ_ИМЕНИТЕЛЬНЫЙ]"
+                    .text = "[Р—Р’РђРќРР•_РРњР•РќРРўР•Р›Р¬РќР«Р™]"
                     .Replacement.text = mdlHelper.GetZvanieImenitelnyForSignature(zvanie)
                     .Execute Replace:=2
                 
-                    .text = "[ФИО_ИНИЦИАЛЫ_ИМЕНИТЕЛЬНЫЙ]"
+                    .text = "[Р¤РРћ_РРќРР¦РРђР›Р«_РРњР•РќРРўР•Р›Р¬РќР«Р™]"
                     .Replacement.text = mdlHelper.GetFIOWithInitialsImenitelny(fio)
                     .Execute Replace:=2
                 
-                    .text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
+                    .text = "[Р¤РРћ_РРњР•РќРРўР•Р›Р¬РќР«Р™]"
                     .Replacement.text = fio
                     .Execute Replace:=2
                 
-                    .text = "[ЛИЧНЫЙ_НОМЕР]"
+                    .text = "[Р›РР§РќР«Р™_РќРћРњР•Р ]"
                     .Replacement.text = lichniyNomer
                     .Execute Replace:=2
                     
                 End With
 
-                ' Корректная вставка periodsText через Range.Text
+                ' Correct insertion of periodsText via Range.Text
                 Dim rng As Object
                 Set rng = wdDoc.Content
                 With rng.Find
-                    .text = "[ПЕРИОДЫ_СЛУЖБЫ]"
+                    .text = "[РџР•Р РРћР”Р«_РЎР›РЈР–Р‘Р«]"
                     If .Execute Then
                         rng.text = periodsText
                     End If
                 End With
 
-                ' Формируем имя файла
+                ' Generate file name
                 Dim cleanFIO As String, periodForFileName As String
                 cleanFIO = Replace(Replace(Replace(fio, " ", "_"), ".", ""), ",", "")
-                periodForFileName = firstDate & "_по_" & lastDate
-                fileName = "Рапорт_" & lichniyNomer & "_" & cleanFIO & "_" & periodForFileName & ".docx"
+                periodForFileName = firstDate & "_РїРѕ_" & lastDate
+                fileName = "Р Р°РїРѕСЂС‚_" & lichniyNomer & "_" & cleanFIO & "_" & periodForFileName & ".docx"
                 savePath = ThisWorkbook.Path & "\" & fileName
 
                 Call mdlHelper.SaveWordDocumentSafe(wdDoc, savePath)
                 wdDoc.Close
-                Debug.Print "Создан рапорт: " & fileName
+                Debug.Print "РЎРѕР·РґР°РЅ СЂР°РїРѕСЂС‚: " & fileName
             End If
         End If
     Next i
 
-    MsgBox "Все рапорты сформированы и сохранены в папке: " & ThisWorkbook.Path, vbInformation, "Рапорты готовы"
+    MsgBox "Р’СЃРµ СЂР°РїРѕСЂС‚С‹ СЃС„РѕСЂРјРёСЂРѕРІР°РЅС‹ Рё СЃРѕС…СЂР°РЅРµРЅС‹ РІ РїР°РїРєРµ: " & ThisWorkbook.Path, vbInformation, "Р Р°РїРѕСЂС‚С‹ РіРѕС‚РѕРІС‹"
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка при создании рапортов: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё СЂР°РїРѕСЂС‚РѕРІ: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
     If Not wdDoc Is Nothing Then wdDoc.Close False
 CleanUp:
     Application.ScreenUpdating = True
@@ -279,23 +279,18 @@ CleanUp:
         Set wdApp = Nothing
     End If
     
-    ' Принудительное завершение посторонних процессов Word через WMI
-Dim wmi As Object, procs As Object, proc As Object
-Set wmi = GetObject("winmgmts:")
-Set procs = wmi.ExecQuery("SELECT * FROM Win32_Process WHERE Name='WINWORD.EXE'")
-For Each proc In procs
-    On Error Resume Next
-    proc.Terminate
-    On Error GoTo 0
-Next proc
+    ' Force termination of extraneous Word processes via WMI
+    Dim wmi As Object, procs As Object, proc As Object
+    Set wmi = GetObject("winmgmts:")
+    Set procs = wmi.ExecQuery("SELECT * FROM Win32_Process WHERE Name='WINWORD.EXE'")
+    For Each proc In procs
+        On Error Resume Next
+        proc.Terminate
+        On Error GoTo 0
+    Next proc
 
-    
-    
-    
-    
     Set wdDoc = Nothing
     Set wsMain = Nothing
     Set wsStaff = Nothing
 End Sub
-
 

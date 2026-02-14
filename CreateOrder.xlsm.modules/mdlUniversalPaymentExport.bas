@@ -1,17 +1,17 @@
 Attribute VB_Name = "mdlUniversalPaymentExport"
 ' ===============================================================================
-' Модуль mdlUniversalPaymentExport
-' Версия: 1.0.0
-' Дата: 01.12.2025
-' Описание: Универсальный экспорт надбавок без периодов в Word
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' Module mdlUniversalPaymentExport
+' Version: 1.0.0
+' Date: 14.02.2026
+' Description: Universal export of allowances without periods to Word
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
 ' ===============================================================================
 
 Option Explicit
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Главная функция массового импорта сотрудников по номерам
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Main function for mass import of employees by numbers
 ' =============================================
 Public Sub ImportEmployeesByNumbers()
     On Error GoTo ErrorHandler
@@ -21,39 +21,39 @@ Public Sub ImportEmployeesByNumbers()
     Dim reportText As String
     
     Application.ScreenUpdating = False
-    Application.StatusBar = "Массовое добавление сотрудников..."
+    Application.StatusBar = "РњР°СЃСЃРѕРІРѕРµ РґРѕР±Р°РІР»РµРЅРёРµ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ..."
     
-    ' Проверяем активный лист
+    ' Check active sheet
     If ActiveSheet.Name <> mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
-        MsgBox "Активен не тот лист. Перейдите на лист '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbExclamation, "Ошибка"
+        MsgBox "РђРєС‚РёРІРµРЅ РЅРµ С‚РѕС‚ Р»РёСЃС‚. РџРµСЂРµР№РґРёС‚Рµ РЅР° Р»РёСЃС‚ '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbExclamation, "РћС€РёР±РєР°"
         GoTo CleanUp
     End If
     
     Set wsPayments = ActiveSheet
     
-    ' Получаем выделенный диапазон
+    ' Get selected range
     Set selectedRange = Selection
     If selectedRange Is Nothing Then
-        MsgBox "Выделите ячейки с номерами в колонке D (личный номер).", vbExclamation, "Ошибка"
+        MsgBox "Р’С‹РґРµР»РёС‚Рµ СЏС‡РµР№РєРё СЃ РЅРѕРјРµСЂР°РјРё РІ РєРѕР»РѕРЅРєРµ D (Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ).", vbExclamation, "РћС€РёР±РєР°"
         GoTo CleanUp
     End If
     
-    ' Проверяем, что диапазон находится в колонке D
+    ' Check if range is in column D
     If selectedRange.Column <> mdlPaymentValidation.COL_LICHNIY_NOMER Then
-        MsgBox "Выделенный диапазон должен находиться в колонке D (личный номер).", vbExclamation, "Ошибка"
+        MsgBox "Р’С‹РґРµР»РµРЅРЅС‹Р№ РґРёР°РїР°Р·РѕРЅ РґРѕР»Р¶РµРЅ РЅР°С…РѕРґРёС‚СЊСЃСЏ РІ РєРѕР»РѕРЅРєРµ D (Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ).", vbExclamation, "РћС€РёР±РєР°"
         GoTo CleanUp
     End If
     
-    ' Обрабатываем диапазон
+    ' Process range
     reportText = ProcessSelectedRangeForImport(wsPayments, selectedRange)
     
-    ' Показываем отчет
-    MsgBox reportText, vbInformation, "Массовое добавление завершено"
+    ' Show report
+    MsgBox reportText, vbInformation, "РњР°СЃСЃРѕРІРѕРµ РґРѕР±Р°РІР»РµРЅРёРµ Р·Р°РІРµСЂС€РµРЅРѕ"
     
     GoTo CleanUp
     
 ErrorHandler:
-    MsgBox "Ошибка при массовом добавлении сотрудников: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РјР°СЃСЃРѕРІРѕРј РґРѕР±Р°РІР»РµРЅРёРё СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
     
 CleanUp:
     Application.ScreenUpdating = True
@@ -61,11 +61,11 @@ CleanUp:
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработка выделенного диапазона и заполнение данных сотрудников
-' @param wsPayments As Worksheet - лист "Выплаты_Без_Периодов"
-' @param selectedRange As Range - выделенный диапазон
-' @return String - отчет о результатах
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Process selected range and fill employee data
+' @param wsPayments As Worksheet - sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
+' @param selectedRange As Range - selected range
+' @return String - report on results
 ' =============================================
 Public Function ProcessSelectedRangeForImport(wsPayments As Worksheet, selectedRange As Range) As String
     On Error GoTo ErrorHandler
@@ -86,25 +86,25 @@ Public Function ProcessSelectedRangeForImport(wsPayments As Worksheet, selectedR
     
     Application.ScreenUpdating = False
     
-    ' Обрабатываем каждую ячейку в диапазоне
+    ' Process each cell in range
     For Each cell In selectedRange.Cells
         numberValue = Trim(CStr(cell.value))
         
-        ' Пропускаем пустые ячейки
+        ' Skip empty cells
         If numberValue = "" Then
             GoTo NextCell
         End If
         
-        ' Ищем сотрудника по номеру (личный или табельный)
+        ' Find employee by number (personal or table)
         Set staffData = mdlHelper.FindEmployeeByAnyNumber(numberValue)
         
         If staffData.count > 0 Then
-            ' Найден сотрудник - заполняем данные
-            cell.value = CStr(staffData("Личный номер")) ' Обновляем личный номер (нормализация)
-            wsPayments.Cells(cell.Row, mdlPaymentValidation.COL_FIO).value = CStr(staffData("Лицо")) ' Заполняем ФИО
+            ' Employee found - fill data
+            cell.value = CStr(staffData("Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ")) ' Update personal number (normalization)
+            wsPayments.Cells(cell.Row, mdlPaymentValidation.COL_FIO).value = CStr(staffData("Р›РёС†Рѕ")) ' Fill FIO
             foundCount = foundCount + 1
         Else
-            ' Не найден - добавляем в список
+            ' Not found - add to list
             notFoundCount = notFoundCount + 1
             If notFoundList <> "" Then
                 notFoundList = notFoundList & ", "
@@ -115,7 +115,7 @@ Public Function ProcessSelectedRangeForImport(wsPayments As Worksheet, selectedR
 NextCell:
     Next cell
     
-    ' Автоматическая нумерация в колонке A
+    ' Automatic numbering in column A
     lastRow = wsPayments.Cells(wsPayments.Rows.count, mdlPaymentValidation.COL_LICHNIY_NOMER).End(xlUp).Row
     For i = 2 To lastRow
         If Trim(CStr(wsPayments.Cells(i, mdlPaymentValidation.COL_NUMBER).value)) = "" Then
@@ -123,29 +123,29 @@ NextCell:
         End If
     Next i
     
-    ' Формируем отчет
-    reportText = "Результаты массового добавления:" & vbCrLf & vbCrLf
-    reportText = reportText & "Найдено и добавлено: " & foundCount & vbCrLf
-    reportText = reportText & "Не найдено: " & notFoundCount
+    ' Generate report
+    reportText = "Р РµР·СѓР»СЊС‚Р°С‚С‹ РјР°СЃСЃРѕРІРѕРіРѕ РґРѕР±Р°РІР»РµРЅРёСЏ:" & vbCrLf & vbCrLf
+    reportText = reportText & "РќР°Р№РґРµРЅРѕ Рё РґРѕР±Р°РІР»РµРЅРѕ: " & foundCount & vbCrLf
+    reportText = reportText & "РќРµ РЅР°Р№РґРµРЅРѕ: " & notFoundCount
     
     If notFoundCount > 0 And Len(notFoundList) < 200 Then
-        reportText = reportText & vbCrLf & "Номера, которые не найдены: " & notFoundList
+        reportText = reportText & vbCrLf & "РќРѕРјРµСЂР°, РєРѕС‚РѕСЂС‹Рµ РЅРµ РЅР°Р№РґРµРЅС‹: " & notFoundList
     ElseIf notFoundCount > 0 Then
-        reportText = reportText & vbCrLf & "(Список не найденных номеров слишком длинный для отображения)"
+        reportText = reportText & vbCrLf & "(РЎРїРёСЃРѕРє РЅРµ РЅР°Р№РґРµРЅРЅС‹С… РЅРѕРјРµСЂРѕРІ СЃР»РёС€РєРѕРј РґР»РёРЅРЅС‹Р№ РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ)"
     End If
     
     ProcessSelectedRangeForImport = reportText
     Exit Function
     
 ErrorHandler:
-    ProcessSelectedRangeForImport = "Ошибка при обработке диапазона: " & Err.Description
+    ProcessSelectedRangeForImport = "РћС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РґРёР°РїР°Р·РѕРЅР°: " & Err.Description
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Преобразование PaymentWithoutPeriod в Dictionary (для хранения в Collection)
-' @param payment As PaymentWithoutPeriod - данные о выплате
-' @return Object (Dictionary) - словарь с данными выплаты
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Convert PaymentWithoutPeriod to Dictionary (for storing in Collection)
+' @param payment As PaymentWithoutPeriod - payment data
+' @return Object (Dictionary) - dictionary with payment data
 ' =============================================
 Private Function PaymentToDictionary(ByRef payment As PaymentWithoutPeriod) As Object
     Dim dict As Object
@@ -162,10 +162,10 @@ Private Function PaymentToDictionary(ByRef payment As PaymentWithoutPeriod) As O
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Преобразование Dictionary обратно в PaymentWithoutPeriod
-' @param dict As Object (Dictionary) - словарь с данными выплаты
-' @return PaymentWithoutPeriod - данные о выплате
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Convert Dictionary back to PaymentWithoutPeriod
+' @param dict As Object (Dictionary) - dictionary with payment data
+' @return PaymentWithoutPeriod - payment data
 ' =============================================
 Private Function DictionaryToPayment(ByRef dict As Object) As PaymentWithoutPeriod
     Dim payment As PaymentWithoutPeriod
@@ -183,8 +183,8 @@ Private Function DictionaryToPayment(ByRef dict As Object) As PaymentWithoutPeri
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Главная функция экспорта надбавок
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Main function for exporting allowances
 ' =============================================
 Public Sub ExportPaymentsWithoutPeriods()
     On Error GoTo ErrorHandler
@@ -196,24 +196,24 @@ Public Sub ExportPaymentsWithoutPeriods()
     Dim successCount As Long
     
     Application.ScreenUpdating = False
-    Application.StatusBar = "Сбор данных о надбавках..."
+    Application.StatusBar = "РЎР±РѕСЂ РґР°РЅРЅС‹С… Рѕ РЅР°РґР±Р°РІРєР°С…..."
     
-    ' Собираем все данные о выплатах
+    ' Collect all payment data
     Set payments = CollectPaymentsData()
     
     If payments.count = 0 Then
-        MsgBox "Нет данных для экспорта в листе 'Выплаты_Без_Периодов'.", vbExclamation, "Экспорт"
+        MsgBox "РќРµС‚ РґР°РЅРЅС‹С… РґР»СЏ СЌРєСЃРїРѕСЂС‚Р° РІ Р»РёСЃС‚Рµ 'Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ'.", vbExclamation, "Р­РєСЃРїРѕСЂС‚"
         GoTo CleanUp
     End If
     
-    Application.StatusBar = "Группировка по типам выплат..."
+    Application.StatusBar = "Р“СЂСѓРїРїРёСЂРѕРІРєР° РїРѕ С‚РёРїР°Рј РІС‹РїР»Р°С‚..."
     
-    ' Группируем по типу выплаты
+    ' Group by payment type
     Set groupedPayments = GroupPaymentsByType(payments)
     
-    Application.StatusBar = "Генерация приказов..."
+    Application.StatusBar = "Р“РµРЅРµСЂР°С†РёСЏ РїСЂРёРєР°Р·РѕРІ..."
     
-    ' Генерируем приказы для каждого типа выплаты
+    ' Generate orders for each payment type
     successCount = 0
     For Each paymentType In groupedPayments.Keys
         Set paymentList = groupedPayments(paymentType)
@@ -222,12 +222,12 @@ Public Sub ExportPaymentsWithoutPeriods()
         End If
     Next paymentType
     
-    MsgBox "Экспорт завершен. Создано приказов: " & successCount & " из " & groupedPayments.count, vbInformation, "Экспорт"
+    MsgBox "Р­РєСЃРїРѕСЂС‚ Р·Р°РІРµСЂС€РµРЅ. РЎРѕР·РґР°РЅРѕ РїСЂРёРєР°Р·РѕРІ: " & successCount & " РёР· " & groupedPayments.count, vbInformation, "Р­РєСЃРїРѕСЂС‚"
     
     GoTo CleanUp
     
 ErrorHandler:
-    MsgBox "Ошибка при экспорте надбавок: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЌРєСЃРїРѕСЂС‚Рµ РЅР°РґР±Р°РІРѕРє: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
     
 CleanUp:
     Application.ScreenUpdating = True
@@ -235,9 +235,9 @@ CleanUp:
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Сбор всех данных о выплатах из листа "Выплаты_Без_Периодов"
-' @return Collection - коллекция объектов PaymentWithoutPeriod
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Collect all payment data from sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
+' @return Collection - collection of PaymentWithoutPeriod objects
 ' =============================================
 Public Function CollectPaymentsData() As Collection
     On Error GoTo ErrorHandler
@@ -251,7 +251,7 @@ Public Function CollectPaymentsData() As Collection
     
     Set result = New Collection
     
-    ' Ищем лист "Выплаты_Без_Периодов"
+    ' Find sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
     Set wsPayments = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
@@ -273,7 +273,7 @@ Public Function CollectPaymentsData() As Collection
         Exit Function
     End If
     
-    ' Собираем данные из каждой строки
+    ' Collect data from each row
     For i = 2 To lastRow
         payment.fio = Trim(CStr(wsPayments.Cells(i, mdlPaymentValidation.COL_FIO).value))
         payment.lichniyNomer = Trim(CStr(wsPayments.Cells(i, mdlPaymentValidation.COL_LICHNIY_NOMER).value))
@@ -281,30 +281,30 @@ Public Function CollectPaymentsData() As Collection
         payment.amount = Trim(CStr(wsPayments.Cells(i, mdlPaymentValidation.COL_AMOUNT).value))
         payment.foundation = Trim(CStr(wsPayments.Cells(i, mdlPaymentValidation.COL_FOUNDATION).value))
         
-        ' Пропускаем пустые строки
+        ' Skip empty rows
         If payment.lichniyNomer = "" Then
             GoTo NextRow
         End If
         
-        ' Получаем данные о военнослужащем из листа "Штат"
+        ' Get serviceman data from "Staff" sheet
         Set staffData = mdlHelper.GetStaffData(payment.lichniyNomer, True)
         If staffData.count > 0 Then
-            payment.Rank = CStr(staffData("Воинское звание"))
-            payment.Position = CStr(staffData("Штатная должность"))
-            payment.VoinskayaChast = mdlHelper.ExtractVoinskayaChast(CStr(staffData("Часть")))
+            payment.Rank = CStr(staffData("Р’РѕРёРЅСЃРєРѕРµ Р·РІР°РЅРёРµ"))
+            payment.Position = CStr(staffData("РЁС‚Р°С‚РЅР°СЏ РґРѕР»Р¶РЅРѕСЃС‚СЊ"))
+            payment.VoinskayaChast = mdlHelper.ExtractVoinskayaChast(CStr(staffData("Р§Р°СЃС‚СЊ")))
         Else
-            ' Если данные не найдены, используем значения из таблицы или заглушки
-            payment.Rank = "Звание не найдено"
-            payment.Position = "Должность не найдена"
+            ' If data not found, use values from table or placeholders
+            payment.Rank = "Р—РІР°РЅРёРµ РЅРµ РЅР°Р№РґРµРЅРѕ"
+            payment.Position = "Р”РѕР»Р¶РЅРѕСЃС‚СЊ РЅРµ РЅР°Р№РґРµРЅР°"
             payment.VoinskayaChast = ""
         End If
         
-        ' Если ФИО не указано в таблице, берем из штата
+        ' If FIO is not specified in table, take from staff
         If payment.fio = "" And staffData.count > 0 Then
-            payment.fio = CStr(staffData("Лицо"))
+            payment.fio = CStr(staffData("Р›РёС†Рѕ"))
         End If
         
-        ' Преобразуем UDT в Dictionary для хранения в Collection
+        ' Convert UDT to Dictionary for storage in Collection
         result.Add PaymentToDictionary(payment)
         
 NextRow:
@@ -318,10 +318,10 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Группировка выплат по типу
-' @param payments As Collection - коллекция выплат
-' @return Object (Dictionary) - словарь, где ключ = тип выплаты, значение = коллекция выплат
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Group payments by type
+' @param payments As Collection - collection of payments
+' @return Object (Dictionary) - dictionary where key = payment type, value = collection of payments
 ' =============================================
 Public Function GroupPaymentsByType(ByVal payments As Collection) As Object
     On Error GoTo ErrorHandler
@@ -336,13 +336,13 @@ Public Function GroupPaymentsByType(ByVal payments As Collection) As Object
     Dim i As Long
     Dim paymentDict As Object
     For i = 1 To payments.count
-        ' Извлекаем Dictionary из Collection и преобразуем в UDT
+        ' Extract Dictionary from Collection and convert to UDT
         Set paymentDict = payments(i)
         payment = DictionaryToPayment(paymentDict)
         paymentType = Trim(LCase(payment.paymentType))
         
         If paymentType = "" Then
-            paymentType = "Не указан"
+            paymentType = "РќРµ СѓРєР°Р·Р°РЅ"
         End If
         
         If Not result.exists(paymentType) Then
@@ -352,7 +352,7 @@ Public Function GroupPaymentsByType(ByVal payments As Collection) As Object
             Set paymentList = result(paymentType)
         End If
         
-        ' Добавляем Dictionary обратно в paymentList
+        ' Add Dictionary back to paymentList
         paymentList.Add paymentDict
     Next i
     
@@ -364,11 +364,11 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Генерация приказа Word для конкретного типа выплаты
-' @param paymentType As String - тип выплаты
-' @param payments As Collection - коллекция выплат данного типа
-' @return Boolean - True если приказ успешно создан
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Generate Word order for specific payment type
+' @param paymentType As String - payment type
+' @param payments As Collection - collection of payments of this type
+' @return Boolean - True if order successfully created
 ' =============================================
 Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments As Collection) As Boolean
     On Error GoTo ErrorHandler
@@ -389,13 +389,13 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
     Dim newRange As Object
     Dim endRange As Object
     
-    ' Получаем конфигурацию типа выплаты
+    ' Get payment type configuration
     config = mdlPaymentTypes.GetPaymentTypeConfig(paymentType)
     
-    ' Получаем путь к шаблону с учетом приоритета
+    ' Get template path with priority
     templatePath = mdlPaymentTypes.GetTemplatePathWithFallback(config)
     
-    ' Создаем Word приложение
+    ' Create Word application
     On Error Resume Next
     Set wordApp = GetObject(, "Word.Application")
     If wordApp Is Nothing Then
@@ -408,21 +408,21 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
     
     wordApp.Visible = True
     
-    ' Создаем один документ из шаблона
+    ' Create one document from template
     If templatePath <> "" Then
-        ' Открываем шаблон для копирования содержимого
+        ' Open template to copy content
         Set templateDoc = wordApp.Documents.Open(templatePath)
-        ' Создаем новый документ
+        ' Create new document
         Set doc = wordApp.Documents.Add
-        ' Копируем содержимое шаблона в новый документ (для первой записи)
+        ' Copy template content to new document (for first record)
         templateDoc.Content.Copy
         doc.Content.Paste
-        ' Закрываем шаблон
+        ' Close template
         templateDoc.Close False
         Set templateDoc = Nothing
     Else
         Set doc = wordApp.Documents.Add
-        ' Устанавливаем шрифт по умолчанию
+        ' Set default font
         With doc.Styles(1).Font
             .Name = "Times New Roman"
             .Size = 12
@@ -431,32 +431,32 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
     
     successCount = 0
     
-    ' Добавляем все записи в один документ
+    ' Add all records to one document
     For i = 1 To payments.count
-        ' Извлекаем Dictionary из Collection и преобразуем в UDT
+        ' Extract Dictionary from Collection and convert to UDT
         Set paymentDict = payments(i)
         payment = DictionaryToPayment(paymentDict)
         
         If templatePath <> "" Then
-            ' Для каждой записи создаем копию шаблона с заменой маркеров
+            ' For each record create a copy of template with marker replacement
             If i = 1 Then
-                ' Первая запись - используем уже созданный документ
+                ' First record - use already created document
                 If FillPaymentTemplate(doc, payment) Then
                     successCount = successCount + 1
                 End If
             Else
-                ' Для остальных записей открываем шаблон, заменяем маркеры и добавляем в документ
+                ' For other records open template, replace markers and add to document
                 Set templateDoc = wordApp.Documents.Open(templatePath)
                 
-                ' Заменяем маркеры в шаблоне
+                ' Replace markers in template
                 If FillPaymentTemplate(templateDoc, payment) Then
-                    ' Копируем содержимое шаблона
+                    ' Copy template content
                     templateDoc.Content.Copy
                     
-                    ' Вставляем в конец основного документа
+                    ' Paste at the end of main document
                     Set endRange = doc.Range
                     endRange.Collapse Direction:=0 ' wdCollapseEnd
-                    ' Добавляем разрыв между записями
+                    ' Add break between records
                     If i > 1 Then
                         endRange.InsertAfter vbCrLf & vbCrLf
                         endRange.Collapse Direction:=0
@@ -466,12 +466,12 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
                     successCount = successCount + 1
                 End If
                 
-                ' Закрываем шаблон без сохранения
+                ' Close template without saving
                 templateDoc.Close False
                 Set templateDoc = Nothing
             End If
         Else
-            ' Если шаблона нет, добавляем текст напрямую
+            ' If no template, add text directly
             If i > 1 Then
                 Set endRange = doc.Range
                 endRange.Collapse Direction:=0
@@ -484,25 +484,25 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
         End If
     Next i
     
-    ' Формируем имя файла для приказа
+    ' Generate filename for order
     Dim cleanTypeName As String
     cleanTypeName = Replace(Replace(Replace(paymentType, " ", "_"), "/", "_"), "\", "_")
-    fileName = "Приказ_" & cleanTypeName & "_" & Format(Date, "dd.mm.yyyy") & ".docx"
+    fileName = "РџСЂРёРєР°Р·_" & cleanTypeName & "_" & Format(Date, "dd.mm.yyyy") & ".docx"
     If config.TypeCode <> "" Then
-        fileName = "Приказ_" & config.TypeCode & "_" & Format(Date, "dd.mm.yyyy") & ".docx"
+        fileName = "РџСЂРёРєР°Р·_" & config.TypeCode & "_" & Format(Date, "dd.mm.yyyy") & ".docx"
     End If
     savePath = ThisWorkbook.Path & "\" & fileName
     
-    ' Сохраняем документ
+    ' Save document
     Call mdlHelper.SaveWordDocumentSafe(doc, savePath)
     doc.Activate
     
-    ' Закрываем Word только если мы его создали
+    ' Close Word only if we created it
     If wordWasNotRunning And Not wordApp Is Nothing Then
-        ' Оставляем документ открытым, но не закрываем Word
+        ' Leave document open, but do not close Word
     End If
     
-    MsgBox "Создан приказ с " & successCount & " записями из " & payments.count, vbInformation, "Экспорт завершен"
+    MsgBox "РЎРѕР·РґР°РЅ РїСЂРёРєР°Р· СЃ " & successCount & " Р·Р°РїРёСЃСЏРјРё РёР· " & payments.count, vbInformation, "Р­РєСЃРїРѕСЂС‚ Р·Р°РІРµСЂС€РµРЅ"
     
     GeneratePaymentOrder = (successCount > 0)
     Exit Function
@@ -512,68 +512,68 @@ ErrorHandler:
     If Not templateDoc Is Nothing Then templateDoc.Close False
     If Not doc Is Nothing Then doc.Close False
     If wordWasNotRunning And Not wordApp Is Nothing Then wordApp.Quit False
-    MsgBox "Ошибка при создании приказа: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё РїСЂРёРєР°Р·Р°: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Заполнение шаблона Word данными о выплате
-' @param doc As Object - документ Word
-' @param payment As PaymentWithoutPeriod - данные о выплате
-' @return Boolean - True если успешно
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Fill Word template with payment data
+' @param doc As Object - Word document
+' @param payment As PaymentWithoutPeriod - payment data
+' @return Boolean - True if successful
 ' =============================================
 Public Function FillPaymentTemplate(ByVal doc As Object, ByRef payment As PaymentWithoutPeriod) As Boolean
     On Error GoTo ErrorHandler
     
     Dim rng As Object
     
-    ' Замена плейсхолдеров в шаблоне
+    ' Replace placeholders in template
     With doc.Content.Find
         .ClearFormatting
         .Replacement.ClearFormatting
         
-        ' [ФИО]
-        .text = "[ФИО]"
+        ' [Р¤РРћ]
+        .text = "[Р¤РРћ]"
         .Replacement.text = payment.fio
         .Execute Replace:=2
         
-        ' [ФИО_ИМЕНИТЕЛЬНЫЙ]
-        .text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
+        ' [Р¤РРћ_РРњР•РќРРўР•Р›Р¬РќР«Р™]
+        .text = "[Р¤РРћ_РРњР•РќРРўР•Р›Р¬РќР«Р™]"
         .Replacement.text = mdlHelper.SklonitFIO(payment.fio)
         .Execute Replace:=2
         
-        ' [ЗВАНИЕ]
-        .text = "[ЗВАНИЕ]"
+        ' [Р—Р’РђРќРР•]
+        .text = "[Р—Р’РђРќРР•]"
         .Replacement.text = payment.Rank
         .Execute Replace:=2
         
-        ' [ЗВАНИЕ_СКЛОНЕННОЕ]
-        .text = "[ЗВАНИЕ_СКЛОНЕННОЕ]"
+        ' [Р—Р’РђРќРР•_РЎРљР›РћРќР•РќРќРћР•]
+        .text = "[Р—Р’РђРќРР•_РЎРљР›РћРќР•РќРќРћР•]"
         .Replacement.text = mdlHelper.SklonitZvanie(payment.Rank)
         .Execute Replace:=2
         
-        ' [ЛИЧНЫЙ_НОМЕР]
-        .text = "[ЛИЧНЫЙ_НОМЕР]"
+        ' [Р›РР§РќР«Р™_РќРћРњР•Р ]
+        .text = "[Р›РР§РќР«Р™_РќРћРњР•Р ]"
         .Replacement.text = payment.lichniyNomer
         .Execute Replace:=2
         
-        ' [ДОЛЖНОСТЬ]
-        .text = "[ДОЛЖНОСТЬ]"
+        ' [Р”РћР›Р–РќРћРЎРўР¬]
+        .text = "[Р”РћР›Р–РќРћРЎРўР¬]"
         .Replacement.text = payment.Position
         .Execute Replace:=2
         
-        ' [ДОЛЖНОСТЬ_СКЛОНЕННАЯ]
-        .text = "[ДОЛЖНОСТЬ_СКЛОНЕННАЯ]"
+        ' [Р”РћР›Р–РќРћРЎРўР¬_РЎРљР›РћРќР•РќРќРђРЇ]
+        .text = "[Р”РћР›Р–РќРћРЎРўР¬_РЎРљР›РћРќР•РќРќРђРЇ]"
         .Replacement.text = mdlHelper.SklonitDolzhnost(payment.Position, payment.VoinskayaChast)
         .Execute Replace:=2
         
-        ' [РАЗМЕР]
-        .text = "[РАЗМЕР]"
+        ' [Р РђР—РњР•Р ]
+        .text = "[Р РђР—РњР•Р ]"
         .Replacement.text = payment.amount
         .Execute Replace:=2
         
-        ' [ОСНОВАНИЕ]
-        .text = "[ОСНОВАНИЕ]"
+        ' [РћРЎРќРћР’РђРќРР•]
+        .text = "[РћРЎРќРћР’РђРќРР•]"
         .Replacement.text = payment.foundation
         .Execute Replace:=2
     End With
@@ -586,11 +586,11 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Формирование текста приказа напрямую в Word без шаблона
-' @param doc As Object - документ Word
-' @param payment As PaymentWithoutPeriod - данные о выплате
-' @return Boolean - True если успешно
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Generate order text directly in Word without template
+' @param doc As Object - Word document
+' @param payment As PaymentWithoutPeriod - payment data
+' @return Boolean - True if successful
 ' =============================================
 Public Function GeneratePaymentTextDirectly(ByVal doc As Object, ByRef payment As PaymentWithoutPeriod) As Boolean
     On Error GoTo ErrorHandler
@@ -598,14 +598,14 @@ Public Function GeneratePaymentTextDirectly(ByVal doc As Object, ByRef payment A
     Dim rng As Object
     Dim textLine As String
     
-    ' Формируем текст приказа
+    ' Form order text
     textLine = mdlHelper.SklonitZvanie(payment.Rank) & " " & _
-               mdlHelper.SklonitFIO(payment.fio) & ", личный номер " & payment.lichniyNomer & ", " & _
+               mdlHelper.SklonitFIO(payment.fio) & ", Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ " & payment.lichniyNomer & ", " & _
                mdlHelper.SklonitDolzhnost(payment.Position, payment.VoinskayaChast) & vbCrLf
-    textLine = textLine & "Размер: " & payment.amount & vbCrLf
-    textLine = textLine & "Основание: " & payment.foundation & vbCrLf & vbCrLf
+    textLine = textLine & "Р Р°Р·РјРµСЂ: " & payment.amount & vbCrLf
+    textLine = textLine & "РћСЃРЅРѕРІР°РЅРёРµ: " & payment.foundation & vbCrLf & vbCrLf
     
-    ' Вставляем текст в документ
+    ' Insert text into document
     Set rng = doc.Range
     rng.Collapse Direction:=0
     rng.text = textLine

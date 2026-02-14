@@ -19,8 +19,8 @@ Attribute VB_Exposed = False
 
 
 '==============================================================
-' frmAbout - Форма информации и активации макроса
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' frmAbout - Р¤РѕСЂРјР° РёРЅС„РѕСЂРјР°С†РёРё Рё Р°РєС‚РёРІР°С†РёРё РјР°РєСЂРѕСЃР°
+' РђРІС‚РѕСЂ: РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
 '==============================================================
 
 Option Explicit
@@ -55,11 +55,11 @@ Private Sub UserForm_Initialize()
     Call mdlHelper.EnsureStaffColumnsInitialized
 
     lblProductName.Caption = PRODUCT_NAME
-    lblVersion.Caption = "Версия: " & PRODUCT_VERSION
-    lblAuthor.Caption = "Автор: " & PRODUCT_AUTHOR
+    lblVersion.Caption = "Р’РµСЂСЃРёСЏ: " & PRODUCT_VERSION
+    lblAuthor.Caption = "РђРІС‚РѕСЂ: " & PRODUCT_AUTHOR
     lblEmail.Caption = "E-mail: " & PRODUCT_EMAIL
-    lblPhone.Caption = "Телефон: " & PRODUCT_PHONE
-    lblCompany.Caption = "Организация: " & PRODUCT_COMPANY
+    lblPhone.Caption = "РўРµР»РµС„РѕРЅ: " & PRODUCT_PHONE
+    lblCompany.Caption = "РћСЂРіР°РЅРёР·Р°С†РёСЏ: " & PRODUCT_COMPANY
     lblActivationHint.Caption = ACTIVATION_HINT
 
     lblActivationStatus.Caption = GetTrialStatusText
@@ -68,7 +68,7 @@ Private Sub UserForm_Initialize()
         txtActivationCode.Enabled = False
         btnActivate.Enabled = False
     ElseIf GetProductStatus() = 1 Then
-        lblActivationStatus.ForeColor = &H80FF   ' синий — триал
+        lblActivationStatus.ForeColor = &H80FF   ' СЃРёРЅРёР№ вЂ” С‚СЂРёР°Р»
         txtActivationCode.Enabled = True
         btnActivate.Enabled = True
     Else
@@ -85,34 +85,34 @@ Private Sub btnActivate_Click()
         lblActivationStatus.ForeColor = vbGreen
         txtActivationCode.Enabled = False
         btnActivate.Enabled = False
-        MsgBox "Спасибо! Продукт активирован.", vbInformation
+        MsgBox "РЎРїР°СЃРёР±Рѕ! РџСЂРѕРґСѓРєС‚ Р°РєС‚РёРІРёСЂРѕРІР°РЅ.", vbInformation
     Else
-        MsgBox "Код активации неверный.", vbExclamation
+        MsgBox "РљРѕРґ Р°РєС‚РёРІР°С†РёРё РЅРµРІРµСЂРЅС‹Р№.", vbExclamation
     End If
 End Sub
 
 
 Private Sub btnCopyContact_Click()
-    ' Копирует информацию для связи в буфер обмена
+    ' РљРѕРїРёСЂСѓРµС‚ РёРЅС„РѕСЂРјР°С†РёСЋ РґР»СЏ СЃРІСЏР·Рё РІ Р±СѓС„РµСЂ РѕР±РјРµРЅР°
     Dim contactText As String
-    contactText = "Автор: " & PRODUCT_AUTHOR & vbCrLf & _
+    contactText = "РђРІС‚РѕСЂ: " & PRODUCT_AUTHOR & vbCrLf & _
                   "Email: " & PRODUCT_EMAIL & vbCrLf & _
-                  "Телефон: " & PRODUCT_PHONE & vbCrLf & _
-                  "Компания: " & PRODUCT_COMPANY
+                  "РўРµР»РµС„РѕРЅ: " & PRODUCT_PHONE & vbCrLf & _
+                  "РљРѕРјРїР°РЅРёСЏ: " & PRODUCT_COMPANY
     PutToClipboard contactText
-    MsgBox "Контактная информация скопирована в буфер обмена.", vbInformation
+    MsgBox "РљРѕРЅС‚Р°РєС‚РЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ СЃРєРѕРїРёСЂРѕРІР°РЅР° РІ Р±СѓС„РµСЂ РѕР±РјРµРЅР°.", vbInformation
 End Sub
 
 Private Sub btnShowHelp_Click()
-    ' Открытие справки (можно заменить вызов на собственную инструкцию)
-    MsgBox "Здесь будет ваша инструкция/FAQ.", vbInformation
+    ' РћС‚РєСЂС‹С‚РёРµ СЃРїСЂР°РІРєРё (РјРѕР¶РЅРѕ Р·Р°РјРµРЅРёС‚СЊ РІС‹Р·РѕРІ РЅР° СЃРѕР±СЃС‚РІРµРЅРЅСѓСЋ РёРЅСЃС‚СЂСѓРєС†РёСЋ)
+    MsgBox "Р—РґРµСЃСЊ Р±СѓРґРµС‚ РІР°С€Р° РёРЅСЃС‚СЂСѓРєС†РёСЏ/FAQ.", vbInformation
 End Sub
 
 Private Sub btnClose_Click()
     Unload Me
 End Sub
 
-' ===== Служебная процедура для копирования текста в буфер обмена =====
+' ===== РЎР»СѓР¶РµР±РЅР°СЏ РїСЂРѕС†РµРґСѓСЂР° РґР»СЏ РєРѕРїРёСЂРѕРІР°РЅРёСЏ С‚РµРєСЃС‚Р° РІ Р±СѓС„РµСЂ РѕР±РјРµРЅР° =====
 Private Sub PutToClipboard(ByVal text As String)
     #If VBA7 Then
         Dim hGlobalMemory As LongPtr, lpGlobalMemory As LongPtr

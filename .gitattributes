@@ -1,0 +1,4 @@
+# Force git to treat these as text but aware of encoding
+*.bas text working-tree-encoding=windows-1251 git-encoding=utf-8
+*.cls text working-tree-encoding=windows-1251 git-encoding=utf-8
+*.frm text working-tree-encoding=windows-1251 git-encoding=utf-8

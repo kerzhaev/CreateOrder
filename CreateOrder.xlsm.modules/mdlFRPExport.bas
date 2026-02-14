@@ -1,40 +1,40 @@
 Attribute VB_Name = "mdlFRPExport"
 ' ===================================================================
-' Модуль mdlFRPExport (Универсальный)
-' Версия: 3.0.0 (ДСО + Риск)
-' Дата: 01.12.2025
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' Описание: Формирует Excel-отчёты:
-' 1. ДСО (сутки отдыха)
-' 2. ФРП Риск (2% в день, макс 60% в месяц, каждый период отдельно)
+' Module mdlFRPExport (Universal)
+' Version: 3.0.0 (DSO + Risk)
+' Date: 01.12.2025
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' Description: Generates Excel reports:
+' 1. DSO (rest days)
+' 2. FRP Risk (2% per day, max 60% per month, each period separately)
 ' ===================================================================
 Option Explicit
 
 '/**
-'* ExportPeriodsToExcel_WithChoice — Точка входа с кнопки Ribbon "Отчёт по периодам"
-'* Спрашивает пользователя, какой отчёт формировать
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* ExportPeriodsToExcel_WithChoice вЂ” Entry point from Ribbon button "Period Report"
+'* Asks the user which report to generate
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Public Sub ExportPeriodsToExcel_WithChoice()
 
     Call mdlHelper.EnsureStaffColumnsInitialized
 
     Dim choice As VbMsgBoxResult
-    choice = MsgBox("Выберите тип отчёта:" & vbCrLf & vbCrLf & _
-                    "Да - Отчёт ДСО (Сутки отдыха)" & vbCrLf & _
-                    "Нет - Отчёт ФРП Риск (Надбавка 2%)" & vbCrLf & _
-                    "Отмена - Выход", _
-                    vbYesNoCancel + vbQuestion, "Выбор типа отчёта")
+    choice = MsgBox("Р’С‹Р±РµСЂРёС‚Рµ С‚РёРї РѕС‚С‡С‘С‚Р°:" & vbCrLf & vbCrLf & _
+                    "Р”Р° - РћС‚С‡С‘С‚ Р”РЎРћ (РЎСѓС‚РєРё РѕС‚РґС‹С…Р°)" & vbCrLf & _
+                    "РќРµС‚ - РћС‚С‡С‘С‚ Р¤Р Рџ Р РёСЃРє (РќР°РґР±Р°РІРєР° 2%)" & vbCrLf & _
+                    "РћС‚РјРµРЅР° - Р’С‹С…РѕРґ", _
+                    vbYesNoCancel + vbQuestion, "Р’С‹Р±РѕСЂ С‚РёРїР° РѕС‚С‡С‘С‚Р°")
     
     If choice = vbYes Then
-        Call CreateExcelReportPeriodsByLichniyNomer ' Старый отчёт ДСО
+        Call CreateExcelReportPeriodsByLichniyNomer ' Old DSO report
     ElseIf choice = vbNo Then
-        Call CreateRiskExcelReport ' Новый отчёт ЗаРиск
+        Call CreateRiskExcelReport ' New Risk report
     End If
 End Sub
 
 '====================================================================
-' ЧАСТЬ 1: Отчёт ДСО (Существующая логика)
+' PART 1: DSO Report (Existing Logic)
 '====================================================================
 Sub CreateExcelReportPeriodsByLichniyNomer()
 
@@ -49,13 +49,13 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
     
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
-    Application.StatusBar = "Создание отчёта ДСО..."
+    Application.StatusBar = "РЎРѕР·РґР°РЅРёРµ РѕС‚С‡С‘С‚Р° Р”РЎРћ..."
 
-    Set wsMain = ThisWorkbook.Sheets("ДСО")
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsMain = ThisWorkbook.Sheets("Р”РЎРћ")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
 
     If Not mdlHelper.FindColumnNumbers(wsStaff, colLichniyNomer, colZvanie, colFIO, colDolzhnost, colVoinskayaChast) Then
-        MsgBox "Ошибка: Не удалось найти столбцы в листе 'Штат'!", vbCritical
+        MsgBox "РћС€РёР±РєР°: РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё СЃС‚РѕР»Р±С†С‹ РІ Р»РёСЃС‚Рµ 'РЁС‚Р°С‚'!", vbCritical
         GoTo CleanUp
     End If
 
@@ -84,17 +84,17 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
 
     Set wbNew = Workbooks.Add
     Set wsNew = wbNew.Sheets(1)
-    wsNew.Name = "Отчет ДСО"
+    wsNew.Name = "РћС‚С‡РµС‚ Р”РЎРћ"
     
-    ' Заголовки
-    wsNew.Cells(1, 1).value = "№ п/п"
-    wsNew.Cells(1, 2).value = "ФИО"
-    wsNew.Cells(1, 3).value = "Личный номер"
-    wsNew.Cells(1, 4).value = "Начало периода"
-    wsNew.Cells(1, 5).value = "Конец периода"
-    wsNew.Cells(1, 6).value = "Длительность, сут."
-    wsNew.Cells(1, 7).value = "Сутки отдыха"
-    wsNew.Cells(1, 8).value = "Актуален"
+    ' Headers
+    wsNew.Cells(1, 1).value = "в„– Рї/Рї"
+    wsNew.Cells(1, 2).value = "Р¤РРћ"
+    wsNew.Cells(1, 3).value = "Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ"
+    wsNew.Cells(1, 4).value = "РќР°С‡Р°Р»Рѕ РїРµСЂРёРѕРґР°"
+    wsNew.Cells(1, 5).value = "РљРѕРЅРµС† РїРµСЂРёРѕРґР°"
+    wsNew.Cells(1, 6).value = "Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ, СЃСѓС‚."
+    wsNew.Cells(1, 7).value = "РЎСѓС‚РєРё РѕС‚РґС‹С…Р°"
+    wsNew.Cells(1, 8).value = "РђРєС‚СѓР°Р»РµРЅ"
     wsNew.Range("A1:H1").Font.Bold = True
     outputRow = 2
 
@@ -111,10 +111,10 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
                 periodArr(j, 3) = periodList(j)(3)
             Next j
             
-            ' Сортировка
+            ' Sorting
             Call SortArray(periodArr)
 
-            ' Расчёт суток отдыха
+            ' Calculation of rest days
             Dim totalDays As Long, totalRestDays As Long, restDaysArr() As Long
             totalDays = 0
             For j = 1 To UBound(periodArr)
@@ -137,7 +137,7 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
                 Next j
             End If
 
-            ' Вывод
+            ' Output
             For j = 1 To UBound(periodArr)
                 wsNew.Cells(outputRow, 1).value = outputRow - 1
                 wsNew.Cells(outputRow, 2).value = personData("fio")
@@ -146,32 +146,32 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
                 wsNew.Cells(outputRow, 5).value = periodArr(j, 2)
                 wsNew.Cells(outputRow, 6).value = periodArr(j, 3)
                 wsNew.Cells(outputRow, 7).value = restDaysArr(j)
-                wsNew.Cells(outputRow, 8).value = IIf(periodArr(j, 2) >= cutoffDate, "Да", "Нет")
+                wsNew.Cells(outputRow, 8).value = IIf(periodArr(j, 2) >= cutoffDate, "Р”Р°", "РќРµС‚")
                 outputRow = outputRow + 1
             Next j
         End If
     Next infoRow
 
     wsNew.Columns("A:H").AutoFit
-    filePath = ThisWorkbook.Path & "\Сведения для ФРП (ДСО).xlsx"
+    filePath = ThisWorkbook.Path & "\РЎРІРµРґРµРЅРёСЏ РґР»СЏ Р¤Р Рџ (Р”РЎРћ).xlsx"
     Application.DisplayAlerts = False
     If dir(filePath) <> "" Then Kill filePath
     wbNew.SaveAs filePath
-    MsgBox "Отчёт ДСО сохранён: " & filePath, vbInformation
+    MsgBox "РћС‚С‡С‘С‚ Р”РЎРћ СЃРѕС…СЂР°РЅС‘РЅ: " & filePath, vbInformation
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка: " & Err.Description, vbCritical
+    MsgBox "РћС€РёР±РєР°: " & Err.Description, vbCritical
 CleanUp:
     Application.ScreenUpdating = True
     Application.StatusBar = False
 End Sub
 
 '====================================================================
-' ЧАСТЬ 2: Отчёт ФРП Риск (Новая логика)
+' PART 2: FRP Risk Report (New Logic)
 '====================================================================
-' Формирует список периодов построчно с разбивкой по месяцам
-' Расчёт: каждый период считается отдельно, но с учётом лимита 60% в месяц
+' Generates a list of periods line by line with monthly breakdown
+' Calculation: each period is calculated separately, but taking into account the 60% monthly limit
 '====================================================================
 Sub CreateRiskExcelReport()
 
@@ -187,24 +187,24 @@ Sub CreateRiskExcelReport()
     
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
-    Application.StatusBar = "Создание отчёта ФРП Риск..."
+    Application.StatusBar = "РЎРѕР·РґР°РЅРёРµ РѕС‚С‡С‘С‚Р° Р¤Р Рџ Р РёСЃРє..."
     
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
 
     Set wbNew = Workbooks.Add
     Set wsNew = wbNew.Sheets(1)
-    wsNew.Name = "ФРП Риск"
+    wsNew.Name = "Р¤Р Рџ Р РёСЃРє"
     
-    ' Заголовки
-    wsNew.Cells(1, 1).value = "№ п/п"
-    wsNew.Cells(1, 2).value = "ФИО"
-    wsNew.Cells(1, 3).value = "Личный номер"
-    wsNew.Cells(1, 4).value = "Начало периода"
-    wsNew.Cells(1, 5).value = "Конец периода"
-    wsNew.Cells(1, 6).value = "Дней"
-    wsNew.Cells(1, 7).value = "Процент"
-    wsNew.Cells(1, 8).value = "Актуален"
+    ' Headers
+    wsNew.Cells(1, 1).value = "в„– Рї/Рї"
+    wsNew.Cells(1, 2).value = "Р¤РРћ"
+    wsNew.Cells(1, 3).value = "Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ"
+    wsNew.Cells(1, 4).value = "РќР°С‡Р°Р»Рѕ РїРµСЂРёРѕРґР°"
+    wsNew.Cells(1, 5).value = "РљРѕРЅРµС† РїРµСЂРёРѕРґР°"
+    wsNew.Cells(1, 6).value = "Р”РЅРµР№"
+    wsNew.Cells(1, 7).value = "РџСЂРѕС†РµРЅС‚"
+    wsNew.Cells(1, 8).value = "РђРєС‚СѓР°Р»РµРЅ"
     
     With wsNew.Range("A1:H1")
         .Font.Bold = True
@@ -214,21 +214,21 @@ Sub CreateRiskExcelReport()
     
     outputRow = 2
     
-    ' Проход по всем сотрудникам в ДСО
+    ' Iterate through all employees in DSO
     For i = 2 To lastRow
         lichniyNomer = Trim(CStr(wsDSO.Cells(i, 3).value))
         fio = Trim(CStr(wsDSO.Cells(i, 2).value))
         
         If lichniyNomer <> "" Then
-            ' 1. Собираем сырые периоды из строки
+            ' 1. Collect raw periods from the row
             periodCount = CollectRawRiskPeriods_Local(wsDSO, i, rawPeriods)
             
             If periodCount > 0 Then
-                ' 2. Разбиваем периоды по месяцам (каждый кусок отдельно)
+                ' 2. Split periods by months (each piece separately)
                 Dim splitCount As Long
                 splitCount = SplitPeriodsByMonth_SeparateRows(rawPeriods, periodCount, splitPeriods)
                 
-                ' 3. Вывод в Excel
+                ' 3. Output to Excel
                 For k = 1 To splitCount
                     wsNew.Cells(outputRow, 1).value = outputRow - 1
                     wsNew.Cells(outputRow, 2).value = fio
@@ -237,7 +237,7 @@ Sub CreateRiskExcelReport()
                     wsNew.Cells(outputRow, 5).value = splitPeriods(k).EndDate
                     wsNew.Cells(outputRow, 6).value = splitPeriods(k).DaysCount
                     wsNew.Cells(outputRow, 7).value = splitPeriods(k).PercentValue & "%"
-                    wsNew.Cells(outputRow, 8).value = IIf(splitPeriods(k).IsExpired, "Нет", "Да")
+                    wsNew.Cells(outputRow, 8).value = IIf(splitPeriods(k).IsExpired, "РќРµС‚", "Р”Р°")
                     
                     If splitPeriods(k).IsExpired Then
                         wsNew.Range("A" & outputRow & ":H" & outputRow).Interior.Color = RGB(255, 200, 200)
@@ -251,14 +251,14 @@ Sub CreateRiskExcelReport()
     
     wsNew.Columns("A:H").AutoFit
     Dim filePath As String
-    filePath = ThisWorkbook.Path & "\ФРПРиск_" & Format(Date, "dd.mm.yyyy") & ".xlsx"
+    filePath = ThisWorkbook.Path & "\Р¤Р РџР РёСЃРє_" & Format(Date, "dd.mm.yyyy") & ".xlsx"
     wbNew.SaveAs filePath
     
-    MsgBox "Отчёт ФРП Риск сохранён: " & filePath, vbInformation
+    MsgBox "РћС‚С‡С‘С‚ Р¤Р Рџ Р РёСЃРє СЃРѕС…СЂР°РЅС‘РЅ: " & filePath, vbInformation
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка при создании отчёта Риск: " & Err.Description, vbCritical
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё РѕС‚С‡С‘С‚Р° Р РёСЃРє: " & Err.Description, vbCritical
     If Not wbNew Is Nothing Then wbNew.Close False
     Resume CleanUp
 CleanUp:
@@ -267,18 +267,18 @@ CleanUp:
 End Sub
 
 '====================================================================
-' ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (Локальные для отчёта Риск)
+' HELPER FUNCTIONS (Local for Risk report)
 '====================================================================
 
-' Сбор сырых периодов из одной строки ДСО
+' Collection of raw periods from one DSO row
 Private Function CollectRawRiskPeriods_Local(ws As Worksheet, rowNum As Long, ByRef periods() As mdlRiskExport.RiskPeriod) As Long
     Dim lastCol As Long, j As Long, pCount As Long
     pCount = 0
     lastCol = ws.Cells(rowNum, ws.Columns.count).End(xlToLeft).Column
     
-    ReDim periods(1 To 50) ' Запас
+    ReDim periods(1 To 50) ' Reserve
     Dim expirationDate As Date
-    expirationDate = DateAdd("m", -42, Date) ' 3 года 6 месяцев
+    expirationDate = DateAdd("m", -42, Date) ' 3 years 6 months
     
     For j = 5 To lastCol Step 2
         Dim sVal As Variant, eVal As Variant
@@ -301,24 +301,24 @@ Private Function CollectRawRiskPeriods_Local(ws As Worksheet, rowNum As Long, By
     CollectRawRiskPeriods_Local = pCount
 End Function
 
-' Разбивка периодов по месяцам БЕЗ ОБЪЕДИНЕНИЯ (каждый кусок - отдельная строка)
-' Но с расчётом процента: 2% за день, но не более 60% за месяц (тут нюанс)
-' ВАЖНО: Для ФРП каждый период идёт отдельно. Если в месяце 2 периода,
-' то Excel должен показывать их отдельно.
-' Логика 60% применяется к МЕСЯЦУ, но в таблице мы показываем факт по периоду.
-' Если требование "строго 2% в день", то пишем просто Дни * 2.
-' Если нужно учитывать лимит 60% суммарно, это сложнее в плоской таблице.
-' В текущей реализации: 2% за день без оглядки на другие периоды (как просили "каждый период в отдельной строчке с её расчётом")
-' Исправленная функция с контролем лимита 60% на месяц
+' Split periods by months WITHOUT MERGING (each piece is a separate row)
+' But with percentage calculation: 2% per day, but not more than 60% per month (nuance here)
+' IMPORTANT: For FRP, each period goes separately. If there are 2 periods in a month,
+' then Excel should show them separately.
+' The 60% logic applies to the MONTH, but in the table we show the fact for the period.
+' If the requirement is "strictly 2% per day", then we simply write Days * 2.
+' If we need to account for the 60% limit in total, it is more difficult in a flat table.
+' In the current implementation: 2% per day without regard to other periods (as requested "each period in a separate line with its calculation")
+' Corrected function with 60% monthly limit control
 Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskExport.RiskPeriod, ByVal rawCount As Long, ByRef splitPeriods() As mdlRiskExport.RiskPeriod) As Long
     Dim i As Long, count As Long
     count = 0
     
-    ' Временный массив всех разбитых кусочков (без ограничения процентов)
+    ' Temporary array of all split pieces (without percentage limit)
     Dim tempSplit() As mdlRiskExport.RiskPeriod
     ReDim tempSplit(1 To rawCount * 10)
     
-    ' 1. Разбиваем всё по границам месяцев
+    ' 1. Split everything by month boundaries
     For i = 1 To rawCount
         Dim curDate As Date
         curDate = rawPeriods(i).StartDate
@@ -338,7 +338,7 @@ Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskE
             tempSplit(count).StartDate = curDate
             tempSplit(count).EndDate = segEnd
             tempSplit(count).DaysCount = DateDiff("d", curDate, segEnd) + 1
-            tempSplit(count).MonthYear = Format(curDate, "yyyymm") ' Ключ для группировки
+            tempSplit(count).MonthYear = Format(curDate, "yyyymm") ' Key for grouping
             tempSplit(count).IsExpired = rawPeriods(i).IsExpired
             
             curDate = monthEnd + 1
@@ -350,7 +350,7 @@ Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskE
         Exit Function
     End If
     
-    ' 2. Сортировка по дате начала (важно для правильного накопления процентов)
+    ' 2. Sort by start date (important for correct percentage accumulation)
     Dim j As Long
     Dim temp As mdlRiskExport.RiskPeriod
     For i = 1 To count - 1
@@ -363,8 +363,8 @@ Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskE
         Next j
     Next i
     
-    ' 3. Расчёт процентов с учётом накопления по месяцу
-    ' Словарь для хранения уже начисленных процентов за месяц: Key="yyyymm", Item=Double
+    ' 3. Calculation of percentages taking into account accumulation by month
+    ' Dictionary to store already accrued percentages for the month: Key="yyyymm", Item=Double
     Dim monthlyAccumulator As Object
     Set monthlyAccumulator = CreateObject("Scripting.Dictionary")
     
@@ -379,16 +379,16 @@ Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskE
             currentAccumulated = 0
         End If
         
-        ' Сколько "стоит" текущий период (2% в день)
+        ' How much the current period "costs" (2% per day)
         Dim periodValue As Double
         periodValue = tempSplit(i).DaysCount * 2
         
-        ' Сколько ещё можно начислить в этом месяце (до 60%)
+        ' How much more can be accrued this month (up to 60%)
         Dim remainingLimit As Double
         remainingLimit = 60 - currentAccumulated
         If remainingLimit < 0 Then remainingLimit = 0
         
-        ' Определяем итоговый процент для периода
+        ' Determine the final percentage for the period
         Dim finalPercent As Double
         If periodValue <= remainingLimit Then
             finalPercent = periodValue
@@ -398,7 +398,7 @@ Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskE
         
         tempSplit(i).PercentValue = finalPercent
         
-        ' Обновляем аккумулятор
+        ' Update accumulator
         If monthlyAccumulator.exists(key) Then
             monthlyAccumulator(key) = currentAccumulated + finalPercent
         Else
@@ -406,7 +406,7 @@ Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskE
         End If
     Next i
     
-    ' Возвращаем результат
+    ' Return result
     ReDim splitPeriods(1 To count)
     For i = 1 To count
         splitPeriods(i) = tempSplit(i)
@@ -416,7 +416,7 @@ Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskE
 End Function
 
 
-' Сортировка массива (пузырёк)
+' Array sorting (bubble sort)
 Private Sub SortArray(ByRef arr As Variant)
     Dim i As Long, j As Long, temp1, temp2, temp3
     For i = LBound(arr) To UBound(arr) - 1
@@ -429,5 +429,4 @@ Private Sub SortArray(ByRef arr As Variant)
         Next j
     Next i
 End Sub
-
 

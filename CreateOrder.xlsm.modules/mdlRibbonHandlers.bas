@@ -1,21 +1,21 @@
 Attribute VB_Name = "mdlRibbonHandlers"
 ' ===============================================================================
-' Модуль mdlRibbonHandlers для обработки событий пользовательской ленты
-' Версия: 2.1.0
-' Дата: 12.07.2025
-' Автор: Система управления военным персоналом
-' Описание: Полный набор обработчиков событий для кнопок пользовательской ленты
-' Функциональность:
-' - Обработка всех кнопок экспорта документов
-' - Управление данными (импорт, предпросмотр)
-' - Валидация и диагностика данных
-' - Системные функции (справка, настройки, проверка готовности)
-' Изменения в v2.1.0: Добавлены недостающие обработчики для валидации и управления данными
+' Module mdlRibbonHandlers for handling custom ribbon events
+' Version: 2.1.0
+' Date: 14.02.2026
+' Author: Military Personnel Management System
+' Description: Full set of event handlers for custom ribbon buttons
+' Functionality:
+' - Handling all document export buttons
+' - Data management (import, preview)
+' - Data validation and diagnostics
+' - System functions (help, settings, readiness check)
+' Changes in v2.1.0: Added missing handlers for validation and data management
 ' ===============================================================================
 
 Option Explicit
 
-' Обработчик для основного приказа
+' Handler for main order
 Sub RunMainExport(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
@@ -25,10 +25,10 @@ Sub RunMainExport(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании основного приказа: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё РѕСЃРЅРѕРІРЅРѕРіРѕ РїСЂРёРєР°Р·Р°: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
-' Обработчик для справки ДСО
+' Handler for DSO certificate (spravka)
 Sub RunSpravkaExport(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
@@ -38,10 +38,10 @@ Sub RunSpravkaExport(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании справки: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё СЃРїСЂР°РІРєРё: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
-' Обработчик для рапорта
+' Handler for report (raport)
 Sub RunRaportExport(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
@@ -51,10 +51,10 @@ Sub RunRaportExport(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании рапорта: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё СЂР°РїРѕСЂС‚Р°: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
-' Обработчик для Excel отчета
+' Handler for Excel report
 Sub RunExcelReport(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
@@ -64,14 +64,14 @@ Sub RunExcelReport(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании Excel отчета: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё Excel РѕС‚С‡РµС‚Р°: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
-' *** НЕДОСТАЮЩИЙ ОБРАБОТЧИК *** Обработчик для валидации данных
+' *** MISSING HANDLER *** Handler for data validation
 Sub RunDataValidation(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
-    Application.StatusBar = "Выполняется валидация данных..."
+    Application.StatusBar = "Р’С‹РїРѕР»РЅСЏРµС‚СЃСЏ РІР°Р»РёРґР°С†РёСЏ РґР°РЅРЅС‹С…..."
     Call ValidateMainSheetData
     Application.ScreenUpdating = True
     Application.StatusBar = False
@@ -80,10 +80,10 @@ Sub RunDataValidation(control As IRibbonControl)
 ErrorHandler:
     Application.ScreenUpdating = True
     Application.StatusBar = False
-    MsgBox "Ошибка при валидации данных: " & Err.Description, vbCritical, "Ошибка валидации"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РІР°Р»РёРґР°С†РёРё РґР°РЅРЅС‹С…: " & Err.Description, vbCritical, "РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё"
 End Sub
 
-' *** НЕДОСТАЮЩИЙ ОБРАБОТЧИК *** Обработчик для диагностики структуры
+' *** MISSING HANDLER *** Handler for structure diagnostics
 Sub RunDiagnoseStructure(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
@@ -93,10 +93,10 @@ Sub RunDiagnoseStructure(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при диагностике структуры: " & Err.Description, vbCritical, "Ошибка диагностики"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РґРёР°РіРЅРѕСЃС‚РёРєРµ СЃС‚СЂСѓРєС‚СѓСЂС‹: " & Err.Description, vbCritical, "РћС€РёР±РєР° РґРёР°РіРЅРѕСЃС‚РёРєРё"
 End Sub
 
-' *** НЕДОСТАЮЩИЙ ОБРАБОТЧИК *** Обработчик для импорта данных
+' *** MISSING HANDLER *** Handler for data import
 Sub RunImportData(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
@@ -106,10 +106,10 @@ Sub RunImportData(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при импорте данных: " & Err.Description, vbCritical, "Ошибка импорта"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ РґР°РЅРЅС‹С…: " & Err.Description, vbCritical, "РћС€РёР±РєР° РёРјРїРѕСЂС‚Р°"
 End Sub
 
-' *** НЕДОСТАЮЩИЙ ОБРАБОТЧИК *** Обработчик для предпросмотра данных
+' *** MISSING HANDLER *** Handler for data preview
 Sub RunPreviewData(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
@@ -119,218 +119,218 @@ Sub RunPreviewData(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при предпросмотре данных: " & Err.Description, vbCritical, "Ошибка предпросмотра"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РїСЂРµРґРїСЂРѕСЃРјРѕС‚СЂРµ РґР°РЅРЅС‹С…: " & Err.Description, vbCritical, "РћС€РёР±РєР° РїСЂРµРґРїСЂРѕСЃРјРѕС‚СЂР°"
 End Sub
 
-' Обработчик для справки
+' Handler for help
 Sub ShowHelp(control As IRibbonControl)
     Dim helpText As String
-    helpText = "=== МАКРОСЫ ДЛЯ РАБОТЫ С ДАННЫМИ СВО ===" & vbCrLf & vbCrLf
-    helpText = helpText & "[ЭКСПОРТ] ЭКСПОРТ ДОКУМЕНТОВ:" & vbCrLf
-    helpText = helpText & "• Основной приказ - создает Word документ с приказом в дательном падеже" & vbCrLf
-    helpText = helpText & "• Справка ДСО - создает справки на основе шаблона Word" & vbCrLf
-    helpText = helpText & "• Рапорт - создает рапорты о выплате компенсации" & vbCrLf & vbCrLf
-    helpText = helpText & "[ОТЧЕТЫ] ОТЧЕТЫ:" & vbCrLf
-    helpText = helpText & "• Отчет по периодам - создает сводный Excel отчет" & vbCrLf & vbCrLf
-    helpText = helpText & "[ДАННЫЕ] УПРАВЛЕНИЕ ДАННЫМИ:" & vbCrLf
-    helpText = helpText & "• Импорт данных - загружает данные из Excel в лист 'Штат'" & vbCrLf
-    helpText = helpText & "• Предпросмотр - показывает предварительный просмотр файла" & vbCrLf & vbCrLf
-    helpText = helpText & "[ВАЛИДАЦИЯ] ПРОВЕРКА ДАННЫХ:" & vbCrLf
-    helpText = helpText & "• Проверить данные - выполняет полную валидацию листа ДСО" & vbCrLf
-    helpText = helpText & "• Диагностика структуры - анализирует структуру листов" & vbCrLf & vbCrLf
-    helpText = helpText & "[ТРЕБОВАНИЯ] ТРЕБОВАНИЯ:" & vbCrLf
-    helpText = helpText & "• Шаблоны Word должны находиться в папке с Excel файлом" & vbCrLf
-    helpText = helpText & "• Лист 'Штат' должен содержать данные о сотрудниках" & vbCrLf
-    helpText = helpText & "• Основной лист должен содержать периоды службы" & vbCrLf
-    helpText = helpText & "• Столбец 'Личный номер' обязателен для уникальной идентификации" & vbCrLf & vbCrLf
-    helpText = helpText & "[ШАБЛОНЫ] ФАЙЛЫ ШАБЛОНОВ:" & vbCrLf
-    helpText = helpText & "• Шаблон_Справка.docx" & vbCrLf
-    helpText = helpText & "• Шаблон_Рапорт.docx"
+    helpText = "=== РњРђРљР РћРЎР« Р”Р›РЇ Р РђР‘РћРўР« РЎ Р”РђРќРќР«РњР РЎР’Рћ ===" & vbCrLf & vbCrLf
+    helpText = helpText & "[Р­РљРЎРџРћР Рў] Р­РљРЎРџРћР Рў Р”РћРљРЈРњР•РќРўРћР’:" & vbCrLf
+    helpText = helpText & "вЂў РћСЃРЅРѕРІРЅРѕР№ РїСЂРёРєР°Р· - СЃРѕР·РґР°РµС‚ Word РґРѕРєСѓРјРµРЅС‚ СЃ РїСЂРёРєР°Р·РѕРј РІ РґР°С‚РµР»СЊРЅРѕРј РїР°РґРµР¶Рµ" & vbCrLf
+    helpText = helpText & "вЂў РЎРїСЂР°РІРєР° Р”РЎРћ - СЃРѕР·РґР°РµС‚ СЃРїСЂР°РІРєРё РЅР° РѕСЃРЅРѕРІРµ С€Р°Р±Р»РѕРЅР° Word" & vbCrLf
+    helpText = helpText & "вЂў Р Р°РїРѕСЂС‚ - СЃРѕР·РґР°РµС‚ СЂР°РїРѕСЂС‚С‹ Рѕ РІС‹РїР»Р°С‚Рµ РєРѕРјРїРµРЅСЃР°С†РёРё" & vbCrLf & vbCrLf
+    helpText = helpText & "[РћРўР§Р•РўР«] РћРўР§Р•РўР«:" & vbCrLf
+    helpText = helpText & "вЂў РћС‚С‡РµС‚ РїРѕ РїРµСЂРёРѕРґР°Рј - СЃРѕР·РґР°РµС‚ СЃРІРѕРґРЅС‹Р№ Excel РѕС‚С‡РµС‚" & vbCrLf & vbCrLf
+    helpText = helpText & "[Р”РђРќРќР«Р•] РЈРџР РђР’Р›Р•РќРР• Р”РђРќРќР«РњР:" & vbCrLf
+    helpText = helpText & "вЂў РРјРїРѕСЂС‚ РґР°РЅРЅС‹С… - Р·Р°РіСЂСѓР¶Р°РµС‚ РґР°РЅРЅС‹Рµ РёР· Excel РІ Р»РёСЃС‚ 'РЁС‚Р°С‚'" & vbCrLf
+    helpText = helpText & "вЂў РџСЂРµРґРїСЂРѕСЃРјРѕС‚СЂ - РїРѕРєР°Р·С‹РІР°РµС‚ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅС‹Р№ РїСЂРѕСЃРјРѕС‚СЂ С„Р°Р№Р»Р°" & vbCrLf & vbCrLf
+    helpText = helpText & "[Р’РђР›РР”РђР¦РРЇ] РџР РћР’Р•Р РљРђ Р”РђРќРќР«РҐ:" & vbCrLf
+    helpText = helpText & "вЂў РџСЂРѕРІРµСЂРёС‚СЊ РґР°РЅРЅС‹Рµ - РІС‹РїРѕР»РЅСЏРµС‚ РїРѕР»РЅСѓСЋ РІР°Р»РёРґР°С†РёСЋ Р»РёСЃС‚Р° Р”РЎРћ" & vbCrLf
+    helpText = helpText & "вЂў Р”РёР°РіРЅРѕСЃС‚РёРєР° СЃС‚СЂСѓРєС‚СѓСЂС‹ - Р°РЅР°Р»РёР·РёСЂСѓРµС‚ СЃС‚СЂСѓРєС‚СѓСЂСѓ Р»РёСЃС‚РѕРІ" & vbCrLf & vbCrLf
+    helpText = helpText & "[РўР Р•Р‘РћР’РђРќРРЇ] РўР Р•Р‘РћР’РђРќРРЇ:" & vbCrLf
+    helpText = helpText & "вЂў РЁР°Р±Р»РѕРЅС‹ Word РґРѕР»Р¶РЅС‹ РЅР°С…РѕРґРёС‚СЊСЃСЏ РІ РїР°РїРєРµ СЃ Excel С„Р°Р№Р»РѕРј" & vbCrLf
+    helpText = helpText & "вЂў Р›РёСЃС‚ 'РЁС‚Р°С‚' РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ РґР°РЅРЅС‹Рµ Рѕ СЃРѕС‚СЂСѓРґРЅРёРєР°С…" & vbCrLf
+    helpText = helpText & "вЂў РћСЃРЅРѕРІРЅРѕР№ Р»РёСЃС‚ РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ РїРµСЂРёРѕРґС‹ СЃР»СѓР¶Р±С‹" & vbCrLf
+    helpText = helpText & "вЂў РЎС‚РѕР»Р±РµС† 'Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ' РѕР±СЏР·Р°С‚РµР»РµРЅ РґР»СЏ СѓРЅРёРєР°Р»СЊРЅРѕР№ РёРґРµРЅС‚РёС„РёРєР°С†РёРё" & vbCrLf & vbCrLf
+    helpText = helpText & "[РЁРђР‘Р›РћРќР«] Р¤РђР™Р›Р« РЁРђР‘Р›РћРќРћР’:" & vbCrLf
+    helpText = helpText & "вЂў РЁР°Р±Р»РѕРЅ_РЎРїСЂР°РІРєР°.docx" & vbCrLf
+    helpText = helpText & "вЂў РЁР°Р±Р»РѕРЅ_Р Р°РїРѕСЂС‚.docx"
     
-    MsgBox helpText, vbInformation, "Справка по макросам СВО"
+    MsgBox helpText, vbInformation, "РЎРїСЂР°РІРєР° РїРѕ РјР°РєСЂРѕСЃР°Рј РЎР’Рћ"
 End Sub
 
-' Обработчик для настроек (обновленная версия)
+' Handler for settings (updated version)
 Sub ShowSettings(control As IRibbonControl)
     Dim settingsText As String
-    settingsText = "=== НАСТРОЙКИ МАКРОСОВ ===" & vbCrLf & vbCrLf
-    settingsText = settingsText & "[ПАПКА] Текущая папка: " & ThisWorkbook.Path & vbCrLf & vbCrLf
-    settingsText = settingsText & "[ПРОВЕРКА] Проверка шаблонов:" & vbCrLf
+    settingsText = "=== РќРђРЎРўР РћР™РљР РњРђРљР РћРЎРћР’ ===" & vbCrLf & vbCrLf
+    settingsText = settingsText & "[РџРђРџРљРђ] РўРµРєСѓС‰Р°СЏ РїР°РїРєР°: " & ThisWorkbook.Path & vbCrLf & vbCrLf
+    settingsText = settingsText & "[РџР РћР’Р•Р РљРђ] РџСЂРѕРІРµСЂРєР° С€Р°Р±Р»РѕРЅРѕРІ:" & vbCrLf
     
-    ' Проверяем наличие шаблонов
-    If dir(ThisWorkbook.Path & "\Шаблон_Справка.docx") <> "" Then
-        settingsText = settingsText & "[+] Шаблон_Справка.docx - найден" & vbCrLf
+    ' Check templates existence
+    If dir(ThisWorkbook.Path & "\РЁР°Р±Р»РѕРЅ_РЎРїСЂР°РІРєР°.docx") <> "" Then
+        settingsText = settingsText & "[+] РЁР°Р±Р»РѕРЅ_РЎРїСЂР°РІРєР°.docx - РЅР°Р№РґРµРЅ" & vbCrLf
     Else
-        settingsText = settingsText & "[-] Шаблон_Справка.docx - НЕ НАЙДЕН" & vbCrLf
+        settingsText = settingsText & "[-] РЁР°Р±Р»РѕРЅ_РЎРїСЂР°РІРєР°.docx - РќР• РќРђР™Р”Р•Рќ" & vbCrLf
     End If
     
-    If dir(ThisWorkbook.Path & "\Шаблон_Рапорт.docx") <> "" Then
-        settingsText = settingsText & "[+] Шаблон_Рапорт.docx - найден" & vbCrLf
+    If dir(ThisWorkbook.Path & "\РЁР°Р±Р»РѕРЅ_Р Р°РїРѕСЂС‚.docx") <> "" Then
+        settingsText = settingsText & "[+] РЁР°Р±Р»РѕРЅ_Р Р°РїРѕСЂС‚.docx - РЅР°Р№РґРµРЅ" & vbCrLf
     Else
-        settingsText = settingsText & "[-] Шаблон_Рапорт.docx - НЕ НАЙДЕН" & vbCrLf
+        settingsText = settingsText & "[-] РЁР°Р±Р»РѕРЅ_Р Р°РїРѕСЂС‚.docx - РќР• РќРђР™Р”Р•Рќ" & vbCrLf
     End If
     
-    settingsText = settingsText & vbCrLf & "[ЛИСТЫ] Проверка листов:" & vbCrLf
+    settingsText = settingsText & vbCrLf & "[Р›РРЎРўР«] РџСЂРѕРІРµСЂРєР° Р»РёСЃС‚РѕРІ:" & vbCrLf
     
-    ' Проверяем наличие листа "ДСО"
+    ' Check "DSO" sheet existence
     Dim dsoExists As Boolean
     dsoExists = False
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.Name = "ДСО" Then
+        If ws.Name = "Р”РЎРћ" Then
             dsoExists = True
             Exit For
         End If
     Next ws
     
     If dsoExists Then
-        settingsText = settingsText & "[+] Лист 'ДСО' - найден" & vbCrLf
+        settingsText = settingsText & "[+] Р›РёСЃС‚ 'Р”РЎРћ' - РЅР°Р№РґРµРЅ" & vbCrLf
     Else
-        settingsText = settingsText & "[-] Лист 'ДСО' - НЕ НАЙДЕН" & vbCrLf
+        settingsText = settingsText & "[-] Р›РёСЃС‚ 'Р”РЎРћ' - РќР• РќРђР™Р”Р•Рќ" & vbCrLf
     End If
     
-    ' Проверяем наличие листа "Штат"
+    ' Check "Staff" sheet existence
     Dim wsExists As Boolean
     wsExists = False
     For Each ws In ThisWorkbook.Worksheets
-        If ws.Name = "Штат" Then
+        If ws.Name = "РЁС‚Р°С‚" Then
             wsExists = True
             Exit For
         End If
     Next ws
     
     If wsExists Then
-        settingsText = settingsText & "[+] Лист 'Штат' - найден" & vbCrLf
+        settingsText = settingsText & "[+] Р›РёСЃС‚ 'РЁС‚Р°С‚' - РЅР°Р№РґРµРЅ" & vbCrLf
     Else
-        settingsText = settingsText & "[-] Лист 'Штат' - НЕ НАЙДЕН" & vbCrLf
+        settingsText = settingsText & "[-] Р›РёСЃС‚ 'РЁС‚Р°С‚' - РќР• РќРђР™Р”Р•Рќ" & vbCrLf
     End If
     
-    settingsText = settingsText & vbCrLf & "[СТАТИСТИКА] Информация о данных:" & vbCrLf
+    settingsText = settingsText & vbCrLf & "[РЎРўРђРўРРЎРўРРљРђ] РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РґР°РЅРЅС‹С…:" & vbCrLf
     
-    ' Подсчитываем количество записей в листе ДСО
+    ' Count rows in DSO sheet
     If dsoExists Then
         Dim dsoSheet As Worksheet
-        Set dsoSheet = ThisWorkbook.Sheets("ДСО")
+        Set dsoSheet = ThisWorkbook.Sheets("Р”РЎРћ")
         Dim lastRowDSO As Long
         lastRowDSO = dsoSheet.Cells(dsoSheet.Rows.count, "C").End(xlUp).Row
         
         If lastRowDSO > 1 Then
-            settingsText = settingsText & "[ДАННЫЕ] Записей в листе ДСО: " & (lastRowDSO - 1) & vbCrLf
+            settingsText = settingsText & "[Р”РђРќРќР«Р•] Р—Р°РїРёСЃРµР№ РІ Р»РёСЃС‚Рµ Р”РЎРћ: " & (lastRowDSO - 1) & vbCrLf
         Else
-            settingsText = settingsText & "[ДАННЫЕ] Лист ДСО пуст" & vbCrLf
+            settingsText = settingsText & "[Р”РђРќРќР«Р•] Р›РёСЃС‚ Р”РЎРћ РїСѓСЃС‚" & vbCrLf
         End If
     End If
     
-    ' Подсчитываем количество записей в листе "Штат"
+    ' Count rows in "Staff" sheet
     If wsExists Then
         Dim staffSheet As Worksheet
-        Set staffSheet = ThisWorkbook.Sheets("Штат")
+        Set staffSheet = ThisWorkbook.Sheets("РЁС‚Р°С‚")
         Dim lastRowStaff As Long
         lastRowStaff = staffSheet.Cells(staffSheet.Rows.count, "A").End(xlUp).Row
         
         If lastRowStaff > 1 Then
-            settingsText = settingsText & "[ШТАТ] Записей в листе 'Штат': " & (lastRowStaff - 1) & vbCrLf
+            settingsText = settingsText & "[РЁРўРђРў] Р—Р°РїРёСЃРµР№ РІ Р»РёСЃС‚Рµ 'РЁС‚Р°С‚': " & (lastRowStaff - 1) & vbCrLf
         Else
-            settingsText = settingsText & "[ШТАТ] Лист 'Штат' пуст" & vbCrLf
+            settingsText = settingsText & "[РЁРўРђРў] Р›РёСЃС‚ 'РЁС‚Р°С‚' РїСѓСЃС‚" & vbCrLf
         End If
     End If
     
-    settingsText = settingsText & vbCrLf & "[ВЕРСИЯ] Версия макросов: 2.1.0" & vbCrLf
-    settingsText = settingsText & "[ДАТА] Дата обновления: 12.07.2025" & vbCrLf
-    settingsText = settingsText & "[НОВОЕ] Поддержка личных номеров: ДА"
+    settingsText = settingsText & vbCrLf & "[Р’Р•Р РЎРРЇ] Р’РµСЂСЃРёСЏ РјР°РєСЂРѕСЃРѕРІ: 2.1.0" & vbCrLf
+    settingsText = settingsText & "[Р”РђРўРђ] Р”Р°С‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ: 12.07.2025" & vbCrLf
+    settingsText = settingsText & "[РќРћР’РћР•] РџРѕРґРґРµСЂР¶РєР° Р»РёС‡РЅС‹С… РЅРѕРјРµСЂРѕРІ: Р”Рђ"
     
-    MsgBox settingsText, vbInformation, "Настройки и проверка"
+    MsgBox settingsText, vbInformation, "РќР°СЃС‚СЂРѕР№РєРё Рё РїСЂРѕРІРµСЂРєР°"
 End Sub
 
-' Функция для проверки готовности системы
+' Function to check system readiness
 Sub CheckSystemReadiness(control As IRibbonControl)
     Dim readinessText As String
     Dim isReady As Boolean
     isReady = True
     
-    readinessText = "=== ПРОВЕРКА ГОТОВНОСТИ СИСТЕМЫ ===" & vbCrLf & vbCrLf
+    readinessText = "=== РџР РћР’Р•Р РљРђ Р“РћРўРћР’РќРћРЎРўР РЎРРЎРўР•РњР« ===" & vbCrLf & vbCrLf
     
-    ' Проверка шаблонов
-    readinessText = readinessText & "[ШАБЛОНЫ]" & vbCrLf
-    If dir(ThisWorkbook.Path & "\Шаблон_Справка.docx") <> "" Then
-        readinessText = readinessText & "[OK] Шаблон справки найден" & vbCrLf
+    ' Check templates
+    readinessText = readinessText & "[РЁРђР‘Р›РћРќР«]" & vbCrLf
+    If dir(ThisWorkbook.Path & "\РЁР°Р±Р»РѕРЅ_РЎРїСЂР°РІРєР°.docx") <> "" Then
+        readinessText = readinessText & "[OK] РЁР°Р±Р»РѕРЅ СЃРїСЂР°РІРєРё РЅР°Р№РґРµРЅ" & vbCrLf
     Else
-        readinessText = readinessText & "[ОШИБКА] Шаблон справки отсутствует" & vbCrLf
+        readinessText = readinessText & "[РћРЁРР‘РљРђ] РЁР°Р±Р»РѕРЅ СЃРїСЂР°РІРєРё РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚" & vbCrLf
         isReady = False
     End If
     
-    If dir(ThisWorkbook.Path & "\Шаблон_Рапорт.docx") <> "" Then
-        readinessText = readinessText & "[OK] Шаблон рапорта найден" & vbCrLf
+    If dir(ThisWorkbook.Path & "\РЁР°Р±Р»РѕРЅ_Р Р°РїРѕСЂС‚.docx") <> "" Then
+        readinessText = readinessText & "[OK] РЁР°Р±Р»РѕРЅ СЂР°РїРѕСЂС‚Р° РЅР°Р№РґРµРЅ" & vbCrLf
     Else
-        readinessText = readinessText & "[ОШИБКА] Шаблон рапорта отсутствует" & vbCrLf
+        readinessText = readinessText & "[РћРЁРР‘РљРђ] РЁР°Р±Р»РѕРЅ СЂР°РїРѕСЂС‚Р° РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚" & vbCrLf
         isReady = False
     End If
     
-    ' Проверка листов
-    readinessText = readinessText & vbCrLf & "[СТРУКТУРА ДАННЫХ]" & vbCrLf
+    ' Check sheets
+    readinessText = readinessText & vbCrLf & "[РЎРўР РЈРљРўРЈР Рђ Р”РђРќРќР«РҐ]" & vbCrLf
     Dim wsExists As Boolean
     wsExists = False
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
-        If ws.Name = "Штат" Then
+        If ws.Name = "РЁС‚Р°С‚" Then
             wsExists = True
             Exit For
         End If
     Next ws
     
     If wsExists Then
-        readinessText = readinessText & "[OK] Лист 'Штат' найден" & vbCrLf
+        readinessText = readinessText & "[OK] Р›РёСЃС‚ 'РЁС‚Р°С‚' РЅР°Р№РґРµРЅ" & vbCrLf
     Else
-        readinessText = readinessText & "[ОШИБКА] Лист 'Штат' отсутствует" & vbCrLf
+        readinessText = readinessText & "[РћРЁРР‘РљРђ] Р›РёСЃС‚ 'РЁС‚Р°С‚' РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚" & vbCrLf
         isReady = False
     End If
     
-    ' Проверка наличия данных
+    ' Check data presence
     Dim mainSheet As Worksheet
-    Set mainSheet = ThisWorkbook.Sheets("ДСО")
+    Set mainSheet = ThisWorkbook.Sheets("Р”РЎРћ")
     Dim lastRowMain As Long
     lastRowMain = mainSheet.Cells(mainSheet.Rows.count, "C").End(xlUp).Row
     
     If lastRowMain > 1 Then
-        readinessText = readinessText & "[OK] Данные в основном листе найдены" & vbCrLf
+        readinessText = readinessText & "[OK] Р”Р°РЅРЅС‹Рµ РІ РѕСЃРЅРѕРІРЅРѕРј Р»РёСЃС‚Рµ РЅР°Р№РґРµРЅС‹" & vbCrLf
     Else
-        readinessText = readinessText & "[ПРЕДУПРЕЖДЕНИЕ] Основной лист пуст" & vbCrLf
+        readinessText = readinessText & "[РџР Р•Р”РЈРџР Р•Р–Р”Р•РќРР•] РћСЃРЅРѕРІРЅРѕР№ Р»РёСЃС‚ РїСѓСЃС‚" & vbCrLf
     End If
     
-    ' Проверка структуры листа ДСО
-    readinessText = readinessText & vbCrLf & "[СТРУКТУРА ЛИСТА ДСО]" & vbCrLf
-    If mainSheet.Cells(1, 2).value = "ФИО" And mainSheet.Cells(1, 3).value = "Личный номер" Then
-        readinessText = readinessText & "[OK] Структура листа ДСО корректна" & vbCrLf
+    ' Check DSO sheet structure
+    readinessText = readinessText & vbCrLf & "[РЎРўР РЈРљРўРЈР Рђ Р›РРЎРўРђ Р”РЎРћ]" & vbCrLf
+    If mainSheet.Cells(1, 2).value = "Р¤РРћ" And mainSheet.Cells(1, 3).value = "Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ" Then
+        readinessText = readinessText & "[OK] РЎС‚СЂСѓРєС‚СѓСЂР° Р»РёСЃС‚Р° Р”РЎРћ РєРѕСЂСЂРµРєС‚РЅР°" & vbCrLf
     Else
-        readinessText = readinessText & "[ПРЕДУПРЕЖДЕНИЕ] Проверьте структуру листа ДСО (B=ФИО, C=Личный номер)" & vbCrLf
+        readinessText = readinessText & "[РџР Р•Р”РЈРџР Р•Р–Р”Р•РќРР•] РџСЂРѕРІРµСЂСЊС‚Рµ СЃС‚СЂСѓРєС‚СѓСЂСѓ Р»РёСЃС‚Р° Р”РЎРћ (B=Р¤РРћ, C=Р›РёС‡РЅС‹Р№ РЅРѕРјРµСЂ)" & vbCrLf
     End If
     
-    ' Итоговый статус
-    readinessText = readinessText & vbCrLf & "[СТАТУС] "
+    ' Final status
+    readinessText = readinessText & vbCrLf & "[РЎРўРђРўРЈРЎ] "
     If isReady Then
-        readinessText = readinessText & "СИСТЕМА ГОТОВА К РАБОТЕ"
-        MsgBox readinessText, vbInformation, "Проверка готовности"
+        readinessText = readinessText & "РЎРРЎРўР•РњРђ Р“РћРўРћР’Рђ Рљ Р РђР‘РћРўР•"
+        MsgBox readinessText, vbInformation, "РџСЂРѕРІРµСЂРєР° РіРѕС‚РѕРІРЅРѕСЃС‚Рё"
     Else
-        readinessText = readinessText & "СИСТЕМА НЕ ГОТОВА - УСТРАНИТЕ ОШИБКИ"
-        MsgBox readinessText, vbCritical, "Проверка готовности"
+        readinessText = readinessText & "РЎРРЎРўР•РњРђ РќР• Р“РћРўРћР’Рђ - РЈРЎРўР РђРќРРўР• РћРЁРР‘РљР"
+        MsgBox readinessText, vbCritical, "РџСЂРѕРІРµСЂРєР° РіРѕС‚РѕРІРЅРѕСЃС‚Рё"
     End If
 End Sub
 
-'/** Обработчик кнопки "ПриказЗаРиск" */
+'/** Handler for "OrderForRisk" button */
 Public Sub OnRiskOrderClick(control As IRibbonControl)
     Call mdlRiskExport.ExportRiskAllowanceOrder
 End Sub
 
-' Было: Call mdlPeriodsExport.ExportPeriodsToExcel_WithChoice
-' Стало:
+' Was: Call mdlPeriodsExport.ExportPeriodsToExcel_WithChoice
+' Now:
 Public Sub OnPeriodsReportClick(control As IRibbonControl)
     Call mdlFRPExport.ExportPeriodsToExcel_WithChoice
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработчик кнопки "Экспорт надбавок" (надбавки без периодов)
-' @param control As IRibbonControl - элемент управления Ribbon
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Handler for "Export Allowances" button (allowances without periods)
+' @param control As IRibbonControl - Ribbon control element
 ' =============================================
 Public Sub OnExportAllowancesClick(control As IRibbonControl)
     On Error GoTo ErrorHandler
@@ -341,13 +341,13 @@ Public Sub OnExportAllowancesClick(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при экспорте надбавок: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СЌРєСЃРїРѕСЂС‚Рµ РЅР°РґР±Р°РІРѕРє: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработчик кнопки "Проверить надбавки"
-' @param control As IRibbonControl - элемент управления Ribbon
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Handler for "Validate Allowances" button
+' @param control As IRibbonControl - Ribbon control element
 ' =============================================
 Public Sub OnValidateAllowancesClick(control As IRibbonControl)
     On Error GoTo ErrorHandler
@@ -358,20 +358,20 @@ Public Sub OnValidateAllowancesClick(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при проверке надбавок: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РїСЂРѕРІРµСЂРєРµ РЅР°РґР±Р°РІРѕРє: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработчик кнопки "Массовое добавление" сотрудников
-' @param control As IRibbonControl - элемент управления Ribbon
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Handler for "Mass Add Employees" button
+' @param control As IRibbonControl - Ribbon control element
 ' =============================================
 Public Sub OnMassImportEmployeesClick(control As IRibbonControl)
     On Error GoTo ErrorHandler
     
-    ' Проверяем активный лист
+    ' Check active sheet
     If ActiveSheet.Name <> mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
-        MsgBox "Для массового добавления перейдите на лист '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbExclamation, "Внимание"
+        MsgBox "Р”Р»СЏ РјР°СЃСЃРѕРІРѕРіРѕ РґРѕР±Р°РІР»РµРЅРёСЏ РїРµСЂРµР№РґРёС‚Рµ РЅР° Р»РёСЃС‚ '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbExclamation, "Р’РЅРёРјР°РЅРёРµ"
         Exit Sub
     End If
     
@@ -380,13 +380,13 @@ Public Sub OnMassImportEmployeesClick(control As IRibbonControl)
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при массовом добавлении сотрудников: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РјР°СЃСЃРѕРІРѕРј РґРѕР±Р°РІР»РµРЅРёРё СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработчик кнопки "Выбрать сотрудника" (открытие формы выбора)
-' @param control As IRibbonControl - элемент управления Ribbon
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Handler for "Select Employee" button (opening selection form)
+' @param control As IRibbonControl - Ribbon control element
 ' =============================================
 Public Sub OnSelectEmployeeClick(control As IRibbonControl)
     On Error GoTo ErrorHandler
@@ -395,80 +395,79 @@ Public Sub OnSelectEmployeeClick(control As IRibbonControl)
     Dim activeCell As Range
     Dim targetRow As Long
     
-    ' Проверяем активный лист
-
-   If ActiveSheet Is Nothing Then
-       MsgBox "Нет активного листа.", vbExclamation, "Внимание"
-       Exit Sub
-   End If
+    ' Check active sheet
+    If ActiveSheet Is Nothing Then
+        MsgBox "РќРµС‚ Р°РєС‚РёРІРЅРѕРіРѕ Р»РёСЃС‚Р°.", vbExclamation, "Р’РЅРёРјР°РЅРёРµ"
+        Exit Sub
+    End If
 
     If ActiveSheet.Name <> mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
-        MsgBox "Для выбора сотрудника перейдите на лист '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbExclamation, "Внимание"
+        MsgBox "Р”Р»СЏ РІС‹Р±РѕСЂР° СЃРѕС‚СЂСѓРґРЅРёРєР° РїРµСЂРµР№РґРёС‚Рµ РЅР° Р»РёСЃС‚ '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbExclamation, "Р’РЅРёРјР°РЅРёРµ"
         Exit Sub
     End If
     
     Set wsPayments = ActiveSheet
 
-     On Error Resume Next
-   Set activeCell = Application.activeCell
-   On Error GoTo ErrorHandler
-   
-   If activeCell Is Nothing Then
-       MsgBox "Нет активной ячейки.", vbExclamation, "Внимание"
-       Exit Sub
-   End If
+    On Error Resume Next
+    Set activeCell = Application.activeCell
+    On Error GoTo ErrorHandler
     
-    ' Проверяем, что активная ячейка находится в колонке C или D
-    If activeCell.Column <> mdlPaymentValidation.COL_FIO And activeCell.Column <> mdlPaymentValidation.COL_LICHNIY_NOMER Then
-        MsgBox "Активная ячейка должна находиться в колонке C (ФИО) или D (личный номер).", vbExclamation, "Внимание"
+    If activeCell Is Nothing Then
+        MsgBox "РќРµС‚ Р°РєС‚РёРІРЅРѕР№ СЏС‡РµР№РєРё.", vbExclamation, "Р’РЅРёРјР°РЅРёРµ"
         Exit Sub
     End If
     
-    ' Определяем целевую строку
+    ' Check if active cell is in column C or D
+    If activeCell.Column <> mdlPaymentValidation.COL_FIO And activeCell.Column <> mdlPaymentValidation.COL_LICHNIY_NOMER Then
+        MsgBox "РђРєС‚РёРІРЅР°СЏ СЏС‡РµР№РєР° РґРѕР»Р¶РЅР° РЅР°С…РѕРґРёС‚СЊСЃСЏ РІ РєРѕР»РѕРЅРєРµ C (Р¤РРћ) РёР»Рё D (Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ).", vbExclamation, "Р’РЅРёРјР°РЅРёРµ"
+        Exit Sub
+    End If
+    
+    ' Determine target row
     targetRow = activeCell.Row
     
-    ' Открываем форму выбора сотрудника
+    ' Open employee selection form
     frmSelectEmployee.selectedLichniyNomer = ""
     frmSelectEmployee.selectedFIO = ""
     frmSelectEmployee.isCancelled = True
     
     frmSelectEmployee.Show
     
-    ' Если выбор сделан (не отменен), заполняем ячейки
+    ' If selection made (not cancelled), fill cells
     If Not frmSelectEmployee.isCancelled Then
         wsPayments.Cells(targetRow, mdlPaymentValidation.COL_FIO).value = frmSelectEmployee.selectedFIO
         wsPayments.Cells(targetRow, mdlPaymentValidation.COL_LICHNIY_NOMER).value = frmSelectEmployee.selectedLichniyNomer
     End If
 
-       ' Очистка объектов
-   Set activeCell = Nothing
-   Set wsPayments = Nothing
+    ' Cleanup objects
+    Set activeCell = Nothing
+    Set wsPayments = Nothing
     
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при выборе сотрудника: " & Err.Description, vbCritical, "Ошибка"
-       ' Очистка объектов в случае ошибки
-   Set activeCell = Nothing
-   Set wsPayments = Nothing
+    MsgBox "РћС€РёР±РєР° РїСЂРё РІС‹Р±РѕСЂРµ СЃРѕС‚СЂСѓРґРЅРёРєР°: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
+    ' Cleanup objects on error
+    Set activeCell = Nothing
+    Set wsPayments = Nothing
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработчик кнопки "Справочники"
-' @param control As IRibbonControl - элемент управления Ribbon
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Handler for "References" button
+' @param control As IRibbonControl - Ribbon control element
 ' =============================================
 Public Sub OnManageReferencesClick(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
     
-    ' Переходим на лист со справочниками или показываем информацию
+    ' Switch to references sheet or show info
     Dim wsRef As Worksheet
     On Error Resume Next
     Set wsRef = ThisWorkbook.Sheets(mdlReferenceData.SHEET_REF_PAYMENT_TYPES)
     If wsRef Is Nothing Then
-        ' Если лист не найден, создаем или показываем сообщение
-        MsgBox "Лист справочников не найден. Убедитесь, что лист '" & mdlReferenceData.SHEET_REF_PAYMENT_TYPES & "' существует.", vbInformation, "Справочники"
+        ' If sheet not found, create or show message
+        MsgBox "Р›РёСЃС‚ СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ РЅРµ РЅР°Р№РґРµРЅ. РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ Р»РёСЃС‚ '" & mdlReferenceData.SHEET_REF_PAYMENT_TYPES & "' СЃСѓС‰РµСЃС‚РІСѓРµС‚.", vbInformation, "РЎРїСЂР°РІРѕС‡РЅРёРєРё"
     Else
         wsRef.Activate
         wsRef.Cells(1, 1).Select
@@ -480,14 +479,14 @@ Public Sub OnManageReferencesClick(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при открытии справочников: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РѕС‚РєСЂС‹С‚РёРё СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Обработчик кнопки "Удалить дубликаты модулей"
-' @description Удаляет модули с именами, заканчивающимися на цифру (например, mdlHelper1)
-' @param control As IRibbonControl - элемент управления Ribbon
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Handler for "Remove Duplicate Modules" button
+' @description Removes modules with names ending in a digit (e.g., mdlHelper1)
+' @param control As IRibbonControl - Ribbon control element
 ' =============================================
 Public Sub OnRemoveDuplicateModulesClick(control As IRibbonControl)
     On Error GoTo ErrorHandler
@@ -498,6 +497,5 @@ Public Sub OnRemoveDuplicateModulesClick(control As IRibbonControl)
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при удалении дубликатов модулей: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СѓРґР°Р»РµРЅРёРё РґСѓР±Р»РёРєР°С‚РѕРІ РјРѕРґСѓР»РµР№: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
-

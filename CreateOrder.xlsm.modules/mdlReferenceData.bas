@@ -1,47 +1,47 @@
 Attribute VB_Name = "mdlReferenceData"
 ' ===============================================================================
-' Модуль mdlReferenceData
-' Версия: 1.0.0
-' Дата: 01.12.2025
-' Описание: Работа со справочниками для системы надбавок без периодов
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' Module mdlReferenceData
+' Version: 1.0.0
+' Date: 14.02.2026
+' Description: Handling reference data for the allowance system without periods
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
 ' ===============================================================================
 
 Option Explicit
 
-' Константы имен листов
-Public Const SHEET_PAYMENTS_NO_PERIODS As String = "Выплаты_Без_Периодов"
-Public Const SHEET_REF_VUS_CREW As String = "Справочник_ВУС_Экипаж"
-Public Const SHEET_REF_PAYMENT_TYPES As String = "Справочник_Типы_Выплат"
-Public Const SHEET_STAFF As String = "Штат"
+' Sheet name constants
+Public Const SHEET_PAYMENTS_NO_PERIODS As String = "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
+Public Const SHEET_REF_VUS_CREW As String = "РЎРїСЂР°РІРѕС‡РЅРёРє_Р’РЈРЎ_Р­РєРёРїР°Р¶"
+Public Const SHEET_REF_PAYMENT_TYPES As String = "РЎРїСЂР°РІРѕС‡РЅРёРє_РўРёРїС‹_Р’С‹РїР»Р°С‚"
+Public Const SHEET_STAFF As String = "РЁС‚Р°С‚"
 
-' Тип для пары ВУС-Должность
+' Type for VUS-Position pair
 Public Type VUSPositionPair
     vus As String
     Position As String
 End Type
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Инициализация листа справочников (если создается программно)
-' @param ws Worksheet - лист для инициализации
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Initialization of reference sheet (if created programmatically)
+' @param ws Worksheet - sheet to initialize
 ' =============================================
 Public Sub InitializeReferencesSheet(ByVal ws As Worksheet)
     On Error GoTo ErrorHandler
     
-    ' Создание структуры заголовков для справочников
-    ' Эта функция может быть использована для программного создания листов
+    ' Creation of header structure for references
+    ' This function can be used for programmatic sheet creation
     
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при инициализации листа справочников: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё Р»РёСЃС‚Р° СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Загрузка всех пар ВУС-должность из справочника в Dictionary
-' @return Object (Dictionary) - словарь, где ключ = "ВУС|Должность", значение = True
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Load all VUS-Position pairs from reference into Dictionary
+' @return Object (Dictionary) - dictionary where key = "VUS|Position", value = True
 ' =============================================
 Public Function LoadVUSPositionPairs() As Object
     On Error GoTo ErrorHandler
@@ -56,7 +56,7 @@ Public Function LoadVUSPositionPairs() As Object
     
     Set result = CreateObject("Scripting.Dictionary")
     
-    ' Ищем лист "Справочник_ВУС_Экипаж"
+    ' Search for sheet "РЎРїСЂР°РІРѕС‡РЅРёРє_Р’РЈРЎ_Р­РєРёРїР°Р¶"
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
@@ -71,15 +71,15 @@ Public Function LoadVUSPositionPairs() As Object
         Exit Function
     End If
     
-    ' Загружаем данные (предполагаем: колонка A = ВУС, колонка B = Должность)
+    ' Load data (assume: column A = VUS, column B = Position)
     lastRow = wsRef.Cells(wsRef.Rows.count, 1).End(xlUp).Row
     
-    For i = 2 To lastRow ' Пропускаем заголовок
+    For i = 2 To lastRow ' Skip header
         vus = Trim(LCase(CStr(wsRef.Cells(i, 1).value)))
         Position = Trim(LCase(CStr(wsRef.Cells(i, 2).value)))
         
         If vus <> "" And Position <> "" Then
-            ' Создаем ключ из пары ВУС-Должность
+            ' Create key from VUS-Position pair
             key = vus & "|" & Position
             If Not result.exists(key) Then
                 result.Add key, True
@@ -95,11 +95,11 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Проверка наличия пары (ВУС, должность) в справочнике
-' @param vus As String - ВУС военнослужащего
-' @param position As String - должность военнослужащего
-' @return Boolean - True если пара найдена в справочнике
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Check existence of (VUS, Position) pair in reference
+' @param vus As String - soldier's VUS
+' @param position As String - soldier's position
+' @return Boolean - True if pair found in reference
 ' =============================================
 Public Function CheckVUSPositionPair(ByVal vus As String, ByVal Position As String) As Boolean
     On Error GoTo ErrorHandler
@@ -110,7 +110,7 @@ Public Function CheckVUSPositionPair(ByVal vus As String, ByVal Position As Stri
     Dim refVUS As String
     Dim refPosition As String
     
-    ' Ищем лист "Справочник_ВУС_Экипаж"
+    ' Search for sheet "РЎРїСЂР°РІРѕС‡РЅРёРє_Р’РЈРЎ_Р­РєРёРїР°Р¶"
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
@@ -125,25 +125,25 @@ Public Function CheckVUSPositionPair(ByVal vus As String, ByVal Position As Stri
         Exit Function
     End If
     
-    ' Нормализуем входные данные для сравнения
+    ' Normalize input data for comparison
     vus = Trim(LCase(vus))
     Position = Trim(LCase(Position))
     
-    ' Проверяем каждую строку справочника
+    ' Check every row of the reference
     lastRow = wsRef.Cells(wsRef.Rows.count, 1).End(xlUp).Row
     
-    For i = 2 To lastRow ' Пропускаем заголовок
+    For i = 2 To lastRow ' Skip header
         refVUS = Trim(LCase(CStr(wsRef.Cells(i, 1).value)))
         refPosition = Trim(LCase(CStr(wsRef.Cells(i, 2).value)))
         
-        ' Проверяем совпадение пары ВУС-должность
+        ' Check VUS-Position pair match
         If refVUS = vus And refPosition = Position Then
             CheckVUSPositionPair = True
             Exit Function
         End If
     Next i
     
-    ' Пара не найдена
+    ' Pair not found
     CheckVUSPositionPair = False
     Exit Function
     
@@ -152,10 +152,10 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Получение конфигурации типа выплаты из справочника
-' @param paymentType As String - название типа выплаты
-' @return Object (Dictionary) - конфигурация типа выплаты или Nothing
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Get payment type configuration from reference
+' @param paymentType As String - payment type name
+' @return Object (Dictionary) - payment type configuration or Nothing
 ' =============================================
 Public Function GetPaymentTypeConfig(ByVal paymentType As String) As Object
     On Error GoTo ErrorHandler
@@ -168,7 +168,7 @@ Public Function GetPaymentTypeConfig(ByVal paymentType As String) As Object
     
     Set resultDict = CreateObject("Scripting.Dictionary")
     
-    ' Ищем лист "Справочник_Типы_Выплат"
+    ' Search for sheet "РЎРїСЂР°РІРѕС‡РЅРёРє_РўРёРїС‹_Р’С‹РїР»Р°С‚"
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
@@ -183,11 +183,11 @@ Public Function GetPaymentTypeConfig(ByVal paymentType As String) As Object
         Exit Function
     End If
     
-    ' Ищем тип выплаты (колонка A = Тип выплаты, B = Код, C = Шаблон Word, D = Описание)
+    ' Search for payment type (col A = Type, B = Code, C = Template, D = Description)
     lastRow = wsRef.Cells(wsRef.Rows.count, 1).End(xlUp).Row
     paymentType = Trim(LCase(paymentType))
     
-    For i = 2 To lastRow ' Пропускаем заголовок
+    For i = 2 To lastRow ' Skip header
         refTypeName = Trim(LCase(CStr(wsRef.Cells(i, 1).value)))
         
         If refTypeName = paymentType Then
@@ -200,7 +200,7 @@ Public Function GetPaymentTypeConfig(ByVal paymentType As String) As Object
         End If
     Next i
     
-    ' Тип не найден
+    ' Type not found
     Set GetPaymentTypeConfig = resultDict
     Exit Function
     
@@ -209,9 +209,9 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Получение списка всех типов выплат из справочника
-' @return Collection - коллекция строк с названиями типов выплат
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Get list of all payment types from reference
+' @return Collection - collection of payment type name strings
 ' =============================================
 Public Function GetAllPaymentTypes() As Collection
     On Error GoTo ErrorHandler
@@ -224,7 +224,7 @@ Public Function GetAllPaymentTypes() As Collection
     
     Set result = New Collection
     
-    ' Ищем лист "Справочник_Типы_Выплат"
+    ' Search for sheet "РЎРїСЂР°РІРѕС‡РЅРёРє_РўРёРїС‹_Р’С‹РїР»Р°С‚"
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
@@ -239,10 +239,10 @@ Public Function GetAllPaymentTypes() As Collection
         Exit Function
     End If
     
-    ' Загружаем все типы выплат (колонка A = Тип выплаты)
+    ' Load all payment types (column A = Payment Type)
     lastRow = wsRef.Cells(wsRef.Rows.count, 1).End(xlUp).Row
     
-    For i = 2 To lastRow ' Пропускаем заголовок
+    For i = 2 To lastRow ' Skip header
         typeName = Trim(CStr(wsRef.Cells(i, 1).value))
         If typeName <> "" Then
             result.Add typeName
@@ -255,4 +255,3 @@ Public Function GetAllPaymentTypes() As Collection
 ErrorHandler:
     Set GetAllPaymentTypes = New Collection
 End Function
-

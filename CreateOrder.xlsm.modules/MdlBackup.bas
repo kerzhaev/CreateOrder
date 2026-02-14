@@ -1,14 +1,14 @@
 Attribute VB_Name = "MdlBackup"
-' === СНАПШОТ ВЕРСИИ === 12.07.2025 20:45 ===
-' Рабочая версия сохранена: 12.07.2025 20:45
+' === РЎРќРђРџРЁРћРў Р’Р•Р РЎРР === 12.07.2025 20:45 ===
+' Р Р°Р±РѕС‡Р°СЏ РІРµСЂСЃРёСЏ СЃРѕС…СЂР°РЅРµРЅР°: 12.07.2025 20:45
 
 Option Explicit
 
-' Модуль MdlBackup для создания резервных копий VBA проекта
-' Версия: 1.0.0
-' Дата: 12.07.2025
-' Описание: Экспортирует все модули VBA в отдельные файлы для создания снапшота проекта
-' Функциональность: Создает резервную копию всех модулей, форм и классов в указанную папку
+' РњРѕРґСѓР»СЊ MdlBackup РґР»СЏ СЃРѕР·РґР°РЅРёСЏ СЂРµР·РµСЂРІРЅС‹С… РєРѕРїРёР№ VBA РїСЂРѕРµРєС‚Р°
+' Р’РµСЂСЃРёСЏ: 1.0.0
+' Р”Р°С‚Р°: 12.07.2025
+' РћРїРёСЃР°РЅРёРµ: Р­РєСЃРїРѕСЂС‚РёСЂСѓРµС‚ РІСЃРµ РјРѕРґСѓР»Рё VBA РІ РѕС‚РґРµР»СЊРЅС‹Рµ С„Р°Р№Р»С‹ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ СЃРЅР°РїС€РѕС‚Р° РїСЂРѕРµРєС‚Р°
+' Р¤СѓРЅРєС†РёРѕРЅР°Р»СЊРЅРѕСЃС‚СЊ: РЎРѕР·РґР°РµС‚ СЂРµР·РµСЂРІРЅСѓСЋ РєРѕРїРёСЋ РІСЃРµС… РјРѕРґСѓР»РµР№, С„РѕСЂРј Рё РєР»Р°СЃСЃРѕРІ РІ СѓРєР°Р·Р°РЅРЅСѓСЋ РїР°РїРєСѓ
 
 Sub CreateVBASnapshot()
     Dim vbComp As Object
@@ -17,10 +17,10 @@ Sub CreateVBASnapshot()
     Dim timeStamp As String
     Dim fso As Object
     
-    ' Создаем временную метку для уникальности
+    ' РЎРѕР·РґР°РµРј РІСЂРµРјРµРЅРЅСѓСЋ РјРµС‚РєСѓ РґР»СЏ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё
     timeStamp = Format(Now, "yyyy-mm-dd_hh-mm-ss")
     
-    ' Создаем папку для снапшота
+    ' РЎРѕР·РґР°РµРј РїР°РїРєСѓ РґР»СЏ СЃРЅР°РїС€РѕС‚Р°
     exportPath = ThisWorkbook.Path & "\VBA_Snapshots\Snapshot_" & timeStamp & "\"
     
     Set fso = CreateObject("Scripting.FileSystemObject")
@@ -28,25 +28,25 @@ Sub CreateVBASnapshot()
         fso.CreateFolder Left(exportPath, Len(exportPath) - 1)
     End If
     
-    ' Экспортируем все компоненты VBA проекта
+    ' Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј РІСЃРµ РєРѕРјРїРѕРЅРµРЅС‚С‹ VBA РїСЂРѕРµРєС‚Р°
     For Each vbComp In ThisWorkbook.VBProject.VBComponents
         Select Case vbComp.Type
-            Case 1 ' vbext_ct_StdModule - стандартные модули
+            Case 1 ' vbext_ct_StdModule - СЃС‚Р°РЅРґР°СЂС‚РЅС‹Рµ РјРѕРґСѓР»Рё
                 fileName = vbComp.Name & ".bas"
-            Case 2 ' vbext_ct_ClassModule - модули классов
+            Case 2 ' vbext_ct_ClassModule - РјРѕРґСѓР»Рё РєР»Р°СЃСЃРѕРІ
                 fileName = vbComp.Name & ".cls"
-            Case 3 ' vbext_ct_MSForm - пользовательские формы
+            Case 3 ' vbext_ct_MSForm - РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРµ С„РѕСЂРјС‹
                 fileName = vbComp.Name & ".frm"
-            Case 100 ' vbext_ct_Document - модули листов/книги
+            Case 100 ' vbext_ct_Document - РјРѕРґСѓР»Рё Р»РёСЃС‚РѕРІ/РєРЅРёРіРё
                 fileName = vbComp.Name & ".cls"
         End Select
         
-        ' Экспортируем компонент
+        ' Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј РєРѕРјРїРѕРЅРµРЅС‚
         vbComp.Export exportPath & fileName
-        Debug.Print "Экспортирован: " & fileName
+        Debug.Print "Р­РєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅ: " & fileName
     Next vbComp
     
-    ' Создаем файл с информацией о снапшоте
+    ' РЎРѕР·РґР°РµРј С„Р°Р№Р» СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ Рѕ СЃРЅР°РїС€РѕС‚Рµ
     Dim infoFile As String
     infoFile = exportPath & "SnapshotInfo.txt"
     
@@ -54,43 +54,43 @@ Sub CreateVBASnapshot()
     fileNum = FreeFile
     Open infoFile For Output As fileNum
     Print #fileNum, "VBA Project Snapshot"
-    Print #fileNum, "Дата создания: " & Format(Now, "dd.mm.yyyy hh:mm:ss")
-    Print #fileNum, "Файл проекта: " & ThisWorkbook.Name
-    Print #fileNum, "Путь: " & ThisWorkbook.FullName
-    Print #fileNum, "Количество модулей: " & ThisWorkbook.VBProject.VBComponents.count
+    Print #fileNum, "Р”Р°С‚Р° СЃРѕР·РґР°РЅРёСЏ: " & Format(Now, "dd.mm.yyyy hh:mm:ss")
+    Print #fileNum, "Р¤Р°Р№Р» РїСЂРѕРµРєС‚Р°: " & ThisWorkbook.Name
+    Print #fileNum, "РџСѓС‚СЊ: " & ThisWorkbook.FullName
+    Print #fileNum, "РљРѕР»РёС‡РµСЃС‚РІРѕ РјРѕРґСѓР»РµР№: " & ThisWorkbook.VBProject.VBComponents.count
     Print #fileNum, ""
-    Print #fileNum, "Список модулей:"
+    Print #fileNum, "РЎРїРёСЃРѕРє РјРѕРґСѓР»РµР№:"
     For Each vbComp In ThisWorkbook.VBProject.VBComponents
-        Print #fileNum, "- " & vbComp.Name & " (Тип: " & GetComponentTypeName(vbComp.Type) & ")"
+        Print #fileNum, "- " & vbComp.Name & " (РўРёРї: " & GetComponentTypeName(vbComp.Type) & ")"
     Next vbComp
     Close fileNum
     
-    MsgBox "Снапшот VBA проекта создан!" & vbCrLf & _
-           "Путь: " & exportPath & vbCrLf & _
-           "Экспортировано модулей: " & ThisWorkbook.VBProject.VBComponents.count, _
-           vbInformation, "Снапшот создан"
+    MsgBox "РЎРЅР°РїС€РѕС‚ VBA РїСЂРѕРµРєС‚Р° СЃРѕР·РґР°РЅ!" & vbCrLf & _
+           "РџСѓС‚СЊ: " & exportPath & vbCrLf & _
+           "Р­РєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅРѕ РјРѕРґСѓР»РµР№: " & ThisWorkbook.VBProject.VBComponents.count, _
+           vbInformation, "РЎРЅР°РїС€РѕС‚ СЃРѕР·РґР°РЅ"
     
-    ' Открываем папку со снапшотом
+    ' РћС‚РєСЂС‹РІР°РµРј РїР°РїРєСѓ СЃРѕ СЃРЅР°РїС€РѕС‚РѕРј
     Shell "explorer.exe " & exportPath, vbNormalFocus
 End Sub
 
-' Вспомогательная функция для получения названия типа компонента
+' Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РЅР°Р·РІР°РЅРёСЏ С‚РёРїР° РєРѕРјРїРѕРЅРµРЅС‚Р°
 Function GetComponentTypeName(componentType As Integer) As String
     Select Case componentType
-        Case 1: GetComponentTypeName = "Стандартный модуль"
-        Case 2: GetComponentTypeName = "Модуль класса"
-        Case 3: GetComponentTypeName = "Пользовательская форма"
-        Case 100: GetComponentTypeName = "Модуль документа"
-        Case Else: GetComponentTypeName = "Неизвестный тип"
+        Case 1: GetComponentTypeName = "РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РјРѕРґСѓР»СЊ"
+        Case 2: GetComponentTypeName = "РњРѕРґСѓР»СЊ РєР»Р°СЃСЃР°"
+        Case 3: GetComponentTypeName = "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєР°СЏ С„РѕСЂРјР°"
+        Case 100: GetComponentTypeName = "РњРѕРґСѓР»СЊ РґРѕРєСѓРјРµРЅС‚Р°"
+        Case Else: GetComponentTypeName = "РќРµРёР·РІРµСЃС‚РЅС‹Р№ С‚РёРї"
     End Select
 End Function
 
 
-' Модуль для восстановления VBA проекта из снапшота
-' Версия: 1.0.0
-' Дата: 12.07.2025
-' Описание: Импортирует модули VBA из папки снапшота для восстановления предыдущего состояния
-' Функциональность: Удаляет текущие модули и загружает модули из выбранной резервной копии
+' РњРѕРґСѓР»СЊ РґР»СЏ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ VBA РїСЂРѕРµРєС‚Р° РёР· СЃРЅР°РїС€РѕС‚Р°
+' Р’РµСЂСЃРёСЏ: 1.0.0
+' Р”Р°С‚Р°: 12.07.2025
+' РћРїРёСЃР°РЅРёРµ: РРјРїРѕСЂС‚РёСЂСѓРµС‚ РјРѕРґСѓР»Рё VBA РёР· РїР°РїРєРё СЃРЅР°РїС€РѕС‚Р° РґР»СЏ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РїСЂРµРґС‹РґСѓС‰РµРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ
+' Р¤СѓРЅРєС†РёРѕРЅР°Р»СЊРЅРѕСЃС‚СЊ: РЈРґР°Р»СЏРµС‚ С‚РµРєСѓС‰РёРµ РјРѕРґСѓР»Рё Рё Р·Р°РіСЂСѓР¶Р°РµС‚ РјРѕРґСѓР»Рё РёР· РІС‹Р±СЂР°РЅРЅРѕР№ СЂРµР·РµСЂРІРЅРѕР№ РєРѕРїРёРё
 
 Sub RestoreFromSnapshot()
     Dim importPath As String
@@ -100,64 +100,64 @@ Sub RestoreFromSnapshot()
     Dim vbComp As Object
     Dim componentName As String
     
-    ' Выбираем папку со снапшотом
+    ' Р’С‹Р±РёСЂР°РµРј РїР°РїРєСѓ СЃРѕ СЃРЅР°РїС€РѕС‚РѕРј
     importPath = SelectSnapshotFolder()
     If importPath = "" Then Exit Sub
     
     Set fso = CreateObject("Scripting.FileSystemObject")
     Set folder = fso.GetFolder(importPath)
     
-    ' Предупреждение пользователя
+    ' РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     Dim response As VbMsgBoxResult
-    response = MsgBox("ВНИМАНИЕ!" & vbCrLf & _
-                     "Это действие удалит все текущие модули VBA и заменит их модулями из снапшота." & vbCrLf & _
-                     "Вы уверены, что хотите продолжить?", _
-                     vbYesNo + vbExclamation, "Подтверждение восстановления")
+    response = MsgBox("Р’РќРРњРђРќРР•!" & vbCrLf & _
+                     "Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ СѓРґР°Р»РёС‚ РІСЃРµ С‚РµРєСѓС‰РёРµ РјРѕРґСѓР»Рё VBA Рё Р·Р°РјРµРЅРёС‚ РёС… РјРѕРґСѓР»СЏРјРё РёР· СЃРЅР°РїС€РѕС‚Р°." & vbCrLf & _
+                     "Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ РїСЂРѕРґРѕР»Р¶РёС‚СЊ?", _
+                     vbYesNo + vbExclamation, "РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ")
     
     If response = vbNo Then Exit Sub
     
-    ' Удаляем все пользовательские модули (кроме модулей листов)
+    ' РЈРґР°Р»СЏРµРј РІСЃРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРµ РјРѕРґСѓР»Рё (РєСЂРѕРјРµ РјРѕРґСѓР»РµР№ Р»РёСЃС‚РѕРІ)
     For Each vbComp In ThisWorkbook.VBProject.VBComponents
-        If vbComp.Type = 1 Or vbComp.Type = 2 Or vbComp.Type = 3 Then ' Стандартные модули, классы, формы
+        If vbComp.Type = 1 Or vbComp.Type = 2 Or vbComp.Type = 3 Then ' РЎС‚Р°РЅРґР°СЂС‚РЅС‹Рµ РјРѕРґСѓР»Рё, РєР»Р°СЃСЃС‹, С„РѕСЂРјС‹
             ThisWorkbook.VBProject.VBComponents.Remove vbComp
         End If
     Next vbComp
     
-    ' Импортируем модули из снапшота
+    ' РРјРїРѕСЂС‚РёСЂСѓРµРј РјРѕРґСѓР»Рё РёР· СЃРЅР°РїС€РѕС‚Р°
     For Each file In folder.Files
         If Right(LCase(file.Name), 4) = ".bas" Or _
            Right(LCase(file.Name), 4) = ".cls" Or _
            Right(LCase(file.Name), 4) = ".frm" Then
             
             ThisWorkbook.VBProject.VBComponents.Import file.Path
-            Debug.Print "Импортирован: " & file.Name
+            Debug.Print "РРјРїРѕСЂС‚РёСЂРѕРІР°РЅ: " & file.Name
         End If
     Next file
     
-    MsgBox "Снапшот успешно восстановлен!" & vbCrLf & _
-           "Папка снапшота: " & importPath, _
-           vbInformation, "Восстановление завершено"
+    MsgBox "РЎРЅР°РїС€РѕС‚ СѓСЃРїРµС€РЅРѕ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅ!" & vbCrLf & _
+           "РџР°РїРєР° СЃРЅР°РїС€РѕС‚Р°: " & importPath, _
+           vbInformation, "Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ Р·Р°РІРµСЂС€РµРЅРѕ"
 End Sub
 
-' Функция для выбора папки со снапшотом
+' Р¤СѓРЅРєС†РёСЏ РґР»СЏ РІС‹Р±РѕСЂР° РїР°РїРєРё СЃРѕ СЃРЅР°РїС€РѕС‚РѕРј
 Function SelectSnapshotFolder() As String
     Dim snapshotsPath As String
     Dim selectedPath As String
     
     snapshotsPath = ThisWorkbook.Path & "\VBA_Snapshots\"
     
-    ' Проверяем существование папки со снапшотами
+    ' РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ РїР°РїРєРё СЃРѕ СЃРЅР°РїС€РѕС‚Р°РјРё
     If dir(snapshotsPath, vbDirectory) = "" Then
-        MsgBox "Папка со снапшотами не найдена: " & snapshotsPath, vbExclamation
+        MsgBox "РџР°РїРєР° СЃРѕ СЃРЅР°РїС€РѕС‚Р°РјРё РЅРµ РЅР°Р№РґРµРЅР°: " & snapshotsPath, vbExclamation
         SelectSnapshotFolder = ""
         Exit Function
     End If
     
-    ' Здесь можно добавить диалог выбора папки
-    ' Для простоты используем InputBox
-    selectedPath = InputBox("Введите имя папки снапшота:" & vbCrLf & _
-                           "Доступные снапшоты находятся в: " & snapshotsPath, _
-                           "Выбор снапшота", "Snapshot_")
+    ' Р—РґРµСЃСЊ РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РґРёР°Р»РѕРі РІС‹Р±РѕСЂР° РїР°РїРєРё
+    ' Р”Р»СЏ РїСЂРѕСЃС‚РѕС‚С‹ РёСЃРїРѕР»СЊР·СѓРµРј InputBox
+    selectedPath = InputBox("Р’РІРµРґРёС‚Рµ РёРјСЏ РїР°РїРєРё СЃРЅР°РїС€РѕС‚Р°:" & vbCrLf & _
+                           "Р”РѕСЃС‚СѓРїРЅС‹Рµ СЃРЅР°РїС€РѕС‚С‹ РЅР°С…РѕРґСЏС‚СЃСЏ РІ: " & snapshotsPath, _
+                           "Р’С‹Р±РѕСЂ СЃРЅР°РїС€РѕС‚Р°", "Snapshot_")
     
     If selectedPath <> "" Then
         SelectSnapshotFolder = snapshotsPath & selectedPath & "\"
@@ -167,11 +167,11 @@ Function SelectSnapshotFolder() As String
 End Function
 
 
-' Модуль для управления версиями кода через комментарии
-' Версия: 1.0.0
-' Дата: 12.07.2025
-' Описание: Добавляет метки версий в код для отслеживания изменений
-' Функциональность: Вставляет комментарии с версиями и датами в начало каждого модуля
+' РњРѕРґСѓР»СЊ РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РІРµСЂСЃРёСЏРјРё РєРѕРґР° С‡РµСЂРµР· РєРѕРјРјРµРЅС‚Р°СЂРёРё
+' Р’РµСЂСЃРёСЏ: 1.0.0
+' Р”Р°С‚Р°: 12.07.2025
+' РћРїРёСЃР°РЅРёРµ: Р”РѕР±Р°РІР»СЏРµС‚ РјРµС‚РєРё РІРµСЂСЃРёР№ РІ РєРѕРґ РґР»СЏ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ РёР·РјРµРЅРµРЅРёР№
+' Р¤СѓРЅРєС†РёРѕРЅР°Р»СЊРЅРѕСЃС‚СЊ: Р’СЃС‚Р°РІР»СЏРµС‚ РєРѕРјРјРµРЅС‚Р°СЂРёРё СЃ РІРµСЂСЃРёСЏРјРё Рё РґР°С‚Р°РјРё РІ РЅР°С‡Р°Р»Рѕ РєР°Р¶РґРѕРіРѕ РјРѕРґСѓР»СЏ
 
 Sub AddVersionTagsToAllModules()
     Dim vbComp As Object
@@ -180,30 +180,30 @@ Sub AddVersionTagsToAllModules()
     Dim currentDate As String
     
     currentDate = Format(Now, "dd.mm.yyyy hh:mm")
-    versionTag = "' === СНАПШОТ ВЕРСИИ === " & currentDate & " ==="
+    versionTag = "' === РЎРќРђРџРЁРћРў Р’Р•Р РЎРР === " & currentDate & " ==="
     
     For Each vbComp In ThisWorkbook.VBProject.VBComponents
-        If vbComp.Type = 1 Then ' Только стандартные модули
+        If vbComp.Type = 1 Then ' РўРѕР»СЊРєРѕ СЃС‚Р°РЅРґР°СЂС‚РЅС‹Рµ РјРѕРґСѓР»Рё
             Set codeModule = vbComp.codeModule
             
-            ' Добавляем метку версии в начало модуля
+            ' Р”РѕР±Р°РІР»СЏРµРј РјРµС‚РєСѓ РІРµСЂСЃРёРё РІ РЅР°С‡Р°Р»Рѕ РјРѕРґСѓР»СЏ
             codeModule.InsertLines 1, versionTag
-            codeModule.InsertLines 2, "' Рабочая версия сохранена: " & currentDate
+            codeModule.InsertLines 2, "' Р Р°Р±РѕС‡Р°СЏ РІРµСЂСЃРёСЏ СЃРѕС…СЂР°РЅРµРЅР°: " & currentDate
             codeModule.InsertLines 3, ""
             
-            Debug.Print "Метка версии добавлена в модуль: " & vbComp.Name
+            Debug.Print "РњРµС‚РєР° РІРµСЂСЃРёРё РґРѕР±Р°РІР»РµРЅР° РІ РјРѕРґСѓР»СЊ: " & vbComp.Name
         End If
     Next vbComp
     
-    MsgBox "Метки версий добавлены во все модули!", vbInformation
+    MsgBox "РњРµС‚РєРё РІРµСЂСЃРёР№ РґРѕР±Р°РІР»РµРЅС‹ РІРѕ РІСЃРµ РјРѕРґСѓР»Рё!", vbInformation
 End Sub
 
 
-' Модуль для создания именованных копий Excel файла
-' Версия: 1.0.0
-' Дата: 12.07.2025
-' Описание: Создает копии текущего Excel файла с временными метками для быстрого отката
-' Функциональность: Сохраняет копию файла с описательным именем и временной меткой
+' РњРѕРґСѓР»СЊ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РёРјРµРЅРѕРІР°РЅРЅС‹С… РєРѕРїРёР№ Excel С„Р°Р№Р»Р°
+' Р’РµСЂСЃРёСЏ: 1.0.0
+' Р”Р°С‚Р°: 12.07.2025
+' РћРїРёСЃР°РЅРёРµ: РЎРѕР·РґР°РµС‚ РєРѕРїРёРё С‚РµРєСѓС‰РµРіРѕ Excel С„Р°Р№Р»Р° СЃ РІСЂРµРјРµРЅРЅС‹РјРё РјРµС‚РєР°РјРё РґР»СЏ Р±С‹СЃС‚СЂРѕРіРѕ РѕС‚РєР°С‚Р°
+' Р¤СѓРЅРєС†РёРѕРЅР°Р»СЊРЅРѕСЃС‚СЊ: РЎРѕС…СЂР°РЅСЏРµС‚ РєРѕРїРёСЋ С„Р°Р№Р»Р° СЃ РѕРїРёСЃР°С‚РµР»СЊРЅС‹Рј РёРјРµРЅРµРј Рё РІСЂРµРјРµРЅРЅРѕР№ РјРµС‚РєРѕР№
 
 Sub CreateWorkbookSnapshot()
     Dim originalPath As String
@@ -212,41 +212,41 @@ Sub CreateWorkbookSnapshot()
     Dim Description As String
     Dim fileName As String
     
-    ' Получаем описание от пользователя
-    Description = InputBox("Введите краткое описание этого снапшота:", _
-                          "Описание снапшота", "Рабочая_версия")
+    ' РџРѕР»СѓС‡Р°РµРј РѕРїРёСЃР°РЅРёРµ РѕС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+    Description = InputBox("Р’РІРµРґРёС‚Рµ РєСЂР°С‚РєРѕРµ РѕРїРёСЃР°РЅРёРµ СЌС‚РѕРіРѕ СЃРЅР°РїС€РѕС‚Р°:", _
+                          "РћРїРёСЃР°РЅРёРµ СЃРЅР°РїС€РѕС‚Р°", "Р Р°Р±РѕС‡Р°СЏ_РІРµСЂСЃРёСЏ")
     
     If Description = "" Then Exit Sub
     
-    ' Создаем временную метку
+    ' РЎРѕР·РґР°РµРј РІСЂРµРјРµРЅРЅСѓСЋ РјРµС‚РєСѓ
     timeStamp = Format(Now, "yyyy-mm-dd_hh-mm")
     
-    ' Формируем имя файла
+    ' Р¤РѕСЂРјРёСЂСѓРµРј РёРјСЏ С„Р°Р№Р»Р°
     fileName = Replace(ThisWorkbook.Name, ".xlsm", "") & "_" & Description & "_" & timeStamp & ".xlsm"
     
-    ' Определяем путь для сохранения
+    ' РћРїСЂРµРґРµР»СЏРµРј РїСѓС‚СЊ РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ
     originalPath = ThisWorkbook.Path
     snapshotPath = originalPath & "\Snapshots\"
     
-    ' Создаем папку, если её нет
+    ' РЎРѕР·РґР°РµРј РїР°РїРєСѓ, РµСЃР»Рё РµС‘ РЅРµС‚
     If dir(snapshotPath, vbDirectory) = "" Then
         MkDir snapshotPath
     End If
     
-    ' Сохраняем копию
+    ' РЎРѕС…СЂР°РЅСЏРµРј РєРѕРїРёСЋ
     ThisWorkbook.SaveCopyAs snapshotPath & fileName
     
-    MsgBox "Снапшот создан!" & vbCrLf & _
-           "Файл: " & fileName & vbCrLf & _
-           "Путь: " & snapshotPath, _
-           vbInformation, "Снапшот сохранен"
+    MsgBox "РЎРЅР°РїС€РѕС‚ СЃРѕР·РґР°РЅ!" & vbCrLf & _
+           "Р¤Р°Р№Р»: " & fileName & vbCrLf & _
+           "РџСѓС‚СЊ: " & snapshotPath, _
+           vbInformation, "РЎРЅР°РїС€РѕС‚ СЃРѕС…СЂР°РЅРµРЅ"
     
-    ' Открываем папку со снапшотами
+    ' РћС‚РєСЂС‹РІР°РµРј РїР°РїРєСѓ СЃРѕ СЃРЅР°РїС€РѕС‚Р°РјРё
     Shell "explorer.exe " & snapshotPath, vbNormalFocus
 End Sub
 
 
-' Быстрая команда для создания снапшота
+' Р‘С‹СЃС‚СЂР°СЏ РєРѕРјР°РЅРґР° РґР»СЏ СЃРѕР·РґР°РЅРёСЏ СЃРЅР°РїС€РѕС‚Р°
 Sub QuickSnapshot()
     Call AddVersionTagsToAllModules
     Call CreateVBASnapshot
@@ -255,9 +255,9 @@ End Sub
 
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Удаление дубликатов модулей с именами, заканчивающимися на цифру (например, mdlHelper1)
-' @description Используется перед импортом модулей через VbaModuleManager для предотвращения конфликтов имен
+' @author РљРµСЂР¶Р°РµРІ Р•РІРіРµРЅРёР№, Р¤РљРЈ "95 Р¤Р­РЎ" РњРћ Р Р¤
+' @description РЈРґР°Р»РµРЅРёРµ РґСѓР±Р»РёРєР°С‚РѕРІ РјРѕРґСѓР»РµР№ СЃ РёРјРµРЅР°РјРё, Р·Р°РєР°РЅС‡РёРІР°СЋС‰РёРјРёСЃСЏ РЅР° С†РёС„СЂСѓ (РЅР°РїСЂРёРјРµСЂ, mdlHelper1)
+' @description РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїРµСЂРµРґ РёРјРїРѕСЂС‚РѕРј РјРѕРґСѓР»РµР№ С‡РµСЂРµР· VbaModuleManager РґР»СЏ РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёСЏ РєРѕРЅС„Р»РёРєС‚РѕРІ РёРјРµРЅ
 ' =============================================
 Sub RemoveDuplicateModules()
     Dim vbComp As Object
@@ -272,55 +272,55 @@ Sub RemoveDuplicateModules()
     
     Set modulesToRemove = New Collection
     
-    ' Проходим по всем компонентам проекта
+    ' РџСЂРѕС…РѕРґРёРј РїРѕ РІСЃРµРј РєРѕРјРїРѕРЅРµРЅС‚Р°Рј РїСЂРѕРµРєС‚Р°
     For Each vbComp In ThisWorkbook.VBProject.VBComponents
-        ' Проверяем только стандартные модули, классы и формы (не модули листов)
+        ' РџСЂРѕРІРµСЂСЏРµРј С‚РѕР»СЊРєРѕ СЃС‚Р°РЅРґР°СЂС‚РЅС‹Рµ РјРѕРґСѓР»Рё, РєР»Р°СЃСЃС‹ Рё С„РѕСЂРјС‹ (РЅРµ РјРѕРґСѓР»Рё Р»РёСЃС‚РѕРІ)
         If vbComp.Type = 1 Or vbComp.Type = 2 Or vbComp.Type = 3 Then
             compName = vbComp.Name
             lastChar = Right(compName, 1)
             
-            ' Проверяем, заканчивается ли имя на цифру
+            ' РџСЂРѕРІРµСЂСЏРµРј, Р·Р°РєР°РЅС‡РёРІР°РµС‚СЃСЏ Р»Рё РёРјСЏ РЅР° С†РёС„СЂСѓ
             If IsNumeric(lastChar) Then
-                ' Получаем базовое имя (без последней цифры)
+                ' РџРѕР»СѓС‡Р°РµРј Р±Р°Р·РѕРІРѕРµ РёРјСЏ (Р±РµР· РїРѕСЃР»РµРґРЅРµР№ С†РёС„СЂС‹)
                 baseName = Left(compName, Len(compName) - 1)
                 
-                ' Проверяем, существует ли модуль с базовым именем
+                ' РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё РјРѕРґСѓР»СЊ СЃ Р±Р°Р·РѕРІС‹Рј РёРјРµРЅРµРј
                 On Error Resume Next
                 Set compToRemove = Nothing
                 Set compToRemove = ThisWorkbook.VBProject.VBComponents(baseName)
                 On Error GoTo ErrorHandler
                 
-                ' Если базовый модуль существует, добавляем дубликат в список на удаление
+                ' Р•СЃР»Рё Р±Р°Р·РѕРІС‹Р№ РјРѕРґСѓР»СЊ СЃСѓС‰РµСЃС‚РІСѓРµС‚, РґРѕР±Р°РІР»СЏРµРј РґСѓР±Р»РёРєР°С‚ РІ СЃРїРёСЃРѕРє РЅР° СѓРґР°Р»РµРЅРёРµ
                 If Not compToRemove Is Nothing Then
                     modulesToRemove.Add vbComp
-                    Debug.Print "Найден дубликат: " & compName & " (базовый модуль: " & baseName & ")"
+                    Debug.Print "РќР°Р№РґРµРЅ РґСѓР±Р»РёРєР°С‚: " & compName & " (Р±Р°Р·РѕРІС‹Р№ РјРѕРґСѓР»СЊ: " & baseName & ")"
                 End If
             End If
         End If
     Next vbComp
     
-    ' Удаляем найденные дубликаты
+    ' РЈРґР°Р»СЏРµРј РЅР°Р№РґРµРЅРЅС‹Рµ РґСѓР±Р»РёРєР°С‚С‹
     If modulesToRemove.count > 0 Then
         Dim response As VbMsgBoxResult
-        response = MsgBox("Найдено дубликатов модулей: " & modulesToRemove.count & vbCrLf & _
-                         "Удалить дубликаты?", _
-                         vbYesNo + vbQuestion, "Удаление дубликатов")
+        response = MsgBox("РќР°Р№РґРµРЅРѕ РґСѓР±Р»РёРєР°С‚РѕРІ РјРѕРґСѓР»РµР№: " & modulesToRemove.count & vbCrLf & _
+                         "РЈРґР°Р»РёС‚СЊ РґСѓР±Р»РёРєР°С‚С‹?", _
+                         vbYesNo + vbQuestion, "РЈРґР°Р»РµРЅРёРµ РґСѓР±Р»РёРєР°С‚РѕРІ")
         
         If response = vbYes Then
             For i = 1 To modulesToRemove.count
                 Set vbComp = modulesToRemove(i)
                 ThisWorkbook.VBProject.VBComponents.Remove vbComp
-                Debug.Print "Удален дубликат: " & vbComp.Name
+                Debug.Print "РЈРґР°Р»РµРЅ РґСѓР±Р»РёРєР°С‚: " & vbComp.Name
             Next i
             
-            MsgBox "Удалено дубликатов: " & modulesToRemove.count, vbInformation, "Готово"
+            MsgBox "РЈРґР°Р»РµРЅРѕ РґСѓР±Р»РёРєР°С‚РѕРІ: " & modulesToRemove.count, vbInformation, "Р“РѕС‚РѕРІРѕ"
         End If
     Else
-        MsgBox "Дубликаты модулей не найдены.", vbInformation, "Проверка завершена"
+        MsgBox "Р”СѓР±Р»РёРєР°С‚С‹ РјРѕРґСѓР»РµР№ РЅРµ РЅР°Р№РґРµРЅС‹.", vbInformation, "РџСЂРѕРІРµСЂРєР° Р·Р°РІРµСЂС€РµРЅР°"
     End If
     
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при удалении дубликатов: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё СѓРґР°Р»РµРЅРёРё РґСѓР±Р»РёРєР°С‚РѕРІ: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub

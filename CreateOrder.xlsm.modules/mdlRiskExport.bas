@@ -1,24 +1,24 @@
 Attribute VB_Name = "mdlRiskExport"
 '==============================================================
-' Модуль формирования приказа о надбавке за риск (2% в день, макс 60% в месяц)
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' Версия: 1.2 от 01.12.2025
-' Описание: Полный модуль с интеграцией глобальных функций поиска и корректным форматированием
+' Module for generating risk allowance order (2% per day, max 60% per month)
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' Version: 1.2 from 14.02.2026
+' Description: Full module with integration of global search functions and correct formatting
 '==============================================================
 Option Explicit
 
-'/** Тип для хранения данных о периоде риска с разбивкой по месяцам (ПУБЛИЧНЫЙ) */
+'/** Type for storing risk period data broken down by month (PUBLIC) */
 Public Type RiskPeriod
     StartDate As Date
     EndDate As Date
     DaysCount As Long
     PercentValue As Double
-    MonthYear As String ' Формат: "Февраль 2025"
-    PeriodString As String ' "с 01.02 по 20.02, с 25.02 по 28.02"
-    IsExpired As Boolean ' Превышен срок 3 года 6 месяцев
+    MonthYear As String ' Format: "February 2025"
+    PeriodString As String ' "from 01.02 to 20.02, from 25.02 to 28.02"
+    IsExpired As Boolean ' Exceeded 3 years 6 months limit
 End Type
 
-'/** Тип для хранения данных о сотруднике с периодами риска (ПУБЛИЧНЫЙ) */
+'/** Type for storing employee data with risk periods (PUBLIC) */
 Public Type EmployeeRiskData
     fio As String
     lichniyNomer As String
@@ -30,57 +30,57 @@ Public Type EmployeeRiskData
 End Type
 
 '/**
-'* ExportRiskAllowanceOrder — главная процедура формирования приказа за риск
-'* Выгружает приказ в Word с разбивкой периодов по месяцам
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* ExportRiskAllowanceOrder вЂ” main procedure for generating risk order
+'* Exports order to Word with period breakdown by month
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Public Sub ExportRiskAllowanceOrder()
     On Error GoTo ErrorHandler
     
-    ' Проверка критических ошибок
+    ' Check critical errors
     If Not ValidateRiskData() Then Exit Sub
     
-    ' Сбор данных по всем сотрудникам
+    ' Collect data for all employees
     Dim employees() As EmployeeRiskData
     Dim empCount As Long
     empCount = CollectRiskEmployeesData(employees)
     
     If empCount = 0 Then
-        MsgBox "Нет данных для формирования приказа за риск.", vbExclamation, "Ошибка"
+        MsgBox "РќРµС‚ РґР°РЅРЅС‹С… РґР»СЏ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РїСЂРёРєР°Р·Р° Р·Р° СЂРёСЃРє.", vbExclamation, "РћС€РёР±РєР°"
         Exit Sub
     End If
     
-    ' Формирование Word-документа
+    ' Generate Word document
     Call GenerateRiskWordDocument(employees, empCount)
     
-    MsgBox "Приказ о надбавке за риск успешно сформирован!", vbInformation, "Готово"
+    MsgBox "РџСЂРёРєР°Р· Рѕ РЅР°РґР±Р°РІРєРµ Р·Р° СЂРёСЃРє СѓСЃРїРµС€РЅРѕ СЃС„РѕСЂРјРёСЂРѕРІР°РЅ!", vbInformation, "Р“РѕС‚РѕРІРѕ"
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при формировании приказа за риск: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё С„РѕСЂРјРёСЂРѕРІР°РЅРёРё РїСЂРёРєР°Р·Р° Р·Р° СЂРёСЃРє: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
 '/**
-'* ValidateRiskData — проверка критических ошибок перед формированием приказа
-'* @return Boolean — True если данные корректны, False если есть критические ошибки
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* ValidateRiskData вЂ” check critical errors before generating order
+'* @return Boolean вЂ” True if data is valid, False if critical errors exist
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Private Function ValidateRiskData() As Boolean
     Dim wsDSO As Worksheet, wsStaff As Worksheet
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
+    Set wsStaff = ThisWorkbook.Sheets("РЁС‚Р°С‚")
     
     If wsDSO Is Nothing Or wsStaff Is Nothing Then
-        MsgBox "Необходимые листы 'ДСО' или 'Штат' не найдены.", vbCritical, "Критическая ошибка"
+        MsgBox "РќРµРѕР±С…РѕРґРёРјС‹Рµ Р»РёСЃС‚С‹ 'Р”РЎРћ' РёР»Рё 'РЁС‚Р°С‚' РЅРµ РЅР°Р№РґРµРЅС‹.", vbCritical, "РљСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°"
         ValidateRiskData = False
         Exit Function
     End If
     
-    ' Проверка: есть ли данные в ДСО
+    ' Check: is there data in DSO
     Dim lastRow As Long
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
     If lastRow < 2 Then
-        MsgBox "Нет данных в листе ДСО для формирования приказа.", vbCritical, "Критическая ошибка"
+        MsgBox "РќРµС‚ РґР°РЅРЅС‹С… РІ Р»РёСЃС‚Рµ Р”РЎРћ РґР»СЏ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РїСЂРёРєР°Р·Р°.", vbCritical, "РљСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°"
         ValidateRiskData = False
         Exit Function
     End If
@@ -89,15 +89,15 @@ Private Function ValidateRiskData() As Boolean
 End Function
 
 '/**
-'* CollectRiskEmployeesData — сбор данных по всем сотрудникам с периодами риска (ПУБЛИЧНАЯ)
-'* Разбивает периоды по месяцам и вычисляет процент надбавки (макс 60% в месяц)
-'* @param employees() — массив структур EmployeeRiskData для заполнения
-'* @return Long — количество собранных сотрудников
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* CollectRiskEmployeesData вЂ” collect data for all employees with risk periods (PUBLIC)
+'* Splits periods by month and calculates allowance percentage (max 60% per month)
+'* @param employees() вЂ” array of EmployeeRiskData structures to fill
+'* @return Long вЂ” number of collected employees
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Public Function CollectRiskEmployeesData(ByRef employees() As EmployeeRiskData) As Long
     Dim wsDSO As Worksheet
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     
     Dim lastRow As Long, i As Long
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
@@ -105,7 +105,7 @@ Public Function CollectRiskEmployeesData(ByRef employees() As EmployeeRiskData) 
     Dim uniqueLN As Object
     Set uniqueLN = CreateObject("Scripting.Dictionary")
     
-    ' Сбор уникальных личных номеров
+    ' Collect unique personal numbers
     For i = 2 To lastRow
         Dim ln As String
         ln = Trim(wsDSO.Cells(i, 3).value)
@@ -114,7 +114,7 @@ Public Function CollectRiskEmployeesData(ByRef employees() As EmployeeRiskData) 
         End If
     Next i
     
-    ' Инициализация массива сотрудников
+    ' Initialize employees array
     Dim empCount As Long
     empCount = uniqueLN.count
     
@@ -125,7 +125,7 @@ Public Function CollectRiskEmployeesData(ByRef employees() As EmployeeRiskData) 
     
     ReDim employees(1 To empCount)
     
-    ' Заполнение данных по каждому сотруднику
+    ' Fill data for each employee
     Dim empIndex As Long
     empIndex = 1
     
@@ -139,42 +139,42 @@ Public Function CollectRiskEmployeesData(ByRef employees() As EmployeeRiskData) 
 End Function
 
 '/**
-'* FillEmployeeRiskData — заполнение данных о сотруднике и его периодах риска
-'* Использует глобальную функцию mdlHelper.GetStaffData для поиска данных
-'* @param lichniyNomer — личный номер сотрудника
-'* @param emp — структура EmployeeRiskData для заполнения
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* FillEmployeeRiskData вЂ” fill employee data and risk periods
+'* Uses global search function mdlHelper.GetStaffData
+'* @param lichniyNomer вЂ” employee personal number
+'* @param emp вЂ” EmployeeRiskData structure to fill
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Private Sub FillEmployeeRiskData(ByVal lichniyNomer As String, ByRef emp As EmployeeRiskData)
     emp.lichniyNomer = lichniyNomer
     
-    ' Использование глобальной функции поиска
+    ' Use global search function
     Dim staffData As Object
     Set staffData = mdlHelper.GetStaffData(lichniyNomer, True)
     
     If staffData.count > 0 Then
-        emp.fio = staffData("Лицо")
-        emp.Rank = staffData("Воинское звание")
-        emp.Position = staffData("Штатная должность")
-        emp.VoinskayaChast = mdlHelper.ExtractVoinskayaChast(staffData("Часть"))
+        emp.fio = staffData("Р›РёС†Рѕ")
+        emp.Rank = staffData("Р’РѕРёРЅСЃРєРѕРµ Р·РІР°РЅРёРµ")
+        emp.Position = staffData("РЁС‚Р°С‚РЅР°СЏ РґРѕР»Р¶РЅРѕСЃС‚СЊ")
+        emp.VoinskayaChast = mdlHelper.ExtractVoinskayaChast(staffData("Р§Р°СЃС‚СЊ"))
     Else
-        emp.fio = "ФИО не найдено"
-        emp.Rank = "Звание не найдено"
-        emp.Position = "Должность не найдена"
+        emp.fio = "Р¤РРћ РЅРµ РЅР°Р№РґРµРЅРѕ"
+        emp.Rank = "Р—РІР°РЅРёРµ РЅРµ РЅР°Р№РґРµРЅРѕ"
+        emp.Position = "Р”РѕР»Р¶РЅРѕСЃС‚СЊ РЅРµ РЅР°Р№РґРµРЅР°"
         emp.VoinskayaChast = ""
     End If
     
-    ' Сбор всех периодов сотрудника
+    ' Collect all employee periods
     Dim rawPeriods() As RiskPeriod
     Dim rawCount As Long
     rawCount = CollectRawRiskPeriods(lichniyNomer, rawPeriods)
     
-    ' Разбивка периодов по месяцам и объединение
+    ' Split periods by month and merge
     Dim monthlyPeriods() As RiskPeriod
     Dim monthlyCount As Long
     monthlyCount = SplitAndMergePeriodsByMonth(rawPeriods, rawCount, monthlyPeriods)
     
-    ' Сохранение периодов в структуру сотрудника
+    ' Save periods to employee structure
     emp.periodCount = monthlyCount
     If monthlyCount > 0 Then
         ReDim emp.periods(1 To monthlyCount)
@@ -186,16 +186,16 @@ Private Sub FillEmployeeRiskData(ByVal lichniyNomer As String, ByRef emp As Empl
 End Sub
 
 '/**
-'* CollectRawRiskPeriods — сбор всех периодов сотрудника из листа ДСО
-'* Безопасное чтение дат с проверкой типов
-'* @param lichniyNomer — личный номер сотрудника
-'* @param periods() — массив RiskPeriod для заполнения
-'* @return Long — количество собранных периодов
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* CollectRawRiskPeriods вЂ” collect all employee periods from DSO sheet
+'* Safe date reading with type checking
+'* @param lichniyNomer вЂ” employee personal number
+'* @param periods() вЂ” RiskPeriod array to fill
+'* @return Long вЂ” number of collected periods
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Private Function CollectRawRiskPeriods(ByVal lichniyNomer As String, ByRef periods() As RiskPeriod) As Long
     Dim wsDSO As Worksheet
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     
     Dim lastRow As Long, i As Long
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
@@ -210,7 +210,7 @@ Private Function CollectRawRiskPeriods(ByVal lichniyNomer As String, ByRef perio
     Dim pCount As Long
     pCount = 0
     
-    ' Срок актуальности: 3 года 6 месяцев (42 месяца)
+    ' Expiration period: 3 years 6 months (42 months)
     Dim expirationDate As Date
     expirationDate = DateAdd("m", -42, Date)
     
@@ -220,7 +220,7 @@ Private Function CollectRawRiskPeriods(ByVal lichniyNomer As String, ByRef perio
             lastCol = wsDSO.Cells(i, wsDSO.Columns.count).End(xlToLeft).Column
             
             Dim j As Long
-            ' Периоды идут парами начиная с 5-го столбца
+            ' Periods come in pairs starting from 5th column
             For j = 5 To lastCol Step 2
                 Dim startVal As Variant, endVal As Variant
                 startVal = wsDSO.Cells(i, j).value
@@ -242,7 +242,7 @@ Private Function CollectRawRiskPeriods(ByVal lichniyNomer As String, ByRef perio
         End If
     Next i
     
-    ' Объединение пересекающихся периодов
+    ' Merge overlapping periods
     If pCount > 0 Then
         Dim mergedPeriods() As RiskPeriod
         Dim mergedCount As Long
@@ -266,12 +266,12 @@ Private Function CollectRawRiskPeriods(ByVal lichniyNomer As String, ByRef perio
 End Function
 
 '/**
-'* MergeOverlappingRiskPeriods — объединение пересекающихся периодов
-'* @param rawPeriods() — исходные периоды
-'* @param rawCount — количество исходных периодов
-'* @param merged() — результирующий массив объединённых периодов
-'* @return Long — количество объединённых периодов
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* MergeOverlappingRiskPeriods вЂ” merge overlapping periods
+'* @param rawPeriods() вЂ” source periods
+'* @param rawCount вЂ” number of source periods
+'* @param merged() вЂ” resulting array of merged periods
+'* @return Long вЂ” number of merged periods
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Private Function MergeOverlappingRiskPeriods(ByRef rawPeriods() As RiskPeriod, ByVal rawCount As Long, ByRef merged() As RiskPeriod) As Long
     If rawCount = 0 Then
@@ -279,7 +279,7 @@ Private Function MergeOverlappingRiskPeriods(ByRef rawPeriods() As RiskPeriod, B
         Exit Function
     End If
     
-    ' Сортировка по дате начала
+    ' Sort by start date
     Call SortRiskPeriods(rawPeriods, 1, rawCount)
     
     ReDim merged(1 To rawCount)
@@ -290,16 +290,16 @@ Private Function MergeOverlappingRiskPeriods(ByRef rawPeriods() As RiskPeriod, B
     Dim i As Long
     For i = 2 To rawCount
         If rawPeriods(i).StartDate <= merged(mergedCount).EndDate + 1 Then
-            ' Пересечение или смежность — объединяем
+            ' Overlap or adjacent вЂ” merge
             If rawPeriods(i).EndDate > merged(mergedCount).EndDate Then
                 merged(mergedCount).EndDate = rawPeriods(i).EndDate
             End If
-            ' Если хотя бы один период просрочен — весь объединённый просрочен
+            ' If at least one period is expired вЂ” whole merged period is expired
             If rawPeriods(i).IsExpired Then
                 merged(mergedCount).IsExpired = True
             End If
         Else
-            ' Новый период
+            ' New period
             mergedCount = mergedCount + 1
             merged(mergedCount) = rawPeriods(i)
         End If
@@ -309,11 +309,11 @@ Private Function MergeOverlappingRiskPeriods(ByRef rawPeriods() As RiskPeriod, B
 End Function
 
 '/**
-'* SortRiskPeriods — сортировка периодов по дате начала (пузырьковая сортировка)
-'* @param arr() — массив RiskPeriod
-'* @param leftIndex — начальный индекс
-'* @param rightIndex — конечный индекс
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* SortRiskPeriods вЂ” sort periods by start date (bubble sort)
+'* @param arr() вЂ” RiskPeriod array
+'* @param leftIndex вЂ” start index
+'* @param rightIndex вЂ” end index
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Private Sub SortRiskPeriods(ByRef arr() As RiskPeriod, ByVal leftIndex As Long, ByVal rightIndex As Long)
     Dim i As Long, j As Long
@@ -331,8 +331,8 @@ Private Sub SortRiskPeriods(ByRef arr() As RiskPeriod, ByVal leftIndex As Long, 
 End Sub
 
 '/**
-'* SplitAndMergePeriodsByMonth — группировка периодов по месяцам с сохранением разрывов дат
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* SplitAndMergePeriodsByMonth вЂ” group periods by month preserving date gaps
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, ByVal rawCount As Long, ByRef monthlyPeriods() As RiskPeriod) As Long
     If rawCount = 0 Then
@@ -340,7 +340,7 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
         Exit Function
     End If
     
-    ' Словарь для группировки по месяцам: Key = "YYYYMM", Item = Index in monthlyPeriods
+    ' Dictionary for monthly grouping: Key = "YYYYMM", Item = Index in monthlyPeriods
     Dim dict As Object
     Set dict = CreateObject("Scripting.Dictionary")
     
@@ -350,7 +350,7 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
     
     Dim i As Long
     For i = 1 To rawCount
-        ' Разбиваем исходный период, если он переходит через границу месяца
+        ' Split source period if it crosses month boundary
         Dim curDate As Date
         curDate = rawPeriods(i).StartDate
         
@@ -371,15 +371,15 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
             Dim key As String
             key = Format(curDate, "yyyymm")
             
-            ' Формируем строку для текущего отрезка
+            ' Form string for current segment
             Dim segStr As String
-            segStr = "с " & Format(curDate, "dd.mm.yyyy") & " по " & Format(segEnd, "dd.mm.yyyy")
+            segStr = "СЃ " & Format(curDate, "dd.mm.yyyy") & " РїРѕ " & Format(segEnd, "dd.mm.yyyy")
             
             If Not dict.exists(key) Then
                 resCount = resCount + 1
                 ReDim Preserve result(1 To resCount)
-                result(resCount).StartDate = curDate ' Первая дата месяца
-                result(resCount).EndDate = segEnd   ' Последняя дата месяца (пока)
+                result(resCount).StartDate = curDate ' First date of month
+                result(resCount).EndDate = segEnd    ' Last date of month (for now)
                 result(resCount).DaysCount = segDays
                 result(resCount).MonthYear = Format(curDate, "mmmm yyyy")
                 result(resCount).PeriodString = segStr
@@ -391,7 +391,7 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
                 result(idx).DaysCount = result(idx).DaysCount + segDays
                 result(idx).PeriodString = result(idx).PeriodString & ", " & segStr
                 
-                ' Обновляем границы месяца (для сортировки)
+                ' Update month boundaries (for sorting)
                 If curDate < result(idx).StartDate Then result(idx).StartDate = curDate
                 If segEnd > result(idx).EndDate Then result(idx).EndDate = segEnd
                 If rawPeriods(i).IsExpired Then result(idx).IsExpired = True
@@ -401,7 +401,7 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
         Loop
     Next i
     
-    ' Финальный расчет процентов
+    ' Final percentage calculation
     For i = 1 To resCount
         Dim pct As Double
         pct = result(i).DaysCount * 2
@@ -409,7 +409,7 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
         result(i).PercentValue = pct
     Next i
     
-    ' Сортировка по дате
+    ' Sort by date
     Call SortRiskPeriods(result, 1, resCount)
     
     If resCount > 0 Then
@@ -420,11 +420,11 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
 End Function
 
 '/**
-'* GenerateRiskWordDocument — формирование Word-документа с корректным форматированием
-'* Использует Times New Roman 12, добавляет основание из ДСО
-'* @param employees() — массив данных о сотрудниках
-'* @param empCount — количество сотрудников
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* GenerateRiskWordDocument вЂ” generate Word document with correct formatting
+'* Uses Times New Roman 12, adds foundation from DSO
+'* @param employees() вЂ” employee data array
+'* @param empCount вЂ” number of employees
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVal empCount As Long)
     Dim wordApp As Object, doc As Object, rng As Object
@@ -432,30 +432,30 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
     wordApp.Visible = True
     Set doc = wordApp.Documents.Add
     
-    ' Установка шрифта Times New Roman по умолчанию для всего документа
+    ' Set default font Times New Roman for the whole document
     With doc.Styles(1).Font
         .Name = "Times New Roman"
         .Size = 12
     End With
     
-    ' Заголовок приказа
+    ' Order header
     Set rng = doc.Range
-    rng.text = "ПРИКАЗ" & vbCrLf
+    rng.text = "РџР РРљРђР—" & vbCrLf
     rng.Font.Bold = True
     rng.Font.Size = 12
     rng.Font.Name = "Times New Roman"
     rng.ParagraphFormat.Alignment = 1 ' wdAlignParagraphCenter
     
-    ' Нумерация сотрудников
+    ' Employee numbering
     Dim i As Long, j As Long
     For i = 1 To empCount
         Set rng = doc.Range
         rng.Collapse Direction:=0
         
-        ' Формирование заголовка сотрудника
+        ' Generate employee header
         Dim header As String
         header = i & ". " & mdlHelper.SklonitZvanie(employees(i).Rank) & " " & _
-                 mdlHelper.SklonitFIO(employees(i).fio) & ", личный номер " & employees(i).lichniyNomer & ", " & _
+                 mdlHelper.SklonitFIO(employees(i).fio) & ", Р»РёС‡РЅС‹Р№ РЅРѕРјРµСЂ " & employees(i).lichniyNomer & ", " & _
                  mdlHelper.SklonitDolzhnost(employees(i).Position, employees(i).VoinskayaChast) & vbCrLf
         
         rng.text = header
@@ -464,15 +464,15 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
         rng.Font.Name = "Times New Roman"
         rng.ParagraphFormat.Alignment = 3 ' wdAlignParagraphJustify
         
-  ' Периоды
+        ' Periods
         For j = 1 To employees(i).periodCount
             Set rng = doc.Range
             rng.Collapse Direction:=0
             
-            ' Используем сформированную строку периодов
+            ' Use generated period string
             Dim periodText As String
-            periodText = "   - " & employees(i).periods(j).PeriodString & _
-                         " (" & employees(i).periods(j).DaysCount & " дн.) = " & _
+            periodText = "    - " & employees(i).periods(j).PeriodString & _
+                         " (" & employees(i).periods(j).DaysCount & " РґРЅ.) = " & _
                          employees(i).periods(j).PercentValue & "%" & vbCrLf
             
             rng.text = periodText
@@ -482,13 +482,13 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
             rng.Font.Size = 12
             rng.Font.Name = "Times New Roman"
             
-            ' Предупреждение о просроченности
+            ' Expiration warning
             If employees(i).periods(j).IsExpired Then
                 Set rng = doc.Range
                 rng.Collapse Direction:=0
-                rng.text = "      ВНИМАНИЕ: Период с " & Format(employees(i).periods(j).StartDate, "dd.mm.yyyy") & _
-                          " по " & Format(employees(i).periods(j).EndDate, "dd.mm.yyyy") & _
-                          " превышает срок в три года на обращение за получением надбавки согласно ПМО 727" & vbCrLf
+                rng.text = "      Р’РќРРњРђРќРР•: РџРµСЂРёРѕРґ СЃ " & Format(employees(i).periods(j).StartDate, "dd.mm.yyyy") & _
+                           " РїРѕ " & Format(employees(i).periods(j).EndDate, "dd.mm.yyyy") & _
+                           " РїСЂРµРІС‹С€Р°РµС‚ СЃСЂРѕРє РІ С‚СЂРё РіРѕРґР° РЅР° РѕР±СЂР°С‰РµРЅРёРµ Р·Р° РїРѕР»СѓС‡РµРЅРёРµРј РЅР°РґР±Р°РІРєРё СЃРѕРіР»Р°СЃРЅРѕ РџРњРћ 727" & vbCrLf
                 rng.Font.Color = RGB(255, 0, 0)
                 rng.Font.Bold = True
                 rng.Font.Size = 12
@@ -497,30 +497,30 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
             End If
         Next j
         
-        ' Добавление основания из ДСО
+        ' Add foundation from DSO
         Call AddRiskFoundationFromDSO(doc, employees(i).lichniyNomer)
         
         Set rng = doc.Range
         rng.Collapse Direction:=0
-        rng.InsertAfter vbCrLf ' Пустая строка между сотрудниками
+        rng.InsertAfter vbCrLf ' Empty line between employees
     Next i
     
-    ' Сохранение
+    ' Save
     Dim savePath As String
-    savePath = ThisWorkbook.Path & "\ПриказЗаРиск_" & Format(Date, "dd.mm.yyyy") & ".docx"
+    savePath = ThisWorkbook.Path & "\РџСЂРёРєР°Р·Р—Р°Р РёСЃРє_" & Format(Date, "dd.mm.yyyy") & ".docx"
     Call mdlHelper.SaveWordDocumentSafe(doc, savePath)
 End Sub
 
 
 '/**
-'* AddRiskFoundationFromDSO — добавление строки основания из столбца 4 листа ДСО
-'* @param doc — объект Word.Document
-'* @param lichniyNomer — личный номер сотрудника
-'* @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+'* AddRiskFoundationFromDSO вЂ” add foundation string from column 4 of DSO sheet
+'* @param doc вЂ” Word.Document object
+'* @param lichniyNomer вЂ” employee personal number
+'* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Private Sub AddRiskFoundationFromDSO(ByVal doc As Object, ByVal lichniyNomer As String)
     Dim wsDSO As Worksheet
-    Set wsDSO = ThisWorkbook.Sheets("ДСО")
+    Set wsDSO = ThisWorkbook.Sheets("Р”РЎРћ")
     
     Dim lastRow As Long, i As Long
     lastRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
@@ -528,7 +528,7 @@ Private Sub AddRiskFoundationFromDSO(ByVal doc As Object, ByVal lichniyNomer As 
     Dim foundationText As String
     foundationText = ""
     
-    ' Поиск оснований в столбце 4 для данного личного номера
+    ' Search for foundations in column 4 for given personal number
     For i = 2 To lastRow
         If Trim(CStr(wsDSO.Cells(i, 3).value)) = lichniyNomer Then
             Dim basis As String
@@ -544,14 +544,14 @@ Private Sub AddRiskFoundationFromDSO(ByVal doc As Object, ByVal lichniyNomer As 
         End If
     Next i
     
-    ' Добавление основания в документ
+    ' Add foundation to document
     If foundationText <> "" Then
         Dim rng As Object
         Set rng = doc.Range
         rng.Collapse Direction:=0
         
         Dim foundationLine As String
-        foundationLine = "Основание: " & foundationText & vbCrLf
+        foundationLine = "РћСЃРЅРѕРІР°РЅРёРµ: " & foundationText & vbCrLf
         
         rng.text = foundationLine
         rng.Font.Size = 12
@@ -559,6 +559,4 @@ Private Sub AddRiskFoundationFromDSO(ByVal doc As Object, ByVal lichniyNomer As 
         rng.ParagraphFormat.Alignment = 0 ' wdAlignParagraphLeft
     End If
 End Sub
-
-
 

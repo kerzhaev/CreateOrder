@@ -1,25 +1,25 @@
 Attribute VB_Name = "MdlClearCash"
-' === СНАПШОТ ВЕРСИИ === 12.07.2025 20:45 ===
-' Рабочая версия сохранена: 12.07.2025 20:45
+' === РЎРќРђРџРЁРћРў Р’Р•Р РЎРР === 12.07.2025 20:45 ===
+' Р Р°Р±РѕС‡Р°СЏ РІРµСЂСЃРёСЏ СЃРѕС…СЂР°РЅРµРЅР°: 12.07.2025 20:45
 
 Option Explicit
 
-' Модуль MdlClearCash для очистки кэша Office и восстановления ribbon
-' Версия: 1.0.0
-' Дата: 11.07.2025
-' Описание: Выполняет полную очистку кэша Office для восстановления иконок ribbon
+' РњРѕРґСѓР»СЊ MdlClearCash РґР»СЏ РѕС‡РёСЃС‚РєРё РєСЌС€Р° Office Рё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ ribbon
+' Р’РµСЂСЃРёСЏ: 1.0.0
+' Р”Р°С‚Р°: 11.07.2025
+' РћРїРёСЃР°РЅРёРµ: Р’С‹РїРѕР»РЅСЏРµС‚ РїРѕР»РЅСѓСЋ РѕС‡РёСЃС‚РєСѓ РєСЌС€Р° Office РґР»СЏ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РёРєРѕРЅРѕРє ribbon
 
 Sub ClearOfficeRibbonCache()
     Dim fso As Object
     Dim cachePath As String
     
-    ' Создаем объект FileSystemObject
+    ' РЎРѕР·РґР°РµРј РѕР±СЉРµРєС‚ FileSystemObject
     Set fso = CreateObject("Scripting.FileSystemObject")
     
-    ' Закрываем все приложения Office
-    MsgBox "ВАЖНО: Закройте ВСЕ приложения Office (Word, Excel, PowerPoint) перед продолжением!", vbExclamation
+    ' Р—Р°РєСЂС‹РІР°РµРј РІСЃРµ РїСЂРёР»РѕР¶РµРЅРёСЏ Office
+    MsgBox "Р’РђР–РќРћ: Р—Р°РєСЂРѕР№С‚Рµ Р’РЎР• РїСЂРёР»РѕР¶РµРЅРёСЏ Office (Word, Excel, PowerPoint) РїРµСЂРµРґ РїСЂРѕРґРѕР»Р¶РµРЅРёРµРј!", vbExclamation
     
-    ' Пути к кэшу для разных версий Office
+    ' РџСѓС‚Рё Рє РєСЌС€Сѓ РґР»СЏ СЂР°Р·РЅС‹С… РІРµСЂСЃРёР№ Office
     Dim cachePaths As Variant
     cachePaths = Array( _
         Environ("LOCALAPPDATA") & "\Microsoft\Office\16.0\OfficeFileCache\", _
@@ -38,39 +38,39 @@ Sub ClearOfficeRibbonCache()
         End If
     Next i
     
-    MsgBox "Кэш очищен. Перезапустите Excel и проверьте иконки.", vbInformation
+    MsgBox "РљСЌС€ РѕС‡РёС‰РµРЅ. РџРµСЂРµР·Р°РїСѓСЃС‚РёС‚Рµ Excel Рё РїСЂРѕРІРµСЂСЊС‚Рµ РёРєРѕРЅРєРё.", vbInformation
 End Sub
 
 
-' Функция для проверки состояния надстроек
-' Версия: 1.0.0
-' Дата: 11.07.2025
-' Описание: Проверяет и восстанавливает отключенные надстройки
+' Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃРѕСЃС‚РѕСЏРЅРёСЏ РЅР°РґСЃС‚СЂРѕРµРє
+' Р’РµСЂСЃРёСЏ: 1.0.0
+' Р”Р°С‚Р°: 11.07.2025
+' РћРїРёСЃР°РЅРёРµ: РџСЂРѕРІРµСЂСЏРµС‚ Рё РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РѕС‚РєР»СЋС‡РµРЅРЅС‹Рµ РЅР°РґСЃС‚СЂРѕР№РєРё
 
 Sub CheckAndRestoreAddins()
     Dim diagText As String
     Dim addin As Object
     
-    diagText = "=== ДИАГНОСТИКА НАДСТРОЕК ===" & vbCrLf & vbCrLf
+    diagText = "=== Р”РРђР“РќРћРЎРўРРљРђ РќРђР”РЎРўР РћР•Рљ ===" & vbCrLf & vbCrLf
     
-    ' Проверяем установленные надстройки
-    diagText = diagText & "[УСТАНОВЛЕННЫЕ НАДСТРОЙКИ]" & vbCrLf
+    ' РџСЂРѕРІРµСЂСЏРµРј СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹Рµ РЅР°РґСЃС‚СЂРѕР№РєРё
+    diagText = diagText & "[РЈРЎРўРђРќРћР’Р›Р•РќРќР«Р• РќРђР”РЎРўР РћР™РљР]" & vbCrLf
     For Each addin In Application.AddIns
         If addin.Installed Then
-            diagText = diagText & "[+] " & addin.Name & " - АКТИВНА" & vbCrLf
+            diagText = diagText & "[+] " & addin.Name & " - РђРљРўРР’РќРђ" & vbCrLf
         Else
-            diagText = diagText & "[-] " & addin.Name & " - ОТКЛЮЧЕНА" & vbCrLf
+            diagText = diagText & "[-] " & addin.Name & " - РћРўРљР›Р®Р§Р•РќРђ" & vbCrLf
         End If
     Next addin
     
-    diagText = diagText & vbCrLf & "[ИНСТРУКЦИИ]" & vbCrLf
-    diagText = diagText & "1. Откройте Файл > Параметры > Надстройки" & vbCrLf
-    diagText = diagText & "2. В списке 'Управление' выберите 'Отключенные элементы'" & vbCrLf
-    diagText = diagText & "3. Нажмите 'Перейти'" & vbCrLf
-    diagText = diagText & "4. Включите отключенные надстройки" & vbCrLf
-    diagText = diagText & "5. Перезапустите Excel"
+    diagText = diagText & vbCrLf & "[РРќРЎРўР РЈРљР¦РР]" & vbCrLf
+    diagText = diagText & "1. РћС‚РєСЂРѕР№С‚Рµ Р¤Р°Р№Р» > РџР°СЂР°РјРµС‚СЂС‹ > РќР°РґСЃС‚СЂРѕР№РєРё" & vbCrLf
+    diagText = diagText & "2. Р’ СЃРїРёСЃРєРµ 'РЈРїСЂР°РІР»РµРЅРёРµ' РІС‹Р±РµСЂРёС‚Рµ 'РћС‚РєР»СЋС‡РµРЅРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹'" & vbCrLf
+    diagText = diagText & "3. РќР°Р¶РјРёС‚Рµ 'РџРµСЂРµР№С‚Рё'" & vbCrLf
+    diagText = diagText & "4. Р’РєР»СЋС‡РёС‚Рµ РѕС‚РєР»СЋС‡РµРЅРЅС‹Рµ РЅР°РґСЃС‚СЂРѕР№РєРё" & vbCrLf
+    diagText = diagText & "5. РџРµСЂРµР·Р°РїСѓСЃС‚РёС‚Рµ Excel"
     
-    MsgBox diagText, vbInformation, "Диагностика надстроек"
+    MsgBox diagText, vbInformation, "Р”РёР°РіРЅРѕСЃС‚РёРєР° РЅР°РґСЃС‚СЂРѕРµРє"
 End Sub
 
 

@@ -1,5 +1,8 @@
 # Project Constitution: VBA Project (создание приказов воинской части)
-
+Global encoding for all .bas/.cls/.frm files is Windows-1251. 
+When reading context, assume Russian Cyrillic.
+Hard Rule: Variable and function names MUST use English ASCII characters only. Cyrillic is allowed ONLY inside string literals (e.g., MsgBox "Привет").
+If you see '????', assume it is a decoding error and infer the Russian word from context.
 ## 1. Контекст и Роль
 - **Проект**: Автоматизация деятельности воинской части.
 - **Роль AI**: Ты — Senior VBA Developer. Ты пишешь код для **Кержаева Евгения (ФКУ "95 ФЭС" МО РФ)**.

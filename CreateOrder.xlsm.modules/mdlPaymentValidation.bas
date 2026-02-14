@@ -1,25 +1,25 @@
 Attribute VB_Name = "mdlPaymentValidation"
 ' ===============================================================================
-' Модуль mdlPaymentValidation
-' Версия: 1.0.0
-' Дата: 01.12.2025
-' Описание: Валидация надбавок без периодов
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' Module mdlPaymentValidation
+' Version: 1.0.0
+' Date: 14.02.2026
+' Description: Validation of allowances without periods
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
 ' ===============================================================================
 
 Option Explicit
 
-' Константы индексов колонок листа "Выплаты_Без_Периодов"
+' Column index constants for sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
 Public Const COL_NUMBER As Long = 1          ' A
 Public Const COL_PAYMENT_TYPE As Long = 2    ' B
 Public Const COL_FIO As Long = 3             ' C
-Public Const COL_LICHNIY_NOMER As Long = 4    ' D
+Public Const COL_LICHNIY_NOMER As Long = 4   ' D
 Public Const COL_AMOUNT As Long = 5          ' E
-Public Const COL_FOUNDATION As Long = 6       ' F
+Public Const COL_FOUNDATION As Long = 6      ' F
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Главная функция валидации всех надбавок
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Main function for validating all allowances
 ' =============================================
 Public Sub ValidatePaymentsWithoutPeriods()
     On Error GoTo ErrorHandler
@@ -34,9 +34,9 @@ Public Sub ValidatePaymentsWithoutPeriods()
     Dim paymentType As String
     
     Application.ScreenUpdating = False
-    Application.StatusBar = "Выполняется валидация надбавок..."
+    Application.StatusBar = "Р’С‹РїРѕР»РЅСЏРµС‚СЃСЏ РІР°Р»РёРґР°С†РёСЏ РЅР°РґР±Р°РІРѕРє..."
     
-    ' Ищем лист "Выплаты_Без_Периодов"
+    ' Search for sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
     Set wsPayments = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
@@ -47,70 +47,70 @@ Public Sub ValidatePaymentsWithoutPeriods()
     Next ws
     
     If wsPayments Is Nothing Then
-        MsgBox "Лист '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "' не найден.", vbCritical, "Ошибка"
+        MsgBox "Р›РёСЃС‚ '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "' РЅРµ РЅР°Р№РґРµРЅ.", vbCritical, "РћС€РёР±РєР°"
         GoTo CleanUp
     End If
     
     lastRow = wsPayments.Cells(wsPayments.Rows.count, COL_LICHNIY_NOMER).End(xlUp).Row
     
     If lastRow < 2 Then
-        MsgBox "В листе '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "' нет данных для валидации.", vbInformation, "Информация"
+        MsgBox "Р’ Р»РёСЃС‚Рµ '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "' РЅРµС‚ РґР°РЅРЅС‹С… РґР»СЏ РІР°Р»РёРґР°С†РёРё.", vbInformation, "РРЅС„РѕСЂРјР°С†РёСЏ"
         GoTo CleanUp
     End If
     
     errorCount = 0
     warningCount = 0
-    reportText = "====== ОТЧЕТ О ВАЛИДАЦИИ НАДБАВОК ======" & vbCrLf & vbCrLf
-    reportText = reportText & "Дата проверки: " & Format(Now, "dd.mm.yyyy hh:mm:ss") & vbCrLf
-    reportText = reportText & "Проверено записей: " & (lastRow - 1) & vbCrLf & vbCrLf
+    reportText = "====== РћРўР§Р•Рў Рћ Р’РђР›РР”РђР¦РР РќРђР”Р‘РђР’РћРљ ======" & vbCrLf & vbCrLf
+    reportText = reportText & "Р”Р°С‚Р° РїСЂРѕРІРµСЂРєРё: " & Format(Now, "dd.mm.yyyy hh:mm:ss") & vbCrLf
+    reportText = reportText & "РџСЂРѕРІРµСЂРµРЅРѕ Р·Р°РїРёСЃРµР№: " & (lastRow - 1) & vbCrLf & vbCrLf
     
-    ' Проверяем каждую строку
+    ' Check every row
     For i = 2 To lastRow
-        Application.StatusBar = "Проверка строки " & i & " из " & lastRow
+        Application.StatusBar = "РџСЂРѕРІРµСЂРєР° СЃС‚СЂРѕРєРё " & i & " РёР· " & lastRow
         
         paymentType = Trim(LCase(CStr(wsPayments.Cells(i, COL_PAYMENT_TYPE).value)))
         
-        ' Вызываем соответствующую функцию валидации
+        ' Call corresponding validation function
         Select Case paymentType
-            Case "водители сдэ", "водители сде"
+            Case "РІРѕРґРёС‚РµР»Рё СЃРґСЌ", "РІРѕРґРёС‚РµР»Рё СЃРґРµ"
                 isValid = ValidateDriverSDE(wsPayments, i)
-            Case "экипаж"
+            Case "СЌРєРёРїР°Р¶"
                 isValid = ValidateCrew(wsPayments, i)
-            Case "физо"
+            Case "С„РёР·Рѕ"
                 isValid = ValidateFIZO(wsPayments, i)
-            Case "секретность"
+            Case "СЃРµРєСЂРµС‚РЅРѕСЃС‚СЊ"
                 isValid = ValidateSecrecy(wsPayments, i)
             Case Else
-                ' Для неизвестных типов - базовая проверка
+                ' For unknown types - basic check
                 isValid = ValidateBasic(wsPayments, i)
                 If Not isValid Then
                     warningCount = warningCount + 1
-                    reportText = reportText & "Строка " & i & ": Неизвестный тип выплаты '" & paymentType & "'" & vbCrLf
+                    reportText = reportText & "РЎС‚СЂРѕРєР° " & i & ": РќРµРёР·РІРµСЃС‚РЅС‹Р№ С‚РёРї РІС‹РїР»Р°С‚С‹ '" & paymentType & "'" & vbCrLf
                 End If
         End Select
         
         If Not isValid Then
             errorCount = errorCount + 1
-            reportText = reportText & "Строка " & i & ": Ошибка валидации для типа '" & paymentType & "'" & vbCrLf
+            reportText = reportText & "РЎС‚СЂРѕРєР° " & i & ": РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё РґР»СЏ С‚РёРїР° '" & paymentType & "'" & vbCrLf
         End If
     Next i
     
-    ' Итоговый отчет
-    reportText = reportText & vbCrLf & "Итого:" & vbCrLf
-    reportText = reportText & "Ошибок: " & errorCount & vbCrLf
-    reportText = reportText & "Предупреждений: " & warningCount & vbCrLf
+    ' Final report
+    reportText = reportText & vbCrLf & "РС‚РѕРіРѕ:" & vbCrLf
+    reportText = reportText & "РћС€РёР±РѕРє: " & errorCount & vbCrLf
+    reportText = reportText & "РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёР№: " & warningCount & vbCrLf
     
     If errorCount = 0 And warningCount = 0 Then
-        reportText = reportText & vbCrLf & "Все данные корректны!" & vbCrLf
-        MsgBox reportText, vbInformation, "Валидация завершена"
+        reportText = reportText & vbCrLf & "Р’СЃРµ РґР°РЅРЅС‹Рµ РєРѕСЂСЂРµРєС‚РЅС‹!" & vbCrLf
+        MsgBox reportText, vbInformation, "Р’Р°Р»РёРґР°С†РёСЏ Р·Р°РІРµСЂС€РµРЅР°"
     Else
-        MsgBox reportText, vbExclamation, "Валидация завершена"
+        MsgBox reportText, vbExclamation, "Р’Р°Р»РёРґР°С†РёСЏ Р·Р°РІРµСЂС€РµРЅР°"
     End If
     
     GoTo CleanUp
     
 ErrorHandler:
-    MsgBox "Ошибка при валидации надбавок: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РІР°Р»РёРґР°С†РёРё РЅР°РґР±Р°РІРѕРє: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
     
 CleanUp:
     Application.ScreenUpdating = True
@@ -118,11 +118,11 @@ CleanUp:
 End Sub
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Базовая валидация (проверка обязательных полей)
-' @param ws As Worksheet - лист "Выплаты_Без_Периодов"
-' @param rowNum As Long - номер строки для проверки
-' @return Boolean - True если данные корректны
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Basic validation (check mandatory fields)
+' @param ws As Worksheet - sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
+' @param rowNum As Long - row number to check
+' @return Boolean - True if data is valid
 ' =============================================
 Private Function ValidateBasic(ByVal ws As Worksheet, ByVal rowNum As Long) As Boolean
     On Error GoTo ErrorHandler
@@ -137,7 +137,7 @@ Private Function ValidateBasic(ByVal ws As Worksheet, ByVal rowNum As Long) As B
     amount = Trim(CStr(ws.Cells(rowNum, COL_AMOUNT).value))
     foundation = Trim(CStr(ws.Cells(rowNum, COL_FOUNDATION).value))
     
-    ' Проверяем обязательные поля
+    ' Check mandatory fields
     If fio = "" Or lichniyNomer = "" Or amount = "" Or foundation = "" Then
         ValidateBasic = False
         Exit Function
@@ -151,11 +151,11 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Валидация надбавки водителям СдЕ
-' @param ws As Worksheet - лист "Выплаты_Без_Периодов"
-' @param rowNum As Long - номер строки для проверки
-' @return Boolean - True если данные корректны
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Validation for Drivers CDE allowance
+' @param ws As Worksheet - sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
+' @param rowNum As Long - row number to check
+' @return Boolean - True if data is valid
 ' =============================================
 Public Function ValidateDriverSDE(ByVal ws As Worksheet, ByVal rowNum As Long) As Boolean
     On Error GoTo ErrorHandler
@@ -165,41 +165,41 @@ Public Function ValidateDriverSDE(ByVal ws As Worksheet, ByVal rowNum As Long) A
     Dim staffData As Object
     Dim Position As String
     
-    ' Базовая проверка
+    ' Basic check
     If Not ValidateBasic(ws, rowNum) Then
         ValidateDriverSDE = False
         Exit Function
     End If
     
-    ' Получаем личный номер
+    ' Get personal number
     lichniyNomer = Trim(CStr(ws.Cells(rowNum, COL_LICHNIY_NOMER).value))
     
-    ' Получаем данные из штата
+    ' Get data from staff
     Set staffData = mdlHelper.GetStaffData(lichniyNomer, True)
     If staffData.count = 0 Then
         ValidateDriverSDE = False
         Exit Function
     End If
     
-    ' Проверяем должность (должна быть "водитель" или "старший водитель", НЕ "механик-водитель")
-    Position = LCase(Trim(CStr(staffData("Штатная должность"))))
-    If InStr(Position, "механик-водитель") > 0 Then
+    ' Check position (must be "driver" or "senior driver", NOT "mechanic-driver")
+    Position = LCase(Trim(CStr(staffData("РЁС‚Р°С‚РЅР°СЏ РґРѕР»Р¶РЅРѕСЃС‚СЊ"))))
+    If InStr(Position, "РјРµС…Р°РЅРёРє-РІРѕРґРёС‚РµР»СЊ") > 0 Then
         ValidateDriverSDE = False
         Exit Function
     End If
-    If InStr(Position, "водитель") = 0 And InStr(Position, "старший водитель") = 0 Then
+    If InStr(Position, "РІРѕРґРёС‚РµР»СЊ") = 0 And InStr(Position, "СЃС‚Р°СЂС€РёР№ РІРѕРґРёС‚РµР»СЊ") = 0 Then
         ValidateDriverSDE = False
         Exit Function
     End If
     
-    ' Проверяем основание (должны быть: копия ВУ, справка ВАИ, марка, ГРЗ)
+    ' Check foundation (must contain: copy of license, VAI certificate, brand, license plate)
     foundation = LCase(Trim(CStr(ws.Cells(rowNum, COL_FOUNDATION).value)))
     
     Dim hasVU As Boolean, hasVAI As Boolean, hasMark As Boolean, hasGRZ As Boolean
-    hasVU = (InStr(foundation, "удостоверен") > 0 Or InStr(foundation, "ву") > 0 Or InStr(foundation, "водительск") > 0)
-    hasVAI = (InStr(foundation, "ваи") > 0)
-    hasMark = (InStr(foundation, "марка") > 0)
-    hasGRZ = (InStr(foundation, "грз") > 0 Or InStr(foundation, "регистрационный") > 0 Or InStr(foundation, "гос. номер") > 0)
+    hasVU = (InStr(foundation, "СѓРґРѕСЃС‚РѕРІРµСЂРµРЅ") > 0 Or InStr(foundation, "РІСѓ") > 0 Or InStr(foundation, "РІРѕРґРёС‚РµР»СЊСЃРє") > 0)
+    hasVAI = (InStr(foundation, "РІР°Рё") > 0)
+    hasMark = (InStr(foundation, "РјР°СЂРєР°") > 0)
+    hasGRZ = (InStr(foundation, "РіСЂР·") > 0 Or InStr(foundation, "СЂРµРіРёСЃС‚СЂР°С†РёРѕРЅРЅС‹Р№") > 0 Or InStr(foundation, "РіРѕСЃ. РЅРѕРјРµСЂ") > 0)
     
     ValidateDriverSDE = (hasVU And hasVAI And hasMark And hasGRZ)
     Exit Function
@@ -209,11 +209,11 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Валидация надбавки за экипаж
-' @param ws As Worksheet - лист "Выплаты_Без_Периодов"
-' @param rowNum As Long - номер строки для проверки
-' @return Boolean - True если данные корректны
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Validation for Crew allowance
+' @param ws As Worksheet - sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
+' @param rowNum As Long - row number to check
+' @return Boolean - True if data is valid
 ' =============================================
 Public Function ValidateCrew(ByVal ws As Worksheet, ByVal rowNum As Long) As Boolean
     On Error GoTo ErrorHandler
@@ -223,34 +223,34 @@ Public Function ValidateCrew(ByVal ws As Worksheet, ByVal rowNum As Long) As Boo
     Dim vus As String
     Dim Position As String
     
-    ' Базовая проверка
+    ' Basic check
     If Not ValidateBasic(ws, rowNum) Then
         ValidateCrew = False
         Exit Function
     End If
     
-    ' Получаем личный номер
+    ' Get personal number
     lichniyNomer = Trim(CStr(ws.Cells(rowNum, COL_LICHNIY_NOMER).value))
     
-    ' Получаем данные из штата
+    ' Get data from staff
     Set staffData = mdlHelper.GetStaffData(lichniyNomer, True)
     If staffData.count = 0 Then
         ValidateCrew = False
         Exit Function
     End If
     
-    ' Получаем ВУС и должность (ВУС может быть в отдельном столбце или нужно будет добавить функцию получения ВУС)
-    ' Пока используем должность для проверки
-    Position = LCase(Trim(CStr(staffData("Штатная должность"))))
+    ' Get VUS and position (VUS might be in a separate column or needs a helper function)
+    ' Using position for check for now
+    Position = LCase(Trim(CStr(staffData("РЁС‚Р°С‚РЅР°СЏ РґРѕР»Р¶РЅРѕСЃС‚СЊ"))))
     
-    ' TODO: Нужно получить ВУС из листа "Штат" - возможно, нужно добавить функцию в mdlHelper
-    ' Пока проверяем только должность
-    ' Проверяем пару (ВУС, должность) в справочнике
+    ' TODO: Need to get VUS from "Staff" sheet - might need to add function to mdlHelper
+    ' Checking only position for now
+    ' Check VUS-Position pair in reference
     ' ValidateCrew = mdlReferenceData.CheckVUSPositionPair(vus, position)
     
-    ' Временная проверка: если должность содержит ключевые слова для экипажа
+    ' Temporary check: if position contains crew keywords
     Dim crewKeywords As Variant
-    crewKeywords = Array("командир", "механик", "наводчик", "оператор", "экипаж")
+    crewKeywords = Array("РєРѕРјР°РЅРґРёСЂ", "РјРµС…Р°РЅРёРє", "РЅР°РІРѕРґС‡РёРє", "РѕРїРµСЂР°С‚РѕСЂ", "СЌРєРёРїР°Р¶")
     
     Dim i As Long
     Dim hasCrewKeyword As Boolean
@@ -262,7 +262,7 @@ Public Function ValidateCrew(ByVal ws As Worksheet, ByVal rowNum As Long) As Boo
         End If
     Next i
     
-    ' TODO: Заменить на проверку по справочнику, когда будет реализовано получение ВУС
+    ' TODO: Replace with reference check when VUS retrieval is implemented
     ValidateCrew = hasCrewKeyword
     Exit Function
     
@@ -271,11 +271,11 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Валидация надбавки за ФИЗО
-' @param ws As Worksheet - лист "Выплаты_Без_Периодов"
-' @param rowNum As Long - номер строки для проверки
-' @return Boolean - True если данные корректны
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Validation for FIZO allowance
+' @param ws As Worksheet - sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
+' @param rowNum As Long - row number to check
+' @return Boolean - True if data is valid
 ' =============================================
 Public Function ValidateFIZO(ByVal ws As Worksheet, ByVal rowNum As Long) As Boolean
     On Error GoTo ErrorHandler
@@ -284,20 +284,20 @@ Public Function ValidateFIZO(ByVal ws As Worksheet, ByVal rowNum As Long) As Boo
     Dim vedomostCount As Long
     Dim i As Long
     
-    ' Базовая проверка
+    ' Basic check
     If Not ValidateBasic(ws, rowNum) Then
         ValidateFIZO = False
         Exit Function
     End If
     
-    ' Получаем основание
+    ' Get foundation
     foundation = LCase(Trim(CStr(ws.Cells(rowNum, COL_FOUNDATION).value)))
     
-    ' Подсчитываем количество упоминаний "ведомость"
+    ' Count occurrences of "vedomost"
     vedomostCount = 0
     i = 1
     Do While i <= Len(foundation)
-        If Mid(foundation, i, 8) = "ведомость" Then
+        If Mid(foundation, i, 8) = "РІРµРґРѕРјРѕСЃС‚СЊ" Then
             vedomostCount = vedomostCount + 1
             i = i + 8
         Else
@@ -305,7 +305,7 @@ Public Function ValidateFIZO(ByVal ws As Worksheet, ByVal rowNum As Long) As Boo
         End If
     Loop
     
-    ' Должно быть минимум 2 ведомости
+    ' Must be at least 2 vedomosts
     ValidateFIZO = (vedomostCount >= 2)
     Exit Function
     
@@ -314,11 +314,11 @@ ErrorHandler:
 End Function
 
 ' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Валидация надбавки за секретность
-' @param ws As Worksheet - лист "Выплаты_Без_Периодов"
-' @param rowNum As Long - номер строки для проверки
-' @return Boolean - True если данные корректны
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Validation for Secrecy allowance
+' @param ws As Worksheet - sheet "Р’С‹РїР»Р°С‚С‹_Р‘РµР·_РџРµСЂРёРѕРґРѕРІ"
+' @param rowNum As Long - row number to check
+' @return Boolean - True if data is valid
 ' =============================================
 Public Function ValidateSecrecy(ByVal ws As Worksheet, ByVal rowNum As Long) As Boolean
     On Error GoTo ErrorHandler
@@ -326,20 +326,20 @@ Public Function ValidateSecrecy(ByVal ws As Worksheet, ByVal rowNum As Long) As 
     Dim foundation As String
     Dim hasForm As Boolean, hasNumber As Boolean, hasDate As Boolean, hasNomenclature As Boolean
     
-    ' Базовая проверка
+    ' Basic check
     If Not ValidateBasic(ws, rowNum) Then
         ValidateSecrecy = False
         Exit Function
     End If
     
-    ' Получаем основание
+    ' Get foundation
     foundation = LCase(Trim(CStr(ws.Cells(rowNum, COL_FOUNDATION).value)))
     
-    ' Проверяем наличие обязательных элементов
-    hasForm = (InStr(foundation, "форма") > 0)
-    hasNumber = (InStr(foundation, "номер") > 0)
-    hasDate = (InStr(foundation, "дата") > 0)
-    hasNomenclature = (InStr(foundation, "номенклатур") > 0 Or InStr(foundation, "пункт") > 0)
+    ' Check for mandatory elements
+    hasForm = (InStr(foundation, "С„РѕСЂРјР°") > 0)
+    hasNumber = (InStr(foundation, "РЅРѕРјРµСЂ") > 0)
+    hasDate = (InStr(foundation, "РґР°С‚Р°") > 0)
+    hasNomenclature = (InStr(foundation, "РЅРѕРјРµРЅРєР»Р°С‚СѓСЂ") > 0 Or InStr(foundation, "РїСѓРЅРєС‚") > 0)
     
     ValidateSecrecy = (hasForm And hasNumber And hasDate And hasNomenclature)
     Exit Function
@@ -347,4 +347,3 @@ Public Function ValidateSecrecy(ByVal ws As Worksheet, ByVal rowNum As Long) As 
 ErrorHandler:
     ValidateSecrecy = False
 End Function
-
