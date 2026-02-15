@@ -10,161 +10,30 @@
     <tabs>
       <tab id="customTab" label="СВО Макросы">
         
-        <!-- Группа экспорта документов -->
-        <group id="exportGroup" label="Экспорт документов">
-          <button id="mainExport" 
-                  label="Основной приказ" 
-                  onAction="RunMainExport" 
-                  imageMso="FileNew"
-                  size="large"
-                  screentip="Создание приказа"
-                  supertip="Создает Word документ с приказом в дательном падеже на основе данных из листа ДСО"/>
-          
-          <button id="spravkaExport" 
-                  label="Справка ДСО" 
-                  onAction="RunSpravkaExport" 
-                  imageMso="FileProperties"
-                  size="large"
-                  screentip="Создание справки ДСО"
-                  supertip="Создает справки о нахождении в зоне СВО на основе шаблона Word"/>
-          
-          <button id="raportExport" 
-                  label="Рапорт" 
-                  onAction="RunRaportExport" 
-                  imageMso="FileDocumentAsTemplate"
-                  size="large"
-                  screentip="Создание рапорта"
-                  supertip="Создает рапорты о выплате компенсации"/>
+        <group id="docsGroup" label="Основные документы">
+          <button id="mainExport" label="Приказ (Основной)" onAction="RunMainExport" imageMso="FileNew" size="large"/>
+          <button id="spravkaExport" label="Справка ДСО" onAction="RunSpravkaExport" imageMso="FileProperties" size="large"/>
+          <button id="raportExport" label="Рапорт" onAction="RunRaportExport" imageMso="FileSaveAs" size="large"/>
         </group>
         
-        <!-- Группа: Надбавка за риск (выплаты с периодами) -->
-        <group id="riskGroup" label="Надбавка за риск">
-          <button id="riskOrder" 
-                  label="ПриказЗаРиск" 
-                  onAction="OnRiskOrderClick" 
-                  imageMso="DataFormShowMore"
-                  size="large"
-                  screentip="Приказ о надбавке за риск"
-                  supertip="Создает приказ о выплате надбавки за задачи, связанные с риском для жизни и здоровья (2% в день, макс 60% в месяц)"/>
+        <group id="financeGroup" label="Финансы и Надбавки">
+          <button id="riskOrder" label="Приказ за Риск" onAction="OnRiskOrderClick" imageMso="AccountingFormat" size="large"/>
+          
+          <menu id="allowancesMenu" label="Доп. Надбавки" imageMso="TableDesign" size="large">
+              <button id="mnuExportAllowances" label="Экспорт приказов" onAction="OnExportAllowancesClick" imageMso="FileSaveAs"/>
+              <button id="mnuValidate" label="Проверить ошибки" onAction="OnValidateAllowancesClick" imageMso="Spelling"/>
+              <menuSeparator id="sep1" />
+              <button id="mnuMassImport" label="Массовое добавление" onAction="OnMassImportEmployeesClick" imageMso="GroupSmartArtAdd"/>
+              <button id="mnuSelectEmp" label="Найти сотрудника" onAction="OnSelectEmployeeClick" imageMso="FindDialog"/>
+              <menuSeparator id="sep2" />
+              <button id="mnuReferences" label="Справочники" onAction="OnManageReferencesClick" imageMso="AccessTableContacts"/>
+          </menu>
         </group>
         
-        <!-- НОВАЯ ГРУППА: Надбавки без периодов -->
-        <group id="allowancesGroup" label="Надбавки">
-          <button id="exportAllowances" 
-                  label="Экспорт надбавок" 
-                  onAction="OnExportAllowancesClick" 
-                  imageMso="ExportSharePointList"
-                  size="large"
-                  screentip="Экспорт надбавок"
-                  supertip="Создает приказы на выплату надбавок (водители СдЕ, экипаж, ФИЗО, секретность и др.)"/>
-          
-          <button id="validateAllowances" 
-                  label="Проверить надбавки" 
-                  onAction="OnValidateAllowancesClick" 
-                  imageMso="ReviewCheckDocument"
-                  size="normal"
-                  screentip="Валидация надбавок"
-                  supertip="Проверяет корректность данных в листе 'Выплаты_Без_Периодов'"/>
-          
-          <button id="manageReferences" 
-                  label="Справочники" 
-                  onAction="OnManageReferencesClick" 
-                  imageMso="DatabaseTable"
-                  size="normal"
-                  screentip="Управление справочниками"
-                  supertip="Открывает лист 'Справочники' для настройки ВУС, должностей и других справочных данных"/>
-          
-          <button id="massImportEmployees" 
-                  label="Массовое добавление" 
-                  onAction="OnMassImportEmployeesClick" 
-                  imageMso="PeopleAddToTeam"
-                  size="normal"
-                  screentip="Массовое добавление сотрудников"
-                  supertip="Выделите ячейки с номерами в колонке D и нажмите для автоматического заполнения Ф�О"/>
-          
-          <button id="selectEmployee" 
-                  label="Выбрать сотрудника" 
-                  onAction="OnSelectEmployeeClick" 
-                  imageMso="PeoplePicker"
-                  size="normal"
-                  screentip="Выбрать сотрудника из списка"
-                  supertip="Открывает форму поиска для выбора сотрудника и заполнения текущей строки"/>
-        </group>
-        
-        <!-- Группа отчетов -->
-        <group id="reportsGroup" label="Отчеты">
-          <button id="excelReport" 
-                  label="Отчет по периодам" 
-                  onAction="OnPeriodsReportClick" 
-                  imageMso="ExportExcel"
-                  size="large"
-                  screentip="Excel отчет"
-                  supertip="Создает Excel файл для передачи в ФЭС (ДСО или ЗаРиск - выбор при запуске)"/>
-        </group>
-        
-        <!-- Группа управления данными -->
-        <group id="dataGroup" label="Данные">
-          <button id="importData" 
-                  label="Импорт данных" 
-                  onAction="RunImportData" 
-                  imageMso="ImportExcel"
-                  size="normal"
-                  screentip="Импорт данных"
-                  supertip="Импортирует данные из Excel в лист 'Штат'"/>
-          
-          <button id="previewData" 
-                  label="Предпросмотр" 
-                  onAction="RunPreviewData" 
-                  imageMso="PrintPreview"
-                  size="normal"
-                  screentip="Предварительный просмотр"
-                  supertip="Показывает предварительный просмотр данных"/>
-        </group>
-        
-        <!-- Группа валидации данных -->
-        <group id="validationGroup" label="Валидация">
-          <button id="validateData" 
-                  label="Проверить данные" 
-                  onAction="RunDataValidation" 
-                  imageMso="ReviewCheckDocument"
-                  size="normal"
-                  screentip="Валидация данных"
-                  supertip="Выполняет полную валидацию данных в листах с выплатами"/>
-          
-          <button id="diagnoseStructure" 
-                  label="Диагностика структуры" 
-                  onAction="RunDiagnoseStructure" 
-                  imageMso="DatabaseAnalyzeTable"
-                  size="normal"
-                  screentip="Диагностика структуры"
-                  supertip="Анализирует структуру листов и выявляет проблемы"/>
-        </group>
-        
-        <!-- Группа системных функций -->
-        <group id="systemGroup" label="Система">
-          <button id="showHelp" 
-                  label="Справка" 
-                  onAction="ShowHelp" 
-                  imageMso="Help"
-                  size="normal"
-                  screentip="Справка по системе"
-                  supertip="Показывает подробную справку по использованию программы"/>
-          
-          <button id="showSettings" 
-                  label="Настройки" 
-                  onAction="ShowSettings" 
-                  imageMso="ApplicationOptionsDialog"
-                  size="normal"
-                  screentip="Настройки системы"
-                  supertip="Показывает текущие настройки и проверяет готовность системы"/>
-          
-          <button id="checkReadiness" 
-                  label="Проверка готовности" 
-                  onAction="CheckSystemReadiness" 
-                  imageMso="ReviewCheckDocument"
-                  size="normal"
-                  screentip="Проверка готовности"
-                  supertip="Выполняет комплексную проверку готовности системы к работе"/>
+        <group id="dataGroup" label="Данные и Сервис">
+          <button id="excelReport" label="Выгрузка Алушта/ФРП" onAction="OnPeriodsReportClick" imageMso="ExcelSpreadsheetInsert" size="large"/>
+          <button id="importData" label="Обновить штат" onAction="RunImportData" imageMso="ImportExcel" size="large"/>
+          <button id="showSettings" label="Настройки" onAction="ShowSettings" imageMso="ControlsGallery" size="large"/>
         </group>
         
       </tab>

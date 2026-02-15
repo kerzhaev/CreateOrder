@@ -151,7 +151,7 @@ Sub ExportToWordSpravkaFromTemplate()
                     periodsText = "Нет актуальных периодов службы в зоне СВО." & vbCrLf
                 End If
 
-                With wdDoc.Content.Find
+                With wdDoc.content.Find
                     .ClearFormatting
                     .Replacement.ClearFormatting
 
@@ -174,7 +174,7 @@ Sub ExportToWordSpravkaFromTemplate()
 
                 ' === Inserting periodsText via Range.InsertAfter in chunks of 230 characters ===
                 Dim rng As Object
-                Set rng = wdDoc.Content
+                Set rng = wdDoc.content
                 With rng.Find
                     .Text = "[ПЕРИОДЫ]"
                     If .Execute Then

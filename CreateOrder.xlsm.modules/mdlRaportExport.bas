@@ -191,7 +191,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                 End If
 
                 ' Replace short placeholders Find+Replace as usual
-                With wdDoc.Content.Find
+                With wdDoc.content.Find
                     .ClearFormatting
                     .Replacement.ClearFormatting
                     .Text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
@@ -242,7 +242,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
 
                 ' Correct insertion of periodsText via Range.Text
                 Dim rng As Object
-                Set rng = wdDoc.Content
+                Set rng = wdDoc.content
                 With rng.Find
                     .Text = "[ПЕРИОДЫ_СЛУЖБЫ]"
                     If .Execute Then

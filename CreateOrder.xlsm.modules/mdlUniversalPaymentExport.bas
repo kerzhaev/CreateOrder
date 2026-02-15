@@ -415,8 +415,8 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
         ' Create new document
         Set doc = wordApp.Documents.Add
         ' Copy template content to new document (for first record)
-        templateDoc.Content.Copy
-        doc.Content.Paste
+        templateDoc.content.Copy
+        doc.content.Paste
         ' Close template
         templateDoc.Close False
         Set templateDoc = Nothing
@@ -451,7 +451,7 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
                 ' Replace markers in template
                 If FillPaymentTemplate(templateDoc, payment) Then
                     ' Copy template content
-                    templateDoc.Content.Copy
+                    templateDoc.content.Copy
                     
                     ' Paste at the end of main document
                     Set endRange = doc.Range
@@ -528,7 +528,7 @@ Public Function FillPaymentTemplate(ByVal doc As Object, ByRef payment As Paymen
     Dim rng As Object
     
     ' Replace placeholders in template
-    With doc.Content.Find
+    With doc.content.Find
         .ClearFormatting
         .Replacement.ClearFormatting
         

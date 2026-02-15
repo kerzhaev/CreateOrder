@@ -151,7 +151,7 @@ Sub ExportToWordFromStaffByLichniyNomer()
             textLine = textLine & "Основание: " & osnovanie & vbCrLf
         End If
         textLine = textLine & vbCrLf
-        wdDoc.Content.InsertAfter textLine
+        wdDoc.content.InsertAfter textLine
     Next i
 
     fileName = "Основной приказ.docx"
