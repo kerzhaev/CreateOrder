@@ -1,138 +1,156 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmAbout 
-   Caption         =   "UserForm1"
-   ClientHeight    =   9045.001
+   Caption         =   "О программе"
+   ClientHeight    =   7830
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   10545
+   ClientWidth     =   8100
    OleObjectBlob   =   "frmAbout.frx":0000
-   StartUpPosition =   2  'CenterScreen
+   StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmAbout"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-
-
-
-
-
-'==============================================================
-' frmAbout - Форма информации и активации макроса
-' Автор: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-'==============================================================
-
 Option Explicit
 
-#If VBA7 Then
-    Private Declare PtrSafe Function OpenClipboard Lib "User32" (ByVal hWnd As LongPtr) As Long
-    Private Declare PtrSafe Function CloseClipboard Lib "User32" () As Long
-    Private Declare PtrSafe Function EmptyClipboard Lib "User32" () As Long
-    Private Declare PtrSafe Function SetClipboardData Lib "User32" (ByVal wFormat As Long, ByVal hMem As LongPtr) As LongPtr
-    Private Declare PtrSafe Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As LongPtr) As LongPtr
-    Private Declare PtrSafe Function GlobalLock Lib "kernel32" (ByVal hMem As LongPtr) As LongPtr
-    Private Declare PtrSafe Function GlobalUnlock Lib "kernel32" (ByVal hMem As LongPtr) As Long
-    Private Declare PtrSafe Function lstrcpy Lib "kernel32" (ByVal lpString1 As LongPtr, ByVal lpString2 As String) As LongPtr
-#Else
-    Private Declare Function OpenClipboard Lib "User32" (ByVal hwnd As Long) As Long
-    Private Declare Function CloseClipboard Lib "User32" () As Long
-    Private Declare Function EmptyClipboard Lib "User32" () As Long
-    Private Declare Function SetClipboardData Lib "User32" (ByVal wFormat As Long, ByVal hMem As Long) As Long
-    Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
-    Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
-    Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
-    Private Declare Function lstrcpy Lib "kernel32" (ByVal lpString1 As Long, ByVal lpString2 As String) As Long
-#End If
-
-Const GHND = &H42
-Const CF_TEXT = 1
-
-
+' Флаг для предотвращения "зацикливания" события Change
+Private bIgnoreChange As Boolean
 
 Private Sub UserForm_Initialize()
-
-    Call mdlHelper.EnsureStaffColumnsInitialized
-
+    ' Инициализация данных о программе
     lblProductName.Caption = PRODUCT_NAME
     lblVersion.Caption = "Версия: " & PRODUCT_VERSION
     lblAuthor.Caption = "Автор: " & PRODUCT_AUTHOR
     lblEmail.Caption = "E-mail: " & PRODUCT_EMAIL
     lblPhone.Caption = "Телефон: " & PRODUCT_PHONE
     lblCompany.Caption = "Организация: " & PRODUCT_COMPANY
-    lblActivationHint.Caption = ACTIVATION_HINT
-
-    lblActivationStatus.Caption = GetTrialStatusText
-    If GetProductStatus() = 0 Then
-        lblActivationStatus.ForeColor = vbGreen
-        txtActivationCode.Enabled = False
-        btnActivate.Enabled = False
-    ElseIf GetProductStatus() = 1 Then
-        lblActivationStatus.ForeColor = &H80FF   ' синий — триал
-        txtActivationCode.Enabled = True
-        btnActivate.Enabled = True
-    Else
-        lblActivationStatus.ForeColor = vbRed
-        txtActivationCode.Enabled = True
-        btnActivate.Enabled = True
-    End If
+    
+    ' Настройка интерфейса в зависимости от статуса
+    UpdateLicenseStatusUI
 End Sub
 
 Private Sub btnActivate_Click()
-    If ValidateActivationKey(txtActivationCode.text) Then
-        SaveActivationStatus True
-        lblActivationStatus.Caption = GetTrialStatusText
-        lblActivationStatus.ForeColor = vbGreen
-        txtActivationCode.Enabled = False
-        btnActivate.Enabled = False
-        MsgBox "Спасибо! Продукт активирован.", vbInformation
-    Else
-        MsgBox "Код активации неверный.", vbExclamation
+    Dim key As String
+    key = Trim(txtActivationCode.Text)
+    
+    If key = "" Then
+        MsgBox "Введите ключ активации.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Вызов функции проверки из модуля modActivation
+    If modActivation.ActivateProduct(key) Then
+        ' Если успешно - обновляем интерфейс
+        UpdateLicenseStatusUI
+        txtActivationCode.Text = ""
     End If
 End Sub
 
-
-Private Sub btnCopyContact_Click()
-    ' Копирует информацию для связи в буфер обмена
-    Dim contactText As String
-    contactText = "Автор: " & PRODUCT_AUTHOR & vbCrLf & _
-                  "Email: " & PRODUCT_EMAIL & vbCrLf & _
-                  "Телефон: " & PRODUCT_PHONE & vbCrLf & _
-                  "Компания: " & PRODUCT_COMPANY
-    PutToClipboard contactText
-    MsgBox "Контактная информация скопирована в буфер обмена.", vbInformation
-End Sub
-
-Private Sub btnShowHelp_Click()
-    ' Открытие справки (можно заменить вызов на собственную инструкцию)
-    MsgBox "Здесь будет ваша инструкция/FAQ.", vbInformation
+Private Sub UpdateLicenseStatusUI()
+    Dim status As Integer
+    status = modActivation.GetLicenseStatus()
+    
+    If status = 0 Then
+        ' Активна
+        lblActivationStatus.Caption = "СТАТУС: АКТИВИРОВАНО (до " & modActivation.GetLicenseExpiryDateStr() & ")"
+        lblActivationStatus.ForeColor = RGB(0, 150, 0) ' Зеленый
+        
+        ' Скрываем поля ввода, они больше не нужны
+        txtActivationCode.Enabled = False
+        btnActivate.Enabled = False
+        lblActivationHint.Caption = "Продукт активирован. Спасибо!"
+    Else
+        ' Истекла или нет
+        lblActivationStatus.Caption = "СТАТУС: ТРЕБУЕТСЯ АКТИВАЦИЯ"
+        lblActivationStatus.ForeColor = RGB(200, 0, 0) ' Красный
+        
+        txtActivationCode.Enabled = True
+        btnActivate.Enabled = True
+        lblActivationHint.Caption = modActivation.ACTIVATION_HINT
+    End If
 End Sub
 
 Private Sub btnClose_Click()
     Unload Me
 End Sub
 
-' ===== Служебная процедура для копирования текста в буфер обмена =====
-Private Sub PutToClipboard(ByVal text As String)
-    #If VBA7 Then
-        Dim hGlobalMemory As LongPtr, lpGlobalMemory As LongPtr
-        Dim hWnd As LongPtr
-    #Else
-        Dim hGlobalMemory As Long, lpGlobalMemory As Long
-        Dim hWnd As Long
-    #End If
-    
-    hWnd = 0
-    If OpenClipboard(hWnd) Then
-        EmptyClipboard
-        hGlobalMemory = GlobalAlloc(GHND, Len(text) + 1)
-        lpGlobalMemory = GlobalLock(hGlobalMemory)
-        lstrcpy lpGlobalMemory, text
-        GlobalUnlock hGlobalMemory
-        SetClipboardData CF_TEXT, hGlobalMemory
-        CloseClipboard
+' Сброс лицензии (для отладки, можно назначить на секретную кнопку или убрать)
+Private Sub lblVersion_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+    Dim response As VbMsgBoxResult
+    response = MsgBox("Сбросить лицензию (для тестов)?", vbYesNo + vbQuestion)
+    If response = vbYes Then
+        On Error Resume Next
+        ThisWorkbook.Names("LicData").Delete
+        ThisWorkbook.Names("LicSign").Delete
+        MsgBox "Лицензия сброшена."
+        UpdateLicenseStatusUI
     End If
 End Sub
 
+' === АВТОМАТИЧЕСКОЕ ФОРМАТИРОВАНИЕ КЛЮЧА (XXXX-XXXX-XXXX-XXXX) ===
 
+
+
+Private Sub txtActivationCode_Change()
+    ' Если изменение вызвано нашим кодом, ничего не делаем
+    If bIgnoreChange Then Exit Sub
+    
+    Dim rawText As String
+    Dim cleanText As String
+    Dim formattedText As String
+    Dim i As Integer
+    
+    ' Включаем блокировку событий
+    bIgnoreChange = True
+    
+    ' 1. Получаем текущий текст и сразу переводим в верхний регистр
+    rawText = UCase(Me.txtActivationCode.Text)
+    
+    ' 2. Очищаем от всего лишнего (тире, пробелы), оставляем только буквы/цифры
+    cleanText = Replace(Replace(rawText, "-", ""), " ", "")
+    
+    ' 3. Ограничиваем длину ввода (максимум 16 символов самого ключа)
+    If Len(cleanText) > 16 Then cleanText = Left(cleanText, 16)
+    
+    ' 4. Собираем строку заново, вставляя тире
+    formattedText = ""
+    For i = 1 To Len(cleanText)
+        formattedText = formattedText & Mid(cleanText, i, 1)
+        
+        ' Вставляем тире после каждого 4-го символа (4, 8, 12), но не в самом конце
+        If (i Mod 4 = 0) And (i < 16) Then
+            formattedText = formattedText & "-"
+        End If
+    Next i
+    
+    ' 5. Записываем отформатированный текст обратно
+    Me.txtActivationCode.Text = formattedText
+    
+    ' 6. Ставим курсор в конец строки (чтобы при вставке в середину курсор не прыгал, можно усложнить, но для ввода ключа обычно вводят последовательно)
+    Me.txtActivationCode.SelStart = Len(formattedText)
+    
+    ' Снимаем блокировку
+    bIgnoreChange = False
+End Sub
+
+' Дополнительно: Запрет на ввод русских букв и спецсимволов (только латиница и цифры)
+Private Sub txtActivationCode_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    Dim char As String
+    
+    ' Используем ChrW вместо Chr, чтобы не было ошибки на русских буквах (Unicode)
+    char = UCase(ChrW(KeyAscii))
+    
+    ' Разрешаем: 0-9, A-Z, Backspace (8)
+    ' Запрещаем все остальное (включая русские буквы)
+    If InStr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", char) = 0 And KeyAscii <> 8 Then
+        KeyAscii = 0 ' Отменяем ввод символа
+    Else
+        ' Принудительно переводим в верхний регистр при вводе
+        ' (Если введена маленькая латинская буква a-z)
+        If KeyAscii >= 97 And KeyAscii <= 122 Then
+            KeyAscii = KeyAscii - 32
+        End If
+    End If
+End Sub

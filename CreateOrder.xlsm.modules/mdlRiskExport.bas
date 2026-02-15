@@ -440,7 +440,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
     
     ' Order header
     Set rng = doc.Range
-    rng.text = "ПРИКАЗ" & vbCrLf
+    rng.Text = "ПРИКАЗ" & vbCrLf
     rng.Font.Bold = True
     rng.Font.Size = 12
     rng.Font.Name = "Times New Roman"
@@ -458,7 +458,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
                  mdlHelper.SklonitFIO(employees(i).fio) & ", личный номер " & employees(i).lichniyNomer & ", " & _
                  mdlHelper.SklonitDolzhnost(employees(i).Position, employees(i).VoinskayaChast) & vbCrLf
         
-        rng.text = header
+        rng.Text = header
         rng.Font.Bold = False
         rng.Font.Size = 12
         rng.Font.Name = "Times New Roman"
@@ -475,7 +475,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
                          " (" & employees(i).periods(j).daysCount & " дн.) = " & _
                          employees(i).periods(j).PercentValue & "%" & vbCrLf
             
-            rng.text = periodText
+            rng.Text = periodText
             
             rng.ParagraphFormat.Alignment = 0 ' wdAlignParagraphLeft
             rng.Font.Bold = False
@@ -486,7 +486,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
             If employees(i).periods(j).IsExpired Then
                 Set rng = doc.Range
                 rng.Collapse Direction:=0
-                rng.text = "      ВНИМАНИЕ: Период с " & Format(employees(i).periods(j).StartDate, "dd.mm.yyyy") & _
+                rng.Text = "      ВНИМАНИЕ: Период с " & Format(employees(i).periods(j).StartDate, "dd.mm.yyyy") & _
                            " по " & Format(employees(i).periods(j).EndDate, "dd.mm.yyyy") & _
                            " превышает срок в три года на обращение за получением надбавки согласно ПМО 727" & vbCrLf
                 rng.Font.Color = RGB(255, 0, 0)
@@ -553,7 +553,7 @@ Private Sub AddRiskFoundationFromDSO(ByVal doc As Object, ByVal lichniyNomer As 
         Dim foundationLine As String
         foundationLine = "Основание: " & foundationText & vbCrLf
         
-        rng.text = foundationLine
+        rng.Text = foundationLine
         rng.Font.Size = 12
         rng.Font.Name = "Times New Roman"
         rng.ParagraphFormat.Alignment = 0 ' wdAlignParagraphLeft

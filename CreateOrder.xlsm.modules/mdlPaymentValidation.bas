@@ -324,24 +324,29 @@ Public Function ValidateSecrecy(ByVal ws As Worksheet, ByVal rowNum As Long) As 
     On Error GoTo ErrorHandler
     
     Dim foundation As String
-    Dim hasForm As Boolean, hasNumber As Boolean, hasDate As Boolean, hasNomenclature As Boolean
+    Dim hasForm As Boolean, hasNumber As Boolean, hasDate As Boolean
     
-    ' Basic check
+    ' Базовая проверка на пустоту
     If Not ValidateBasic(ws, rowNum) Then
         ValidateSecrecy = False
         Exit Function
     End If
     
-    ' Get foundation
-    foundation = LCase(Trim(CStr(ws.Cells(rowNum, COL_FOUNDATION).value)))
+    foundation = Trim(CStr(ws.Cells(rowNum, COL_FOUNDATION).value))
     
-    ' Check for mandatory elements
-    hasForm = (InStr(foundation, "форма") > 0)
-    hasNumber = (InStr(foundation, "номер") > 0)
-    hasDate = (InStr(foundation, "дата") > 0)
-    hasNomenclature = (InStr(foundation, "номенклатур") > 0 Or InStr(foundation, "пункт") > 0)
+    ' 1. Проверка Формы (ищем "форма 1", "форма 2", "форма 3" или "1 форма" и т.д.)
+    ' Шаблон: слово "форма" рядом с цифрой 1, 2 или 3
+    hasForm = mdlHelper.RegExpMatch(foundation, "(форма\s*[1-3]|[1-3]\s*форма)")
     
-    ValidateSecrecy = (hasForm And hasNumber And hasDate And hasNomenclature)
+    ' 2. Проверка Номера (ищем "№ 123" или "номер 123")
+    ' Шаблон: № или "номер" + пробелы + цифры/буквы
+    hasNumber = mdlHelper.RegExpMatch(foundation, "(№|номер)\s*[\w\d-]+")
+    
+    ' 3. Проверка Даты (ищем формат ДД.ММ.ГГГГ или ДД.ММ.ГГ)
+    ' Шаблон: цифры.цифры.цифры
+    hasDate = mdlHelper.RegExpMatch(foundation, "\d{2}\.\d{2}\.\d{2,4}")
+    
+    ValidateSecrecy = (hasForm And hasNumber And hasDate)
     Exit Function
     
 ErrorHandler:

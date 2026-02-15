@@ -155,20 +155,20 @@ Sub ExportToWordSpravkaFromTemplate()
                     .ClearFormatting
                     .Replacement.ClearFormatting
 
-                    .text = "[ЗВАНИЕ]"
-                    .Replacement.text = mdlHelper.GetZvanieImenitelny(zvanie)
+                    .Text = "[ЗВАНИЕ]"
+                    .Replacement.Text = mdlHelper.GetZvanieImenitelny(zvanie)
                     .Execute Replace:=2
 
-                    .text = "[ФИО]"
-                    .Replacement.text = fio
+                    .Text = "[ФИО]"
+                    .Replacement.Text = fio
                     .Execute Replace:=2
 
-                    .text = "[ЛИЧНЫЙ_НОМЕР]"
-                    .Replacement.text = lichniyNomer
+                    .Text = "[ЛИЧНЫЙ_НОМЕР]"
+                    .Replacement.Text = lichniyNomer
                     .Execute Replace:=2
 
-                    .text = "[ДОЛЖНОСТЬ]"
-                    .Replacement.text = mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast)
+                    .Text = "[ДОЛЖНОСТЬ]"
+                    .Replacement.Text = mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast)
                     .Execute Replace:=2
                 End With
 
@@ -176,10 +176,10 @@ Sub ExportToWordSpravkaFromTemplate()
                 Dim rng As Object
                 Set rng = wdDoc.Content
                 With rng.Find
-                    .text = "[ПЕРИОДЫ]"
+                    .Text = "[ПЕРИОДЫ]"
                     If .Execute Then
                         rng.Select
-                        rng.text = "" ' Clear placeholder
+                        rng.Text = "" ' Clear placeholder
                         Dim partLen As Integer, startPos As Integer, periodChunk As String
                         partLen = 230
                         For startPos = 1 To Len(periodsText) Step partLen

@@ -56,7 +56,7 @@ Private Sub txtSearch_Change()
     lastRowLN = wsStaff.Cells(wsStaff.Rows.count, colLichniyNomer_Global).End(xlUp).Row
     lastRow = Application.WorksheetFunction.Max(lastRowFIO, lastRowLN)
 
-    query = LCase(Trim(txtSearch.text))
+    query = LCase(Trim(txtSearch.Text))
     lstResults.Clear
     If Len(query) < 2 Then
         lstResults.AddItem "Введите минимум 2 символа для поиска..."
@@ -268,7 +268,7 @@ End Sub
 '============================================================
 Private Sub btnAddPeriod_Click()
     ' Проверка заполненности полей периода
-    If txtPeriodStart.text = "" Or txtPeriodEnd.text = "" Or cmbReason.text = "" Then
+    If txtPeriodStart.Text = "" Or txtPeriodEnd.Text = "" Or cmbReason.Text = "" Then
         MsgBox "Укажите даты и основание для периода.", vbExclamation
         Exit Sub
     End If
@@ -308,26 +308,26 @@ Private Sub btnAddPeriod_Click()
     If lastCol < 4 Then lastCol = 4 ' если только что создана строка
 
     ' Даты периода попадают в новые столбцы (пары: начало, конец)
-    wsDSO.Cells(rowNum, lastCol + 1).value = txtPeriodStart.text
-    wsDSO.Cells(rowNum, lastCol + 2).value = txtPeriodEnd.text
+    wsDSO.Cells(rowNum, lastCol + 1).value = txtPeriodStart.Text
+    wsDSO.Cells(rowNum, lastCol + 2).value = txtPeriodEnd.Text
 
     ' --- Корректно добавлять основание только в столбец 4 (через запятую) ---
     Dim oldReasonRaw As String, newReasonRaw As String
     oldReasonRaw = wsDSO.Cells(rowNum, 4).value
     If Trim(oldReasonRaw) = "" Then
-        newReasonRaw = cmbReason.text
+        newReasonRaw = cmbReason.Text
     Else
         If Right(Trim(oldReasonRaw), 1) <> "," Then
             oldReasonRaw = oldReasonRaw & ","
         End If
-        newReasonRaw = oldReasonRaw & " " & cmbReason.text
+        newReasonRaw = oldReasonRaw & " " & cmbReason.Text
     End If
     wsDSO.Cells(rowNum, 4).value = newReasonRaw
 
     Call LoadPeriodsForLichniy(selectedLichniyNomer)
-    txtPeriodStart.text = ""
-    txtPeriodEnd.text = ""
-    cmbReason.text = ""
+    txtPeriodStart.Text = ""
+    txtPeriodEnd.Text = ""
+    cmbReason.Text = ""
     lblStatus.Caption = "Период добавлен."
 End Sub
 
@@ -384,9 +384,9 @@ Private Sub btnDeletePeriod_Click()
             Call CleanPeriodsForLichniyRow(wsDSO, i)
 
             Call LoadPeriodsForLichniy(selectedLichniyNomer)
-            txtPeriodStart.text = ""
-            txtPeriodEnd.text = ""
-            cmbReason.text = ""
+            txtPeriodStart.Text = ""
+            txtPeriodEnd.Text = ""
+            cmbReason.Text = ""
             lblStatus.Caption = "Период удалён корректно."
             Exit Sub
         End If
@@ -410,9 +410,9 @@ Private Sub lstPeriods_Click()
     ' Проверка на заголовок или спец. строку
     If lstPeriods.List(lstPeriods.ListIndex, 0) = "Нет действующих периодов" Then Exit Sub
     
-    txtPeriodStart.text = lstPeriods.List(lstPeriods.ListIndex, 1) ' Начало
-    txtPeriodEnd.text = lstPeriods.List(lstPeriods.ListIndex, 2)   ' Конец
-    cmbReason.text = lstPeriods.List(lstPeriods.ListIndex, 3)      ' Основание
+    txtPeriodStart.Text = lstPeriods.List(lstPeriods.ListIndex, 1) ' Начало
+    txtPeriodEnd.Text = lstPeriods.List(lstPeriods.ListIndex, 2)   ' Конец
+    cmbReason.Text = lstPeriods.List(lstPeriods.ListIndex, 3)      ' Основание
 End Sub
 
 
@@ -433,8 +433,8 @@ Private Sub btnEditPeriod_Click()
             maxPairs = (lastCol - 4 + 1) \ 2
             ' Индексирование строго по совпадающей паре
             j = 5 + (periodNum - 1) * 2
-            wsDSO.Cells(i, j).value = txtPeriodStart.text
-            wsDSO.Cells(i, j + 1).value = txtPeriodEnd.text
+            wsDSO.Cells(i, j).value = txtPeriodStart.Text
+            wsDSO.Cells(i, j + 1).value = txtPeriodEnd.Text
 
             reasonsArr = Split(wsDSO.Cells(i, 4).value, ",")
             ' Если оснований меньше, расширить массив до нужного размера
@@ -446,7 +446,7 @@ Private Sub btnEditPeriod_Click()
                     End If
                 Next k
             End If
-            reasonsArr(periodNum - 1) = cmbReason.text
+            reasonsArr(periodNum - 1) = cmbReason.Text
             wsDSO.Cells(i, 4).value = Join(reasonsArr, ",")
 
             Call LoadPeriodsForLichniy(selectedLichniyNomer)

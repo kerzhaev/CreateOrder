@@ -123,11 +123,11 @@ Private Function IsTextFIOColumn(ws As Worksheet, colNum As Long) As Boolean
 End Function
 
 Public Function ExtractVoinskayaChast(inputText As String) As String
-    Dim text As String, i As Long, result As String, inNumber As Boolean
-    text = Trim(inputText): result = "": inNumber = False
-    For i = 1 To Len(text)
-        If IsNumeric(Mid(text, i, 1)) Then
-            result = result & Mid(text, i, 1): inNumber = True
+    Dim Text As String, i As Long, result As String, inNumber As Boolean
+    Text = Trim(inputText): result = "": inNumber = False
+    For i = 1 To Len(Text)
+        If IsNumeric(Mid(Text, i, 1)) Then
+            result = result & Mid(Text, i, 1): inNumber = True
         Else
             If inNumber And Len(result) >= 4 Then ExtractVoinskayaChast = result: Exit Function
             If inNumber Then result = "": inNumber = False
@@ -195,19 +195,19 @@ Public Function IsVoinskayaChastColumn(ws As Worksheet, colNum As Long) As Boole
     If totalCount > 0 Then IsVoinskayaChastColumn = (voinskayaChastCount / totalCount) > 0.7 Else IsVoinskayaChastColumn = False
 End Function
 
-Public Function ContainsNumbers(text As String) As Boolean
+Public Function ContainsNumbers(Text As String) As Boolean
     Dim i As Long, char As String
-    For i = 1 To Len(text)
-        char = Mid(text, i, 1)
+    For i = 1 To Len(Text)
+        char = Mid(Text, i, 1)
         If char >= "0" And char <= "9" Then ContainsNumbers = True: Exit Function
     Next i
     ContainsNumbers = False
 End Function
 
-Public Function ContainsLetters(text As String) As Boolean
+Public Function ContainsLetters(Text As String) As Boolean
     Dim i As Long, char As String
-    For i = 1 To Len(text)
-        char = Mid(text, i, 1)
+    For i = 1 To Len(Text)
+        char = Mid(Text, i, 1)
         If (char >= "А" And char <= "я") Or (char >= "A" And char <= "z") Then
             ContainsLetters = True: Exit Function
         End If
@@ -304,8 +304,8 @@ Public Function CheckRowForDateErrors(ws As Worksheet, rowNum As Long) As Boolea
     If lastCol > 50 Then lastCol = 50
     j = 5
     Do While j + 1 <= lastCol
-        startValue = Trim(ws.Cells(rowNum, j).text)
-        endValue = Trim(ws.Cells(rowNum, j + 1).text)
+        startValue = Trim(ws.Cells(rowNum, j).Text)
+        endValue = Trim(ws.Cells(rowNum, j + 1).Text)
         If startValue <> "" And endValue <> "" Then
             On Error Resume Next
             dateStart = DateValue(startValue)
@@ -1553,3 +1553,71 @@ Public Function fio(NameAsText As String, Optional NameCase As String = "И", Op
         
 End Function
 
+' ==========================================================
+' РЕГУЛЯРНЫЕ ВЫРАЖЕНИЯ (RegExp Engine)
+' ==========================================================
+
+' @description Извлекает текст по шаблону регулярного выражения
+' @param Text [String] Исходный текст
+' @param Pattern [String] Шаблон (например, "\d+" для цифр)
+' @param item [Integer] Номер совпадения (1 - первое, -1 - вернуть все через разделитель)
+' @return [String] Найденное значение или пустая строка
+Public Function RegExpExtract(ByVal Text As String, ByVal Pattern As String, Optional ByVal item As Integer = 1, Optional ByVal MatchCase As Boolean = False, Optional ByVal delim As String = ", ") As String
+    Dim objRegExp As Object
+    Dim objMatches As Object
+    Dim strResult As String
+    Dim i As Integer
+    
+    On Error Resume Next
+    
+    ' Используем Late Binding для совместимости (не требует Tools->References)
+    Set objRegExp = CreateObject("VBScript.RegExp")
+    
+    If objRegExp Is Nothing Then
+        RegExpExtract = ""
+        Exit Function
+    End If
+    
+    With objRegExp
+        .Global = True
+        .IgnoreCase = Not MatchCase
+        .Pattern = Pattern
+    End With
+    
+    If objRegExp.Test(Text) Then
+        Set objMatches = objRegExp.Execute(Text)
+        
+        If item = -1 Then
+            ' Режим "Все совпадения": собираем через разделитель
+            For i = 0 To objMatches.count - 1
+                If strResult = "" Then
+                    strResult = objMatches.item(i).value
+                Else
+                    strResult = strResult & delim & objMatches.item(i).value
+                End If
+            Next i
+            RegExpExtract = strResult
+        ElseIf item > 0 Then
+            ' Режим "Конкретное совпадение"
+            If objMatches.count >= item Then
+                RegExpExtract = objMatches.item(item - 1).value
+            End If
+        End If
+    End If
+    
+    Set objRegExp = Nothing
+End Function
+
+' @description Проверяет, соответствует ли текст шаблону (например, формат даты)
+Public Function RegExpMatch(ByVal Text As String, ByVal Pattern As String) As Boolean
+    Dim objRegExp As Object
+    On Error Resume Next
+    Set objRegExp = CreateObject("VBScript.RegExp")
+    With objRegExp
+        .Global = False
+        .IgnoreCase = True
+        .Pattern = Pattern
+    End With
+    RegExpMatch = objRegExp.Test(Text)
+    Set objRegExp = Nothing
+End Function

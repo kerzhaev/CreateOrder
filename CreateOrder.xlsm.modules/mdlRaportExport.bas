@@ -194,48 +194,48 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                 With wdDoc.Content.Find
                     .ClearFormatting
                     .Replacement.ClearFormatting
-                    .text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
-                    .Replacement.text = fio
+                    .Text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
+                    .Replacement.Text = fio
                     .Execute Replace:=2
-                    .text = "[ЛИЧНЫЙ_НОМЕР]"
-                    .Replacement.text = lichniyNomer
+                    .Text = "[ЛИЧНЫЙ_НОМЕР]"
+                    .Replacement.Text = lichniyNomer
                     .Execute Replace:=2
                     .ClearFormatting
                     .Replacement.ClearFormatting
-                    .text = "[ЗВАНИЕ_СОКРАЩЕННО]"
-                    .Replacement.text = mdlHelper.GetZvanieSkrasheno(zvanie)
+                    .Text = "[ЗВАНИЕ_СОКРАЩЕННО]"
+                    .Replacement.Text = mdlHelper.GetZvanieSkrasheno(zvanie)
                     .Execute Replace:=2
                 
-                    .text = "[ФИО_ИНИЦИАЛЫ]"
-                    .Replacement.text = mdlHelper.GetFIOWithInitials(fio)
+                    .Text = "[ФИО_ИНИЦИАЛЫ]"
+                    .Replacement.Text = mdlHelper.GetFIOWithInitials(fio)
                     .Execute Replace:=2
                 
-                    .text = "[ДОЛЖНОСТЬ]"
-                    .Replacement.text = mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast)
+                    .Text = "[ДОЛЖНОСТЬ]"
+                    .Replacement.Text = mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast)
                     .Execute Replace:=2
                 
-                    .text = "[ПЕРИОД_УЧАСТИЯ]"
-                    .Replacement.text = periodForRaport
+                    .Text = "[ПЕРИОД_УЧАСТИЯ]"
+                    .Replacement.Text = periodForRaport
                     .Execute Replace:=2
                 
-                    .text = "[РАСЧЕТ]"
-                    .Replacement.text = calculationText
+                    .Text = "[РАСЧЕТ]"
+                    .Replacement.Text = calculationText
                     .Execute Replace:=2
                 
-                    .text = "[ЗВАНИЕ_ИМЕНИТЕЛЬНЫЙ]"
-                    .Replacement.text = mdlHelper.GetZvanieImenitelnyForSignature(zvanie)
+                    .Text = "[ЗВАНИЕ_ИМЕНИТЕЛЬНЫЙ]"
+                    .Replacement.Text = mdlHelper.GetZvanieImenitelnyForSignature(zvanie)
                     .Execute Replace:=2
                 
-                    .text = "[ФИО_ИНИЦИАЛЫ_ИМЕНИТЕЛЬНЫЙ]"
-                    .Replacement.text = mdlHelper.GetFIOWithInitialsImenitelny(fio)
+                    .Text = "[ФИО_ИНИЦИАЛЫ_ИМЕНИТЕЛЬНЫЙ]"
+                    .Replacement.Text = mdlHelper.GetFIOWithInitialsImenitelny(fio)
                     .Execute Replace:=2
                 
-                    .text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
-                    .Replacement.text = fio
+                    .Text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
+                    .Replacement.Text = fio
                     .Execute Replace:=2
                 
-                    .text = "[ЛИЧНЫЙ_НОМЕР]"
-                    .Replacement.text = lichniyNomer
+                    .Text = "[ЛИЧНЫЙ_НОМЕР]"
+                    .Replacement.Text = lichniyNomer
                     .Execute Replace:=2
                     
                 End With
@@ -244,9 +244,9 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                 Dim rng As Object
                 Set rng = wdDoc.Content
                 With rng.Find
-                    .text = "[ПЕРИОДЫ_СЛУЖБЫ]"
+                    .Text = "[ПЕРИОДЫ_СЛУЖБЫ]"
                     If .Execute Then
-                        rng.text = periodsText
+                        rng.Text = periodsText
                     End If
                 End With
 

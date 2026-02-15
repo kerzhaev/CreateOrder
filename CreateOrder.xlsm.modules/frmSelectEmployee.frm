@@ -107,7 +107,7 @@ Private Sub txtSearch_Change()
         Exit Sub
     End If
     
-    query = LCase(Trim(txtSearch.text))
+    query = LCase(Trim(txtSearch.Text))
     lstResults.Clear
     
     If Len(query) < 2 Then

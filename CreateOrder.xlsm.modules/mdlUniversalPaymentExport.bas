@@ -533,48 +533,48 @@ Public Function FillPaymentTemplate(ByVal doc As Object, ByRef payment As Paymen
         .Replacement.ClearFormatting
         
         ' [ФИО]
-        .text = "[ФИО]"
-        .Replacement.text = payment.fio
+        .Text = "[ФИО]"
+        .Replacement.Text = payment.fio
         .Execute Replace:=2
         
         ' [ФИО_ИМЕНИТЕЛЬНЫЙ]
-        .text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
-        .Replacement.text = mdlHelper.SklonitFIO(payment.fio)
+        .Text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
+        .Replacement.Text = mdlHelper.SklonitFIO(payment.fio)
         .Execute Replace:=2
         
         ' [ЗВАНИЕ]
-        .text = "[ЗВАНИЕ]"
-        .Replacement.text = payment.Rank
+        .Text = "[ЗВАНИЕ]"
+        .Replacement.Text = payment.Rank
         .Execute Replace:=2
         
         ' [ЗВАНИЕ_СКЛОНЕННОЕ]
-        .text = "[ЗВАНИЕ_СКЛОНЕННОЕ]"
-        .Replacement.text = mdlHelper.SklonitZvanie(payment.Rank)
+        .Text = "[ЗВАНИЕ_СКЛОНЕННОЕ]"
+        .Replacement.Text = mdlHelper.SklonitZvanie(payment.Rank)
         .Execute Replace:=2
         
         ' [ЛИЧНЫЙ_НОМЕР]
-        .text = "[ЛИЧНЫЙ_НОМЕР]"
-        .Replacement.text = payment.lichniyNomer
+        .Text = "[ЛИЧНЫЙ_НОМЕР]"
+        .Replacement.Text = payment.lichniyNomer
         .Execute Replace:=2
         
         ' [ДОЛЖНОСТЬ]
-        .text = "[ДОЛЖНОСТЬ]"
-        .Replacement.text = payment.Position
+        .Text = "[ДОЛЖНОСТЬ]"
+        .Replacement.Text = payment.Position
         .Execute Replace:=2
         
         ' [ДОЛЖНОСТЬ_СКЛОНЕННАЯ]
-        .text = "[ДОЛЖНОСТЬ_СКЛОНЕННАЯ]"
-        .Replacement.text = mdlHelper.SklonitDolzhnost(payment.Position, payment.VoinskayaChast)
+        .Text = "[ДОЛЖНОСТЬ_СКЛОНЕННАЯ]"
+        .Replacement.Text = mdlHelper.SklonitDolzhnost(payment.Position, payment.VoinskayaChast)
         .Execute Replace:=2
         
         ' [РАЗМЕР]
-        .text = "[РАЗМЕР]"
-        .Replacement.text = payment.amount
+        .Text = "[РАЗМЕР]"
+        .Replacement.Text = payment.amount
         .Execute Replace:=2
         
         ' [ОСНОВАНИЕ]
-        .text = "[ОСНОВАНИЕ]"
-        .Replacement.text = payment.foundation
+        .Text = "[ОСНОВАНИЕ]"
+        .Replacement.Text = payment.foundation
         .Execute Replace:=2
     End With
     
@@ -608,7 +608,7 @@ Public Function GeneratePaymentTextDirectly(ByVal doc As Object, ByRef payment A
     ' Insert text into document
     Set rng = doc.Range
     rng.Collapse Direction:=0
-    rng.text = textLine
+    rng.Text = textLine
     rng.Font.Name = "Times New Roman"
     rng.Font.Size = 12
     
