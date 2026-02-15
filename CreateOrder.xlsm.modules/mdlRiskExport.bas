@@ -193,6 +193,10 @@ End Sub
 '* @return Long — number of collected periods
 '* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
+'/**
+'* CollectRawRiskPeriods — collect all employee periods from DSO sheet
+'* FIX: Uses mdlHelper.ParseDateSafe to handle dots and 2-digit years correctly
+'*/
 Private Function CollectRawRiskPeriods(ByVal lichniyNomer As String, ByRef periods() As RiskPeriod) As Long
     Dim wsDSO As Worksheet
     Set wsDSO = ThisWorkbook.Sheets("ДСО")
@@ -210,7 +214,7 @@ Private Function CollectRawRiskPeriods(ByVal lichniyNomer As String, ByRef perio
     Dim pCount As Long
     pCount = 0
     
-    ' Expiration period: 3 years 6 months (42 months)
+    ' Срок давности: 3 года 6 месяцев (42 месяца)
     Dim expirationDate As Date
     expirationDate = DateAdd("m", -42, Date)
     
@@ -220,29 +224,32 @@ Private Function CollectRawRiskPeriods(ByVal lichniyNomer As String, ByRef perio
             lastCol = wsDSO.Cells(i, wsDSO.Columns.count).End(xlToLeft).Column
             
             Dim j As Long
-            ' Periods come in pairs starting from 5th column
+            ' Периоды идут парами, начиная с 5 колонки
             For j = 5 To lastCol Step 2
                 Dim startVal As Variant, endVal As Variant
-                startVal = wsDSO.Cells(i, j).value
-                endVal = wsDSO.Cells(i, j + 1).value
+                ' ВАЖНО: Читаем .Text, чтобы получить именно то, что видит пользователь (с точками)
+                startVal = wsDSO.Cells(i, j).Text
+                endVal = wsDSO.Cells(i, j + 1).Text
                 
-                If IsDate(startVal) And IsDate(endVal) Then
-                    Dim StartDate As Date, EndDate As Date
-                    StartDate = CDate(startVal)
-                    EndDate = CDate(endVal)
-                    
-                    If StartDate <= EndDate Then
+                ' Используем наш мощный парсер из mdlHelper
+                Dim sDate As Date, eDate As Date
+                sDate = mdlHelper.ParseDateSafe(startVal)
+                eDate = mdlHelper.ParseDateSafe(endVal)
+                
+                ' Если даты валидны (функция возвращает > 0 для валидных дат)
+                If sDate > 0 And eDate > 0 Then
+                    If sDate <= eDate Then
                         pCount = pCount + 1
-                        tempPeriods(pCount).StartDate = StartDate
-                        tempPeriods(pCount).EndDate = EndDate
-                        tempPeriods(pCount).IsExpired = (StartDate < expirationDate)
+                        tempPeriods(pCount).StartDate = sDate
+                        tempPeriods(pCount).EndDate = eDate
+                        tempPeriods(pCount).IsExpired = (sDate < expirationDate)
                     End If
                 End If
             Next j
         End If
     Next i
     
-    ' Merge overlapping periods
+    ' Слияние пересекающихся периодов
     If pCount > 0 Then
         Dim mergedPeriods() As RiskPeriod
         Dim mergedCount As Long

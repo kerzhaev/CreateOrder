@@ -1246,27 +1246,35 @@ End Function
 ' ==============================================================================
 ' HOTFIX: ROBUST DATE PARSER
 ' ==============================================================================
+' ==============================================================================
+' HOTFIX: ROBUST DATE PARSER (v2.0 - Fix for 2-digit years)
+' ==============================================================================
 Public Function ParseDateSafe(val As Variant) As Date
     On Error Resume Next
-    ParseDateSafe = 0 ' Default failure
+    ParseDateSafe = 0 ' По умолчанию 0 (30.12.1899)
     
-    If IsEmpty(val) Then Exit Function
+    If IsEmpty(val) Or Trim(CStr(val)) = "" Then Exit Function
     
-    ' 1. Try standard conversion (works for real dates and proper system text)
-    If IsDate(val) Then
-        Dim d As Date
-        d = CDate(val)
-        ' Logic check: ignore default 1899 dates (value 0)
-        If Year(d) > 2000 Then
+    Dim d As Date
+    Dim sVal As String
+    sVal = Trim(CStr(val))
+    
+    ' 1. Попытка стандартной конвертации
+    If IsDate(sVal) Then
+        d = CDate(sVal)
+        ' FIX: Если Excel распознал как 1925 год (для "25"), исправляем на 2025
+        If Year(d) < 2000 And Year(d) > 1900 Then
+            d = DateSerial(Year(d) + 100, Month(d), Day(d))
+        End If
+        
+        ' Принимаем дату, если она адекватна (между 2000 и 2100)
+        If Year(d) > 2000 And Year(d) < 2100 Then
             ParseDateSafe = d
             Exit Function
         End If
     End If
     
-    ' 2. Manual parsing for stubborn text formats (e.g. "01.02.25" on US system)
-    Dim sVal As String
-    sVal = Trim(CStr(val))
-    
+    ' 2. Ручной разбор для текста с точками (например "01.02.25")
     Dim parts() As String
     If InStr(sVal, ".") > 0 Then
         parts = Split(sVal, ".")
@@ -1274,7 +1282,6 @@ Public Function ParseDateSafe(val As Variant) As Date
         parts = Split(sVal, "/")
     End If
     
-    ' Expecting 3 parts: Day, Month, Year
     If (Not Not parts) <> 0 Then
         If UBound(parts) = 2 Then
             Dim dInt As Integer, mInt As Integer, yInt As Integer
@@ -1282,13 +1289,12 @@ Public Function ParseDateSafe(val As Variant) As Date
             mInt = CInt(parts(1))
             yInt = CInt(parts(2))
             
-            ' Fix 2-digit year
+            ' FIX: Явная обработка двузначного года
             If yInt < 100 Then
-                If yInt < 50 Then yInt = 2000 + yInt Else yInt = 1900 + yInt
+                yInt = 2000 + yInt
             End If
             
-            ' Logic check: Year > 2000
-            If yInt > 2000 Then
+            If yInt > 2000 And yInt < 2100 Then
                 ParseDateSafe = DateSerial(yInt, mInt, dInt)
             End If
         End If

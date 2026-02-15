@@ -271,24 +271,28 @@ End Sub
 '====================================================================
 
 ' Collection of raw periods from one DSO row
+' Сбор сырых периодов из одной строки ДСО (Локальная версия для отчета)
+' FIX: Использует mdlHelper.ParseDateSafe
 Private Function CollectRawRiskPeriods_Local(ws As Worksheet, rowNum As Long, ByRef periods() As mdlRiskExport.RiskPeriod) As Long
     Dim lastCol As Long, j As Long, pCount As Long
     pCount = 0
     lastCol = ws.Cells(rowNum, ws.Columns.count).End(xlToLeft).Column
     
-    ReDim periods(1 To 50) ' Reserve
+    ReDim periods(1 To 50) ' Резерв
     Dim expirationDate As Date
-    expirationDate = DateAdd("m", -42, Date) ' 3 years 6 months
+    expirationDate = DateAdd("m", -42, Date) ' 3 года 6 месяцев
     
     For j = 5 To lastCol Step 2
         Dim sVal As Variant, eVal As Variant
-        sVal = ws.Cells(rowNum, j).value
-        eVal = ws.Cells(rowNum, j + 1).value
+        ' Читаем .Text чтобы избежать проблем с форматом ячеек
+        sVal = ws.Cells(rowNum, j).Text
+        eVal = ws.Cells(rowNum, j + 1).Text
         
-        If IsDate(sVal) And IsDate(eVal) Then
-            Dim sDate As Date, eDate As Date
-            sDate = CDate(sVal): eDate = CDate(eVal)
-            
+        Dim sDate As Date, eDate As Date
+        sDate = mdlHelper.ParseDateSafe(sVal)
+        eDate = mdlHelper.ParseDateSafe(eVal)
+        
+        If sDate > 0 And eDate > 0 Then
             If sDate <= eDate Then
                 pCount = pCount + 1
                 periods(pCount).StartDate = sDate

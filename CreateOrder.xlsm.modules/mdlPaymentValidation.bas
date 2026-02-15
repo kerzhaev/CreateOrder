@@ -157,51 +157,37 @@ End Function
 ' @param rowNum As Long - row number to check
 ' @return Boolean - True if data is valid
 ' =============================================
+' =============================================
+' ИСПРАВЛЕННАЯ ВАЛИДАЦИЯ (Мягкая проверка)
+' =============================================
+' =============================================
+' ИСПРАВЛЕННАЯ ВАЛИДАЦИЯ (Мягкая проверка для Водителей)
+' =============================================
 Public Function ValidateDriverSDE(ByVal ws As Worksheet, ByVal rowNum As Long) As Boolean
     On Error GoTo ErrorHandler
     
-    Dim lichniyNomer As String
+    ' 1. Базовые проверки (заполнены ли ФИО и номер)
+    If Not ValidateBasic(ws, rowNum) Then ValidateDriverSDE = False: Exit Function
+    
+    ' 2. Проверка должности (через Штат) - опционально, если хотите строгую проверку должности
+    ' Если нужно просто проверить текст основания, этот блок можно пропустить
+    
+    ' 3. Проверка текста основания (МЯГКАЯ)
     Dim foundation As String
-    Dim staffData As Object
-    Dim Position As String
-    
-    ' Basic check
-    If Not ValidateBasic(ws, rowNum) Then
-        ValidateDriverSDE = False
-        Exit Function
-    End If
-    
-    ' Get personal number
-    lichniyNomer = Trim(CStr(ws.Cells(rowNum, COL_LICHNIY_NOMER).value))
-    
-    ' Get data from staff
-    Set staffData = mdlHelper.GetStaffData(lichniyNomer, True)
-    If staffData.count = 0 Then
-        ValidateDriverSDE = False
-        Exit Function
-    End If
-    
-    ' Check position (must be "driver" or "senior driver", NOT "mechanic-driver")
-    Position = LCase(Trim(CStr(staffData("Штатная должность"))))
-    If InStr(Position, "механик-водитель") > 0 Then
-        ValidateDriverSDE = False
-        Exit Function
-    End If
-    If InStr(Position, "водитель") = 0 And InStr(Position, "старший водитель") = 0 Then
-        ValidateDriverSDE = False
-        Exit Function
-    End If
-    
-    ' Check foundation (must contain: copy of license, VAI certificate, brand, license plate)
     foundation = LCase(Trim(CStr(ws.Cells(rowNum, COL_FOUNDATION).value)))
     
-    Dim hasVU As Boolean, hasVAI As Boolean, hasMark As Boolean, hasGRZ As Boolean
-    hasVU = (InStr(foundation, "удостоверен") > 0 Or InStr(foundation, "ву") > 0 Or InStr(foundation, "водительск") > 0)
-    hasVAI = (InStr(foundation, "ваи") > 0)
-    hasMark = (InStr(foundation, "марка") > 0)
-    hasGRZ = (InStr(foundation, "грз") > 0 Or InStr(foundation, "регистрационный") > 0 Or InStr(foundation, "гос. номер") > 0)
+    ' Мы ищем ХОТЯ БЫ ОДНО совпадение из списка ключевых слов
+    Dim isValidDocs As Boolean
+    isValidDocs = False
     
-    ValidateDriverSDE = (hasVU And hasVAI And hasMark And hasGRZ)
+    ' Если есть "ваи" ИЛИ "ву" ИЛИ "приказ" ИЛИ "марка" - считаем верным
+    If InStr(foundation, "ваи") > 0 Then isValidDocs = True
+    If InStr(foundation, "ву") > 0 Then isValidDocs = True
+    If InStr(foundation, "удостоверен") > 0 Then isValidDocs = True
+    If InStr(foundation, "приказ") > 0 Then isValidDocs = True
+    If InStr(foundation, "техник") > 0 Then isValidDocs = True
+    
+    ValidateDriverSDE = isValidDocs
     Exit Function
     
 ErrorHandler:

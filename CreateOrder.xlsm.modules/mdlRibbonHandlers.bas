@@ -42,10 +42,38 @@ ErrorHandler:
 End Sub
 
 ' Handler for report (raport)
+' Handler for report (raport) with CHOICE
 Sub RunRaportExport(control As IRibbonControl)
     On Error GoTo ErrorHandler
+    
+    ' Спрашиваем пользователя
+    Dim choice As VbMsgBoxResult
+    choice = MsgBox("Какой рапорт необходимо сформировать?" & vbCrLf & vbCrLf & _
+                    "Да - Рапорт на ДСО (Сутки отдыха)" & vbCrLf & _
+                    "Нет - Рапорт на РИСК (Денежная выплата)" & vbCrLf & _
+                    "Отмена - Выход", vbYesNoCancel + vbQuestion, "Выбор типа рапорта")
+    
+    If choice = vbCancel Then Exit Sub
+    
     Application.ScreenUpdating = False
-    Call ExportToWordRaportFromTemplateByLichniyNomer
+    
+    If choice = vbYes Then
+        ' === РАПОРТ ДСО ===
+        ' Использует стандартную функцию экспорта (по умолчанию работает как ДСО)
+        Call mdlRaportExport.ExportToWordRaportFromTemplateByLichniyNomer
+    Else
+        ' === РАПОРТ РИСК ===
+        ' Внимание: Если у вас есть отдельная процедура для Рапорта по Риску, вставьте её вызов сюда.
+        ' Если её нет, то пока используем ту же функцию, но шаблон должен быть другим.
+        ' В текущей архитектуре mdlRaportExport настроен на один шаблон.
+        
+        ' Вариант А: Если вы хотите использовать тот же движок, но другой шаблон:
+        MsgBox "Функционал отдельного рапорта на Риск пока в разработке. Используется стандартный шаблон.", vbInformation
+        Call mdlRaportExport.ExportToWordRaportFromTemplateByLichniyNomer
+        
+        ' Вариант Б (Правильный): Нужно создать в mdlRaportExport функцию ExportRiskRaport...
+    End If
+    
     Application.ScreenUpdating = True
     Exit Sub
     
