@@ -1,233 +1,227 @@
 Attribute VB_Name = "mdlDataValidation"
-' ==============================================================================
+' ===============================================================================
 ' Module: mdlDataValidation
-' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' Version: 5.0.0 (Refactored)
 ' Date: 14.02.2026
-' Description: Validates sheet data using high-performance array processing.
-'              Checks for empty fields and invalid date periods.
-' ==============================================================================
+' Description: Bulk validation of the main sheet (DSO).
+'              Now uses mdlHelper.ParseDateSafe for robust date checking.
+' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' ===============================================================================
 
 Option Explicit
 
 ' /**
-'  * Main validation procedure.
-'  * Reads data into memory (Array), checks logic, and highlights errors in Red.
+'  * Main entry point for the "Validate Data" ribbon button.
+'  * Scans the entire DSO sheet and highlights errors.
 '  */
 Public Sub ValidateMainSheetData()
     Dim ws As Worksheet
-    Dim wsStaff As Worksheet
     Dim lastRow As Long
-    Dim lastCol As Long
-    Dim i As Long, j As Long
-    Dim vData As Variant ' Data Array
+    Dim i As Long
     Dim errorCount As Long
-    Dim strFIO As String, strID As String
-    Dim dStart As Variant, dEnd As Variant
-    Dim tStart As Double
+    Dim warningCount As Long
+    Dim processedRows As Long
+    Dim reportText As String
 
     On Error GoTo ErrorHandler
 
-    ' 1. Setup Environment
-    tStart = Timer
     Application.ScreenUpdating = False
-    Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
-    Application.StatusBar = "Подготовка данных..."
+    Application.StatusBar = "Starting validation..."
 
-    ' 2. Validate Sheets existence
-    Set ws = GetWorksheetSafeValidation() ' Active or Target
+    ' 1. Get Worksheet
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets("ДСО")
+    On Error GoTo ErrorHandler
+    
     If ws Is Nothing Then
-        MsgBox "Ошибка: Лист для проверки не найден!", vbCritical, "Ошибка"
-        GoTo CleanUp
-    End If
-    
-    Set wsStaff = GetWorksheetSafeValidation("Штат")
-    If wsStaff Is Nothing Then
-        MsgBox "Ошибка: Не найден лист 'Штат'!", vbCritical, "Ошибка"
+        MsgBox "Лист 'ДСО' не найден!", vbCritical
         GoTo CleanUp
     End If
 
-    ' 3. Load Data into Memory (Array)
-    lastRow = ws.Cells(ws.Rows.count, 2).End(xlUp).Row ' Column B (Name)
+    ' 2. Determine range
+    lastRow = mdlHelper.GetLastRow(ws, "C")
     If lastRow < 2 Then
-        MsgBox "Нет данных для проверки (строк < 2).", vbInformation, "Инфо"
+        MsgBox "Нет данных для проверки (строки 2+).", vbInformation
         GoTo CleanUp
     End If
-    
-    ' Determine last column (at least up to column 20 or actual data)
-    lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
-    If lastCol < 20 Then lastCol = 20
-
-    ' Optimization: Read entire range to Array
-    ' Value2 is faster and handles dates as doubles
-    vData = ws.Range(ws.Cells(1, 1), ws.Cells(lastRow, lastCol)).Value2
-
-    ' Clear previous error highlights
-    ws.Range(ws.Cells(2, 1), ws.Cells(lastRow, lastCol)).Interior.Pattern = xlNone
 
     errorCount = 0
-    Application.StatusBar = "Анализ строк..."
+    warningCount = 0
+    processedRows = 0
+    reportText = "====== ОТЧЁТ О ВАЛИДАЦИИ ======" & vbCrLf & vbCrLf
+    reportText = reportText & "Дата: " & Format(Now, "dd.mm.yyyy hh:mm") & vbCrLf
+    reportText = reportText & "Строк: " & (lastRow - 1) & vbCrLf & vbCrLf
 
-    ' 4. Validation Loop (In Memory)
-    For i = 2 To UBound(vData, 1)
-        
-        ' Check FIO (Column 2 / B)
-        strFIO = CStr(vData(i, 2))
-        If Len(Trim(strFIO)) = 0 Then
-            MarkCellError ws, i, 2
-            errorCount = errorCount + 1
-        End If
-
-        ' Check Personal ID (Column 3 / C)
-        strID = CStr(vData(i, 3))
-        If Len(Trim(strID)) = 0 Then
-            MarkCellError ws, i, 3
-            errorCount = errorCount + 1
-        End If
-
-        ' Check Periods (Start from Column 5 / E, Step 2)
-        ' Expected pair: StartDate, EndDate
-        For j = 5 To UBound(vData, 2) - 1 Step 2
-            dStart = vData(i, j)
-            dEnd = vData(i, j + 1)
-            
-            ' If at least one cell in pair is not empty
-            If Not IsEmpty(dStart) Or Not IsEmpty(dEnd) Then
-                ' 4.1 Check completeness
-                If IsEmpty(dStart) Then
-                    MarkCellError ws, i, j
-                    errorCount = errorCount + 1
-                ElseIf IsEmpty(dEnd) Then
-                    MarkCellError ws, i, j + 1
-                    errorCount = errorCount + 1
-                Else
-                    ' 4.2 Check Date Logic (Start <= End)
-                    If IsNumeric(dStart) And IsNumeric(dEnd) Then
-                        If CDbl(dStart) > CDbl(dEnd) Then
-                            MarkCellError ws, i, j
-                            MarkCellError ws, i, j + 1
-                            errorCount = errorCount + 1
-                        End If
-                    Else
-                        ' Not valid dates
-                        MarkCellError ws, i, j
-                        errorCount = errorCount + 1
-                    End If
-                End If
-            End If
-        Next j
-        
-        ' UI Feedback (every 100 rows)
-        If i Mod 100 = 0 Then Application.StatusBar = "Проверено строк: " & i & " из " & lastRow
+    ' 3. Loop through rows
+    For i = 2 To lastRow
+        Application.StatusBar = "Проверка строки " & i & " из " & lastRow
+        Call ValidateRowLogic(ws, i, errorCount, warningCount)
+        processedRows = processedRows + 1
     Next i
 
-    ' 5. Results
+    ' 4. Final Report
     Application.StatusBar = False
-    Dim timeTaken As Double
-    timeTaken = Round(Timer - tStart, 2)
-
-    If errorCount > 0 Then
-        MsgBox "Проверка завершена за " & timeTaken & " сек." & vbCrLf & _
-               "Найдено ошибок: " & errorCount & "." & vbCrLf & _
-               "Ошибочные ячейки выделены красным.", vbExclamation, "Результат"
+    
+    If errorCount = 0 And warningCount = 0 Then
+        reportText = reportText & "ОШИБОК НЕ ОБНАРУЖЕНО." & vbCrLf & "Все даты корректны."
+        MsgBox reportText, vbInformation, "Успех"
     Else
-        MsgBox "Ошибок не обнаружено!" & vbCrLf & _
-               "Проверено строк: " & (lastRow - 1) & vbCrLf & _
-               "Время: " & timeTaken & " сек.", vbInformation, "Успех"
+        reportText = reportText & "Найдено ошибок: " & errorCount & vbCrLf
+        reportText = reportText & "Предупреждений: " & warningCount & vbCrLf
+        reportText = reportText & "Проверьте ячейки, выделенные красным и желтым."
+        MsgBox reportText, vbExclamation, "Результаты"
     End If
 
-CleanUp:
-    Application.ScreenUpdating = True
-    Application.Calculation = xlCalculationAutomatic
-    Application.EnableEvents = True
-    Application.StatusBar = False
-    Exit Sub
+    GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Критическая ошибка валидации: " & Err.Description, vbCritical, "Ошибка " & Err.number
-    Resume CleanUp
+    MsgBox "Ошибка валидации: " & Err.Description, vbCritical
+CleanUp:
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+    Application.StatusBar = False
 End Sub
 
 ' /**
-'  * Helper: Colors a cell red.
-'  * Accessed directly via Cells() as visual updates cannot be done via Array.
+'  * Validates a single row (Columns E onwards).
+'  * Applies formatting (Red/Yellow/Green) based on logic.
 '  */
-Private Sub MarkCellError(ws As Worksheet, r As Long, c As Long)
-    On Error Resume Next
-    ws.Cells(r, c).Interior.Color = vbRed
-    On Error GoTo 0
+Private Sub ValidateRowLogic(ws As Worksheet, rowNum As Long, ByRef errCnt As Long, ByRef warnCnt As Long)
+    Dim lastCol As Long
+    Dim j As Long
+    Dim startVal As Variant, endVal As Variant
+    Dim dStart As Date, dEnd As Date
+    Dim cutoffDate As Date
+    Dim isError As Boolean, isWarning As Boolean
+    
+    ' Get cutoff date from Helper (single source of truth)
+    cutoffDate = mdlHelper.GetExportCutoffDate()
+    
+    ' Determine last column in this row
+    lastCol = ws.Cells(rowNum, ws.Columns.count).End(xlToLeft).Column
+    If lastCol < 5 Then lastCol = 5
+    ' Limit check to reasonable amount of columns to save performance
+    If lastCol > 60 Then lastCol = 60
+    
+    ' Clear old formatting for the whole row stripe (columns 5 to 60)
+    With ws.Range(ws.Cells(rowNum, 5), ws.Cells(rowNum, 60))
+        .Interior.ColorIndex = xlNone
+        .ClearComments
+    End With
+    
+    ' Loop through period pairs
+    For j = 5 To lastCol Step 2
+        startVal = ws.Cells(rowNum, j).value
+        endVal = ws.Cells(rowNum, j + 1).value
+        
+        isError = False
+        isWarning = False
+        
+        ' Skip if both empty
+        If (IsEmpty(startVal) Or Trim(CStr(startVal)) = "") And _
+           (IsEmpty(endVal) Or Trim(CStr(endVal)) = "") Then
+            ' Ensure it is white
+            ws.Cells(rowNum, j).Interior.ColorIndex = xlNone
+            ws.Cells(rowNum, j + 1).Interior.ColorIndex = xlNone
+            GoTo NextPair
+        End If
+        
+        ' Check 1: Incomplete pair
+        If (Trim(CStr(startVal)) <> "" And Trim(CStr(endVal)) = "") Or _
+           (Trim(CStr(startVal)) = "" And Trim(CStr(endVal)) <> "") Then
+            ApplyFormat ws.Cells(rowNum, j), 2 ' Red
+            ApplyFormat ws.Cells(rowNum, j + 1), 2
+            errCnt = errCnt + 1
+            GoTo NextPair
+        End If
+        
+        ' Check 2: Parse Dates using Helper (The Fix for 01.02.25)
+        dStart = mdlHelper.ParseDateSafe(startVal)
+        dEnd = mdlHelper.ParseDateSafe(endVal)
+        
+        ' If 0, parsing failed (or date is too old)
+        If dStart = 0 Then
+            ApplyFormat ws.Cells(rowNum, j), 2 ' Red
+            errCnt = errCnt + 1
+            isError = True
+        End If
+        If dEnd = 0 Then
+            ApplyFormat ws.Cells(rowNum, j + 1), 2 ' Red
+            errCnt = errCnt + 1
+            isError = True
+        End If
+        
+        If isError Then GoTo NextPair
+        
+        ' Check 3: Logic (End < Start)
+        If dEnd < dStart Then
+            ApplyFormat ws.Cells(rowNum, j), 2
+            ApplyFormat ws.Cells(rowNum, j + 1), 2
+            errCnt = errCnt + 1
+            GoTo NextPair
+        End If
+        
+        ' Check 4: Future dates
+        If dStart > Date Or dEnd > Date Then
+            ApplyFormat ws.Cells(rowNum, j), 3 ' Yellow
+            ApplyFormat ws.Cells(rowNum, j + 1), 3
+            warnCnt = warnCnt + 1
+            isWarning = True
+        End If
+        
+        ' Check 5: Old dates (Cutoff)
+        If dEnd < cutoffDate Then
+            ApplyFormat ws.Cells(rowNum, j), 3 ' Yellow
+            ApplyFormat ws.Cells(rowNum, j + 1), 3
+            warnCnt = warnCnt + 1
+            isWarning = True
+        End If
+        
+        ' Success: Green (only if no error/warning)
+        If Not isWarning Then
+            ApplyFormat ws.Cells(rowNum, j), 1 ' Green
+            ApplyFormat ws.Cells(rowNum, j + 1), 1
+        End If
+        
+NextPair:
+    Next j
 End Sub
 
 ' /**
-'  * Helper: Safely gets a worksheet by name or returns ActiveSheet.
+'  * Helper to apply color.
+'  * Mode: 1=Green, 2=Red, 3=Yellow
 '  */
-Function GetWorksheetSafeValidation(Optional Name As String = "") As Worksheet
-    On Error Resume Next
-    If Name = "" Then
-        Set GetWorksheetSafeValidation = ThisWorkbook.ActiveSheet
-    Else
-        Set GetWorksheetSafeValidation = ThisWorkbook.Sheets(Name)
-    End If
-    On Error GoTo 0
-End Function
+Private Sub ApplyFormat(rng As Range, mode As Integer)
+    Select Case mode
+        Case 1: rng.Interior.Color = RGB(220, 255, 220) ' Light Green
+        Case 2: rng.Interior.Color = RGB(255, 100, 100) ' Red
+        Case 3: rng.Interior.Color = RGB(255, 255, 200) ' Yellow
+        Case Else: rng.Interior.ColorIndex = xlNone
+    End Select
+End Sub
 
 ' /**
-'  * Diagnostics: Analyzes workbook structure and reports to user.
+'  * Diagnostics (Ribbon button).
+'  * Checks if sheets exist.
 '  */
 Public Sub DiagnoseWorkbookStructure()
-    Dim diagText As String
-    Dim ws As Worksheet
-    Dim wsCount As Integer
+    Dim msg As String
+    msg = "Диагностика:" & vbCrLf
     
-    On Error GoTo DiagError
-    
-    diagText = "=== ДИАГНОСТИКА СТРУКТУРЫ ===" & vbCrLf & vbCrLf
-    diagText = diagText & "Файл: " & ThisWorkbook.Name & vbCrLf
-    diagText = diagText & "Листов: " & ThisWorkbook.Worksheets.count & vbCrLf & vbCrLf
-    
-    diagText = diagText & "АНАЛИЗ ЛИСТОВ:" & vbCrLf
-    wsCount = 1
-    For Each ws In ThisWorkbook.Worksheets
-        diagText = diagText & wsCount & ". " & ws.Name
-        Dim lr As Long
-        On Error Resume Next
-        lr = ws.Cells(ws.Rows.count, 2).End(xlUp).Row
-        If lr > 1 Then
-            diagText = diagText & " (строк: " & (lr - 1) & ")"
-        Else
-            diagText = diagText & " (пустой)"
-        End If
-        diagText = diagText & vbCrLf
-        wsCount = wsCount + 1
-    Next ws
-    
-    MsgBox diagText, vbInformation, "Диагностика"
-    Exit Sub
-
-DiagError:
-    MsgBox "Ошибка диагностики: " & Err.Description, vbCritical
-End Sub
-
-' /**
-'  * Emergency Stop: Resets Excel application state.
-'  */
-Public Sub StopValidation()
     On Error Resume Next
-    Application.EnableEvents = True
-    Application.ScreenUpdating = True
-    Application.Calculation = xlCalculationAutomatic
-    Application.StatusBar = False
-    MsgBox "Валидация остановлена.", vbInformation
-End Sub
-
-' /**
-'  * Emergency Cleanup: Hard reset of environment variables.
-'  */
-Public Sub EmergencyCleanup()
-    On Error Resume Next
-    Application.ScreenUpdating = True
-    Application.EnableEvents = True
-    Application.Calculation = xlCalculationAutomatic
-    MsgBox "Настройки Excel восстановлены.", vbInformation
+    If Not ThisWorkbook.Sheets("ДСО") Is Nothing Then
+        msg = msg & "[OK] Лист ДСО найден." & vbCrLf
+    Else
+        msg = msg & "[FAIL] Лист ДСО отсутствует!" & vbCrLf
+    End If
+    
+    If Not ThisWorkbook.Sheets("Штат") Is Nothing Then
+        msg = msg & "[OK] Лист Штат найден." & vbCrLf
+    Else
+        msg = msg & "[FAIL] Лист Штат отсутствует!" & vbCrLf
+    End If
+    
+    MsgBox msg, vbInformation
 End Sub
 

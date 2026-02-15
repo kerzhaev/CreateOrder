@@ -235,7 +235,7 @@ Sub CreateRiskExcelReport()
                     wsNew.Cells(outputRow, 3).value = lichniyNomer
                     wsNew.Cells(outputRow, 4).value = splitPeriods(k).StartDate
                     wsNew.Cells(outputRow, 5).value = splitPeriods(k).EndDate
-                    wsNew.Cells(outputRow, 6).value = splitPeriods(k).DaysCount
+                    wsNew.Cells(outputRow, 6).value = splitPeriods(k).daysCount
                     wsNew.Cells(outputRow, 7).value = splitPeriods(k).PercentValue & "%"
                     wsNew.Cells(outputRow, 8).value = IIf(splitPeriods(k).IsExpired, "Нет", "Да")
                     
@@ -337,7 +337,7 @@ Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskE
             count = count + 1
             tempSplit(count).StartDate = curDate
             tempSplit(count).EndDate = segEnd
-            tempSplit(count).DaysCount = DateDiff("d", curDate, segEnd) + 1
+            tempSplit(count).daysCount = DateDiff("d", curDate, segEnd) + 1
             tempSplit(count).MonthYear = Format(curDate, "yyyymm") ' Key for grouping
             tempSplit(count).IsExpired = rawPeriods(i).IsExpired
             
@@ -381,7 +381,7 @@ Private Function SplitPeriodsByMonth_SeparateRows(ByRef rawPeriods() As mdlRiskE
         
         ' How much the current period "costs" (2% per day)
         Dim periodValue As Double
-        periodValue = tempSplit(i).DaysCount * 2
+        periodValue = tempSplit(i).daysCount * 2
         
         ' How much more can be accrued this month (up to 60%)
         Dim remainingLimit As Double

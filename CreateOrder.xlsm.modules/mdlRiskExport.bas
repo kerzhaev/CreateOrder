@@ -11,7 +11,7 @@ Option Explicit
 Public Type RiskPeriod
     StartDate As Date
     EndDate As Date
-    DaysCount As Long
+    daysCount As Long
     PercentValue As Double
     MonthYear As String ' Format: "February 2025"
     PeriodString As String ' "from 01.02 to 20.02, from 25.02 to 28.02"
@@ -380,7 +380,7 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
                 ReDim Preserve result(1 To resCount)
                 result(resCount).StartDate = curDate ' First date of month
                 result(resCount).EndDate = segEnd    ' Last date of month (for now)
-                result(resCount).DaysCount = segDays
+                result(resCount).daysCount = segDays
                 result(resCount).MonthYear = Format(curDate, "mmmm yyyy")
                 result(resCount).PeriodString = segStr
                 result(resCount).IsExpired = rawPeriods(i).IsExpired
@@ -388,7 +388,7 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
             Else
                 Dim idx As Long
                 idx = dict(key)
-                result(idx).DaysCount = result(idx).DaysCount + segDays
+                result(idx).daysCount = result(idx).daysCount + segDays
                 result(idx).PeriodString = result(idx).PeriodString & ", " & segStr
                 
                 ' Update month boundaries (for sorting)
@@ -404,7 +404,7 @@ Private Function SplitAndMergePeriodsByMonth(ByRef rawPeriods() As RiskPeriod, B
     ' Final percentage calculation
     For i = 1 To resCount
         Dim pct As Double
-        pct = result(i).DaysCount * 2
+        pct = result(i).daysCount * 2
         If pct > 60 Then pct = 60
         result(i).PercentValue = pct
     Next i
@@ -472,7 +472,7 @@ Private Sub GenerateRiskWordDocument(ByRef employees() As EmployeeRiskData, ByVa
             ' Use generated period string
             Dim periodText As String
             periodText = "    - " & employees(i).periods(j).PeriodString & _
-                         " (" & employees(i).periods(j).DaysCount & " дн.) = " & _
+                         " (" & employees(i).periods(j).daysCount & " дн.) = " & _
                          employees(i).periods(j).PercentValue & "%" & vbCrLf
             
             rng.text = periodText

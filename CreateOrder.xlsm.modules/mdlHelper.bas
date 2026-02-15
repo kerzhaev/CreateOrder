@@ -2,79 +2,50 @@ Attribute VB_Name = "mdlHelper"
 ' ==============================================================================
 ' Module: mdlHelper
 ' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
-' Date: 14.02.2026
-' Description: Universal utility functions and procedures for the project.
-'              Contains logic for staff lookup, declension (Russian grammar),
-'              and date handling.
+' Date: 14.02.2026 (Final Fix)
+' Description: Universal utility functions and procedures.
+'              Fixed: Restored missing GetDolzhnostImenitelny function.
 ' ==============================================================================
 
 Option Explicit
 
-' Global variables for column indexes (Cached for performance)
 Public colFIO_Global As Long
 Public colLichniyNomer_Global As Long
 Public colZvanie_Global As Long
 Public colDolzhnost_Global As Long
 Public colVoinskayaChast_Global As Long
 
-' /**
-'  * Initializes column indexes for the "Staff" (Shtat) sheet.
-'  * Must be called before accessing global column variables.
-'  */
 Public Sub InitStaffColumnIndexes()
     Dim wsStaff As Worksheet
-    Set wsStaff = ThisWorkbook.Sheets("Штат") ' Sheet: Staff
+    Set wsStaff = ThisWorkbook.Sheets("Штат")
     
     If Not FindColumnNumbers(wsStaff, colLichniyNomer_Global, colZvanie_Global, colFIO_Global, colDolzhnost_Global, colVoinskayaChast_Global) Then
-        MsgBox "Корректные индексы столбцов не удалось определить. Работа программы невозможна.", vbCritical, "Ошибка инициализации"
+        MsgBox "Корректные индексы столбцов не удалось определить. Работа программы невозможна.", vbCritical
         End
     End If
 End Sub
 
-' /**
-'  * Finds a row number containing specific personal data (Optimized).
-'  * Uses Application.Match for high performance instead of looping.
-'  *
-'  * @param ws Worksheet - Target worksheet
-'  * @param lichniyNomer String - Value to search for
-'  * @param colNum Long - Column index to search in
-'  * @return Long - Row number or 0 if not found
-'  */
 Public Function FindStaffRow(ws As Worksheet, lichniyNomer As String, colNum As Long) As Long
     Dim res As Variant
-    
-    ' Optimization: Use Excel's native Match function
     res = Application.Match(lichniyNomer, ws.Columns(colNum), 0)
-    
-    If IsError(res) Then
+    If isError(res) Then
         FindStaffRow = 0
     Else
         FindStaffRow = CLng(res)
     End If
 End Function
 
-' /**
-'  * Universal function to determine column indexes on the "Staff" sheet.
-'  * Logic:
-'  *   - "Name" (FIO): First text-only column with spaces.
-'  *   - "Position": First text-only column.
-'  *   - "ID", "Rank", "Unit": By header keywords.
-'  *
-'  * @return Boolean - True if all critical columns are found.
-'  */
 Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long, ByRef colZvanie As Long, ByRef colFIO As Long, ByRef colDolzhnost As Long, ByRef colVoinskayaChast As Long) As Boolean
     Dim lastCol As Long, i As Long, headerText As String
     Dim foundFIO As Boolean, foundDolzhnost As Boolean
     Dim msgErr As String
 
-    ' Reset variables
     colLichniyNomer = 0: colZvanie = 0: colFIO = 0: colDolzhnost = 0: colVoinskayaChast = 0
     foundFIO = False: foundDolzhnost = False
     msgErr = ""
 
     lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
 
-    ' 1. Find Personal ID (by header)
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
         If InStr(headerText, "личный номер") > 0 Then
@@ -84,7 +55,6 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
     Next i
     If colLichniyNomer = 0 Then msgErr = msgErr & "Не найден столбец 'Личный номер'." & vbCrLf
 
-    ' 2. Find Rank (by header)
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
         If InStr(headerText, "воинское звание") > 0 Then
@@ -94,7 +64,6 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
     Next i
     If colZvanie = 0 Then msgErr = msgErr & "Не найден столбец 'Воинское звание'." & vbCrLf
 
-    ' 3. Find Unit (by header)
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
         If InStr(headerText, "часть") > 0 Or InStr(headerText, "раздел персонала") > 0 Then
@@ -104,7 +73,6 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
     Next i
     If colVoinskayaChast = 0 Then msgErr = msgErr & "Не найден столбец 'Часть' или 'Раздел персонала'." & vbCrLf
 
-    ' 4. Find FIO (Name) - heuristic check
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
         If headerText = "лицо" Then
@@ -117,7 +85,6 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
     Next i
     If Not foundFIO Then msgErr = msgErr & "Не найден корректный столбец 'Лицо' (ФИО)." & vbCrLf
 
-    ' 5. Find Position - heuristic check
     For i = 1 To lastCol
         headerText = LCase(Trim(ws.Cells(1, i).value))
         If InStr(headerText, "штатная должность") > 0 Then
@@ -130,7 +97,6 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
     Next i
     If Not foundDolzhnost Then msgErr = msgErr & "Не найден корректный столбец 'Штатная должность'." & vbCrLf
 
-    ' Validate results
     If colLichniyNomer > 0 And colZvanie > 0 And colFIO > 0 And colDolzhnost > 0 And colVoinskayaChast > 0 Then
         FindColumnNumbers = True
     Else
@@ -139,18 +105,11 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
     End If
 End Function
 
-' /**
-'  * Checks if a column likely contains FIO (Full Name).
-'  * Heuristic: Mostly text, contains spaces, not numeric.
-'  */
 Private Function IsTextFIOColumn(ws As Worksheet, colNum As Long) As Boolean
     Dim lastRow As Long, i As Long, value As String
     Dim textCount As Long, totalCount As Long
-    
     lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
-    ' Optimize: Check first 50 rows only to speed up init
     Dim checkLimit As Long: checkLimit = IIf(lastRow > 50, 50, lastRow)
-    
     For i = 2 To checkLimit
         value = Trim(ws.Cells(i, colNum).value)
         If value <> "" Then
@@ -160,54 +119,33 @@ Private Function IsTextFIOColumn(ws As Worksheet, colNum As Long) As Boolean
             End If
         End If
     Next i
-    
-    If totalCount > 0 Then
-        IsTextFIOColumn = (textCount / totalCount) > 0.7
-    Else
-        IsTextFIOColumn = False
-    End If
+    If totalCount > 0 Then IsTextFIOColumn = (textCount / totalCount) > 0.7 Else IsTextFIOColumn = False
 End Function
 
-' /**
-'  * Extracts the Unit Number from a text string.
-'  * Example: "Unit 12345 text" -> "12345"
-'  */
 Public Function ExtractVoinskayaChast(inputText As String) As String
     Dim text As String, i As Long, result As String, inNumber As Boolean
     text = Trim(inputText): result = "": inNumber = False
-    
     For i = 1 To Len(text)
         If IsNumeric(Mid(text, i, 1)) Then
             result = result & Mid(text, i, 1): inNumber = True
         Else
-            If inNumber And Len(result) >= 4 Then
-                ExtractVoinskayaChast = result
-                Exit Function
-            End If
+            If inNumber And Len(result) >= 4 Then ExtractVoinskayaChast = result: Exit Function
             If inNumber Then result = "": inNumber = False
         End If
     Next i
-    
     If Len(result) >= 4 Then ExtractVoinskayaChast = result Else ExtractVoinskayaChast = inputText
 End Function
 
-' /**
-'  * Checks if the period is considered "Actual" (recent).
-'  */
 Public Function IsPeriodActual(dateEnd As Date) As Boolean
     IsPeriodActual = (dateEnd >= GetExportCutoffDate())
 End Function
 
-' /**
-'  * Calculates the cutoff date for export (3 years + 1 month back).
-'  */
 Public Function GetExportCutoffDate() As Date
     Dim currentDate As Date, cutoffYear As Integer, cutoffMonth As Integer, cutoffDay As Integer
     currentDate = Date
     cutoffYear = Year(currentDate) - 3
     cutoffMonth = Month(currentDate) - 1
     cutoffDay = Day(currentDate)
-    
     If cutoffMonth <= 0 Then
         cutoffMonth = cutoffMonth + 12
         cutoffYear = cutoffYear - 1
@@ -215,14 +153,10 @@ Public Function GetExportCutoffDate() As Date
     GetExportCutoffDate = DateSerial(cutoffYear, cutoffMonth, cutoffDay)
 End Function
 
-' /**
-'  * Checks if a column is numeric (>80% numbers).
-'  */
 Public Function IsNumericColumn(ws As Worksheet, colNum As Long) As Boolean
     Dim i As Long, numericCount As Long, totalCount As Long, cellValue As String, lastRow As Long, checkRows As Long
     lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
     checkRows = IIf(lastRow - 1 > 10, 10, lastRow - 1)
-    
     For i = 2 To 2 + checkRows - 1
         cellValue = Trim(ws.Cells(i, colNum).value)
         If cellValue <> "" Then
@@ -230,18 +164,13 @@ Public Function IsNumericColumn(ws As Worksheet, colNum As Long) As Boolean
             If IsNumeric(cellValue) Then numericCount = numericCount + 1
         End If
     Next i
-    
     If totalCount > 0 Then IsNumericColumn = (numericCount / totalCount) > 0.8 Else IsNumericColumn = False
 End Function
 
-' /**
-'  * Checks if a column is textual (>70% letters).
-'  */
 Public Function IsTextColumn(ws As Worksheet, colNum As Long) As Boolean
     Dim i As Long, textCount As Long, totalCount As Long, cellValue As String, lastRow As Long, checkRows As Long
     lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
     checkRows = IIf(lastRow - 1 > 20, 20, lastRow - 1)
-    
     For i = 2 To 2 + checkRows - 1
         cellValue = Trim(ws.Cells(i, colNum).value)
         If cellValue <> "" Then
@@ -249,18 +178,13 @@ Public Function IsTextColumn(ws As Worksheet, colNum As Long) As Boolean
             If ContainsLetters(cellValue) And Not IsNumeric(cellValue) Then textCount = textCount + 1
         End If
     Next i
-    
     If totalCount > 0 Then IsTextColumn = (textCount / totalCount) > 0.7 Else IsTextColumn = False
 End Function
 
-' /**
-'  * Checks if a column contains "Voinskaya chast" (Unit).
-'  */
 Public Function IsVoinskayaChastColumn(ws As Worksheet, colNum As Long) As Boolean
     Dim i As Long, voinskayaChastCount As Long, totalCount As Long, cellValue As String, lastRow As Long, checkRows As Long
     lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
     checkRows = IIf(lastRow - 1 > 10, 10, lastRow - 1)
-    
     For i = 2 To 2 + checkRows - 1
         cellValue = LCase(Trim(ws.Cells(i, colNum).value))
         If cellValue <> "" Then
@@ -268,13 +192,9 @@ Public Function IsVoinskayaChastColumn(ws As Worksheet, colNum As Long) As Boole
             If InStr(cellValue, "войсковая часть") > 0 And ContainsNumbers(cellValue) Then voinskayaChastCount = voinskayaChastCount + 1
         End If
     Next i
-    
     If totalCount > 0 Then IsVoinskayaChastColumn = (voinskayaChastCount / totalCount) > 0.7 Else IsVoinskayaChastColumn = False
 End Function
 
-' /**
-'  * Helper: String contains numbers?
-'  */
 Public Function ContainsNumbers(text As String) As Boolean
     Dim i As Long, char As String
     For i = 1 To Len(text)
@@ -284,9 +204,6 @@ Public Function ContainsNumbers(text As String) As Boolean
     ContainsNumbers = False
 End Function
 
-' /**
-'  * Helper: String contains letters?
-'  */
 Public Function ContainsLetters(text As String) As Boolean
     Dim i As Long, char As String
     For i = 1 To Len(text)
@@ -298,9 +215,11 @@ Public Function ContainsLetters(text As String) As Boolean
     ContainsLetters = False
 End Function
 
+
+
 ' /**
 '  * Collects all period pairs (Start/End/Days) for a person from "DSO" sheet.
-'  * Returns a Collection of Collections.
+'  * Uses ParseDateSafe to handle text dates.
 '  */
 Public Sub CollectAllPersonPeriods(ws As Worksheet, rowNum As Long, periods As Collection)
     Dim lastCol As Long, j As Long, dateStart As Date, dateEnd As Date
@@ -310,18 +229,20 @@ Public Sub CollectAllPersonPeriods(ws As Worksheet, rowNum As Long, periods As C
     j = 5 ' Start from column E
     
     Do While j + 1 <= lastCol
-        If ws.Cells(rowNum, j).value <> "" And ws.Cells(rowNum, j + 1).value <> "" Then
-            dateStart = DateValue(ws.Cells(rowNum, j).value)
-            dateEnd = DateValue(ws.Cells(rowNum, j + 1).value)
+        ' Attempt to parse both values using the robust parser
+        dateStart = ParseDateSafe(ws.Cells(rowNum, j).value)
+        dateEnd = ParseDateSafe(ws.Cells(rowNum, j + 1).value)
+        
+        ' Check if both are valid (> year 2000)
+        If dateStart > 0 And dateEnd > 0 Then
+            Dim daysCount As Long
+            daysCount = DateDiff("d", dateStart, dateEnd) + 1
             
-            If IsDate(dateStart) And IsDate(dateEnd) Then
-                Dim DaysCount As Long: DaysCount = DateDiff("d", dateStart, dateEnd) + 1
-                Dim newPeriod As Collection: Set newPeriod = New Collection
-                newPeriod.Add dateStart
-                newPeriod.Add dateEnd
-                newPeriod.Add DaysCount
-                periods.Add newPeriod
-            End If
+            Dim newPeriod As Collection: Set newPeriod = New Collection
+            newPeriod.Add dateStart
+            newPeriod.Add dateEnd
+            newPeriod.Add daysCount
+            periods.Add newPeriod
         End If
         j = j + 2
     Loop
@@ -330,9 +251,6 @@ ErrorHandler:
     Resume Next
 End Sub
 
-' /**
-'  * Checks if any period pair is invalid (End < Start).
-'  */
 Public Function HasInvalidPair(periods As Collection) As Boolean
     Dim p As Collection
     For Each p In periods
@@ -341,18 +259,12 @@ Public Function HasInvalidPair(periods As Collection) As Boolean
     HasInvalidPair = False
 End Function
 
-' /**
-'  * Sorts a collection of periods by Start Date.
-'  */
 Public Function SortPeriodsByDateStart(periods As Collection) As Collection
     Dim arr() As Variant, i As Long, j As Long, n As Long
     n = periods.count
     If n <= 1 Then Set SortPeriodsByDateStart = periods: Exit Function
-    
     ReDim arr(1 To n)
     For i = 1 To n: Set arr(i) = periods(i): Next i
-    
-    ' Bubble sort (acceptable for small N periods)
     For i = 1 To n - 1
         For j = i + 1 To n
             If arr(i)(1) > arr(j)(1) Then
@@ -361,25 +273,18 @@ Public Function SortPeriodsByDateStart(periods As Collection) As Collection
             End If
         Next j
     Next i
-    
     Dim resCol As Collection: Set resCol = New Collection
     For i = 1 To n: resCol.Add arr(i): Next i
     Set SortPeriodsByDateStart = resCol
 End Function
 
-' /**
-'  * Checks "DSO" sheet for critical errors (Red cells).
-'  */
 Public Function hasCriticalErrors() As Boolean
     On Error Resume Next
     Dim ws As Worksheet: Set ws = ThisWorkbook.Sheets("ДСО")
     If ws Is Nothing Then hasCriticalErrors = True: Exit Function
-    
     Dim lastRow As Long: lastRow = ws.Cells(ws.Rows.count, "C").End(xlUp).Row
     Dim lastCol As Long: lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
     Dim i As Long, j As Long
-    
-    ' Loop is unavoidable here as we check formatting (color)
     For i = 2 To lastRow
         For j = 5 To lastCol Step 2
             If ws.Cells(i, j).Interior.Color = RGB(255, 100, 100) Or ws.Cells(i, j).Interior.Color = RGB(255, 200, 200) Then
@@ -390,30 +295,23 @@ Public Function hasCriticalErrors() As Boolean
     hasCriticalErrors = False
 End Function
 
-' /**
-'  * Checks a specific row for date errors (End < Start).
-'  */
 Public Function CheckRowForDateErrors(ws As Worksheet, rowNum As Long) As Boolean
     Dim lastCol As Long, j As Long, startValue As String, endValue As String
     Dim dateStart As Date, dateEnd As Date, hasErrors As Boolean
-    
     On Error GoTo ErrorHandler
     hasErrors = False
     lastCol = ws.Cells(rowNum, ws.Columns.count).End(xlToLeft).Column
     If lastCol > 50 Then lastCol = 50
-    
     j = 5
     Do While j + 1 <= lastCol
         startValue = Trim(ws.Cells(rowNum, j).text)
         endValue = Trim(ws.Cells(rowNum, j + 1).text)
-        
         If startValue <> "" And endValue <> "" Then
             On Error Resume Next
             dateStart = DateValue(startValue)
             dateEnd = DateValue(endValue)
             Err.Clear
             On Error GoTo ErrorHandler
-            
             If IsDate(startValue) And IsDate(endValue) Then
                 dateStart = DateValue(startValue)
                 dateEnd = DateValue(endValue)
@@ -430,14 +328,9 @@ ErrorHandler:
     CheckRowForDateErrors = True
 End Function
 
-' ==========================================================
-' RUSSIAN LANGUAGE GRAMMAR FUNCTIONS
-' (Declensions for Names, Ranks, Positions)
-' ==========================================================
-
+' ================= GRAMMAR FUNCTIONS =================
 Public Function SklonitZvanie(zvanie As String) As String
-    Dim result As String
-    Dim lowerZvanie As String
+    Dim result As String, lowerZvanie As String
     lowerZvanie = LCase(Trim(zvanie))
     Select Case lowerZvanie
         Case "рядовой": result = "Рядовому"
@@ -456,86 +349,123 @@ Public Function SklonitZvanie(zvanie As String) As String
         Case "подполковник": result = "Подполковнику"
         Case "полковник": result = "Полковнику"
         Case "генерал-майор": result = "Генерал-майору"
-        Case "генерал-лейтенант": result = "Генерал-лейтенанту"
+        Case "генерал-лейтенант": result = "Генерал-лейтенант"
         Case "генерал-полковник": result = "Генерал-полковнику"
         Case "генерал армии": result = "Генералу армии"
-        Case Else
-            result = UCase(Left(zvanie, 1)) & LCase(Mid(zvanie, 2))
+        Case Else: result = UCase(Left(zvanie, 1)) & LCase(Mid(zvanie, 2))
     End Select
     SklonitZvanie = result
 End Function
 
 Public Function SklonitDolzhnost(dolzhnost As String, VoinskayaChast As String) As String
     Dim keepWords As Variant, cutWords As Variant
-    ' Dictionary of words to keep or cut
-    keepWords = Array("роты", "взвода", "отделения", "расчета", "группы", "команды", "экипажа")
+    ' Слова, после которых мы ожидаем продолжение (обычно родительный падеж подразделения)
+    keepWords = Array("роты", "взвода", "отделения", "расчета", "группы", "команды", "экипажа", "службы", "батареи")
+    ' Слова, с которых начинается "хвост" (название вышестоящего подразделения, которое мы хотим заменить на в/ч)
     cutWords = Array("отдельного", "гвардейской", "общевойсковой", "мотострелковой", "танковой", "воздушно-десантной", "артиллерийской", "инженерной", "связи", "десантно-штурмовой", "батальона", "полка", "бригады", "дивизии", "корпуса", "армии", "округа")
     
-    Dim dolzhnostLower As String, result As String, lastKeepPos As Long, lastKeepWord As String
+    Dim dolzhnostLower As String, result As String
+    Dim lastKeepPos As Long, lastKeepWord As String
     Dim i As Long, pos As Long
-    dolzhnostLower = LCase(dolzhnost)
-    lastKeepPos = -1: lastKeepWord = ""
     
+    dolzhnostLower = LCase(dolzhnost)
+    lastKeepPos = -1
+    lastKeepWord = ""
+    
+    ' 1. Ищем самое "глубокое" ключевое слово подразделения (отделения, группы и т.д.)
     For i = LBound(keepWords) To UBound(keepWords)
         pos = InStrRev(dolzhnostLower, keepWords(i))
-        If pos > lastKeepPos Then lastKeepPos = pos: lastKeepWord = keepWords(i)
+        If pos > lastKeepPos Then
+            lastKeepPos = pos
+            lastKeepWord = keepWords(i)
+        End If
     Next i
     
+    Dim startCutPosition As Long
+    startCutPosition = 0
+    Dim foundCut As Boolean
+    foundCut = False
+    
+    ' Определение зоны поиска "хвоста"
+    Dim searchStartPos As Long
     If lastKeepPos > 0 Then
-        Dim endKeepPos As Long, cutPosition As Long
-        endKeepPos = lastKeepPos + Len(lastKeepWord) - 1
-        cutPosition = 0
-        For i = LBound(cutWords) To UBound(cutWords)
-            pos = InStr(endKeepPos + 1, dolzhnostLower, cutWords(i))
-            If pos > 0 Then If cutPosition = 0 Or pos < cutPosition Then cutPosition = pos
-        Next i
-        If cutPosition > 0 Then
-            Dim startCutPosition As Long
-            startCutPosition = cutPosition
-            For i = cutPosition - 1 To endKeepPos + 1 Step -1
-                Dim char As String
-                char = Mid(dolzhnostLower, i, 1)
-                If IsNumeric(char) Or char = " " Then startCutPosition = i Else Exit For
-            Next i
-            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " войсковой части " & VoinskayaChast
-        Else
-            result = LCase(Trim(Left(dolzhnost, endKeepPos))) & " войсковой части " & VoinskayaChast
-        End If
+        searchStartPos = lastKeepPos + Len(lastKeepWord)
     Else
-        cutPosition = 0
-        For i = LBound(cutWords) To UBound(cutWords)
-            pos = InStr(dolzhnostLower, cutWords(i))
-            If pos > 0 Then If cutPosition = 0 Or pos < cutPosition Then cutPosition = pos
-        Next i
-        If cutPosition > 0 Then
-            startCutPosition = cutPosition
-            For i = cutPosition - 1 To 1 Step -1
-                Dim char2 As String
-                char2 = Mid(dolzhnostLower, i, 1)
-                If IsNumeric(char2) Or char2 = " " Then startCutPosition = i Else Exit For
-            Next i
-            result = LCase(Trim(Left(dolzhnost, startCutPosition - 1))) & " войсковой части " & VoinskayaChast
-        Else
-            result = LCase(dolzhnost) & " войсковой части " & VoinskayaChast
-        End If
+        searchStartPos = 1
     End If
+    
+    ' 2. Ищем слово, с которого нужно "резать" (отдельного, батальона и т.д.)
+    Dim cutPosition As Long
+    cutPosition = 0
+    
+    For i = LBound(cutWords) To UBound(cutWords)
+        pos = InStr(searchStartPos, dolzhnostLower, cutWords(i))
+        If pos > 0 Then
+            ' Берем самое первое найденное слово-разделитель после keepWord
+            If cutPosition = 0 Or pos < cutPosition Then
+                cutPosition = pos
+            End If
+        End If
+    Next i
+    
+    ' 3. Если нашли место разреза, ищем начало номера перед ним (например, "111 отдельного")
+    If cutPosition > 0 Then
+        ' Идем назад от слова-разделителя, пока видим цифры или пробелы
+        startCutPosition = cutPosition
+        Dim j As Long
+        For j = cutPosition - 1 To searchStartPos Step -1
+            Dim char As String
+            char = Mid(dolzhnostLower, j, 1)
+            ' Если это цифра или пробел - сдвигаем точку разреза влево
+            If IsNumeric(char) Or char = " " Then
+                startCutPosition = j
+            Else
+                ' Наткнулись на букву или скобку - стоп
+                Exit For
+            End If
+        Next j
+        foundCut = True
+    End If
+    
+    ' 4. Формируем результат
+    If foundCut And startCutPosition > 2 Then
+        ' Безопасная обрезка: берем левую часть
+        result = LCase(Trim(Left(dolzhnost, startCutPosition - 1)))
+    Else
+        ' Если не нашли, где резать, или обрезка слишком агрессивная - берем всё
+        result = LCase(Trim(dolzhnost))
+    End If
+    
+    ' Добавляем номер части
+    result = result & " войсковой части " & VoinskayaChast
+    
+    ' 5. Склоняем саму должность (Начальник -> Начальнику)
     result = SklonitVoennayaDolzhnost(result)
+    
     SklonitDolzhnost = result
 End Function
 
 Public Function SklonitVoennayaDolzhnost(dolzhnost As String) As String
     Dim result As String
-    result = dolzhnost
-    ' Hardcoded grammar rules for military positions
+    result = dolzhnost ' Входная строка уже в нижнем регистре от предыдущей функции
+    
+    ' Сложные названия
     result = Replace(result, "механик-радиотелефонист", "механику-радиотелефонисту")
     result = Replace(result, "разведчик-оператор", "разведчику-оператору")
-    result = Replace(result, "командир ", "командиру ")
-    result = Replace(result, "заместитель командира ", "заместителю командира ")
-    result = Replace(result, "начальник ", "начальнику ")
-    result = Replace(result, "заместитель начальника ", "заместителю начальника ")
+    result = Replace(result, "наводчик-оператор", "наводчику-оператору")
+    result = Replace(result, "механик-водитель", "механику-водителю")
+    result = Replace(result, "заместитель командира", "заместителю командира")
+    result = Replace(result, "заместитель начальника", "заместителю начальника")
+    result = Replace(result, "помощник начальника", "помощнику начальника")
+    
+    ' Префиксы
     If Left(result, 8) = "старший " Then result = "старшему " & Mid(result, 9)
     If Left(result, 8) = "младший " Then result = "младшему " & Mid(result, 9)
+    If Left(result, 8) = "главный " Then result = "главному " & Mid(result, 9)
     
+    ' Одиночные должности
+    result = Replace(result, "командир ", "командиру ")
+    result = Replace(result, "начальник ", "начальнику ")
     result = Replace(result, "механик", "механику")
     result = Replace(result, "радиотелефонист", "радиотелефонисту")
     result = Replace(result, "разведчик", "разведчику")
@@ -544,6 +474,11 @@ Public Function SklonitVoennayaDolzhnost(dolzhnost As String) As String
     result = Replace(result, "наводчик", "наводчику")
     result = Replace(result, "инструктор", "инструктору")
     result = Replace(result, "техник", "технику")
+    result = Replace(result, "пулеметчик", "пулеметчику")
+    result = Replace(result, "гранатометчик", "гранатометчику")
+    result = Replace(result, "стрелок", "стрелку")
+    result = Replace(result, "сапер", "саперу")
+    
     SklonitVoennayaDolzhnost = result
 End Function
 
@@ -566,10 +501,19 @@ Public Function SklonitFIO(fio As String) As String
     SklonitFIO = result
 End Function
 
+' ==========================================================
+' ФУНКЦИИ СКЛОНЕНИЯ (ИСПРАВЛЕННЫЕ)
+' ==========================================================
+
+' ==========================================================
+' ФУНКЦИИ СКЛОНЕНИЯ (ИСПРАВЛЕННЫЕ)
+' ==========================================================
+
 Public Function SklonitFamiliya(familiya As String, isWoman As Boolean) As String
     Dim result As String
     result = familiya
     If isWoman Then
+        ' Женские фамилии
         If Right(familiya, 2) = "на" Then
             result = Left(familiya, Len(familiya) - 1) & "е"
         ElseIf Right(familiya, 1) = "а" Then
@@ -578,10 +522,14 @@ Public Function SklonitFamiliya(familiya As String, isWoman As Boolean) As Strin
             result = Left(familiya, Len(familiya) - 1) & "е"
         End If
     Else
-        If Right(familiya, 2) = "ов" Or Right(familiya, 2) = "ёв" Or Right(familiya, 2) = "ин" Then
+        ' Мужские фамилии
+        ' ДОБАВЛЕНО: "ев", "ын"
+        If Right(familiya, 2) = "ов" Or Right(familiya, 2) = "ёв" Or Right(familiya, 2) = "ин" Or Right(familiya, 2) = "ев" Or Right(familiya, 2) = "ын" Then
             result = familiya & "у"
         ElseIf Right(familiya, 2) = "ий" Then
             result = Left(familiya, Len(familiya) - 2) & "ому"
+        ElseIf Right(familiya, 2) = "ая" Then ' Например, Белая -> Белому (редко, но бывает у мужчин)
+             result = Left(familiya, Len(familiya) - 2) & "ому"
         ElseIf Right(familiya, 1) = "а" Then
             result = Left(familiya, Len(familiya) - 1) & "е"
         ElseIf Right(familiya, 1) = "я" Then
@@ -590,7 +538,6 @@ Public Function SklonitFamiliya(familiya As String, isWoman As Boolean) As Strin
     End If
     SklonitFamiliya = result
 End Function
-
 
 Public Function SklonitImya(imya As String, isWoman As Boolean) As String
     Dim result As String
@@ -601,12 +548,13 @@ Public Function SklonitImya(imya As String, isWoman As Boolean) As String
         ElseIf Right(imya, 1) = "я" Then
             result = Left(imya, Len(imya) - 1) & "е"
         ElseIf Right(imya, 1) = "ь" Then
-            result = Left(imya, Len(imya) - 1) & "и"
+            result = Left(imya, Len(imya) - 1) & "и" ' Любовь -> Любови
         ElseIf Right(imya, 1) = "и" Then
             result = imya
         End If
     Else
-        If Right(imya, 1) = "р" Or Right(imya, 1) = "л" Or Right(imya, 1) = "н" Or Right(imya, 1) = "м" Then
+        ' Мужские имена
+        If Right(imya, 1) = "р" Or Right(imya, 1) = "л" Or Right(imya, 1) = "н" Or Right(imya, 1) = "м" Or Right(imya, 1) = "б" Or Right(imya, 1) = "г" Or Right(imya, 1) = "к" Or Right(imya, 1) = "с" Then
             result = imya & "у"
         ElseIf Right(imya, 1) = "й" Then
             result = Left(imya, Len(imya) - 1) & "ю"
@@ -614,6 +562,9 @@ Public Function SklonitImya(imya As String, isWoman As Boolean) As String
             result = Left(imya, Len(imya) - 1) & "е"
         ElseIf Right(imya, 1) = "я" Then
             result = Left(imya, Len(imya) - 1) & "е"
+        ' ДОБАВЛЕНО: Обработка мягкого знака для мужских имен (Игорь -> Игорю)
+        ElseIf Right(imya, 1) = "ь" Then
+            result = Left(imya, Len(imya) - 1) & "ю"
         End If
     End If
     SklonitImya = result
@@ -787,19 +738,14 @@ Public Function GetMonthNameRussian(monthNumber As Integer) As String
 End Function
 
 Public Function GetFIOWithInitials(fio As String) As String
-    Dim parts() As String
-    Dim familiya As String, imya As String, otchestvo As String, result As String, isWoman As Boolean
+    Dim parts() As String, familiya As String, imya As String, otchestvo As String, result As String, isWoman As Boolean
     parts = Split(Trim(fio), " ")
     If UBound(parts) >= 2 Then
-        familiya = parts(0)
-        imya = parts(1)
-        otchestvo = parts(2)
+        familiya = parts(0): imya = parts(1): otchestvo = parts(2)
         isWoman = (Right(LCase(otchestvo), 2) = "на")
-        Dim firstInitial As String, secondInitial As String
-        firstInitial = UCase(Left(imya, 1))
-        secondInitial = UCase(Left(otchestvo, 1))
-        Dim declinedFamiliya As String
-        declinedFamiliya = SklonitFamiliya(familiya, isWoman)
+        Dim firstInitial As String: firstInitial = UCase(Left(imya, 1))
+        Dim secondInitial As String: secondInitial = UCase(Left(otchestvo, 1))
+        Dim declinedFamiliya As String: declinedFamiliya = SklonitFamiliya(familiya, isWoman)
         result = firstInitial & "." & secondInitial & ". " & declinedFamiliya
     Else
         result = fio
@@ -808,16 +754,12 @@ Public Function GetFIOWithInitials(fio As String) As String
 End Function
 
 Public Function GetFIOWithInitialsImenitelny(fio As String) As String
-    Dim parts() As String
-    Dim familiya As String, imya As String, otchestvo As String, result As String
+    Dim parts() As String, familiya As String, imya As String, otchestvo As String, result As String
     parts = Split(Trim(fio), " ")
     If UBound(parts) >= 2 Then
-        familiya = parts(0)
-        imya = parts(1)
-        otchestvo = parts(2)
-        Dim firstInitial As String, secondInitial As String
-        firstInitial = UCase(Left(imya, 1))
-        secondInitial = UCase(Left(otchestvo, 1))
+        familiya = parts(0): imya = parts(1): otchestvo = parts(2)
+        Dim firstInitial As String: firstInitial = UCase(Left(imya, 1))
+        Dim secondInitial As String: secondInitial = UCase(Left(otchestvo, 1))
         result = firstInitial & "." & secondInitial & ". " & familiya
     Else
         result = fio
@@ -826,8 +768,7 @@ Public Function GetFIOWithInitialsImenitelny(fio As String) As String
 End Function
 
 Public Function GetZvanieImenitelnyForSignature(zvanie As String) As String
-    Dim result As String
-    Dim lowerZvanie As String
+    Dim result As String, lowerZvanie As String
     lowerZvanie = LCase(Trim(zvanie))
     Select Case lowerZvanie
         Case "рядовой": result = "Рядовой"
@@ -1156,6 +1097,147 @@ Public Function CreateWordAppSafely() As Object
     Set CreateWordAppSafely = wdApp
 End Function
 
+' ==========================================================
+' EXPORT REFACTOR HELPERS (Step 1)
+' ==========================================================
+
+' /**
+'  * Gets the last used row number in a specific column.
+'  * @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+'  * @param ws [Worksheet] Target sheet.
+'  * @param colIndex [Variant] Column index (Long) or column letter (String), e.g. "C".
+'  * @return [Long] Last row with data, or 0 if column empty.
+'  */
+Public Function GetLastRow(ws As Worksheet, colIndex As Variant) As Long
+    Dim colNum As Long
+    On Error GoTo ErrorHandler
+
+    If VarType(colIndex) = vbString Then
+        colNum = ws.Range(CStr(colIndex) & "1").Column
+    Else
+        colNum = CLng(colIndex)
+    End If
+    GetLastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
+    Exit Function
+ErrorHandler:
+    GetLastRow = 0
+End Function
+
+' /**
+'  * Gets existing Word Application or creates new instance. Sets wasNotRunning if new instance created.
+'  * @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+'  * @param wasNotRunning [Boolean] ByRef. Set to True if a new instance was created.
+'  * @return [Object] Word.Application. Nothing if creation failed. Visible = False by default.
+'  */
+Public Function GetOrCreateWordApp(ByRef wasNotRunning As Boolean) As Object
+    Dim wdApp As Object
+    wasNotRunning = False
+
+    On Error Resume Next
+    Set wdApp = GetObject(, "Word.Application")
+    On Error GoTo 0
+
+    If wdApp Is Nothing Then
+        On Error Resume Next
+        Set wdApp = CreateObject("Word.Application")
+        On Error GoTo 0
+        If wdApp Is Nothing Then
+            MsgBox "Не удалось создать экземпляр Microsoft Word. Убедитесь, что Word установлен.", vbCritical, "Ошибка Word"
+            Set GetOrCreateWordApp = Nothing
+            Exit Function
+        End If
+        wasNotRunning = True
+    End If
+    wdApp.Visible = False
+    Set GetOrCreateWordApp = wdApp
+End Function
+
+' /**
+'  * Terminates any remaining WINWORD.EXE processes (zombie cleanup) via WMI.
+'  * @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+'  */
+Public Sub KillZombieWordProcesses()
+    Dim wmi As Object, procs As Object, proc As Object
+    On Error Resume Next
+    Set wmi = GetObject("winmgmts:")
+    If wmi Is Nothing Then Exit Sub
+    Set procs = wmi.ExecQuery("SELECT * FROM Win32_Process WHERE Name='WINWORD.EXE'")
+    If procs Is Nothing Then Exit Sub
+    For Each proc In procs
+        proc.Terminate
+    Next proc
+    On Error GoTo 0
+End Sub
+
+' /**
+'  * Closes and releases Word Application. If wasNotRunning, quits app and runs zombie cleanup.
+'  * @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+'  * @param wdApp [Object] ByRef. Word.Application reference. Set to Nothing on exit.
+'  * @param wasNotRunning [Boolean] True if this instance was created by GetOrCreateWordApp.
+'  */
+Public Sub CloseWordAppSafe(ByRef wdApp As Object, ByVal wasNotRunning As Boolean)
+    On Error Resume Next
+    If Not wdApp Is Nothing Then
+        If wasNotRunning Then
+            wdApp.Quit False
+            KillZombieWordProcesses
+        End If
+        Set wdApp = Nothing
+    End If
+    On Error GoTo 0
+End Sub
+
+' /**
+'  * Builds formatted period block for Word: "- from dd.mm.yy to dd.mm.yy (X days)...", (NOT ACTUAL) if past cutoff.
+'  * Validates periods (End >= Start), sorts by start date, computes total and rest days.
+'  * @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+'  * @param periods [Collection] Collection of period Collections from CollectAllPersonPeriods: (1)=Start, (2)=End, (3)=Days.
+'  * @param cutoffDate [Date] Periods ending before this are marked as not actual.
+'  * @param outTotalDays [Long] ByRef. Sum of days of all periods.
+'  * @param outRestDays [Long] ByRef. outTotalDays \ 3 * 2 (rest days formula).
+'  * @return [String] Formatted text block; empty string and outTotalDays=0, outRestDays=0 if invalid pair. Raises on invalid.
+'  */
+Public Function FormatPeriodsForWord(periods As Collection, cutoffDate As Date, ByRef outTotalDays As Long, ByRef outRestDays As Long) As String
+    Dim sorted As Collection, p As Collection, i As Long, line As String
+    Dim dateStart As Date, dateEnd As Date, daysCount As Long
+
+    outTotalDays = 0
+    outRestDays = 0
+    FormatPeriodsForWord = ""
+
+    On Error GoTo ErrorHandler
+
+    If periods Is Nothing Or periods.count = 0 Then Exit Function
+
+    If HasInvalidPair(periods) Then
+        Err.Raise 5, "FormatPeriodsForWord", "Invalid period: end date is less than start date."
+    End If
+
+    Set sorted = SortPeriodsByDateStart(periods)
+
+    For i = 1 To sorted.count
+        Set p = sorted(i)
+        dateStart = p(1)
+        dateEnd = p(2)
+        daysCount = p(3)
+        outTotalDays = outTotalDays + daysCount
+
+        line = "- с " & Format(dateStart, "dd.mm.yy") & " по " & Format(dateEnd, "dd.mm.yy") & " (" & daysCount & " сут.)"
+        If dateEnd < cutoffDate Then
+            line = line & " (НЕ АКТУАЛЕН — старше 3 лет + 1 месяц!)"
+        End If
+        FormatPeriodsForWord = FormatPeriodsForWord & line & vbCrLf
+    Next i
+
+    outRestDays = (outTotalDays \ 3) * 2
+    Exit Function
+ErrorHandler:
+    outTotalDays = 0
+    outRestDays = 0
+    FormatPeriodsForWord = ""
+    Err.Raise Err.number, Err.Source, Err.Description
+End Function
+
 ' /**
 '  * checks if Word is available on the system.
 '  */
@@ -1170,5 +1252,57 @@ Public Function IsWordAvailable() As Boolean
         IsWordAvailable = False
     End If
     On Error GoTo 0
+End Function
+
+' ==============================================================================
+' HOTFIX: ROBUST DATE PARSER
+' ==============================================================================
+Public Function ParseDateSafe(val As Variant) As Date
+    On Error Resume Next
+    ParseDateSafe = 0 ' Default failure
+    
+    If IsEmpty(val) Then Exit Function
+    
+    ' 1. Try standard conversion (works for real dates and proper system text)
+    If IsDate(val) Then
+        Dim d As Date
+        d = CDate(val)
+        ' Logic check: ignore default 1899 dates (value 0)
+        If Year(d) > 2000 Then
+            ParseDateSafe = d
+            Exit Function
+        End If
+    End If
+    
+    ' 2. Manual parsing for stubborn text formats (e.g. "01.02.25" on US system)
+    Dim sVal As String
+    sVal = Trim(CStr(val))
+    
+    Dim parts() As String
+    If InStr(sVal, ".") > 0 Then
+        parts = Split(sVal, ".")
+    ElseIf InStr(sVal, "/") > 0 Then
+        parts = Split(sVal, "/")
+    End If
+    
+    ' Expecting 3 parts: Day, Month, Year
+    If (Not Not parts) <> 0 Then
+        If UBound(parts) = 2 Then
+            Dim dInt As Integer, mInt As Integer, yInt As Integer
+            dInt = CInt(parts(0))
+            mInt = CInt(parts(1))
+            yInt = CInt(parts(2))
+            
+            ' Fix 2-digit year
+            If yInt < 100 Then
+                If yInt < 50 Then yInt = 2000 + yInt Else yInt = 1900 + yInt
+            End If
+            
+            ' Logic check: Year > 2000
+            If yInt > 2000 Then
+                ParseDateSafe = DateSerial(yInt, mInt, dInt)
+            End If
+        End If
+    End If
 End Function
 
