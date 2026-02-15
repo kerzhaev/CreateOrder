@@ -252,7 +252,7 @@ Private Sub cmbReason_Enter()
 
     ' Заносим в ComboBox только уникальные значения
     Dim key As Variant
-    For Each key In reasonsDict.Keys
+    For Each key In reasonsDict.keys
         cmbReason.AddItem key
     Next key
 End Sub

@@ -9,7 +9,7 @@
 * **Context Maintenance:** После выполнения задачи Агент обязан обновить разделы `Active State` и `Log` в этом файле.
 
 ## 1. Глобальная цель
-Разработка генератора приказов и QR-кодов для воинской части на базе Excel/VBA с использованием VbaModuleManager.
+Разработка генератора приказов и QR-кодов для воинской части на базе Excel/VBA с использованием VbaModuleManager https://github.com/Rabadash8820/VbaModuleManager.
 
 ## 2. Текущее состояние (Active State)
 * **Версия:** 1.4.1

@@ -215,7 +215,7 @@ Public Sub ExportPaymentsWithoutPeriods()
     
     ' Generate orders for each payment type
     successCount = 0
-    For Each paymentType In groupedPayments.Keys
+    For Each paymentType In groupedPayments.keys
         Set paymentList = groupedPayments(paymentType)
         If GeneratePaymentOrder(CStr(paymentType), paymentList) Then
             successCount = successCount + 1

@@ -130,7 +130,7 @@ Public Function CollectRiskEmployeesData(ByRef employees() As EmployeeRiskData) 
     empIndex = 1
     
     Dim lnKey As Variant
-    For Each lnKey In uniqueLN.Keys
+    For Each lnKey In uniqueLN.keys
         Call FillEmployeeRiskData(CStr(lnKey), employees(empIndex))
         empIndex = empIndex + 1
     Next lnKey
