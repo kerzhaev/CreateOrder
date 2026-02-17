@@ -7,7 +7,7 @@ Option Explicit
 
 ' --- КОНСТАНТЫ ПРОДУКТА ---
 Public Const PRODUCT_NAME As String = "Формирователь приказов"
-Public Const PRODUCT_VERSION As String = "1.5.2"
+Public Const PRODUCT_VERSION As String = "1.5.9"
 Public Const PRODUCT_AUTHOR As String = "Кержаев Евгений Алексеевич"
 Public Const PRODUCT_EMAIL As String = "nachfin@vk.com"
 Public Const PRODUCT_PHONE As String = "+7(989)906-88-91"
@@ -169,8 +169,6 @@ Public Function GetLicenseStatus() As Integer
     ' Если сегодня новый день (дата больше последней), обновляем метку последнего запуска
     If Date > lastRunDate Then
         UpdateLastRunDate Date
-        ' Раскомментируйте следующую строку, если хотите принудительно сохранять файл для фиксации даты (надежнее, но навязчиво)
-        ' ThisWorkbook.Save
     End If
     
     GetLicenseStatus = 0 ' Активна
@@ -189,7 +187,36 @@ Public Function GetLicenseExpiryDateStr() As String
 End Function
 
 ' ===============================================================================
-' 4. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ХЕШИРОВАНИЕ И ХРАНЕНИЕ)
+' 4. ИНТЕГРАЦИЯ ЛИЦЕНЗИРОВАНИЯ В ИНТЕРФЕЙС (NEW)
+' ===============================================================================
+
+' =============================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Проверка лицензии с выводом окна активации, если она недействительна
+' @return [Boolean] True - если лицензия активна и можно продолжать работу
+' =============================================
+Public Function CheckLicenseAndPrompt() As Boolean
+    Dim status As Integer
+    status = GetLicenseStatus()
+
+    If status = 0 Then
+        CheckLicenseAndPrompt = True
+    Else
+        ' Лицензия недействительна или отсутствует. Показываем форму для ввода ключа.
+        MsgBox "Для использования данной функции (экспорт/формирование документов) требуется активация.", vbExclamation, "Требуется лицензия"
+        frmAbout.Show
+
+        ' После закрытия формы снова проверяем статус (пользователь мог успешно активировать)
+        If GetLicenseStatus() = 0 Then
+            CheckLicenseAndPrompt = True
+        Else
+            CheckLicenseAndPrompt = False
+        End If
+    End If
+End Function
+
+' ===============================================================================
+' 5. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ХЕШИРОВАНИЕ И ХРАНЕНИЕ)
 ' ===============================================================================
 
 ' Хеширование строки (для подписи)

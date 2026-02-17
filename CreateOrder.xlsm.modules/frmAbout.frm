@@ -48,27 +48,52 @@ Private Sub btnActivate_Click()
     End If
 End Sub
 
+' =============================================
+' МОДУЛЬ ФОРМЫ: frmAbout (Обновленный UI)
+' =============================================
 Private Sub UpdateLicenseStatusUI()
     Dim status As Integer
     status = modActivation.GetLicenseStatus()
     
+    ' Предполагаем, что Label11 вы переименовали в lblPremiumMessage
+    ' Если нет, замените lblPremiumMessage на Label11 в коде ниже
+    
     If status = 0 Then
-        ' Активна
+        ' === ЛИЦЕНЗИЯ АКТИВНА ===
         lblActivationStatus.Caption = "СТАТУС: АКТИВИРОВАНО (до " & modActivation.GetLicenseExpiryDateStr() & ")"
-        lblActivationStatus.ForeColor = RGB(0, 150, 0) ' Зеленый
+        lblActivationStatus.ForeColor = RGB(0, 150, 0) ' Зеленый цвет успеха
         
         ' Скрываем поля ввода, они больше не нужны
-        txtActivationCode.Enabled = False
-        btnActivate.Enabled = False
-        lblActivationHint.Caption = "Продукт активирован. Спасибо!"
-    Else
-        ' Истекла или нет
-        lblActivationStatus.Caption = "СТАТУС: ТРЕБУЕТСЯ АКТИВАЦИЯ"
-        lblActivationStatus.ForeColor = RGB(200, 0, 0) ' Красный
+        txtActivationCode.Visible = False     ' Лучше скрыть (Visible), а не просто Enabled
+        btnActivate.Visible = False           ' Кнопку тоже скрываем
+        lblActivationHint.Visible = False     ' Подсказку формата скрываем
         
+        ' Сообщение для пользователя (бывший Label11)
+        lblPremiumMessage.Caption = "Спасибо за использование лицензионной версии!" & vbCrLf & _
+                                    "Вам доступны все функции экспорта и отчетов."
+        lblPremiumMessage.ForeColor = RGB(0, 100, 0) ' Темно-зеленый
+        
+    Else
+        ' === ЛИЦЕНЗИЯ ОТСУТСТВУЕТ ИЛИ ИСТЕКЛА ===
+        If status = 1 Then
+            lblActivationStatus.Caption = "СТАТУС: ОГРАНИЧЕННАЯ ВЕРСИЯ"
+        Else
+            lblActivationStatus.Caption = "СТАТУС: БЛОКИРОВКА БЕЗОПАСНОСТИ"
+        End If
+        lblActivationStatus.ForeColor = RGB(200, 0, 0) ' Красный цвет тревоги
+        
+        ' Показываем элементы активации
+        txtActivationCode.Visible = True
         txtActivationCode.Enabled = True
+        btnActivate.Visible = True
         btnActivate.Enabled = True
+        lblActivationHint.Visible = True
         lblActivationHint.Caption = modActivation.ACTIVATION_HINT
+        
+        ' Сообщение-инструкция (бывший Label11)
+        lblPremiumMessage.Caption = "Функции экспорта документов заблокированы." & vbCrLf & _
+                                    "Для снятия ограничений введите ключ и нажмите 'Активировать'."
+        lblPremiumMessage.ForeColor = RGB(50, 50, 50) ' Темно-серый или красный
     End If
 End Sub
 
