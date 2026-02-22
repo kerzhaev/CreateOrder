@@ -1,11 +1,12 @@
 Attribute VB_Name = "mdlWordImport"
 ' ===============================================================================
 ' Module: mdlWordImport
-' Version: 1.5.0 (Final)
+' Version: 1.5.1 (Final + Memory Leak Fix)
 ' Date: 22.02.2026
 ' Author: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
 ' Description: Полный цикл ETL: извлечение рапортов из Word, конвертация в HTML,
 '              чтение в Dictionary, выгрузка в ДСО с сортировкой и группировкой.
+' Fix: Устранены зависания из-за скрытых процессов Excel/Word при ошибках
 ' ===============================================================================
 
 Option Explicit
@@ -64,7 +65,7 @@ Public Sub ExecuteWordImport()
     finalReport = finalReport & vbCrLf & vbCrLf & _
                   "ВНИМАНИЕ: Для визуальной проверки новых периодов на ошибки " & _
                   "нажмите кнопку 'Проверить данные' на ленте (вкладка Валидация)."
-                  
+    
     MsgBox "Импорт завершен успешно!" & vbCrLf & vbCrLf & finalReport, vbInformation, "Итоги импорта рапорта"
     
     Exit Sub
@@ -131,6 +132,8 @@ Private Function ConvertWordToTempHTML(ByVal filePath As String) As String
 ErrorHandler:
     If Not wdDoc Is Nothing Then wdDoc.Close False
     If wordWasNotRunning And Not wdApp Is Nothing Then wdApp.Quit False
+    Set wdDoc = Nothing
+    Set wdApp = Nothing
     ConvertWordToTempHTML = ""
 End Function
 
@@ -148,6 +151,8 @@ Private Function ParseHTMLToDict(ByVal htmlPath As String) As Object
     
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
+    
+    On Error GoTo ErrorHandler ' ВАЖНО: Добавили перехват ошибок
     
     Set wbTemp = Workbooks.Open(fileName:=htmlPath, ReadOnly:=True)
     Set ws = wbTemp.Sheets(1)
@@ -192,8 +197,21 @@ Private Function ParseHTMLToDict(ByVal htmlPath As String) As Object
     Next i
     
     wbTemp.Close False
+    Set wbTemp = Nothing
     Application.DisplayAlerts = True
     
+    Set ParseHTMLToDict = dict
+    Exit Function
+    
+ErrorHandler:
+    ' ГАРАНТИРОВАННО ЗАКРЫВАЕМ ФАЙЛ ПРИ СБОЕ
+    If Not wbTemp Is Nothing Then
+        On Error Resume Next
+        wbTemp.Close False
+        Set wbTemp = Nothing
+        On Error GoTo 0
+    End If
+    Application.DisplayAlerts = True
     Set ParseHTMLToDict = dict
 End Function
 

@@ -2,7 +2,7 @@ Attribute VB_Name = "mdlHelper"
 ' ==============================================================================
 ' Module: mdlHelper
 ' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
-' Version: 1.5.9 (FIXED: ParseDateSafe Syntax Error & Restored Search Functions)
+' Version: 1.6.0 (UX Update: Smart Column Detection & Detailed Error Messages)
 ' Description: Universal utility functions, Smart Position Parser & FIO Engine.
 ' ==============================================================================
 
@@ -23,12 +23,11 @@ Public Sub InitStaffColumnIndexes()
     Set wsStaff = ThisWorkbook.Sheets("Штат")
     
     If Not FindColumnNumbers(wsStaff, colLichniyNomer_Global, colZvanie_Global, colFIO_Global, colDolzhnost_Global, colVoinskayaChast_Global) Then
-        MsgBox "Корректные индексы столбцов не удалось определить. Работа программы невозможна.", vbCritical
+        ' Сообщение уже выводится внутри FindColumnNumbers, здесь просто прерываем работу
         End
     End If
 End Sub
 
-' ВОССТАНОВЛЕННАЯ ФУНКЦИЯ (была потеряна)
 Public Sub EnsureStaffColumnsInitialized()
     If colLichniyNomer_Global = 0 Or colFIO_Global = 0 Then
         InitStaffColumnIndexes
@@ -60,19 +59,23 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
         ' 1. Личный номер
         If InStr(headerText, "личный номер") > 0 Then colLichniyNomer = i
         
-        ' 2. Воинское звание
-        If InStr(headerText, "воинское звание") > 0 Then colZvanie = i
+        ' 2. Воинское звание (понимает "звание" или "воинское звание")
+        If InStr(headerText, "воинское звание") > 0 Or InStr(headerText, "звание") > 0 Then colZvanie = i
         
         ' 3. Часть
         If InStr(headerText, "часть") > 0 Or InStr(headerText, "раздел персонала") > 0 Then colVoinskayaChast = i
         
-        ' 4. ФИО (Лицо)
-        If headerText = "лицо" Then
-            If IsTextFIOColumn(ws, i) Then colFIO = i: foundFIO = True
+        ' 4. ФИО (понимает "лицо", "фио", "фамилия")
+        If headerText = "лицо" Or InStr(headerText, "фио") > 0 Or InStr(headerText, "фамилия") > 0 Then
+            If IsTextFIOColumn(ws, i) Then
+                colFIO = i: foundFIO = True
+            ElseIf colFIO = 0 Then
+                colFIO = i ' Fallback, если вдруг тест IsTextFIOColumn не прошел
+            End If
         End If
         
-        ' 5. Должность (Ищем ДЛИННУЮ с цифрами приоритетно)
-        If InStr(headerText, "штатная должность") > 0 Then
+        ' 5. Должность (Ищем ДЛИННУЮ с цифрами приоритетно, понимает "должность")
+        If InStr(headerText, "штатная должность") > 0 Or InStr(headerText, "должность") > 0 Then
             If IsLongPositionColumn(ws, i) Then
                 colDolzhnost = i: foundDolzhnost = True
             ElseIf colDolzhnost = 0 And IsTextColumn(ws, i) Then
@@ -85,7 +88,19 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
         FindColumnNumbers = True
     Else
         FindColumnNumbers = False
-        MsgBox "Ошибка при определении столбцов. Проверьте заголовки.", vbCritical
+        
+        ' Формируем подробный отчет об отсутствующих колонках
+        Dim missingCols As String
+        missingCols = ""
+        If colLichniyNomer = 0 Then missingCols = missingCols & "? Личный номер" & vbCrLf
+        If colZvanie = 0 Then missingCols = missingCols & "? Воинское звание" & vbCrLf
+        If colFIO = 0 Then missingCols = missingCols & "? Лицо (или ФИО)" & vbCrLf
+        If colDolzhnost = 0 Then missingCols = missingCols & "? Штатная должность" & vbCrLf
+        If colVoinskayaChast = 0 Then missingCols = missingCols & "? Часть (или Раздел персонала)" & vbCrLf
+        
+        MsgBox "Ошибка при проверке структуры листа 'Штат'." & vbCrLf & vbCrLf & _
+               "Не найдены следующие обязательные столбцы:" & vbCrLf & missingCols & vbCrLf & _
+               "Пожалуйста, проверьте заголовки в первой строке.", vbCritical, "Не хватает данных"
     End If
 End Function
 
@@ -191,7 +206,7 @@ Public Sub SetupSettingsSheet()
 End Sub
 
 ' ==============================================================================
-' 4. DATE PARSING & SEARCH (FIXED)
+' 4. DATE PARSING & SEARCH
 ' ==============================================================================
 
 Public Function ParseDateSafe(val As Variant) As Date
@@ -209,7 +224,7 @@ Public Function ParseDateSafe(val As Variant) As Date
         If Year(d) > 2000 And Year(d) < 2100 Then ParseDateSafe = d: Exit Function
     End If
     
-    ' 2. Ручной разбор (ИСПРАВЛЕНА СИНТАКСИЧЕСКАЯ ОШИБКА ЗДЕСЬ)
+    ' 2. Ручной разбор
     Dim parts() As String
     If InStr(sVal, ".") > 0 Then
         parts = Split(sVal, ".")
@@ -273,11 +288,12 @@ Public Function FindEmployeeByAnyNumber(number As String) As Object
 End Function
 
 Public Function FindTableNumberColumn(ws As Worksheet) As Long
-    Dim i As Long, val As Variant
+    Dim i As Long, val As Variant, headerText As String
     Dim lastCol As Long: lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
     
     For i = 1 To lastCol
-        If LCase(Trim(ws.Cells(1, i).value)) = "лицо" Then
+        headerText = LCase(Trim(ws.Cells(1, i).value))
+        If headerText = "лицо" Or InStr(headerText, "табельн") > 0 Then
             ' Проверяем, числовые ли там данные
             val = ws.Cells(2, i).value
             If IsNumeric(val) And Not IsEmpty(val) Then
@@ -386,7 +402,7 @@ Public Function hasCriticalErrors() As Boolean
 End Function
 
 ' ==============================================================================
-' 5. SMART POSITION PARSER (FIXED & RESTORED)
+' 5. SMART POSITION PARSER
 ' ==============================================================================
 
 Public Function SklonitDolzhnost(dolzhnost As String, VoinskayaChast As String) As String
@@ -412,8 +428,7 @@ Private Function CutUnitTail(Text As String) As String
     cutBattalion = GetSettingCutBattalion()
     Dim t As String: t = Text
     
-    ' 1. ОБЯЗАТЕЛЬНАЯ РЕЗКА: Юрлица (цифры + "отдельного", "гвардейского")
-    ' ВАЖНО: Убрал просто "разведывательного" без цифр, чтобы не резало "командир разведывательного взвода"
+    ' 1. ОБЯЗАТЕЛЬНАЯ РЕЗКА: Юрлица
     patterns = Array( _
         "(\d+\s+)?(отдельного|гвардейского|краснознаменного)\s+.*", _
         "\d+\s+(армии|дивизии|бригады|полка|батальона).*" _
@@ -422,7 +437,7 @@ Private Function CutUnitTail(Text As String) As String
         t = RegExpReplace(t, patterns(i), "")
     Next i
     
-    ' 2. Крупные соединения (без цифр) - всегда режем
+    ' 2. Крупные соединения
     patterns = Array( _
         "(управления|штаба)\s+(полка|бригады|дивизии).*" _
     )
@@ -430,7 +445,7 @@ Private Function CutUnitTail(Text As String) As String
         t = RegExpReplace(t, patterns(i), "")
     Next i
     
-    ' 3. Условная резка (Батальоны внутри полка)
+    ' 3. Условная резка
     If cutBattalion Then
         patterns = Array("(\d+\s+)?(батальона|дивизиона|эскадрильи).*")
         For i = LBound(patterns) To UBound(patterns)
@@ -447,7 +462,6 @@ Private Sub SplitRoleAndBody(Text As String, ByRef roleOut As String, ByRef body
     splitIdx = UBound(words)
     
     For i = 0 To UBound(words)
-        ' Если встретили слово-маркер подразделения ("взвода", "роты") - всё, что ДО него, это Роль.
         If IsUnitKeyword(words(i)) Then
             splitIdx = i - 1
             Exit For
@@ -472,12 +486,11 @@ End Function
 
 Public Function SklonitVoennayaDolzhnost(dolzhnost As String) As String
     Dim res As String: res = dolzhnost
-    ' Префиксы
     If Left(res, 8) = "старший " Then res = "старшему " & Mid(res, 9)
     If Left(res, 8) = "младший " Then res = "младшему " & Mid(res, 9)
     If Left(res, 8) = "главный " Then res = "главному " & Mid(res, 9)
     If Left(res, 8) = "ведущий " Then res = "ведущему " & Mid(res, 9)
-    ' Замены
+    
     res = Replace(res, "командир", "командиру")
     res = Replace(res, "начальник", "начальнику")
     res = Replace(res, "заместитель", "заместителю")
@@ -588,7 +601,7 @@ Public Function GetMonthNameRussian(monthNumber As Integer) As String
 End Function
 
 ' ==========================================================
-' FIO ENGINE (FULL)
+' FIO ENGINE
 ' ==========================================================
 
 Private Function IsMan(ByVal sName As String) As Boolean
@@ -620,7 +633,7 @@ Private Function IsWoman(ByVal sName As String) As Boolean
     Next i
 End Function
 
-Public Function GetSex(ByVal cell As String) As Integer
+Private Function GetSex(ByVal cell As String) As Integer
     Dim arWords, iGender As Integer, i As Integer
     arWords = Split(Application.WorksheetFunction.Trim(cell), " ")
     iGender = 0
@@ -830,4 +843,3 @@ Public Function RegExpReplace(ByVal Text As String, ByVal Pattern As String, ByV
     RegExpReplace = objRegExp.Replace(Text, ReplaceWith)
     Set objRegExp = Nothing
 End Function
-

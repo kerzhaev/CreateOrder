@@ -2,7 +2,7 @@ Attribute VB_Name = "mdlDataImport"
 ' ==============================================================================
 ' Module: mdlDataImport
 ' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
-' Date: 14.02.2026
+' Date: 22.02.2026
 ' Description: Imports data from an external Excel file into the "Staff" (Shtat) sheet.
 '              Replaces all existing data on the target sheet.
 ' ==============================================================================
@@ -78,8 +78,8 @@ Sub ImportDataToStaff()
     targetWorksheet.Cells(1, 1).PasteSpecial xlPasteAll
     
     ' Cleanup UI
-    targetWorksheet.Range("A1").Select
     Application.CutCopyMode = False
+    ' ВАЖНО: Убран targetWorksheet.Range("A1").Select, так как он вызывает ошибку 1004, если лист не активен
     
     ' Close Source
     sourceWorkbook.Close False
@@ -95,13 +95,18 @@ Sub ImportDataToStaff()
     GoTo CleanUp
     
 ErrorHandler:
+    ' Сначала сохраняем данные об ошибке, пока On Error GoTo 0 их не стер!
+    Dim errNum As Long, errDesc As String
+    errNum = Err.number
+    errDesc = Err.Description
+
     If Not sourceWorkbook Is Nothing Then
         ' Close without saving if error occurred while open
         On Error Resume Next
         sourceWorkbook.Close False
         On Error GoTo 0
     End If
-    MsgBox "Критическая ошибка при импорте: " & Err.Description, vbCritical, "Ошибка " & Err.number
+    MsgBox "Критическая ошибка при импорте: " & errDesc, vbCritical, "Ошибка " & errNum
     
 CleanUp:
     Application.ScreenUpdating = True
@@ -230,8 +235,16 @@ Sub PreviewImportData()
     GoTo CleanUp
     
 ErrorHandler:
-    If Not sourceWorkbook Is Nothing Then sourceWorkbook.Close False
-    MsgBox "Ошибка чтения файла: " & Err.Description, vbCritical
+    Dim errNum As Long, errDesc As String
+    errNum = Err.number
+    errDesc = Err.Description
+    
+    If Not sourceWorkbook Is Nothing Then
+        On Error Resume Next
+        sourceWorkbook.Close False
+        On Error GoTo 0
+    End If
+    MsgBox "Ошибка чтения файла: " & errDesc, vbCritical, "Ошибка " & errNum
     
 CleanUp:
     Application.ScreenUpdating = True

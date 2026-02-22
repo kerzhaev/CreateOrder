@@ -1,13 +1,14 @@
 Attribute VB_Name = "mdlFRPExport"
 ' ===================================================================
 ' Module mdlFRPExport (Universal)
-' Version: 3.1.0 (Alushta Update)
-' Date: 15.02.2026
+' Version: 3.1.1 (Memory Leak Fix)
+' Date: 22.02.2026
 ' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
 ' Description: Генерация Excel отчетов:
 ' 1. ДСО (сутки отдыха)
 ' 2. ФРП Риск (надбавка 2%)
 ' Updates: Добавлен столбец "Табельный номер" (берется из цифрового столбца "Лицо" в Штате)
+' Fix: Автоматическое закрытие сгенерированных книг для предотвращения фантомных процессов
 ' ===================================================================
 Option Explicit
 
@@ -95,7 +96,7 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
                 personData.Add periodList, "periods"
                 uniquePersons.Add personData, currentLichniyNomer
             End If
-            On Error GoTo 0
+            On Error GoTo ErrorHandler ' ВОССТАНАВЛИВАЕМ ОБРАБОТЧИК
             mdlHelper.CollectAllPersonPeriods wsMain, i, personData("periods")
         End If
     Next i
@@ -178,12 +179,23 @@ Sub CreateExcelReportPeriodsByLichniyNomer()
     Application.DisplayAlerts = False
     If dir(filePath) <> "" Then Kill filePath
     wbNew.SaveAs filePath
+    wbNew.Close False ' ЗАКРЫВАЕМ СОЗДАННЫЙ ФАЙЛ, ЧТОБЫ НЕ ВИСЕЛ!
+    Set wbNew = Nothing
+    
     MsgBox "Отчёт ДСО сохранён: " & filePath, vbInformation
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка: " & Err.Description, vbCritical
+    Dim errNum As Long, errDesc As String
+    errNum = Err.number
+    errDesc = Err.Description
+    MsgBox "Ошибка: " & errDesc, vbCritical, "Ошибка " & errNum
 CleanUp:
+    If Not wbNew Is Nothing Then
+        On Error Resume Next
+        wbNew.Close False
+        On Error GoTo 0
+    End If
     Application.ScreenUpdating = True
     Application.StatusBar = False
 End Sub
@@ -290,16 +302,30 @@ Sub CreateRiskExcelReport()
     wsNew.Columns("A:I").AutoFit
     Dim filePathRisk As String
     filePathRisk = ThisWorkbook.Path & "\Выгрузка_Алушта_Риск_" & Format(Date, "dd.mm.yyyy") & ".xlsx"
+    
+    Application.DisplayAlerts = False
+    If dir(filePathRisk) <> "" Then Kill filePathRisk
+    
     wbNew.SaveAs filePathRisk
+    wbNew.Close False ' ЗАКРЫВАЕМ СОЗДАННЫЙ ФАЙЛ, ЧТОБЫ НЕ ВИСЕЛ!
+    Set wbNew = Nothing
     
     MsgBox "Отчёт ФРП Риск (Алушта) сохранён: " & filePathRisk, vbInformation
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка при создании отчёта Риск: " & Err.Description, vbCritical
-    If Not wbNew Is Nothing Then wbNew.Close False
+    Dim errNum2 As Long, errDesc2 As String
+    errNum2 = Err.number
+    errDesc2 = Err.Description
+    MsgBox "Ошибка при создании отчёта Риск: " & errDesc2, vbCritical, "Ошибка " & errNum2
     Resume CleanUp
 CleanUp:
+    If Not wbNew Is Nothing Then
+        On Error Resume Next
+        wbNew.Close False
+        On Error GoTo 0
+    End If
+    Application.DisplayAlerts = True
     Application.ScreenUpdating = True
     Application.StatusBar = False
 End Sub
