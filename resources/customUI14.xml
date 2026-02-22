@@ -1,27 +1,19 @@
-<!--
-Обновленный Custom Ribbon XML для системы управления военным персоналом
-Версия: 3.0.0
-Дата: 01.12.2025
-Описание: Добавлена группа для работы с надбавками без периодов
--->
-
 <customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
   <ribbon>
     <tabs>
       <tab id="customTab" label="СВО Макросы">
         
-        <group id="docsGroup" label="Основные документы">
+        <group id="docsGroup" label="Приказы и Рапорты">
           <button id="mainExport" label="Приказ (Основной)" onAction="RunMainExport" imageMso="FileNew" size="large"/>
           <button id="spravkaExport" label="Справка ДСО" onAction="RunSpravkaExport" imageMso="FileProperties" size="large"/>
           <button id="raportExport" label="Рапорт" onAction="RunRaportExport" imageMso="FileSaveAs" size="large"/>
         </group>
         
-        <group id="financeGroup" label="Финансы и Надбавки">
+        <group id="financeGroup" label="Надбавки">
           <button id="riskOrder" label="Приказ за Риск" onAction="OnRiskOrderClick" imageMso="AccountingFormat" size="large"/>
           
           <menu id="allowancesMenu" label="Доп. Надбавки" imageMso="TableDesign" size="large">
               <button id="mnuExportAllowances" label="Экспорт приказов" onAction="OnExportAllowancesClick" imageMso="FileSaveAs"/>
-              <button id="mnuValidate" label="Проверить ошибки" onAction="OnValidateAllowancesClick" imageMso="Spelling"/>
               <menuSeparator id="sep1" />
               <button id="mnuMassImport" label="Массовое добавление" onAction="OnMassImportEmployeesClick" imageMso="GroupSmartArtAdd"/>
               <button id="mnuSelectEmp" label="Найти сотрудника" onAction="OnSelectEmployeeClick" imageMso="FindDialog"/>
@@ -30,10 +22,17 @@
           </menu>
         </group>
         
-        <group id="dataGroup" label="Данные и Сервис">
-          <button id="excelReport" label="Выгрузка Алушта/ФРП" onAction="OnPeriodsReportClick" imageMso="ExcelSpreadsheetInsert" size="large"/>
+        <group id="dataGroup" label="Импорт и Отчеты">
+          <button id="excelReport" label="Выгрузка Алушта" onAction="OnPeriodsReportClick" imageMso="ExcelSpreadsheetInsert" size="large"/>
           <button id="importData" label="Обновить штат" onAction="RunImportData" imageMso="ImportExcel" size="large"/>
-          <button id="showSettings" label="Настройки" onAction="ShowSettings" imageMso="ControlsGallery" size="large"/>
+          <button id="importWordRaport" label="Импорт рапорта" onAction="RunWordRaportImport" imageMso="TextFromFileInsert" size="large" screentip="Импорт из Word" supertip="Извлекает периоды из рапорта"/>
+        </group>
+
+        <group id="systemGroup" label="Проверка и Настройки">
+          <button id="smartValidate" label="Проверить лист" onAction="RunSmartValidation" imageMso="Spelling" size="large" screentip="Умная проверка" supertip="Автоматически проверяет текущий открытый лист на ошибки"/>
+          
+          <button id="showSettings" label="Настройки" onAction="ShowSettings" imageMso="ControlsGallery" size="normal"/>
+          <button id="diagnoseStructure" label="Диагностика" onAction="RunDiagnoseStructure" imageMso="DatabaseAnalyzeTable" size="normal"/>
         </group>
         
       </tab>

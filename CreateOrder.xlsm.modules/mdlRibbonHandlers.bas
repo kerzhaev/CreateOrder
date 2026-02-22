@@ -136,20 +136,48 @@ End Sub
 ' ===============================================================================
 
 ' Handler for data validation
-Sub RunDataValidation(control As IRibbonControl)
+
+' =============================================
+' Умная валидация: сама понимает, какой лист проверять
+' =============================================
+Sub RunSmartValidation(control As IRibbonControl)
     On Error GoTo ErrorHandler
-    Application.ScreenUpdating = False
-    Application.StatusBar = "Выполняется валидация данных..."
-    Call mdlDataValidation.ValidateMainSheetData
-    Application.ScreenUpdating = True
+    
+    If ActiveSheet Is Nothing Then Exit Sub
+    
+    Dim sheetName As String
+    sheetName = ActiveSheet.Name
+    
+    If sheetName = "ДСО" Then
+        ' 1. Если мы в ДСО -> проверяем даты
+        Application.ScreenUpdating = False
+        Application.StatusBar = "Проверка периодов ДСО..."
+        Call mdlDataValidation.ValidateMainSheetData
+        Application.ScreenUpdating = True
+        
+    ElseIf sheetName = mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS Then
+        ' 2. Если мы в надбавках -> проверяем документы
+        Application.ScreenUpdating = False
+        Call mdlPaymentValidation.ValidatePaymentsWithoutPeriods
+        Application.ScreenUpdating = True
+        
+    Else
+        ' 3. Если мы на любом другом листе
+        MsgBox "Для проверки данных перейдите на лист 'ДСО' или '" & mdlReferenceData.SHEET_PAYMENTS_NO_PERIODS & "'.", vbInformation, "Умная проверка"
+    End If
+    
     Application.StatusBar = False
     Exit Sub
     
 ErrorHandler:
     Application.ScreenUpdating = True
     Application.StatusBar = False
-    MsgBox "Ошибка при валидации данных: " & Err.Description, vbCritical, "Ошибка валидации"
+    MsgBox "Ошибка при проверке данных: " & Err.Description, vbCritical, "Ошибка"
 End Sub
+
+
+
+
 
 ' Handler for structure diagnostics
 Sub RunDiagnoseStructure(control As IRibbonControl)
@@ -190,18 +218,30 @@ ErrorHandler:
     MsgBox "Ошибка при предпросмотре данных: " & Err.Description, vbCritical, "Ошибка предпросмотра"
 End Sub
 
-' Handler for "Validate Allowances" button
-Public Sub OnValidateAllowancesClick(control As IRibbonControl)
+
+' Handler for Word Raport Import
+Sub RunWordRaportImport(control As IRibbonControl)
     On Error GoTo ErrorHandler
+    
+    ' === ПРОВЕРКА ЛИЦЕНЗИИ ===
+    If Not modActivation.CheckLicenseAndPrompt() Then Exit Sub
+    
     Application.ScreenUpdating = False
-    Call mdlPaymentValidation.ValidatePaymentsWithoutPeriods
+    Application.StatusBar = "Инициализация импорта рапорта..."
+    
+    ' Вызов главной функции импорта из нового модуля
+    Call mdlWordImport.ExecuteWordImport
+    
     Application.ScreenUpdating = True
+    Application.StatusBar = False
     Exit Sub
     
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при проверке надбавок: " & Err.Description, vbCritical, "Ошибка"
+    Application.StatusBar = False
+    MsgBox "Ошибка при вызове импорта: " & Err.Description, vbCritical, "Ошибка"
 End Sub
+
 
 ' Handler for "Mass Add Employees" button
 Public Sub OnMassImportEmployeesClick(control As IRibbonControl)
