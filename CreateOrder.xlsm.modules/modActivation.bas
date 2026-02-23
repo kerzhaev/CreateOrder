@@ -8,11 +8,11 @@ Option Explicit
 
 ' --- ИНФОРМАЦИЯ О ПРОДУКТЕ (ДЛЯ ФОРМЫ FRMABOUT) ---
 Public Const PRODUCT_NAME As String = "Формирователь приказов"
-Public Const PRODUCT_VERSION As String = "2.1.0"
+Public Const PRODUCT_VERSION As String = "2.4.0"
 Public Const PRODUCT_AUTHOR As String = "Кержаев Евгений Алексеевич"
 Public Const PRODUCT_EMAIL As String = "nachfin@vk.com"
 Public Const PRODUCT_PHONE As String = "+7(989)906-88-91"
-Public Const PRODUCT_COMPANY As String = "Отделение по разработке программного обеспечения 95 ФЭС МО РФ"
+Public Const PRODUCT_COMPANY As String = "95 ФЭС"
 Public Const ACTIVATION_HINT As String = "Введите ключ (формат: XXXX-XXXX-XXXX-XXXX)"
 
 ' --- ГЛОБАЛЬНЫЕ НАСТРОЙКИ ЗАЩИТЫ ---
@@ -26,6 +26,14 @@ Private Const NAME_PERSONAL_SIGN As String = "LicSign"    ' Цифровая п�
 Private Const NAME_GLOBAL_DATA As String = "GlobalLimit"  ' Дата, установленная администратором
 Private Const NAME_GLOBAL_SIGN As String = "GlobalSign"   ' Подпись даты администратора (без HWID)
 Private Const NAME_LAST_RUN As String = "LicLast"         ' Дата последнего запуска (от перевода часов)
+
+' ===============================================================================
+' 0. ЕДИНЫЙ ИСТОЧНИК ИСТИНЫ ДЛЯ ОЗНАКОМИТЕЛЬНОГО ПЕРИОДА
+' ===============================================================================
+Private Function GetPublicExpiryDate() As Date
+    ' Измените эту дату здесь, и она автоматически обновится везде (в логике и в окнах)
+    GetPublicExpiryDate = DateSerial(2026, 9, 1) ' 1 Сентября 2026
+End Function
 
 ' ===============================================================================
 ' 1. ИДЕНТИФИКАЦИЯ ОБОРУДОВАНИЯ (HWID)
@@ -129,7 +137,7 @@ Public Function GetLicenseStatus() As Integer
     End If
     
     ' ШАГ 2: Сбор всех доступных дат
-    publicExp = DateSerial(2026, 9, 1) ' 1 Сентябрь 2026 (Публичная триал-версия)
+    publicExp = GetPublicExpiryDate() ' Берем дату из единого источника
     globalExp = GetDateFromHidden(NAME_GLOBAL_DATA, NAME_GLOBAL_SIGN, False)
     personalExp = GetDateFromHidden(NAME_PERSONAL_DATA, NAME_PERSONAL_SIGN, True)
     
@@ -165,7 +173,7 @@ Public Function GetLicenseExpiryDateStr() As String
     Dim personalExp As Date, globalExp As Date, publicExp As Date
     Dim finalExp As Date
     
-    publicExp = DateSerial(2026, 6, 1) ' 1 Июня 2026
+    publicExp = GetPublicExpiryDate() ' Берем дату из единого источника
     globalExp = GetDateFromHidden(NAME_GLOBAL_DATA, NAME_GLOBAL_SIGN, False)
     personalExp = GetDateFromHidden(NAME_PERSONAL_DATA, NAME_PERSONAL_SIGN, True)
     
@@ -186,7 +194,8 @@ Public Function CheckLicenseAndPrompt() As Boolean
     If st = 0 Or st = 3 Or st = 4 Then
         CheckLicenseAndPrompt = True
     Else
-        MsgBox "Бесплатный период завершен. Для использования данной функции требуется действующая лицензия.", vbExclamation, "Блокировка"
+        MsgBox "Бесплатный период завершен." & vbCrLf & _
+               "Для использования данной функции требуется действующая лицензия.", vbExclamation, "Блокировка"
         frmAbout.Show
         
         ' Повторная проверка после закрытия формы
@@ -211,16 +220,15 @@ Public Sub AdminSetGlobalDate()
         Exit Sub
     End If
     
-    ' ---> ДОБАВЛЕННЫЙ БЛОК: Принудительное удаление старого персонального ключа <---
-    ' Это позволяет корпоративной лицензии корректно переопределить истекший HWID-ключ
+    ' ---> Принудительное удаление старого персонального ключа <---
     On Error Resume Next
     ThisWorkbook.Names(NAME_PERSONAL_DATA).Delete
     ThisWorkbook.Names(NAME_PERSONAL_SIGN).Delete
     On Error GoTo 0
-    ' -------------------------------------------------------------------------------
+    ' -------------------------------------------------------------
     
     dStr = InputBox("Введите новую дату отключения для ЭТОГО ФАЙЛА (ДД.ММ.ГГГГ):" & vbCrLf & _
-                    "Оставьте пустым для отмены.", "Установка Глобальной Лицензии", "01.06.2026")
+                    "Оставьте пустым для отмены.", "Установка Глобальной Лицензии", "01.09.2026")
                     
     If dStr = "" Then Exit Sub
     
