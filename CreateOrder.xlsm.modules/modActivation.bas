@@ -1,213 +1,197 @@
 Attribute VB_Name = "modActivation"
 ' ===============================================================================
-' Модуль лицензирования (Оффлайн, с защитой от перевода часов)
-' Формат ключа: AAAA-BBBB-CCCC-DDDD
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Гибридная система лицензирования (Trial + Global Admin + Personal HWID)
+' @version 2.1.0
 ' ===============================================================================
 Option Explicit
 
-' --- КОНСТАНТЫ ПРОДУКТА ---
+' --- ИНФОРМАЦИЯ О ПРОДУКТЕ (ДЛЯ ФОРМЫ FRMABOUT) ---
 Public Const PRODUCT_NAME As String = "Формирователь приказов"
-Public Const PRODUCT_VERSION As String = "1.5.9"
+Public Const PRODUCT_VERSION As String = "2.1.0"
 Public Const PRODUCT_AUTHOR As String = "Кержаев Евгений Алексеевич"
 Public Const PRODUCT_EMAIL As String = "nachfin@vk.com"
 Public Const PRODUCT_PHONE As String = "+7(989)906-88-91"
 Public Const PRODUCT_COMPANY As String = "95 ФЭС"
 Public Const ACTIVATION_HINT As String = "Введите ключ (формат: XXXX-XXXX-XXXX-XXXX)"
 
-' --- СЕКРЕТНЫЕ КОНСТАНТЫ (Внимание: измените их перед выпуском!) ---
-' MAGIC_SEED - смещение даты, SALT_KEY - соль для хеширования
-Private Const MAGIC_SEED As Long = 1985
-Private Const SALT_KEY As String = "95FES_SECURE_2026"
+' --- ГЛОБАЛЬНЫЕ НАСТРОЙКИ ЗАЩИТЫ ---
+Private Const ADMIN_PASSWORD As String = "95FES_Admin"    ' Пароль для "Пасхалки"
+Private Const SALT_KEY As String = "SECURE_TOKEN_2026"    ' Соль для хэширования
+Private Const MAGIC_SEED As Long = 1985                   ' Смещение для шифрования дат
 
-' --- ИМЕНА СКРЫТЫХ ДИАПАЗОНОВ (Хранилище лицензии внутри файла) ---
-Private Const NAME_LICENSE_DATA As String = "LicData"      ' Зашифрованная дата окончания
-Private Const NAME_LICENSE_SIGN As String = "LicSign"      ' Подпись даты окончания
-Private Const NAME_LAST_RUN As String = "LicLastRun"       ' Дата последнего запуска
-Private Const NAME_LAST_RUN_SIGN As String = "LicLastRunS" ' Подпись последнего запуска
+' --- ИМЕНА СКРЫТЫХ ДИАПАЗОНОВ (ПАМЯТЬ КНИГИ EXCEL) ---
+Private Const NAME_PERSONAL_DATA As String = "LicData"    ' Зашифрованная дата персонального ключа
+Private Const NAME_PERSONAL_SIGN As String = "LicSign"    ' Цифровая подпись (привязана к HWID)
+Private Const NAME_GLOBAL_DATA As String = "GlobalLimit"  ' Дата, установленная администратором
+Private Const NAME_GLOBAL_SIGN As String = "GlobalSign"   ' Подпись даты администратора (без HWID)
+Private Const NAME_LAST_RUN As String = "LicLast"         ' Дата последнего запуска (от перевода часов)
 
 ' ===============================================================================
-' 1. ГЕНЕРАТОР КЛЮЧЕЙ (ДЛЯ АДМИНИСТРАТОРА)
-' Вызывать из Immediate Window: ?GenerateLicenseKey("31.12.2026")
+' 1. ИДЕНТИФИКАЦИЯ ОБОРУДОВАНИЯ (HWID)
 ' ===============================================================================
-Public Function GenerateLicenseKey(expiryDate As Date) As String
-    Dim p1_Salt As String
-    Dim p2_Date As String
-    Dim p3_Noise As String
-    Dim p4_Check As String
-    Dim dateVal As Long
+Public Function GetHardwareID() As String
+    On Error Resume Next
+    Dim fso As Object, d As Object, hexStr As String
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set d = fso.GetDrive("C:\")
+    
+    If Err.number = 0 Then
+        hexStr = Hex(d.SerialNumber)
+        ' Дополняем нулями до 8 символов
+        GetHardwareID = Right("00000000" & hexStr, 8)
+    End If
+    
+    If GetHardwareID = "00000000" Or GetHardwareID = "" Then GetHardwareID = "NODEFAULT"
+    On Error GoTo 0
+End Function
+
+' ===============================================================================
+' 2. ГЕНЕРАЦИЯ ПЕРСОНАЛЬНОГО КЛЮЧА (ДЛЯ АДМИНА)
+' Вводить в Immediate Window: ?modActivation.GenerateLicenseKey("31.12.2026", "A1B2C3D4")
+' ===============================================================================
+Public Function GenerateLicenseKey(expiryDate As Date, targetHWID As String) As String
+    Dim p1_Salt As String, p2_Date As String, p3_Noise As String, p4_Check As String
     
     Randomize
-    
-    ' 1. Соль (случайное число Hex)
     p1_Salt = Right("0000" & Hex(Int((65535 * Rnd) + 1)), 4)
-    
-    ' 2. Дата (XOR с солью + Смещение)
-    dateVal = CLng(expiryDate) - MAGIC_SEED
-    dateVal = dateVal Xor CLng("&H" & p1_Salt)
-    p2_Date = Right("0000" & Hex(dateVal), 4)
-    
-    ' 3. Шум
+    p2_Date = Right("0000" & Hex(CLng(expiryDate) - MAGIC_SEED Xor CLng("&H" & p1_Salt)), 4)
     p3_Noise = Right("0000" & Hex(Int((65535 * Rnd) + 1)), 4)
-    
-    ' 4. Контрольная сумма (подпись первых трех частей)
-    p4_Check = CalculateChecksum(p1_Salt & p2_Date & p3_Noise)
+    p4_Check = CalculateHash(p1_Salt & p2_Date & p3_Noise, UCase(Trim(targetHWID)))
     
     GenerateLicenseKey = p1_Salt & "-" & p2_Date & "-" & p3_Noise & "-" & p4_Check
 End Function
 
 ' ===============================================================================
-' 2. ПРОВЕРКА КЛЮЧА И АКТИВАЦИЯ (ДЛЯ ПОЛЬЗОВАТЕЛЯ)
+' 3. АКТИВАЦИЯ ПЕРСОНАЛЬНОГО КЛЮЧА
 ' ===============================================================================
-Public Function ActivateProduct(key As String) As Boolean
-    Dim parts() As String
-    Dim p1 As String, p2 As String, p3 As String, p4 As String
-    Dim expectedCheck As String
-    Dim dateVal As Long
-    Dim expiryDate As Date
+Public Function ActivatePersonal(key As String) As Boolean
+    Dim p() As String, dVal As Long, d As Date, localHWID As String
     
-    ' 1. Очистка и формат
+    ' Очищаем и разбиваем ключ
     key = UCase(Replace(Trim(key), " ", ""))
-    parts = Split(key, "-")
+    p = Split(key, "-")
     
-    If UBound(parts) <> 3 Then
-        MsgBox "Неверный формат ключа.", vbExclamation
-        ActivateProduct = False
+    If UBound(p) <> 3 Then
+        ActivatePersonal = False
         Exit Function
     End If
     
-    p1 = parts(0): p2 = parts(1): p3 = parts(2): p4 = parts(3)
+    localHWID = GetHardwareID()
     
-    ' 2. Проверка целостности
-    expectedCheck = CalculateChecksum(p1 & p2 & p3)
-    If p4 <> expectedCheck Then
-        MsgBox "Ключ недействителен (ошибка контрольной суммы).", vbCritical
-        ActivateProduct = False
+    ' Проверяем подпись ключа с учетом локального HWID
+    If p(3) <> CalculateHash(p(0) & p(1) & p(2), localHWID) Then
+        ActivatePersonal = False
         Exit Function
     End If
     
-    ' 3. Расшифровка даты
+    ' Расшифровываем дату
     On Error Resume Next
-    dateVal = CLng("&H" & p2)
-    dateVal = dateVal Xor CLng("&H" & p1)
-    dateVal = dateVal + MAGIC_SEED
-    expiryDate = CDate(dateVal)
+    dVal = CLng("&H" & p(1)) Xor CLng("&H" & p(0))
+    d = CDate(dVal + MAGIC_SEED)
     
     If Err.number <> 0 Then
-        MsgBox "Ключ поврежден.", vbCritical
-        ActivateProduct = False
+        ActivatePersonal = False
         Exit Function
     End If
     On Error GoTo 0
     
-    ' 4. Проверка срока
-    If expiryDate < Date Then
-        MsgBox "Срок действия этого ключа уже истёк (" & Format(expiryDate, "dd.mm.yyyy") & ").", vbExclamation
-        ActivateProduct = False
-        Exit Function
-    End If
+    ' Записываем в скрытую память с привязкой к HWID
+    WriteHidden NAME_PERSONAL_DATA, CStr(CLng(d))
+    WriteHidden NAME_PERSONAL_SIGN, CalculateHash(CStr(CLng(d)), localHWID)
     
-    ' 5. АКТИВАЦИЯ: Сохраняем лицензию и инициализируем таймер защиты
-    SaveLicenseState expiryDate
-    UpdateLastRunDate Date ' Устанавливаем текущую дату как "последний запуск"
-    
-    MsgBox "Программа успешно активирована!" & vbCrLf & _
-           "Лицензия действует до: " & Format(expiryDate, "dd.mm.yyyy"), vbInformation
-           
-    ActivateProduct = True
+    ActivatePersonal = True
 End Function
 
 ' ===============================================================================
-' 3. ПОЛУЧЕНИЕ СТАТУСА (С ПРОВЕРКОЙ ВРЕМЕНИ)
-' Возвращает: 0 - Активна, 1 - Истекла/Нет, 2 - Блокировка (перевод часов)
+' 4. ГЛАВНАЯ ЛОГИКА ПРОВЕРКИ ЛИЦЕНЗИИ
+' Возвращает:
+' 0 - Активно (Персональный ключ)
+' 3 - Активно (Глобальная дата админа)
+' 4 - Активно (Бесплатный период / Публичная)
+' 1 - Истекло / Нет лицензии
+' 2 - Взлом времени
 ' ===============================================================================
 Public Function GetLicenseStatus() As Integer
+    Dim personalExp As Date, globalExp As Date, publicExp As Date
+    Dim lastRun As Date, lastRunStr As String
+    
     On Error Resume Next
-    Dim licDateRaw As String, storedSign As String
-    Dim lastRunRaw As String, lastRunSign As String
-    Dim expDate As Date, lastRunDate As Date
     
-    ' --- Шаг A: Читаем лицензию ---
-    licDateRaw = ReadHiddenName(NAME_LICENSE_DATA)
-    storedSign = ReadHiddenName(NAME_LICENSE_SIGN)
+    ' ШАГ 1: Защита от перевода часов назад
+    lastRunStr = ReadHidden(NAME_LAST_RUN)
+    If lastRunStr <> "" Then
+        lastRun = CDate(val(lastRunStr))
+        If Date < lastRun And lastRun > 0 Then
+            GetLicenseStatus = 2
+            Exit Function
+        End If
+    End If
     
-    ' Если лицензии нет или подпись не совпадает -> Статус 1
-    If licDateRaw = "" Then GetLicenseStatus = 1: Exit Function
-    If storedSign <> CalculateChecksum(licDateRaw) Then GetLicenseStatus = 1: Exit Function
+    ' ШАГ 2: Сбор всех доступных дат
+    publicExp = DateSerial(2026, 6, 1) ' 1 Июня 2026 (Публичная триал-версия)
+    globalExp = GetDateFromHidden(NAME_GLOBAL_DATA, NAME_GLOBAL_SIGN, False)
+    personalExp = GetDateFromHidden(NAME_PERSONAL_DATA, NAME_PERSONAL_SIGN, True)
     
-    expDate = CDate(CLng(licDateRaw))
+    ' Обновляем метку времени текущего запуска
+    UpdateLastRun
     
-    ' --- Шаг B: Защита от перевода часов ---
-    lastRunRaw = ReadHiddenName(NAME_LAST_RUN)
-    lastRunSign = ReadHiddenName(NAME_LAST_RUN_SIGN)
+    ' ШАГ 3: Иерархия (Персональная > Глобальная > Публичная)
     
-    ' Если даты запуска нет (первый запуск после активации или сбой), считаем текущую дату
-    If lastRunRaw = "" Or lastRunSign <> CalculateChecksum(lastRunRaw) Then
-        lastRunDate = Date
-        UpdateLastRunDate Date
+    ' 1. Если есть персональный ключ (высший приоритет)
+    If personalExp > 0 Then
+        If Date > personalExp Then GetLicenseStatus = 1 Else GetLicenseStatus = 0
+        Exit Function
+    End If
+    
+    ' 2. Если есть дата от админа (пасхалка). Она полностью ПЕРЕБИВАЕТ публичную!
+    If globalExp > 0 Then
+        If Date > globalExp Then GetLicenseStatus = 1 Else GetLicenseStatus = 3
+        Exit Function
+    End If
+    
+    ' 3. Если ничего нет, работает публичная дата (Триал)
+    If Date > publicExp Then
+        GetLicenseStatus = 1
     Else
-        lastRunDate = CDate(CLng(lastRunRaw))
+        GetLicenseStatus = 4 ' Код публичного триала
     End If
     
-    ' ПРОВЕРКА 1: Перевод часов назад (Текущая дата < Последней сохраненной)
-    If Date < lastRunDate Then
-        MsgBox "ВНИМАНИЕ: Обнаружено изменение системного времени!" & vbCrLf & vbCrLf & _
-               "Последний запуск: " & Format(lastRunDate, "dd.mm.yyyy") & vbCrLf & _
-               "Текущая дата: " & Format(Date, "dd.mm.yyyy") & vbCrLf & vbCrLf & _
-               "В целях безопасности лицензия временно заблокирована." & vbCrLf & _
-               "Восстановите корректную дату на компьютере.", vbCritical, "Ошибка безопасности"
-        GetLicenseStatus = 2 ' Блокировка
-        Exit Function
-    End If
-    
-    ' ПРОВЕРКА 2: Истечение срока (Текущая дата > Даты окончания)
-    If Date > expDate Then
-        GetLicenseStatus = 1 ' Истекла
-        Exit Function
-    End If
-    
-    ' --- Шаг C: Всё в порядке ---
-    ' Если сегодня новый день (дата больше последней), обновляем метку последнего запуска
-    If Date > lastRunDate Then
-        UpdateLastRunDate Date
-    End If
-    
-    GetLicenseStatus = 0 ' Активна
+    On Error GoTo 0
 End Function
 
-' Получение строки с датой окончания (для формы About)
+' Получить строку с датой окончания лицензии для формы
 Public Function GetLicenseExpiryDateStr() As String
-    On Error Resume Next
-    Dim v As String
-    v = ReadHiddenName(NAME_LICENSE_DATA)
-    If IsNumeric(v) Then
-        GetLicenseExpiryDateStr = Format(CDate(CLng(v)), "dd.mm.yyyy")
-    Else
-        GetLicenseExpiryDateStr = "Не активировано"
-    End If
+    Dim personalExp As Date, globalExp As Date, publicExp As Date
+    Dim finalExp As Date
+    
+    publicExp = DateSerial(2026, 6, 1) ' 1 Июня 2026
+    globalExp = GetDateFromHidden(NAME_GLOBAL_DATA, NAME_GLOBAL_SIGN, False)
+    personalExp = GetDateFromHidden(NAME_PERSONAL_DATA, NAME_PERSONAL_SIGN, True)
+    
+    ' Выбираем актуальную дату по приоритету
+    finalExp = publicExp
+    If globalExp > 0 Then finalExp = globalExp
+    If personalExp > 0 Then finalExp = personalExp
+    
+    GetLicenseExpiryDateStr = Format(finalExp, "dd.mm.yyyy")
 End Function
 
-' ===============================================================================
-' 4. ИНТЕГРАЦИЯ ЛИЦЕНЗИРОВАНИЯ В ИНТЕРФЕЙС (NEW)
-' ===============================================================================
-
-' =============================================
-' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
-' @description Проверка лицензии с выводом окна активации, если она недействительна
-' @return [Boolean] True - если лицензия активна и можно продолжать работу
-' =============================================
+' Вызов перед выполнением макросов (от кнопок на ленте)
 Public Function CheckLicenseAndPrompt() As Boolean
-    Dim status As Integer
-    status = GetLicenseStatus()
-
-    If status = 0 Then
+    Dim st As Integer
+    st = GetLicenseStatus()
+    
+    ' Разрешаем работу для статусов 0, 3 и 4
+    If st = 0 Or st = 3 Or st = 4 Then
         CheckLicenseAndPrompt = True
     Else
-        ' Лицензия недействительна или отсутствует. Показываем форму для ввода ключа.
-        MsgBox "Для использования данной функции (экспорт/формирование документов) требуется активация.", vbExclamation, "Требуется лицензия"
+        MsgBox "Бесплатный период завершен. Для использования данной функции требуется действующая лицензия.", vbExclamation, "Блокировка"
         frmAbout.Show
-
-        ' После закрытия формы снова проверяем статус (пользователь мог успешно активировать)
-        If GetLicenseStatus() = 0 Then
+        
+        ' Повторная проверка после закрытия формы
+        st = GetLicenseStatus()
+        If st = 0 Or st = 3 Or st = 4 Then
             CheckLicenseAndPrompt = True
         Else
             CheckLicenseAndPrompt = False
@@ -216,56 +200,99 @@ Public Function CheckLicenseAndPrompt() As Boolean
 End Function
 
 ' ===============================================================================
-' 5. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ХЕШИРОВАНИЕ И ХРАНЕНИЕ)
+' 5. ПАСХАЛКА: ПАНЕЛЬ АДМИНИСТРАТОРА (Для выдачи файла без ключа)
 ' ===============================================================================
+Public Sub AdminSetGlobalDate()
+    Dim pwd As String, dStr As String, d As Date
+    
+    pwd = InputBox("Введите пароль администратора:", "Admin Panel")
+    If pwd <> ADMIN_PASSWORD Then
+        If pwd <> "" Then MsgBox "Неверный пароль!", vbCritical
+        Exit Sub
+    End If
+    
+    dStr = InputBox("Введите новую дату отключения для ЭТОГО ФАЙЛА (ДД.ММ.ГГГГ):" & vbCrLf & _
+                    "Оставьте пустым для отмены.", "Установка Глобальной Лицензии", "01.06.2026")
+                    
+    If dStr = "" Then Exit Sub
+    
+    If IsDate(dStr) Then
+        d = CDate(dStr)
+        WriteHidden NAME_GLOBAL_DATA, CStr(CLng(d))
+        WriteHidden NAME_GLOBAL_SIGN, CalculateHash(CStr(CLng(d)), "GLOBAL")
+        MsgBox "Глобальная дата успешно установлена: " & Format(d, "dd.mm.yyyy"), vbInformation
+    Else
+        MsgBox "Некорректный формат даты.", vbExclamation
+    End If
+End Sub
 
-' Хеширование строки (для подписи)
-Private Function CalculateChecksum(inputStr As String) As String
-    Dim i As Long
-    Dim hash As Long
+' ===============================================================================
+' 6. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (КРИПТОГРАФИЯ И ХРАНЕНИЕ)
+' ===============================================================================
+Private Function GetDateFromHidden(dataName As String, signName As String, useHWID As Boolean) As Date
+    Dim dRaw As String, sRaw As String, expectedSign As String
+    
+    dRaw = ReadHidden(dataName)
+    sRaw = ReadHidden(signName)
+    
+    If dRaw = "" Then
+        GetDateFromHidden = 0
+        Exit Function
+    End If
+    
+    ' Формируем подпись для проверки
+    If useHWID Then
+        expectedSign = CalculateHash(dRaw, GetHardwareID())
+    Else
+        expectedSign = CalculateHash(dRaw, "GLOBAL")
+    End If
+    
+    ' Сверяем подписи
+    If sRaw = expectedSign Then
+        On Error Resume Next
+        GetDateFromHidden = CDate(CLng(dRaw))
+        On Error GoTo 0
+    Else
+        GetDateFromHidden = 0
+    End If
+End Function
+
+Private Function CalculateHash(rawStr As String, saltExtra As String) As String
+    Dim i As Long, hash As Long
     Dim fullStr As String
     
-    ' Добавляем соль, чтобы нельзя было подделать подпись без знания кода
-    fullStr = inputStr & SALT_KEY
+    fullStr = rawStr & saltExtra & SALT_KEY
     hash = 0
     
-    ' Простой алгоритм хеширования
     For i = 1 To Len(fullStr)
         hash = (hash * 31 + Asc(Mid(fullStr, i, 1))) Mod 65535
     Next i
     
-    CalculateChecksum = Right("0000" & Hex(hash), 4)
+    CalculateHash = Right("0000" & Hex(hash), 4)
 End Function
 
-' Сохранение лицензии
-Private Sub SaveLicenseState(expDate As Date)
-    WriteHiddenName NAME_LICENSE_DATA, CStr(CLng(expDate))
-    WriteHiddenName NAME_LICENSE_SIGN, CalculateChecksum(CStr(CLng(expDate)))
+Private Sub UpdateLastRun()
+    WriteHidden NAME_LAST_RUN, CStr(CLng(Date))
 End Sub
 
-' Обновление даты последнего запуска
-Private Sub UpdateLastRunDate(runDate As Date)
-    WriteHiddenName NAME_LAST_RUN, CStr(CLng(runDate))
-    WriteHiddenName NAME_LAST_RUN_SIGN, CalculateChecksum(CStr(CLng(runDate)))
-End Sub
-
-' Запись в скрытое имя (Named Range)
-Private Sub WriteHiddenName(nName As String, nValue As String)
+Private Sub WriteHidden(nName As String, nValue As String)
     On Error Resume Next
-    ' Удаляем старое имя, чтобы избежать конфликтов
     ThisWorkbook.Names(nName).Delete
-    ' Создаем новое скрытое имя
     ThisWorkbook.Names.Add Name:=nName, RefersTo:="=""" & nValue & """", Visible:=False
+    On Error GoTo 0
 End Sub
 
-' Чтение из скрытого имени
-Private Function ReadHiddenName(nName As String) As String
+Private Function ReadHidden(nName As String) As String
     On Error Resume Next
     Dim v As String
     v = ThisWorkbook.Names(nName).RefersTo
-    ' Очистка мусора Excel (он возвращает формулу вида ="12345")
-    v = Replace(v, "=", "")
-    v = Replace(v, """", "")
-    ReadHiddenName = v
+    If Err.number = 0 Then
+        v = Replace(v, "=", "")
+        v = Replace(v, """", "")
+        ReadHidden = v
+    Else
+        ReadHidden = ""
+    End If
+    On Error GoTo 0
 End Function
 

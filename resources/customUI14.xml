@@ -32,7 +32,7 @@
           <button id="smartValidate" label="Проверить лист" onAction="RunSmartValidation" imageMso="Spelling" size="large" screentip="Умная проверка" supertip="Автоматически проверяет текущий открытый лист на ошибки"/>
           
           <button id="showSettings" label="Настройки" onAction="ShowSettings" imageMso="ControlsGallery" size="normal"/>
-          <button id="diagnoseStructure" label="Диагностика" onAction="RunDiagnoseStructure" imageMso="DatabaseAnalyzeTable" size="normal"/>
+          <button id="showAbout" label="О программе" onAction="RunShowAbout" imageMso="Info" size="normal"/>
         </group>
         
       </tab>

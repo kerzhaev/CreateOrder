@@ -4,7 +4,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmAbout
    ClientHeight    =   7830
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   8100
+   ClientWidth     =   6825
    OleObjectBlob   =   "frmAbout.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -13,24 +13,34 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+' ===============================================================================
+' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
+' @description Код формы "О программе" (Версия с точными именами контролов)
+' ===============================================================================
 Option Explicit
 
-' Флаг для предотвращения "зацикливания" события Change
 Private bIgnoreChange As Boolean
 
 Private Sub UserForm_Initialize()
     ' Инициализация данных о программе
-    lblProductName.Caption = PRODUCT_NAME
-    lblVersion.Caption = "Версия: " & PRODUCT_VERSION
-    lblAuthor.Caption = "Автор: " & PRODUCT_AUTHOR
-    lblEmail.Caption = "E-mail: " & PRODUCT_EMAIL
-    lblPhone.Caption = "Телефон: " & PRODUCT_PHONE
-    lblCompany.Caption = "Организация: " & PRODUCT_COMPANY
+    lblProductName.Caption = modActivation.PRODUCT_NAME
+    lblVersion.Caption = "Версия: " & modActivation.PRODUCT_VERSION
+    lblAuthor.Caption = "Автор: " & modActivation.PRODUCT_AUTHOR
+    lblEmail.Caption = "E-mail: " & modActivation.PRODUCT_EMAIL
+    lblPhone.Caption = "Телефон: " & modActivation.PRODUCT_PHONE
+    lblCompany.Caption = "Организация: " & modActivation.PRODUCT_COMPANY
     
-    ' Настройка интерфейса в зависимости от статуса
+    ' Обновляем интерфейс
     UpdateLicenseStatusUI
 End Sub
 
+' ПАСХАЛКА: Двойной клик по автору открывает панель администратора
+Private Sub lblAuthor_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+    Call modActivation.AdminSetGlobalDate
+    UpdateLicenseStatusUI
+End Sub
+
+' Кнопка активации
 Private Sub btnActivate_Click()
     Dim key As String
     key = Trim(txtActivationCode.Text)
@@ -41,59 +51,123 @@ Private Sub btnActivate_Click()
     End If
     
     ' Вызов функции проверки из модуля modActivation
-    If modActivation.ActivateProduct(key) Then
-        ' Если успешно - обновляем интерфейс
+    If modActivation.ActivatePersonal(key) Then
+        MsgBox "Программа успешно активирована для данного ПК!", vbInformation
         UpdateLicenseStatusUI
         txtActivationCode.Text = ""
+    Else
+        MsgBox "Ключ не подходит. Проверьте правильность ввода или ID оборудования.", vbCritical
     End If
 End Sub
 
 ' =============================================
-' МОДУЛЬ ФОРМЫ: frmAbout (Обновленный UI)
+' Обновление интерфейса в зависимости от статуса
 ' =============================================
 Private Sub UpdateLicenseStatusUI()
     Dim status As Integer
     status = modActivation.GetLicenseStatus()
     
-    ' Предполагаем, что Label11 вы переименовали в lblPremiumMessage
-    ' Если нет, замените lblPremiumMessage на Label11 в коде ниже
-    
-    If status = 0 Then
-        ' === ЛИЦЕНЗИЯ АКТИВНА ===
-        lblActivationStatus.Caption = "СТАТУС: АКТИВИРОВАНО (до " & modActivation.GetLicenseExpiryDateStr() & ")"
-        lblActivationStatus.ForeColor = RGB(0, 150, 0) ' Зеленый цвет успеха
-        
-        ' Скрываем поля ввода, они больше не нужны
-        txtActivationCode.Visible = False     ' Лучше скрыть (Visible), а не просто Enabled
-        btnActivate.Visible = False           ' Кнопку тоже скрываем
-        lblActivationHint.Visible = False     ' Подсказку формата скрываем
-        
-        ' Сообщение для пользователя (бывший Label11)
-        lblPremiumMessage.Caption = "Спасибо за использование лицензионной версии!" & vbCrLf & _
-                                    "Вам доступны все функции экспорта и отчетов."
-        lblPremiumMessage.ForeColor = RGB(0, 100, 0) ' Темно-зеленый
-        
-    Else
-        ' === ЛИЦЕНЗИЯ ОТСУТСТВУЕТ ИЛИ ИСТЕКЛА ===
-        If status = 1 Then
+    Select Case status
+        Case 0 ' ПЕРСОНАЛЬНАЯ ЛИЦЕНЗИЯ (По ключу HWID)
+            lblActivationStatus.Caption = "СТАТУС: ПЕРСОНАЛЬНАЯ ЛИЦЕНЗИЯ"
+            lblActivationStatus.ForeColor = RGB(0, 150, 0) ' Зеленый
+            lblPremiumMessage.Caption = "Лицензия надежно привязана к этому ПК." & vbCrLf & _
+                                        "Действует до: " & modActivation.GetLicenseExpiryDateStr()
+            lblPremiumMessage.ForeColor = RGB(0, 100, 0)
+            
+            ' Скрываем поля, так как активация уже выполнена
+            txtActivationCode.Visible = False
+            btnActivate.Visible = False
+            lblActivationHint.Visible = False
+            
+        Case 3 ' ГЛОБАЛЬНАЯ ЛИЦЕНЗИЯ (Через пасхалку админа)
+            lblActivationStatus.Caption = "СТАТУС: КОРПОРАТИВНАЯ ВЕРСИЯ"
+            lblActivationStatus.ForeColor = RGB(0, 150, 0) ' Зеленый
+            lblPremiumMessage.Caption = "Файл предварительно активирован администратором." & vbCrLf & _
+                                        "Действует до: " & modActivation.GetLicenseExpiryDateStr()
+            lblPremiumMessage.ForeColor = RGB(0, 100, 0)
+            
+            ' Скрываем поля
+            txtActivationCode.Visible = False
+            btnActivate.Visible = False
+            lblActivationHint.Visible = False
+            
+        Case 4 ' ПУБЛИЧНАЯ ВЕРСИЯ (Бесплатный период)
+            lblActivationStatus.Caption = "СТАТУС: БЕСПЛАТНЫЙ ПЕРИОД"
+            lblActivationStatus.ForeColor = RGB(200, 100, 0) ' Оранжевый
+            lblPremiumMessage.Caption = "Ознакомительная версия активна до: " & modActivation.GetLicenseExpiryDateStr() & vbCrLf & _
+                                        "Ваш КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
+                                        "Если у вас уже есть персональный ключ, активируйте его ниже:"
+            lblPremiumMessage.ForeColor = RGB(100, 50, 0)
+            
+            ' ПОКАЗЫВАЕМ ПОЛЯ для заблаговременной активации!
+            txtActivationCode.Visible = True
+            btnActivate.Visible = True
+            lblActivationHint.Visible = True
+            lblActivationHint.Caption = modActivation.ACTIVATION_HINT
+            
+        Case 2 ' ПЕРЕВОД ЧАСОВ НАЗАД
+            lblActivationStatus.Caption = "ОШИБКА: ОБНАРУЖЕН ПЕРЕВОД ЧАСОВ"
+            lblActivationStatus.ForeColor = RGB(200, 0, 0) ' Красный
+            lblPremiumMessage.Caption = "Защитная блокировка." & vbCrLf & _
+                                        "КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
+                                        "Исправьте дату или введите ключ."
+            lblPremiumMessage.ForeColor = RGB(200, 0, 0)
+            
+            txtActivationCode.Visible = True
+            btnActivate.Visible = True
+            lblActivationHint.Visible = True
+            lblActivationHint.Caption = modActivation.ACTIVATION_HINT
+            
+        Case Else ' ИСТЕКЛО ИЛИ НЕТ ЛИЦЕНЗИИ (1)
             lblActivationStatus.Caption = "СТАТУС: ОГРАНИЧЕННАЯ ВЕРСИЯ"
-        Else
-            lblActivationStatus.Caption = "СТАТУС: БЛОКИРОВКА БЕЗОПАСНОСТИ"
-        End If
-        lblActivationStatus.ForeColor = RGB(200, 0, 0) ' Красный цвет тревоги
-        
-        ' Показываем элементы активации
-        txtActivationCode.Visible = True
-        txtActivationCode.Enabled = True
-        btnActivate.Visible = True
-        btnActivate.Enabled = True
-        lblActivationHint.Visible = True
-        lblActivationHint.Caption = modActivation.ACTIVATION_HINT
-        
-        ' Сообщение-инструкция (бывший Label11)
-        lblPremiumMessage.Caption = "Функции экспорта документов заблокированы." & vbCrLf & _
-                                    "Для снятия ограничений введите ключ и нажмите 'Активировать'."
-        lblPremiumMessage.ForeColor = RGB(50, 50, 50) ' Темно-серый или красный
+            lblActivationStatus.ForeColor = RGB(200, 0, 0) ' Красный
+            lblPremiumMessage.Caption = "Бесплатный период завершен." & vbCrLf & _
+                                        "Ваш КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
+                                        "Для продолжения работы запросите персональный ключ."
+            lblPremiumMessage.ForeColor = RGB(50, 50, 50)
+            
+            txtActivationCode.Visible = True
+            btnActivate.Visible = True
+            lblActivationHint.Visible = True
+            lblActivationHint.Caption = modActivation.ACTIVATION_HINT
+            
+    End Select
+End Sub
+
+' =============================================
+' АВТОМАТИЧЕСКОЕ ФОРМАТИРОВАНИЕ КЛЮЧА
+' =============================================
+Private Sub txtActivationCode_Change()
+    If bIgnoreChange Then Exit Sub
+    Dim rawText As String, cleanText As String, formattedText As String
+    Dim i As Integer
+    
+    bIgnoreChange = True
+    rawText = UCase(Me.txtActivationCode.Text)
+    cleanText = Replace(Replace(rawText, "-", ""), " ", "")
+    
+    If Len(cleanText) > 16 Then cleanText = Left(cleanText, 16)
+    
+    formattedText = ""
+    For i = 1 To Len(cleanText)
+        formattedText = formattedText & Mid(cleanText, i, 1)
+        If (i Mod 4 = 0) And (i < 16) Then formattedText = formattedText & "-"
+    Next i
+    
+    Me.txtActivationCode.Text = formattedText
+    Me.txtActivationCode.SelStart = Len(formattedText)
+    bIgnoreChange = False
+End Sub
+
+' Запрет кириллицы
+Private Sub txtActivationCode_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
+    Dim char As String
+    char = UCase(ChrW(KeyAscii))
+    If InStr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", char) = 0 And KeyAscii <> 8 Then
+        KeyAscii = 0
+    Else
+        If KeyAscii >= 97 And KeyAscii <= 122 Then KeyAscii = KeyAscii - 32
     End If
 End Sub
 
@@ -101,81 +175,3 @@ Private Sub btnClose_Click()
     Unload Me
 End Sub
 
-' Сброс лицензии (для отладки, можно назначить на секретную кнопку или убрать)
-Private Sub lblVersion_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
-    Dim response As VbMsgBoxResult
-    response = MsgBox("Сбросить лицензию (для тестов)?", vbYesNo + vbQuestion)
-    If response = vbYes Then
-        On Error Resume Next
-        ThisWorkbook.Names("LicData").Delete
-        ThisWorkbook.Names("LicSign").Delete
-        MsgBox "Лицензия сброшена."
-        UpdateLicenseStatusUI
-    End If
-End Sub
-
-' === АВТОМАТИЧЕСКОЕ ФОРМАТИРОВАНИЕ КЛЮЧА (XXXX-XXXX-XXXX-XXXX) ===
-
-
-
-Private Sub txtActivationCode_Change()
-    ' Если изменение вызвано нашим кодом, ничего не делаем
-    If bIgnoreChange Then Exit Sub
-    
-    Dim rawText As String
-    Dim cleanText As String
-    Dim formattedText As String
-    Dim i As Integer
-    
-    ' Включаем блокировку событий
-    bIgnoreChange = True
-    
-    ' 1. Получаем текущий текст и сразу переводим в верхний регистр
-    rawText = UCase(Me.txtActivationCode.Text)
-    
-    ' 2. Очищаем от всего лишнего (тире, пробелы), оставляем только буквы/цифры
-    cleanText = Replace(Replace(rawText, "-", ""), " ", "")
-    
-    ' 3. Ограничиваем длину ввода (максимум 16 символов самого ключа)
-    If Len(cleanText) > 16 Then cleanText = Left(cleanText, 16)
-    
-    ' 4. Собираем строку заново, вставляя тире
-    formattedText = ""
-    For i = 1 To Len(cleanText)
-        formattedText = formattedText & Mid(cleanText, i, 1)
-        
-        ' Вставляем тире после каждого 4-го символа (4, 8, 12), но не в самом конце
-        If (i Mod 4 = 0) And (i < 16) Then
-            formattedText = formattedText & "-"
-        End If
-    Next i
-    
-    ' 5. Записываем отформатированный текст обратно
-    Me.txtActivationCode.Text = formattedText
-    
-    ' 6. Ставим курсор в конец строки (чтобы при вставке в середину курсор не прыгал, можно усложнить, но для ввода ключа обычно вводят последовательно)
-    Me.txtActivationCode.SelStart = Len(formattedText)
-    
-    ' Снимаем блокировку
-    bIgnoreChange = False
-End Sub
-
-' Дополнительно: Запрет на ввод русских букв и спецсимволов (только латиница и цифры)
-Private Sub txtActivationCode_KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)
-    Dim char As String
-    
-    ' Используем ChrW вместо Chr, чтобы не было ошибки на русских буквах (Unicode)
-    char = UCase(ChrW(KeyAscii))
-    
-    ' Разрешаем: 0-9, A-Z, Backspace (8)
-    ' Запрещаем все остальное (включая русские буквы)
-    If InStr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", char) = 0 And KeyAscii <> 8 Then
-        KeyAscii = 0 ' Отменяем ввод символа
-    Else
-        ' Принудительно переводим в верхний регистр при вводе
-        ' (Если введена маленькая латинская буква a-z)
-        If KeyAscii >= 97 And KeyAscii <= 122 Then
-            KeyAscii = KeyAscii - 32
-        End If
-    End If
-End Sub
