@@ -1,12 +1,12 @@
 Attribute VB_Name = "mdlWordImport"
 ' ===============================================================================
 ' Module: mdlWordImport
-' Version: 1.6.0 (InputBox Reason Update + Memory Leak Fix)
+' Version: 1.7.2 (Extract FIO from Word)
 ' Date: 23.02.2026
 ' Author: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
 ' Description: Полный цикл ETL: извлечение рапортов из Word, конвертация в HTML,
 '              чтение в Dictionary, выгрузка в ДСО с сортировкой и группировкой.
-'              Включает интерактивный запрос основания (номера приказа) для импортируемых периодов.
+'              Включает извлечение ФИО напрямую из Word для отсутствующих в Штате.
 ' ===============================================================================
 
 Option Explicit
@@ -73,15 +73,15 @@ Public Sub ExecuteWordImport()
     
     Application.StatusBar = "Запись данных в лист ДСО..."
     
-    ' 5. [T006, T007] Запись в лист ДСО и сортировка
+    ' 5. [T006, T007] Запись в лист ДСО и хронологическая сортировка периодов
     finalReport = ApplyDictToDSOSheet(parsedData, baseReason)
     
     ' 6. Финализация
     Application.StatusBar = False
     
     finalReport = finalReport & vbCrLf & vbCrLf & _
-                  "ВНИМАНИЕ: Для визуальной проверки новых периодов на ошибки " & _
-                  "нажмите кнопку 'Проверить данные' на ленте (вкладка Валидация)."
+                  "ВНИМАНИЕ: Новые сотрудники (найденные в Word, но отсутствующие в Штате) выделены желтым цветом. " & _
+                  "Проверьте правильность их ФИО и нажмите 'Проверить данные' на ленте."
                   
     MsgBox "Импорт завершен успешно!" & vbCrLf & vbCrLf & finalReport, vbInformation, "Итоги импорта рапорта"
     
@@ -162,37 +162,55 @@ Private Function ParseHTMLToDict(ByVal htmlPath As String) As Object
     Dim ws As Worksheet
     Dim dict As Object
     Dim lastRow As Long, i As Long
-    Dim colLichniy As Long, colStart As Long, colEnd As Long
+    Dim colLichniy As Long, colStart As Long, colEnd As Long, colFIO As Long
     
     Set dict = CreateObject("Scripting.Dictionary")
     
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
     
-    On Error GoTo ErrorHandler ' ВАЖНО: Добавили перехват ошибок
+    On Error GoTo ErrorHandler
     
     Set wbTemp = Workbooks.Open(fileName:=htmlPath, ReadOnly:=True)
     Set ws = wbTemp.Sheets(1)
     
+    ' Поиск нужных столбцов по ключевым словам
     colLichniy = FindColBySubstring(ws, "личный")
     colStart = FindColBySubstring(ws, "начал")
     colEnd = FindColBySubstring(ws, "окончан")
     
+    ' Умный поиск колонки с ФИО
+    colFIO = FindColBySubstring(ws, "фио")
+    If colFIO = 0 Then colFIO = FindColBySubstring(ws, "фамили")
+    If colFIO = 0 Then colFIO = FindColBySubstring(ws, "военнослужащ")
+    
+    ' Фолбэки, если заголовки нестандартные
     If colLichniy = 0 Then colLichniy = 4
     If colStart = 0 Then colStart = 5
     If colEnd = 0 Then colEnd = 6
+    If colFIO = 0 Then
+        ' Обычно ФИО идет перед личным номером
+        If colLichniy > 1 Then colFIO = colLichniy - 1 Else colFIO = 2
+    End If
     
     lastRow = ws.Cells(ws.Rows.count, colLichniy).End(xlUp).Row
     
-    Dim lnVal As String, strStart As String, strEnd As String
+    Dim lnVal As String, strStart As String, strEnd As String, fioVal As String
     Dim dStart As Date, dEnd As Date
     Dim periodDict As Object
+    Dim personData As Object
     Dim personPeriods As Collection
     
     For i = 1 To lastRow
         lnVal = Trim(CStr(ws.Cells(i, colLichniy).value))
         strStart = Trim(CStr(ws.Cells(i, colStart).value))
         strEnd = Trim(CStr(ws.Cells(i, colEnd).value))
+        
+        ' Извлекаем ФИО и чистим от переносов строк (в Word часто бывают)
+        fioVal = Trim(CStr(ws.Cells(i, colFIO).value))
+        fioVal = Replace(fioVal, vbCr, " ")
+        fioVal = Replace(fioVal, vbLf, "")
+        fioVal = Application.WorksheetFunction.Trim(fioVal)
         
         If lnVal <> "" And InStr(1, LCase(lnVal), "личный") = 0 Then
             dStart = mdlHelper.ParseDateSafe(strStart)
@@ -204,12 +222,19 @@ Private Function ParseHTMLToDict(ByVal htmlPath As String) As Object
             periodDict.Add "StartDate", dStart
             periodDict.Add "EndDate", dEnd
             
+            ' Создаем структуру, если личный номер встретился впервые
             If Not dict.exists(lnVal) Then
+                Set personData = CreateObject("Scripting.Dictionary")
+                personData.Add "FIO", fioVal ' Сохраняем ФИО из Word
+                
                 Set personPeriods = New Collection
-                dict.Add lnVal, personPeriods
+                personData.Add "Periods", personPeriods
+                
+                dict.Add lnVal, personData
             End If
             
-            dict(lnVal).Add periodDict
+            ' Добавляем период в коллекцию сотрудника
+            dict(lnVal)("Periods").Add periodDict
         End If
     Next i
     
@@ -221,7 +246,6 @@ Private Function ParseHTMLToDict(ByVal htmlPath As String) As Object
     Exit Function
     
 ErrorHandler:
-    ' ГАРАНТИРОВАННО ЗАКРЫВАЕМ ФАЙЛ ПРИ СБОЕ
     If Not wbTemp Is Nothing Then
         On Error Resume Next
         wbTemp.Close False
@@ -256,10 +280,12 @@ Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String)
     Dim i As Long, lastRowDSO As Long, rowNum As Long
     Dim newEmpCount As Long, updEmpCount As Long, addedPeriodsCount As Long
     Dim pCol As Long
+    Dim personData As Object
     Dim personPeriods As Collection
     Dim period As Object
     Dim staffData As Object
     Dim currentReason As String
+    Dim wordFIO As String
     
     Set wsDSO = ThisWorkbook.Sheets("ДСО")
     lastRowDSO = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
@@ -274,6 +300,10 @@ Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String)
     
     For Each lnKey In dict.keys()
         rowNum = 0
+        
+        Set personData = dict(lnKey)
+        Set personPeriods = personData("Periods")
+        wordFIO = personData("FIO")
         
         ' Ищем сотрудника в ДСО
         For i = 2 To lastRowDSO
@@ -295,8 +325,20 @@ Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String)
             Set staffData = mdlHelper.GetStaffData(CStr(lnKey), True)
             If staffData.count > 0 Then
                 wsDSO.Cells(rowNum, 2).value = staffData("Лицо")
+                ' Снимаем заливку, если она осталась от прошлого раза
+                wsDSO.Cells(rowNum, 2).Interior.ColorIndex = xlNone
+                wsDSO.Cells(rowNum, 3).Interior.ColorIndex = xlNone
             Else
-                wsDSO.Cells(rowNum, 2).value = "НОВЫЙ: ФИО не найдено"
+                ' Вставляем ФИО прямо из рапорта Word!
+                If wordFIO <> "" Then
+                    wsDSO.Cells(rowNum, 2).value = wordFIO
+                Else
+                    wsDSO.Cells(rowNum, 2).value = "ФИО не указано в рапорте"
+                End If
+                
+                ' ПОДСВЕТКА ЖЕЛТЫМ ЦВЕТОМ ДЛЯ НОВЫХ СОТРУДНИКОВ
+                wsDSO.Cells(rowNum, 2).Interior.Color = vbYellow
+                wsDSO.Cells(rowNum, 3).Interior.Color = vbYellow
             End If
             
             newEmpCount = newEmpCount + 1
@@ -321,8 +363,6 @@ Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String)
             End If
         End If
         
-        Set personPeriods = dict(lnKey)
-        
         ' Находим первую пустую пару колонок для записи (начиная с 5-й)
         pCol = 5
         Do While Trim(CStr(wsDSO.Cells(rowNum, pCol).value)) <> "" Or Trim(CStr(wsDSO.Cells(rowNum, pCol + 1).value)) <> ""
@@ -344,6 +384,9 @@ Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String)
         
     Next lnKey
     
+    ' Сортируем весь лист по алфавиту и обновляем нумерацию (для синхронизации отчетов)
+    Call SortDSOSheetAlphabetically(wsDSO)
+    
     ' Включаем события обратно
     Application.EnableEvents = True
     
@@ -351,6 +394,44 @@ Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String)
                           "Обновлено сотрудников: " & updEmpCount & vbCrLf & _
                           "Добавлено новых строк (сотрудников): " & newEmpCount
 End Function
+
+' =============================================
+' Сортировка листа ДСО по алфавиту (ФИО) для синхронизации выгрузок
+' =============================================
+Private Sub SortDSOSheetAlphabetically(ws As Worksheet)
+    Dim lastRow As Long
+    Dim lastCol As Long
+    Dim i As Long
+    Dim sortRange As Range
+    
+    On Error Resume Next ' Защита от непредвиденных сбоев сортировки
+    lastRow = ws.Cells(ws.Rows.count, 3).End(xlUp).Row
+    If lastRow < 3 Then Exit Sub ' Меньше двух строк данных - сортировать нечего
+    
+    lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
+    If lastCol < 4 Then lastCol = 60 ' Фоллбэк, если шапка обрезана
+    
+    Set sortRange = ws.Range(ws.Cells(2, 1), ws.Cells(lastRow, lastCol))
+    
+    ' Выполняем сортировку по столбцу B (ФИО) по возрастанию
+    With ws.Sort
+        .SortFields.Clear
+        .SortFields.Add key:=ws.Range(ws.Cells(2, 2), ws.Cells(lastRow, 2)), _
+            SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+        .SetRange sortRange
+        .header = xlNo
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    
+    ' После сортировки восстанавливаем сквозную нумерацию в колонке А
+    For i = 2 To lastRow
+        ws.Cells(i, 1).value = i - 1
+    Next i
+    On Error GoTo 0
+End Sub
 
 ' =============================================
 ' [T007] Хронологическая сортировка периодов в строке

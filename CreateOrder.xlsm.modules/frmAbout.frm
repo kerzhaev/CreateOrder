@@ -4,7 +4,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmAbout
    ClientHeight    =   7830
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   6825
+   ClientWidth     =   7260
    OleObjectBlob   =   "frmAbout.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -29,6 +29,8 @@ Private Sub UserForm_Initialize()
     lblEmail.Caption = "E-mail: " & modActivation.PRODUCT_EMAIL
     lblPhone.Caption = "Телефон: " & modActivation.PRODUCT_PHONE
     lblCompany.Caption = "Организация: " & modActivation.PRODUCT_COMPANY
+    ' Выводим HWID компьютера в текстовое поле
+    Me.txtHWID.Text = modActivation.GetHardwareID()
     
     ' Обновляем интерфейс
     UpdateLicenseStatusUI
@@ -173,5 +175,34 @@ End Sub
 
 Private Sub btnClose_Click()
     Unload Me
+End Sub
+
+' ===============================================================================
+' Обработчик двойного клика для быстрого копирования HWID
+' ===============================================================================
+Private Sub txtHWID_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+    Dim clipObj As Object
+    
+    ' Проверка на пустой или дефолтный HWID
+    If Me.txtHWID.Text = "" Or Me.txtHWID.Text = "NODEFAULT" Then Exit Sub
+    
+    ' Используем позднее связывание (Late Binding) с DataObject для работы с буфером.
+    ' GUID {1C3B4210-...} вызывает MSForms.DataObject без необходимости ставить галочки в References.
+    On Error Resume Next
+    Set clipObj = CreateObject("New:{1C3B4210-F441-11CE-B9EA-00AA006B1A69}")
+    If Err.number = 0 Then
+        clipObj.SetText Me.txtHWID.Text
+        clipObj.PutInClipboard
+        MsgBox "Ваш идентификатор оборудования (" & Me.txtHWID.Text & ") скопирован!" & vbCrLf & _
+               "Теперь вы можете отправить его администратору (Ctrl+V).", _
+               vbInformation, "Буфер обмена"
+    Else
+        ' Фолбэк на случай непредвиденной ошибки создания объекта
+        MsgBox "Пожалуйста, выделите код и нажмите Ctrl+C для копирования.", vbInformation, "Ручное копирование"
+    End If
+    On Error GoTo 0
+    
+    ' Отменяем стандартное поведение двойного клика (чтобы текст не оставался выделенным целиком)
+    Cancel = True
 End Sub
 

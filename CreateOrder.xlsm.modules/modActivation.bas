@@ -129,7 +129,7 @@ Public Function GetLicenseStatus() As Integer
     End If
     
     ' ШАГ 2: Сбор всех доступных дат
-    publicExp = DateSerial(2026, 6, 1) ' 1 Июня 2026 (Публичная триал-версия)
+    publicExp = DateSerial(2026, 9, 1) ' 1 Сентябрь 2026 (Публичная триал-версия)
     globalExp = GetDateFromHidden(NAME_GLOBAL_DATA, NAME_GLOBAL_SIGN, False)
     personalExp = GetDateFromHidden(NAME_PERSONAL_DATA, NAME_PERSONAL_SIGN, True)
     
@@ -210,6 +210,14 @@ Public Sub AdminSetGlobalDate()
         If pwd <> "" Then MsgBox "Неверный пароль!", vbCritical
         Exit Sub
     End If
+    
+    ' ---> ДОБАВЛЕННЫЙ БЛОК: Принудительное удаление старого персонального ключа <---
+    ' Это позволяет корпоративной лицензии корректно переопределить истекший HWID-ключ
+    On Error Resume Next
+    ThisWorkbook.Names(NAME_PERSONAL_DATA).Delete
+    ThisWorkbook.Names(NAME_PERSONAL_SIGN).Delete
+    On Error GoTo 0
+    ' -------------------------------------------------------------------------------
     
     dStr = InputBox("Введите новую дату отключения для ЭТОГО ФАЙЛА (ДД.ММ.ГГГГ):" & vbCrLf & _
                     "Оставьте пустым для отмены.", "Установка Глобальной Лицензии", "01.06.2026")
