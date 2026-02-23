@@ -12,7 +12,7 @@ Public Const PRODUCT_VERSION As String = "2.1.0"
 Public Const PRODUCT_AUTHOR As String = "Кержаев Евгений Алексеевич"
 Public Const PRODUCT_EMAIL As String = "nachfin@vk.com"
 Public Const PRODUCT_PHONE As String = "+7(989)906-88-91"
-Public Const PRODUCT_COMPANY As String = "95 ФЭС"
+Public Const PRODUCT_COMPANY As String = "Отделение по разработке программного обеспечения 95 ФЭС МО РФ"
 Public Const ACTIVATION_HINT As String = "Введите ключ (формат: XXXX-XXXX-XXXX-XXXX)"
 
 ' --- ГЛОБАЛЬНЫЕ НАСТРОЙКИ ЗАЩИТЫ ---

@@ -1,12 +1,12 @@
 Attribute VB_Name = "mdlWordImport"
 ' ===============================================================================
 ' Module: mdlWordImport
-' Version: 1.5.1 (Final + Memory Leak Fix)
-' Date: 22.02.2026
+' Version: 1.6.0 (InputBox Reason Update + Memory Leak Fix)
+' Date: 23.02.2026
 ' Author: Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
 ' Description: Полный цикл ETL: извлечение рапортов из Word, конвертация в HTML,
 '              чтение в Dictionary, выгрузка в ДСО с сортировкой и группировкой.
-' Fix: Устранены зависания из-за скрытых процессов Excel/Word при ошибках
+'              Включает интерактивный запрос основания (номера приказа) для импортируемых периодов.
 ' ===============================================================================
 
 Option Explicit
@@ -24,6 +24,8 @@ Public Sub ExecuteWordImport()
     Dim htmlFilePath As String
     Dim parsedData As Object ' Dictionary
     Dim finalReport As String
+    Dim baseReasonVal As Variant
+    Dim baseReason As String
     
     ' 1. Выбор файла
     wordFilePath = SelectWordFile()
@@ -32,15 +34,30 @@ Public Sub ExecuteWordImport()
         Exit Sub
     End If
     
+    ' 2. Запрос основания для импортируемых периодов
+    baseReasonVal = Application.InputBox("Введите основание (номер приказа/распоряжения) для импортируемых периодов:" & vbCrLf & _
+                                         "Если основание не требуется, оставьте поле пустым и нажмите ОК." & vbCrLf & _
+                                         "Для полной отмены импорта нажмите 'Отмена'.", _
+                                         "Основание (Колонка D)", "", Type:=2)
+    
+    ' Если пользователь нажал "Отмена"
+    If VarType(baseReasonVal) = vbBoolean And baseReasonVal = False Then
+        MsgBox "Импорт отменен пользователем.", vbInformation, "Отмена"
+        Application.StatusBar = False
+        Exit Sub
+    End If
+    
+    baseReason = Trim(CStr(baseReasonVal))
+    
     Application.StatusBar = "Конвертация Word документа... Пожалуйста, подождите."
     
-    ' 2. [T004] Конвертация в HTML
+    ' 3. [T004] Конвертация в HTML
     htmlFilePath = ConvertWordToTempHTML(wordFilePath)
     If htmlFilePath = "" Then Err.Raise vbObjectError + 1, , "Не удалось конвертировать файл Word."
     
     Application.StatusBar = "Сбор данных из таблицы..."
     
-    ' 3. [T005] Чтение в Dictionary
+    ' 4. [T005] Чтение в Dictionary
     Set parsedData = ParseHTMLToDict(htmlFilePath)
     
     ' Удаляем временный HTML-файл
@@ -56,16 +73,16 @@ Public Sub ExecuteWordImport()
     
     Application.StatusBar = "Запись данных в лист ДСО..."
     
-    ' 4. [T006, T007] Запись в лист ДСО и сортировка
-    finalReport = ApplyDictToDSOSheet(parsedData)
+    ' 5. [T006, T007] Запись в лист ДСО и сортировка
+    finalReport = ApplyDictToDSOSheet(parsedData, baseReason)
     
-    ' 5. Финализация
+    ' 6. Финализация
     Application.StatusBar = False
     
     finalReport = finalReport & vbCrLf & vbCrLf & _
                   "ВНИМАНИЕ: Для визуальной проверки новых периодов на ошибки " & _
                   "нажмите кнопку 'Проверить данные' на ленте (вкладка Валидация)."
-    
+                  
     MsgBox "Импорт завершен успешно!" & vbCrLf & vbCrLf & finalReport, vbInformation, "Итоги импорта рапорта"
     
     Exit Sub
@@ -231,9 +248,9 @@ Private Function FindColBySubstring(ws As Worksheet, subStr As String) As Long
 End Function
 
 ' =============================================
-' [T006] Загрузка (Load): Запись данных в лист ДСО
+' [T006] Загрузка (Load): Запись данных в лист ДСО с учетом Основания
 ' =============================================
-Private Function ApplyDictToDSOSheet(dict As Object) As String
+Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String) As String
     Dim wsDSO As Worksheet
     Dim lnKey As Variant
     Dim i As Long, lastRowDSO As Long, rowNum As Long
@@ -242,6 +259,7 @@ Private Function ApplyDictToDSOSheet(dict As Object) As String
     Dim personPeriods As Collection
     Dim period As Object
     Dim staffData As Object
+    Dim currentReason As String
     
     Set wsDSO = ThisWorkbook.Sheets("ДСО")
     lastRowDSO = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
@@ -284,6 +302,23 @@ Private Function ApplyDictToDSOSheet(dict As Object) As String
             newEmpCount = newEmpCount + 1
         Else
             updEmpCount = updEmpCount + 1
+        End If
+        
+        ' Логика добавления текста Основания (если пользователь его ввел)
+        If baseReason <> "" Then
+            currentReason = Trim(CStr(wsDSO.Cells(rowNum, 4).value))
+            
+            If currentReason = "" Then
+                wsDSO.Cells(rowNum, 4).value = baseReason
+            Else
+                ' Проверяем, нет ли уже такого текста в ячейке, чтобы избежать дублирования
+                If InStr(1, currentReason, baseReason, vbTextCompare) = 0 Then
+                    If Right(currentReason, 1) <> "," And Right(currentReason, 1) <> ";" Then
+                        currentReason = currentReason & ","
+                    End If
+                    wsDSO.Cells(rowNum, 4).value = currentReason & " " & baseReason
+                End If
+            End If
         End If
         
         Set personPeriods = dict(lnKey)
