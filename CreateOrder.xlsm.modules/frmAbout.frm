@@ -93,11 +93,11 @@ Private Sub UpdateLicenseStatusUI()
             lblActivationHint.Visible = False
             
         Case 4 ' ПУБЛИЧНАЯ ВЕРСИЯ (Бесплатный период)
-            lblActivationStatus.Caption = "СТАТУС: БЕСПЛАТНЫЙ ПЕРИОД"
+            lblActivationStatus.Caption = "СТАТУС: ОЗНАКОМИТЕЛЬНЫЙ ПЕРИОД"
             lblActivationStatus.ForeColor = RGB(200, 100, 0) ' Оранжевый
             lblPremiumMessage.Caption = "Ознакомительная версия активна до: " & modActivation.GetLicenseExpiryDateStr() & vbCrLf & _
-                                        "Ваш КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
-                                        "Если у вас уже есть персональный ключ, активируйте его ниже:"
+                                        "ВАШ КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
+                                        "Если у вас уже есть персональный ключ активируйте его ниже, либо обратитесь для его получения по контактам, указанным выше:"
             lblPremiumMessage.ForeColor = RGB(100, 50, 0)
             
             ' ПОКАЗЫВАЕМ ПОЛЯ для заблаговременной активации!
@@ -122,9 +122,9 @@ Private Sub UpdateLicenseStatusUI()
         Case Else ' ИСТЕКЛО ИЛИ НЕТ ЛИЦЕНЗИИ (1)
             lblActivationStatus.Caption = "СТАТУС: ОГРАНИЧЕННАЯ ВЕРСИЯ"
             lblActivationStatus.ForeColor = RGB(200, 0, 0) ' Красный
-            lblPremiumMessage.Caption = "Бесплатный период завершен." & vbCrLf & _
-                                        "Ваш КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
-                                        "Для продолжения работы запросите персональный ключ."
+            lblPremiumMessage.Caption = "ОЗНАКОМИТЕЛЬНЫЙ период завершен." & vbCrLf & _
+                                        "ВАШ КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
+                                        "Для продолжения работы запросите по контактам указанным выше, персональный ключ."
             lblPremiumMessage.ForeColor = RGB(50, 50, 50)
             
             txtActivationCode.Visible = True

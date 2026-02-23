@@ -256,18 +256,18 @@ Sub ShowSettings(control As IRibbonControl)
         settingsText = settingsText & "[-] Шаблон_Рапорт.docx - НЕ НАЙДЕН" & vbCrLf
     End If
     
-    settingsText = settingsText & vbCrLf & "[СТАТУС АКТИВАЦИЯ]: "
+    settingsText = settingsText & vbCrLf & "[СТАТУС АКТИВАЦИИ]: "
     
     ' Новая расширенная проверка статусов лицензии
     Select Case modActivation.GetLicenseStatus()
         Case 0: settingsText = settingsText & "ПЕРСОНАЛЬНАЯ ЛИЦЕНЗИЯ (до " & modActivation.GetLicenseExpiryDateStr() & ")" & vbCrLf
         Case 3: settingsText = settingsText & "КОРПОРАТИВНАЯ ЛИЦЕНЗИЯ (до " & modActivation.GetLicenseExpiryDateStr() & ")" & vbCrLf
-        Case 4: settingsText = settingsText & "БЕСПЛАТНЫЙ ПЕРИОД (до " & modActivation.GetLicenseExpiryDateStr() & ")" & vbCrLf
+        Case 4: settingsText = settingsText & "ОЗНАКОМИТЕЛЬНЫЙ ПЕРИОД (до " & modActivation.GetLicenseExpiryDateStr() & ")" & vbCrLf
         Case 1: settingsText = settingsText & "ОГРАНИЧЕННАЯ ВЕРСИЯ (Срок истек)" & vbCrLf
         Case 2: settingsText = settingsText & "БЛОКИРОВКА (Сбой системного времени)" & vbCrLf
     End Select
     
-    settingsText = settingsText & vbCrLf & "[ВЕРСИЯ] Версия макросов: 2.3.0"
+    settingsText = settingsText & vbCrLf & "[ВЕРСИЯ] Версия макросов: " & modActivation.PRODUCT_VERSION
     
     MsgBox settingsText, vbInformation, "Настройки и проверка"
 End Sub
