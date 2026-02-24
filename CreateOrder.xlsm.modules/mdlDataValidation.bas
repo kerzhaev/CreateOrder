@@ -91,7 +91,7 @@ End Sub
 
 ' /**
 '  * Validates a single row (Columns E onwards).
-'  * Applies formatting (Red/Yellow/Green) based on logic.
+'  * Теперь она СОРТИРУЕТ периоды, СЖИМАЕТ пустые ячейки, а затем валидирует!
 '  */
 Private Sub ValidateRowLogic(ws As Worksheet, rowNum As Long, ByRef errCnt As Long, ByRef warnCnt As Long)
     Dim lastCol As Long, j As Long
@@ -111,21 +111,67 @@ Private Sub ValidateRowLogic(ws As Worksheet, rowNum As Long, ByRef errCnt As Lo
         .ClearComments
     End With
     
-    Dim validPeriods() As Variant
+    ' 2. СБОР И СОРТИРОВКА ПЕРИОДОВ (Авто-выравнивание дат)
+    Dim rawPeriods() As Variant
     Dim pCount As Long
     pCount = 0
+    ReDim rawPeriods(1 To 30, 1 To 3) ' Хранилище: StartText, EndText, StartDate (для сортировки)
+    
+    For j = 5 To lastCol Step 2
+        startVal = Trim(CStr(ws.Cells(rowNum, j).value))
+        endVal = Trim(CStr(ws.Cells(rowNum, j + 1).value))
+        
+        If startVal <> "" Or endVal <> "" Then
+            pCount = pCount + 1
+            rawPeriods(pCount, 1) = startVal
+            rawPeriods(pCount, 2) = endVal
+            rawPeriods(pCount, 3) = mdlHelper.ParseDateSafe(startVal)
+        End If
+    Next j
+    
+    ' Сортировка (Bubble Sort)
+    If pCount > 1 Then
+        Dim i As Long, k As Long
+        Dim t1 As String, t2 As String, t3 As Date
+        For i = 1 To pCount - 1
+            For k = i + 1 To pCount
+                If rawPeriods(i, 3) > rawPeriods(k, 3) Then
+                    t1 = rawPeriods(i, 1): t2 = rawPeriods(i, 2): t3 = rawPeriods(i, 3)
+                    rawPeriods(i, 1) = rawPeriods(k, 1): rawPeriods(i, 2) = rawPeriods(k, 2): rawPeriods(i, 3) = rawPeriods(k, 3)
+                    rawPeriods(k, 1) = t1: rawPeriods(k, 2) = t2: rawPeriods(k, 3) = t3
+                End If
+            Next k
+        Next i
+    End If
+    
+    ' Перезапись отсортированных и сжатых данных обратно в строку
+    Dim colIdx As Long
+    colIdx = 5
+    For i = 1 To pCount
+        ws.Cells(rowNum, colIdx).value = rawPeriods(i, 1)
+        ws.Cells(rowNum, colIdx + 1).value = rawPeriods(i, 2)
+        colIdx = colIdx + 2
+    Next i
+    
+    ' Очистка хвостов (если были дырки или смещения)
+    If colIdx <= lastCol Then
+        ws.Range(ws.Cells(rowNum, colIdx), ws.Cells(rowNum, 60)).ClearContents
+    End If
+    
+    ' Обновляем lastCol для цикла валидации после компактизации
+    lastCol = colIdx - 1
+    If lastCol < 5 Then Exit Sub
+    
+    ' 3. ВАЛИДАЦИЯ И ОКРАСКА
+    Dim validPeriods() As Variant
+    Dim vCount As Long
+    vCount = 0
     ReDim validPeriods(1 To 30, 1 To 4) ' Хранилище: ColStart, ColEnd, DateStart, DateEnd
     
-    ' 2. Проверяем каждую пару индивидуально
     For j = 5 To lastCol Step 2
         startVal = ws.Cells(rowNum, j).value
         endVal = ws.Cells(rowNum, j + 1).value
         hasLocalError = False
-        
-        ' Пропуск пустых
-        If (IsEmpty(startVal) Or Trim(CStr(startVal)) = "") And (IsEmpty(endVal) Or Trim(CStr(endVal)) = "") Then
-            GoTo NextPair
-        End If
         
         ' Неполная пара
         If (Trim(CStr(startVal)) <> "" And Trim(CStr(endVal)) = "") Or _
@@ -155,11 +201,11 @@ Private Sub ValidateRowLogic(ws As Worksheet, rowNum As Long, ByRef errCnt As Lo
         If hasLocalError Then GoTo NextPair
         
         ' Сохраняем валидную пару для перекрестной проверки
-        pCount = pCount + 1
-        validPeriods(pCount, 1) = j
-        validPeriods(pCount, 2) = j + 1
-        validPeriods(pCount, 3) = dStart
-        validPeriods(pCount, 4) = dEnd
+        vCount = vCount + 1
+        validPeriods(vCount, 1) = j
+        validPeriods(vCount, 2) = j + 1
+        validPeriods(vCount, 3) = dStart
+        validPeriods(vCount, 4) = dEnd
         
         ' Проверка на предупреждения (устаревшие или будущие даты)
         If dStart > Date Or dEnd > Date Or dEnd < cutoffDate Then
@@ -174,35 +220,34 @@ Private Sub ValidateRowLogic(ws As Worksheet, rowNum As Long, ByRef errCnt As Lo
 NextPair:
     Next j
     
-    ' 3. ПРОВЕРКА ПЕРЕСЕЧЕНИЙ И ДУБЛИКАТОВ (Нахлест дат)
-    If pCount > 1 Then
-        Dim k As Long, m As Long
+    ' 4. ПРОВЕРКА ПЕРЕСЕЧЕНИЙ И ДУБЛИКАТОВ (Нахлест дат)
+    If vCount > 1 Then
         Dim s1 As Date, e1 As Date, s2 As Date, e2 As Date
         
-        For k = 1 To pCount - 1
-            s1 = validPeriods(k, 3)
-            e1 = validPeriods(k, 4)
-            For m = k + 1 To pCount
-                s2 = validPeriods(m, 3)
-                e2 = validPeriods(m, 4)
+        For i = 1 To vCount - 1
+            s1 = validPeriods(i, 3)
+            e1 = validPeriods(i, 4)
+            For k = i + 1 To vCount
+                s2 = validPeriods(k, 3)
+                e2 = validPeriods(k, 4)
                 
-                ' Жесткая математическая проверка пересечения дат (нахлеста)
+                ' Жесткая математическая проверка пересечения дат
                 If s1 <= e2 And e1 >= s2 Then
                     ' Перекрашиваем обе конфликтующие ячейки в красный (перезаписывая зеленый)
+                    ApplyFormat ws.Cells(rowNum, validPeriods(i, 1)), 2
+                    ApplyFormat ws.Cells(rowNum, validPeriods(i, 2)), 2
                     ApplyFormat ws.Cells(rowNum, validPeriods(k, 1)), 2
                     ApplyFormat ws.Cells(rowNum, validPeriods(k, 2)), 2
-                    ApplyFormat ws.Cells(rowNum, validPeriods(m, 1)), 2
-                    ApplyFormat ws.Cells(rowNum, validPeriods(m, 2)), 2
                     
                     On Error Resume Next
+                    ws.Cells(rowNum, validPeriods(i, 1)).AddComment "Дубликат/Пересечение!"
                     ws.Cells(rowNum, validPeriods(k, 1)).AddComment "Дубликат/Пересечение!"
-                    ws.Cells(rowNum, validPeriods(m, 1)).AddComment "Дубликат/Пересечение!"
                     On Error GoTo 0
                     
                     errCnt = errCnt + 1
                 End If
-            Next m
-        Next k
+            Next k
+        Next i
     End If
 End Sub
 
