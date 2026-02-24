@@ -24,7 +24,7 @@ Sub ExportToWordFromStaffByLichniyNomer()
     End If
     ' -------------------------------------
 
-
+    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
 
     Dim wdApp As Object
     Dim wdDoc As Object

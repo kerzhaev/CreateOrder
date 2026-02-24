@@ -14,6 +14,9 @@ Option Explicit
 ' @description Main function for mass import of employees by numbers
 ' =============================================
 Public Sub ImportEmployeesByNumbers()
+
+    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
+    
     On Error GoTo ErrorHandler
     
     Dim wsPayments As Worksheet

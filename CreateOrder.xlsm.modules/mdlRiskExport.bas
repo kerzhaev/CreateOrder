@@ -35,6 +35,9 @@ End Type
 '* @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 '*/
 Public Sub ExportRiskAllowanceOrder()
+
+    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
+    
     On Error GoTo ErrorHandler
     
     ' Check critical errors

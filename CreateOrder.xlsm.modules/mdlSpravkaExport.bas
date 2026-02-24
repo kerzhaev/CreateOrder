@@ -16,6 +16,8 @@ Sub ExportToWordSpravkaFromTemplate()
                "Исправьте все ошибки (красные ячейки) в листе ДСО.", vbCritical, "Экспорт невозможен"
         Exit Sub
     End If
+    
+    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
 
     Dim wdApp As Object
     Dim wordWasNotRunning As Boolean

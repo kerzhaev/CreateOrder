@@ -27,6 +27,8 @@ Public Sub ExecuteWordImport()
     Dim baseReasonVal As Variant
     Dim baseReason As String
     
+    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
+    
     ' 1. Выбор файла
     wordFilePath = SelectWordFile()
     If wordFilePath = "" Then

@@ -40,6 +40,8 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                "Исправьте все ошибки (красные ячейки) в листе ДСО.", vbCritical, "Экспорт невозможен"
         Exit Sub
     End If
+    
+    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
 
     On Error GoTo ErrorHandler
 
