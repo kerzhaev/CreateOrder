@@ -15,6 +15,17 @@ Option Explicit
 'End If
 
 Sub ExportToWordFromStaffByLichniyNomer()
+
+    ' --- ДОБАВЛЕН БЛОК ПРОВЕРКИ ОШИБОК ---
+    If mdlHelper.hasCriticalErrors() Then
+        MsgBox "Экспорт основного приказа заблокирован из-за критических ошибок в данных!" & vbCrLf & _
+               "Исправьте все ошибки (красные ячейки) в листе ДСО.", vbCritical, "Экспорт невозможен"
+        Exit Sub
+    End If
+    ' -------------------------------------
+
+
+
     Dim wdApp As Object
     Dim wdDoc As Object
     Dim wsMain As Worksheet

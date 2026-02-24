@@ -76,6 +76,11 @@ Public Sub ExecuteWordImport()
     ' 5. [T006, T007] Запись в лист ДСО и хронологическая сортировка периодов
     finalReport = ApplyDictToDSOSheet(parsedData, baseReason)
     
+    ' --- АВТОМАТИЧЕСКАЯ ВАЛИДАЦИЯ СРАЗУ ПОСЛЕ ИМПОРТА ---
+    Application.StatusBar = "Проверка импортированных данных на пересечения..."
+    Call mdlDataValidation.ValidateMainSheetData(True) ' True означает скрытый запуск без лишних окошек
+    ' ----------------------------------------------------
+    
     ' 6. Финализация
     Application.StatusBar = False
     
@@ -370,15 +375,49 @@ Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String)
             pCol = pCol + 2
         Loop
         
-        ' Вписываем периоды "как есть" (пользовательский текст)
+        ' --- ВПИСЫВАЕМ ПЕРИОДЫ С ЗАЩИТОЙ ОТ ДУБЛИКАТОВ ИЗ РАЗНЫХ ФАЙЛОВ ---
         Dim pItem As Variant
+        Dim isSheetDuplicate As Boolean
+        Dim existStart As Date, existEnd As Date
+        Dim c As Long, maxCol As Long
+        
         For Each pItem In personPeriods
             Set period = pItem
-            wsDSO.Cells(rowNum, pCol).value = period("StartText")
-            wsDSO.Cells(rowNum, pCol + 1).value = period("EndText")
-            pCol = pCol + 2
-            addedPeriodsCount = addedPeriodsCount + 1
+            isSheetDuplicate = False
+            
+            ' Если сотрудник уже существовал на листе, проверяем его текущие периоды
+            If rowNum <= lastRowDSO And rowNum > 1 Then
+                maxCol = wsDSO.Cells(rowNum, wsDSO.Columns.count).End(xlToLeft).Column
+                If maxCol >= 5 Then
+                    For c = 5 To maxCol Step 2
+                        existStart = mdlHelper.ParseDateSafe(wsDSO.Cells(rowNum, c).value)
+                        existEnd = mdlHelper.ParseDateSafe(wsDSO.Cells(rowNum, c + 1).value)
+                        
+                        ' Сравниваем даты. Если совпали - период уже был загружен ранее
+                        If existStart <> 0 And existEnd <> 0 Then
+                            If existStart = period("StartDate") And existEnd = period("EndDate") Then
+                                isSheetDuplicate = True
+                                Exit For
+                            End If
+                        End If
+                    Next c
+                End If
+            End If
+            
+            ' Добавляем только если это не дубликат
+            If Not isSheetDuplicate Then
+                ' Находим первую пустую пару колонок для записи (начиная с 5-й)
+                pCol = 5
+                Do While Trim(CStr(wsDSO.Cells(rowNum, pCol).value)) <> "" Or Trim(CStr(wsDSO.Cells(rowNum, pCol + 1).value)) <> ""
+                    pCol = pCol + 2
+                Loop
+                
+                wsDSO.Cells(rowNum, pCol).value = period("StartText")
+                wsDSO.Cells(rowNum, pCol + 1).value = period("EndText")
+                addedPeriodsCount = addedPeriodsCount + 1
+            End If
         Next pItem
+        ' ----------------------------------------------------------------
         
         ' [T007] Сортируем строку хронологически
         Call SortPeriodsInRow(wsDSO, rowNum)

@@ -85,6 +85,15 @@ Private Function ValidateRiskData() As Boolean
         Exit Function
     End If
     
+    ' --- ДОБАВЛЕН БЛОК ПРОВЕРКИ ОШИБОК ---
+    If mdlHelper.hasCriticalErrors() Then
+        MsgBox "Экспорт приказа за риск заблокирован из-за критических ошибок в данных!" & vbCrLf & _
+               "Исправьте все ошибки (красные ячейки) в листе ДСО.", vbCritical, "Экспорт невозможен"
+        ValidateRiskData = False
+        Exit Function
+    End If
+    ' -------------------------------------
+    
     ValidateRiskData = True
 End Function
 

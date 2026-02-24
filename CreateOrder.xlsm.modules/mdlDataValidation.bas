@@ -14,7 +14,11 @@ Option Explicit
 '  * Main entry point for the "Validate Data" ribbon button.
 '  * Scans the entire DSO sheet and highlights errors.
 '  */
-Public Sub ValidateMainSheetData()
+' /**
+'  * Main entry point for the "Validate Data" ribbon button.
+'  * Scans the entire DSO sheet and highlights errors.
+'  */
+Public Sub ValidateMainSheetData(Optional isSilent As Boolean = False)
     Dim ws As Worksheet
     Dim lastRow As Long
     Dim i As Long
@@ -35,14 +39,14 @@ Public Sub ValidateMainSheetData()
     On Error GoTo ErrorHandler
     
     If ws Is Nothing Then
-        MsgBox "Лист 'ДСО' не найден!", vbCritical
+        If Not isSilent Then MsgBox "Лист 'ДСО' не найден!", vbCritical
         GoTo CleanUp
     End If
 
     ' 2. Determine range
     lastRow = mdlHelper.GetLastRow(ws, "C")
     If lastRow < 2 Then
-        MsgBox "Нет данных для проверки (строки 2+).", vbInformation
+        If Not isSilent Then MsgBox "Нет данных для проверки (строки 2+).", vbInformation
         GoTo CleanUp
     End If
 
@@ -63,20 +67,22 @@ Public Sub ValidateMainSheetData()
     ' 4. Final Report
     Application.StatusBar = False
     
-    If errorCount = 0 And warningCount = 0 Then
-        reportText = reportText & "ОШИБОК НЕ ОБНАРУЖЕНО." & vbCrLf & "Все даты корректны."
-        MsgBox reportText, vbInformation, "Успех"
-    Else
-        reportText = reportText & "Найдено ошибок: " & errorCount & vbCrLf
-        reportText = reportText & "Предупреждений: " & warningCount & vbCrLf
-        reportText = reportText & "Проверьте ячейки, выделенные красным и желтым."
-        MsgBox reportText, vbExclamation, "Результаты"
+    If Not isSilent Then
+        If errorCount = 0 And warningCount = 0 Then
+            reportText = reportText & "ОШИБОК НЕ ОБНАРУЖЕНО." & vbCrLf & "Все даты корректны."
+            MsgBox reportText, vbInformation, "Успех"
+        Else
+            reportText = reportText & "Найдено ошибок (пересечения/опечатки): " & errorCount & vbCrLf
+            reportText = reportText & "Предупреждений: " & warningCount & vbCrLf
+            reportText = reportText & "Проверьте ячейки, выделенные красным и желтым."
+            MsgBox reportText, vbExclamation, "Результаты"
+        End If
     End If
 
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка валидации: " & Err.Description, vbCritical
+    If Not isSilent Then MsgBox "Ошибка валидации: " & Err.Description, vbCritical
 CleanUp:
     Application.ScreenUpdating = True
     Application.EnableEvents = True
@@ -88,46 +94,40 @@ End Sub
 '  * Applies formatting (Red/Yellow/Green) based on logic.
 '  */
 Private Sub ValidateRowLogic(ws As Worksheet, rowNum As Long, ByRef errCnt As Long, ByRef warnCnt As Long)
-    Dim lastCol As Long
-    Dim j As Long
+    Dim lastCol As Long, j As Long
     Dim startVal As Variant, endVal As Variant
     Dim dStart As Date, dEnd As Date
     Dim cutoffDate As Date
-    Dim isError As Boolean, isWarning As Boolean
+    Dim hasLocalError As Boolean
     
-    ' Get cutoff date from Helper (single source of truth)
     cutoffDate = mdlHelper.GetExportCutoffDate()
-    
-    ' Determine last column in this row
     lastCol = ws.Cells(rowNum, ws.Columns.count).End(xlToLeft).Column
     If lastCol < 5 Then lastCol = 5
-    ' Limit check to reasonable amount of columns to save performance
     If lastCol > 60 Then lastCol = 60
     
-    ' Clear old formatting for the whole row stripe (columns 5 to 60)
+    ' 1. Очищаем старое форматирование
     With ws.Range(ws.Cells(rowNum, 5), ws.Cells(rowNum, 60))
         .Interior.ColorIndex = xlNone
         .ClearComments
     End With
     
-    ' Loop through period pairs
+    Dim validPeriods() As Variant
+    Dim pCount As Long
+    pCount = 0
+    ReDim validPeriods(1 To 30, 1 To 4) ' Хранилище: ColStart, ColEnd, DateStart, DateEnd
+    
+    ' 2. Проверяем каждую пару индивидуально
     For j = 5 To lastCol Step 2
         startVal = ws.Cells(rowNum, j).value
         endVal = ws.Cells(rowNum, j + 1).value
+        hasLocalError = False
         
-        isError = False
-        isWarning = False
-        
-        ' Skip if both empty
-        If (IsEmpty(startVal) Or Trim(CStr(startVal)) = "") And _
-           (IsEmpty(endVal) Or Trim(CStr(endVal)) = "") Then
-            ' Ensure it is white
-            ws.Cells(rowNum, j).Interior.ColorIndex = xlNone
-            ws.Cells(rowNum, j + 1).Interior.ColorIndex = xlNone
+        ' Пропуск пустых
+        If (IsEmpty(startVal) Or Trim(CStr(startVal)) = "") And (IsEmpty(endVal) Or Trim(CStr(endVal)) = "") Then
             GoTo NextPair
         End If
         
-        ' Check 1: Incomplete pair
+        ' Неполная пара
         If (Trim(CStr(startVal)) <> "" And Trim(CStr(endVal)) = "") Or _
            (Trim(CStr(startVal)) = "" And Trim(CStr(endVal)) <> "") Then
             ApplyFormat ws.Cells(rowNum, j), 2 ' Red
@@ -136,56 +136,74 @@ Private Sub ValidateRowLogic(ws As Worksheet, rowNum As Long, ByRef errCnt As Lo
             GoTo NextPair
         End If
         
-        ' Check 2: Parse Dates using Helper (The Fix for 01.02.25)
+        ' Парсинг дат
         dStart = mdlHelper.ParseDateSafe(startVal)
         dEnd = mdlHelper.ParseDateSafe(endVal)
         
-        ' If 0, parsing failed (or date is too old)
-        If dStart = 0 Then
+        If dStart = 0 Or dEnd = 0 Then
             ApplyFormat ws.Cells(rowNum, j), 2 ' Red
-            errCnt = errCnt + 1
-            isError = True
-        End If
-        If dEnd = 0 Then
-            ApplyFormat ws.Cells(rowNum, j + 1), 2 ' Red
-            errCnt = errCnt + 1
-            isError = True
-        End If
-        
-        If isError Then GoTo NextPair
-        
-        ' Check 3: Logic (End < Start)
-        If dEnd < dStart Then
-            ApplyFormat ws.Cells(rowNum, j), 2
             ApplyFormat ws.Cells(rowNum, j + 1), 2
             errCnt = errCnt + 1
-            GoTo NextPair
+            hasLocalError = True
+        ElseIf dEnd < dStart Then
+            ApplyFormat ws.Cells(rowNum, j), 2 ' Red
+            ApplyFormat ws.Cells(rowNum, j + 1), 2
+            errCnt = errCnt + 1
+            hasLocalError = True
         End If
         
-        ' Check 4: Future dates
-        If dStart > Date Or dEnd > Date Then
+        If hasLocalError Then GoTo NextPair
+        
+        ' Сохраняем валидную пару для перекрестной проверки
+        pCount = pCount + 1
+        validPeriods(pCount, 1) = j
+        validPeriods(pCount, 2) = j + 1
+        validPeriods(pCount, 3) = dStart
+        validPeriods(pCount, 4) = dEnd
+        
+        ' Проверка на предупреждения (устаревшие или будущие даты)
+        If dStart > Date Or dEnd > Date Or dEnd < cutoffDate Then
             ApplyFormat ws.Cells(rowNum, j), 3 ' Yellow
             ApplyFormat ws.Cells(rowNum, j + 1), 3
             warnCnt = warnCnt + 1
-            isWarning = True
-        End If
-        
-        ' Check 5: Old dates (Cutoff)
-        If dEnd < cutoffDate Then
-            ApplyFormat ws.Cells(rowNum, j), 3 ' Yellow
-            ApplyFormat ws.Cells(rowNum, j + 1), 3
-            warnCnt = warnCnt + 1
-            isWarning = True
-        End If
-        
-        ' Success: Green (only if no error/warning)
-        If Not isWarning Then
+        Else
             ApplyFormat ws.Cells(rowNum, j), 1 ' Green
             ApplyFormat ws.Cells(rowNum, j + 1), 1
         End If
         
 NextPair:
     Next j
+    
+    ' 3. ПРОВЕРКА ПЕРЕСЕЧЕНИЙ И ДУБЛИКАТОВ (Нахлест дат)
+    If pCount > 1 Then
+        Dim k As Long, m As Long
+        Dim s1 As Date, e1 As Date, s2 As Date, e2 As Date
+        
+        For k = 1 To pCount - 1
+            s1 = validPeriods(k, 3)
+            e1 = validPeriods(k, 4)
+            For m = k + 1 To pCount
+                s2 = validPeriods(m, 3)
+                e2 = validPeriods(m, 4)
+                
+                ' Жесткая математическая проверка пересечения дат (нахлеста)
+                If s1 <= e2 And e1 >= s2 Then
+                    ' Перекрашиваем обе конфликтующие ячейки в красный (перезаписывая зеленый)
+                    ApplyFormat ws.Cells(rowNum, validPeriods(k, 1)), 2
+                    ApplyFormat ws.Cells(rowNum, validPeriods(k, 2)), 2
+                    ApplyFormat ws.Cells(rowNum, validPeriods(m, 1)), 2
+                    ApplyFormat ws.Cells(rowNum, validPeriods(m, 2)), 2
+                    
+                    On Error Resume Next
+                    ws.Cells(rowNum, validPeriods(k, 1)).AddComment "Дубликат/Пересечение!"
+                    ws.Cells(rowNum, validPeriods(m, 1)).AddComment "Дубликат/Пересечение!"
+                    On Error GoTo 0
+                    
+                    errCnt = errCnt + 1
+                End If
+            Next m
+        Next k
+    End If
 End Sub
 
 ' /**
