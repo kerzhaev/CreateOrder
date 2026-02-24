@@ -212,7 +212,8 @@ Private Function ParseHTMLToDict(ByVal htmlPath As String) As Object
         fioVal = Replace(fioVal, vbLf, "")
         fioVal = Application.WorksheetFunction.Trim(fioVal)
         
-        If lnVal <> "" And InStr(1, LCase(lnVal), "личный") = 0 Then
+        ' ИГНОРИРУЕМ шапку и строку с нумерацией столбцов (цифры 1,2,3... имеют длину 1-2 символа)
+        If lnVal <> "" And InStr(1, LCase(lnVal), "личный") = 0 And Len(lnVal) > 2 Then
             dStart = mdlHelper.ParseDateSafe(strStart)
             dEnd = mdlHelper.ParseDateSafe(strEnd)
             
@@ -272,7 +273,7 @@ Private Function FindColBySubstring(ws As Worksheet, subStr As String) As Long
 End Function
 
 ' =============================================
-' [T006] Загрузка (Load): Запись данных в лист ДСО с учетом Основания
+' [T006] Загрузка (Load): Запись данных в лист ДСО с учетом Основания и Форматированием
 ' =============================================
 Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String) As String
     Dim wsDSO As Worksheet
@@ -384,9 +385,36 @@ Private Function ApplyDictToDSOSheet(dict As Object, ByVal baseReason As String)
         
     Next lnKey
     
-    ' Сортируем весь лист по алфавиту и обновляем нумерацию (для синхронизации отчетов)
+    ' Сортируем весь лист по алфавиту и обновляем нумерацию
     Call SortDSOSheetAlphabetically(wsDSO)
     
+    ' === ПРИМЕНЕНИЕ ЕДИНОГО ФОРМАТИРОВАНИЯ ===
+    Dim formatRange As Range
+    Dim finalRow As Long, finalCol As Long
+    finalRow = wsDSO.Cells(wsDSO.Rows.count, 3).End(xlUp).Row
+    finalCol = wsDSO.Cells(1, wsDSO.Columns.count).End(xlToLeft).Column
+    
+    If finalRow >= 2 And finalCol >= 4 Then
+        Set formatRange = wsDSO.Range(wsDSO.Cells(2, 1), wsDSO.Cells(finalRow, finalCol))
+        
+        With formatRange.Font
+            .Name = "Times New Roman"
+            .Size = 12
+            .ColorIndex = xlAutomatic
+            .Bold = False
+            .Italic = False
+            .Underline = xlUnderlineStyleNone
+        End With
+        
+        With formatRange
+            .VerticalAlignment = xlCenter
+            .Borders.LineStyle = xlContinuous
+            .Borders.Weight = xlThin
+            .Borders.ColorIndex = xlAutomatic
+        End With
+    End If
+    ' ========================================
+
     ' Включаем события обратно
     Application.EnableEvents = True
     
