@@ -1,15 +1,15 @@
 Attribute VB_Name = "mdlRaportExport"
 ' ===============================================================================
 ' Module mdlRaportExport
-' Version: 1.6.0
-' Date: 14.02.2026
+' Version: 1.7.3 (Unified Raport & Risk Export, Fixed duplicates)
+' Date: 25.02.2026
 ' Description: Export of reports (raports), correct insertion of periodsText via Range for large strings.
 ' Author: Kerzhaev Evgeniy, FKU "95 FES" MO RF
 ' ===============================================================================
 
 Option Explicit
 
-Sub ExportToWordRaportFromTemplateByLichniyNomer()
+Sub ExportToWordRaportFromTemplateByLichniyNomer(Optional RaportType As String = "DSO")
 
     Call mdlHelper.EnsureStaffColumnsInitialized
     
@@ -35,6 +35,21 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
     Dim firstDate As String, lastDate As String
     Dim hasAnyPeriods As Boolean
 
+    ' --- ОПРЕДЕЛЯЕМ ШАБЛОН И ПРЕФИКС В ЗАВИСИМОСТИ ОТ ТИПА РАПОРТА ---
+    Dim templateName As String
+    Dim filePrefix As String
+    
+    If RaportType = "Risk" Then
+        templateName = "Шаблон_РапортРиск.docx"
+        filePrefix = "Рапорт_Риск_"
+    Else
+        templateName = "Шаблон_Рапорт.docx"
+        filePrefix = "Рапорт_Отгулы_"
+    End If
+
+    templatePath = ThisWorkbook.Path & "\" & templateName
+    ' -----------------------------------------------------------------
+
     If mdlHelper.hasCriticalErrors() Then
         MsgBox "Экспорт рапортов заблокирован из-за критических ошибок в данных!" & vbCrLf & _
                "Исправьте все ошибки (красные ячейки) в листе ДСО.", vbCritical, "Экспорт невозможен"
@@ -43,12 +58,11 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
     
     If modActivation.GetLicenseStatus() = 1 Then Exit Sub
 
-'    On Error GoTo ErrorHandler
+    On Error GoTo ErrorHandler
 
     Application.ScreenUpdating = False
     Application.StatusBar = "Создание рапортов..."
 
-    templatePath = ThisWorkbook.Path & "\Шаблон_Рапорт.docx"
     If dir(templatePath) = "" Then
         MsgBox "Файл шаблона не найден: " & templatePath, vbCritical
         GoTo CleanUp
@@ -169,14 +183,21 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                             daysList = daysList & "+" & periodArr(j, 3)
                         End If
                     Next j
+                    
+                    ' --- РАЗДЕЛЬНАЯ ЛОГИКА ДЛЯ ОТГУЛОВ И РИСКА ---
                     If totalDays > 0 Then
-                        restDays = Int(totalDays / 3) * 2
-'                        periodsText = periodsText & "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха." & vbCrLf
-                        calculationText = "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха."
+                        If RaportType = "Risk" Then
+                            ' Расчет для риска (2%)
+                            calculationText = "(" & daysList & ") = " & totalDays & " суток для выплаты надбавки в размере 2% оклада."
+                        Else
+                            ' Расчет для ДСО (отгулы)
+                            restDays = Int(totalDays / 3) * 2
+                            calculationText = "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха."
+                        End If
                     Else
-'                        periodsText = periodsText & "Нет актуальных периодов для расчета." & vbCrLf
                         calculationText = "Нет актуальных периодов для расчета."
                     End If
+                    ' ---------------------------------------------
                     
                     ' Form participation period string
                     If firstDate <> "" And lastDate <> "" Then
@@ -256,7 +277,9 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                 Dim cleanFIO As String, periodForFileName As String
                 cleanFIO = Replace(Replace(Replace(fio, " ", "_"), ".", ""), ",", "")
                 periodForFileName = firstDate & "_по_" & lastDate
-                fileName = "Рапорт_" & lichniyNomer & "_" & cleanFIO & "_" & periodForFileName & ".docx"
+                
+                ' --- ИСПОЛЬЗУЕМ ПРЕФИКС В НАЗВАНИИ ФАЙЛА ---
+                fileName = filePrefix & lichniyNomer & "_" & cleanFIO & "_" & periodForFileName & ".docx"
                 savePath = ThisWorkbook.Path & "\" & fileName
 
                 Call mdlHelper.SaveWordDocumentSafe(wdDoc, savePath)
@@ -270,8 +293,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
     GoTo CleanUp
 
 ErrorHandler:
-'    MsgBox "Ошибка при создании рапортов: " & Err.Description, vbCritical, "Ошибка"
-    MsgBox "Ошибка на строке Excel " & i & " (ФИО: " & currentFIO & "): " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка на строке " & i & " (ФИО: " & currentFIO & "): " & Err.Description, vbCritical, "Ошибка"
     If Not wdDoc Is Nothing Then wdDoc.Close False
 CleanUp:
     Application.ScreenUpdating = True

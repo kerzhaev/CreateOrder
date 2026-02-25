@@ -51,14 +51,18 @@ Sub RunRaportExport(control As IRibbonControl)
     If choice = vbCancel Then Exit Sub
     
     Application.ScreenUpdating = False
+    
     If choice = vbYes Then
-        Call mdlRaportExport.ExportToWordRaportFromTemplateByLichniyNomer
+        ' Если нажали ДА - формируем обычный рапорт на отгулы
+        Call mdlRaportExport.ExportToWordRaportFromTemplateByLichniyNomer("DSO")
     Else
-        MsgBox "Функционал отдельного рапорта на Риск пока в разработке. Используется стандартный шаблон.", vbInformation
-        Call mdlRaportExport.ExportToWordRaportFromTemplateByLichniyNomer
+        ' Если нажали НЕТ - формируем рапорт на риск (2%)
+        Call mdlRaportExport.ExportToWordRaportFromTemplateByLichniyNomer("Risk")
     End If
+    
     Application.ScreenUpdating = True
     Exit Sub
+
 ErrorHandler:
     Application.ScreenUpdating = True
     MsgBox "Ошибка при создании рапорта: " & Err.Description, vbCritical, "Ошибка"
