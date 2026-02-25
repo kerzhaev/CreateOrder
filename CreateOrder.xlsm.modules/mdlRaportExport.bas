@@ -162,14 +162,29 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer(Optional RaportType As String =
                         hasAnyPeriods = True
                         If firstDate = "" Then firstDate = Format(periodArr(j, 1), "dd.mm.yyyy")
                         lastDate = Format(periodArr(j, 2), "dd.mm.yyyy")
+                        
+                        ' --- НОВАЯ ЛОГИКА ОТОБРАЖЕНИЯ СУТОК ИЛИ ПРОЦЕНТОВ ---
+                        Dim periodValue As String
+                        If RaportType = "Risk" Then
+                            Dim calcPercent As Long
+                            calcPercent = periodArr(j, 3) * 2
+                            If calcPercent > 60 Then calcPercent = 60 ' Ограничение максимум 60%
+                            periodValue = calcPercent & "%"
+                        Else
+                            periodValue = periodArr(j, 3) & " сут."
+                        End If
+                        ' ----------------------------------------------------
+                        
                         periodsText = periodsText & "- с " & Format(periodArr(j, 1), "dd.mm.yyyy") & _
-                            " по " & Format(periodArr(j, 2), "dd.mm.yyyy") & " (" & periodArr(j, 3) & " сут.)"
+                            " по " & Format(periodArr(j, 2), "dd.mm.yyyy") & " (" & periodValue & ")"
+                            
                         If periodArr(j, 2) < cutoffDate Then
                             periodsText = periodsText & " (НЕ АКТУАЛЕН — старше 3 лет + 1 месяц!)"
                         End If
                         periodsText = periodsText & vbCrLf
                     Next j
-
+                    
+                    ' --- РАЗДЕЛЬНАЯ ЛОГИКА ДЛЯ ОТГУЛОВ И РИСКА ---
                     ' Calculate total days and rest calculation
                     Dim totalDays As Long, restDays As Long, daysList As String
                     Dim periodForRaport As String, calculationText As String
@@ -187,15 +202,19 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer(Optional RaportType As String =
                     ' --- РАЗДЕЛЬНАЯ ЛОГИКА ДЛЯ ОТГУЛОВ И РИСКА ---
                     If totalDays > 0 Then
                         If RaportType = "Risk" Then
-                            ' Расчет для риска (2%)
-                            calculationText = "(" & daysList & ") = " & totalDays & " суток для выплаты надбавки в размере 2% оклада."
+                            ' Расчет для риска не нужен (оставляем пустым)
+                            calculationText = ""
                         Else
                             ' Расчет для ДСО (отгулы)
                             restDays = Int(totalDays / 3) * 2
                             calculationText = "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха."
                         End If
                     Else
-                        calculationText = "Нет актуальных периодов для расчета."
+                        If RaportType = "Risk" Then
+                            calculationText = ""
+                        Else
+                            calculationText = "Нет актуальных периодов для расчета."
+                        End If
                     End If
                     ' ---------------------------------------------
                     
