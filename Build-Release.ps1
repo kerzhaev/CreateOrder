@@ -3,16 +3,19 @@
     Сборщик релизной версии проекта CreateOrder.
 .DESCRIPTION
     Применяет двойную бинарную защиту: Unviewable Project (DPx) и Ghost Module (скрытие ключевых модулей).
-    Генерирует готовый файл CreateOrder_Release.xlsm.
+    Генерирует готовый файл с меткой даты и времени (например, CreateOrder_Release_20260225_153000.xlsm).
 #>
 
 param(
-    [string]$SourceFile = "CreateOrder.xlsm",
-    [string]$OutputFile = "CreateOrder_Release.xlsm"
+    [string]$SourceFile = "CreateOrder.xlsm"
 )
 
 # Переключаем кодировку консоли на UTF-8 для корректного вывода русских букв
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Генерируем динамическое имя выходного файла с датой и временем
+$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$OutputFile = "CreateOrder_Release_$timestamp.xlsm"
 
 Write-Host "=== Запуск сборки защищенного релиза ===" -ForegroundColor Cyan
 
@@ -23,7 +26,7 @@ if (-not (Test-Path $SourceFile)) {
 }
 
 # 1. Подготовка временных директорий
-$tempDir = Join-Path $env:TEMP "CreateOrderBuild_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+$tempDir = Join-Path $env:TEMP "CreateOrderBuild_$timestamp"
 $tempZip = Join-Path $tempDir "temp_archive.zip"
 $extractDir = Join-Path $tempDir "extracted"
 
@@ -47,8 +50,6 @@ Write-Host "[2/4] Применение бинарной защиты..." -ForegroundColor Yellow
 
 # Читаем как текст в кодировке Default (ANSI/Windows-1251), чтобы сохранить 1-байтовые символы
 $bytes = [System.IO.File]::ReadAllBytes($vbaBinPath)
-# Используем кодировку 1252 (Western) или 1251 (Cyrillic) для чтения бинарника как строки
-# Важно: VBA Project stream обычно в ASCII/ANSI
 $encoding = [System.Text.Encoding]::GetEncoding(1252) 
 $text = $encoding.GetString($bytes)
 
@@ -61,11 +62,10 @@ if ($text -match "DPB=") {
 }
 
 # --- Слой 2: Ghost Modules (Скрытие из дерева) ---
-# СПИСОК МОДУЛЕЙ ДЛЯ СКРЫТИЯ
-# СПИСОК МОДУЛЕЙ ДЛЯ СКРЫТИЯ
+# ПОЛНЫЙ СПИСОК МОДУЛЕЙ ДЛЯ СКРЫТИЯ (Защита от запуска через Alt+F8)
 $modulesToHide = @(
     "modActivation",             # Логика лицензии
-    "mdlRibbonHandlers",         # Вызовы проверок
+    "mdlRibbonHandlers",         # Вызовы проверок с ленты
     "mdlMainExport",             # Основной приказ
     "mdlRaportExport",           # Рапорты
     "mdlSpravkaExport",          # Справки ДСО
@@ -106,4 +106,4 @@ Copy-Item -Path $tempZip -Destination $OutputFile -Force
 Remove-Item $tempDir -Recurse -Force
 
 Write-Host "=== ГОТОВО! ===" -ForegroundColor Cyan
-Write-Host "Защищенный файл: $OutputFile" -ForegroundColor Green
+Write-Host "Защищенный файл создан: $OutputFile" -ForegroundColor Green

@@ -568,13 +568,13 @@ End Function
 
 Public Function GetFIOWithInitials(sName As String) As String
     Dim s As String: s = fio(sName, "Д", True)
-    Dim p(): p = Split(s, " ")
+    Dim p() As String: p = Split(s, " ") ' Добавлено As String
     If UBound(p) = 1 Then GetFIOWithInitials = p(1) & " " & p(0) Else GetFIOWithInitials = s
 End Function
 
 Public Function GetFIOWithInitialsImenitelny(sName As String) As String
     Dim s As String: s = fio(sName, "И", True)
-    Dim p(): p = Split(s, " ")
+    Dim p() As String: p = Split(s, " ") ' Добавлено As String
     If UBound(p) = 1 Then GetFIOWithInitialsImenitelny = p(1) & " " & p(0) Else GetFIOWithInitialsImenitelny = s
 End Function
 

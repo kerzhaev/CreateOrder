@@ -43,7 +43,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
     
     If modActivation.GetLicenseStatus() = 1 Then Exit Sub
 
-    On Error GoTo ErrorHandler
+'    On Error GoTo ErrorHandler
 
     Application.ScreenUpdating = False
     Application.StatusBar = "Создание рапортов..."
@@ -171,10 +171,10 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
                     Next j
                     If totalDays > 0 Then
                         restDays = Int(totalDays / 3) * 2
-                        periodsText = periodsText & "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха." & vbCrLf
+'                        periodsText = periodsText & "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха." & vbCrLf
                         calculationText = "(" & daysList & ") = " & totalDays & " суток привлечения/3*2 = " & restDays & " суток отдыха."
                     Else
-                        periodsText = periodsText & "Нет актуальных периодов для расчета." & vbCrLf
+'                        periodsText = periodsText & "Нет актуальных периодов для расчета." & vbCrLf
                         calculationText = "Нет актуальных периодов для расчета."
                     End If
                     
@@ -270,7 +270,8 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer()
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка при создании рапортов: " & Err.Description, vbCritical, "Ошибка"
+'    MsgBox "Ошибка при создании рапортов: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка на строке Excel " & i & " (ФИО: " & currentFIO & "): " & Err.Description, vbCritical, "Ошибка"
     If Not wdDoc Is Nothing Then wdDoc.Close False
 CleanUp:
     Application.ScreenUpdating = True
