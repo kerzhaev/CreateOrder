@@ -13,6 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 ' ===============================================================================
 ' @author Кержаев Евгений, ФКУ "95 ФЭС" МО РФ
 ' @description Код формы "О программе" (Версия с точными именами контролов)
@@ -20,6 +21,12 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private bIgnoreChange As Boolean
+
+
+
+Private Sub lblPhone_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+    Call modActivation.AdminGenerateKeyUI
+End Sub
 
 Private Sub UserForm_Initialize()
     ' Инициализация данных о программе

@@ -75,13 +75,15 @@ Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long
         End If
         
         ' 5. Должность (Ищем ДЛИННУЮ с цифрами приоритетно, понимает "должность")
-        If InStr(headerText, "штатная должность") > 0 Or InStr(headerText, "должность") > 0 Then
+        If InStr(headerText, "штатная должность") > 0 Or InStr(headerText, "штатная") > 0 Then
             If IsLongPositionColumn(ws, i) Then
                 colDolzhnost = i: foundDolzhnost = True
             ElseIf colDolzhnost = 0 And IsTextColumn(ws, i) Then
                 colDolzhnost = i: foundDolzhnost = True
             End If
         End If
+       
+      
     Next i
 
     If colLichniyNomer > 0 And colZvanie > 0 And colFIO > 0 And colDolzhnost > 0 And colVoinskayaChast > 0 Then

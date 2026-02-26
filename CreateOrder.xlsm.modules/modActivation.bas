@@ -312,3 +312,46 @@ Private Function ReadHidden(nName As String) As String
     On Error GoTo 0
 End Function
 
+' ===============================================================================
+' 7. ПАНЕЛЬ АДМИНИСТРАТОРА: ГЕНЕРАТОР КЛЮЧЕЙ С КОПИРОВАНИЕМ В БУФЕР
+' ===============================================================================
+Public Sub AdminGenerateKeyUI()
+Attribute AdminGenerateKeyUI.VB_ProcData.VB_Invoke_Func = "K\n14"
+    Dim pwd As String, targetHWID As String, expDateStr As String
+    Dim generatedKey As String
+    
+    ' 1. Запрашиваем пароль
+    pwd = InputBox("Введите пароль администратора для доступа к генератору:", "Генератор ключей")
+    If pwd <> "95FES_Admin" Then
+        If pwd <> "" Then MsgBox "Неверный пароль!", vbCritical, "Отказ в доступе"
+        Exit Sub
+    End If
+    
+    ' 2. Запрашиваем HWID пользователя
+    targetHWID = InputBox("Введите HWID компьютера пользователя:" & vbCrLf & _
+                          "(Оставьте текущий, если делаете ключ для себя)", "Ввод HWID", GetHardwareID())
+    If targetHWID = "" Then Exit Sub
+    
+    ' 3. Запрашиваем дату окончания
+    expDateStr = InputBox("Введите дату окончания действия ключа (ДД.ММ.ГГГГ):", "Дата окончания", "31.12.2026")
+    If expDateStr = "" Then Exit Sub
+    
+    If Not IsDate(expDateStr) Then
+        MsgBox "Некорректный формат даты! Используйте формат ДД.ММ.ГГГГ", vbExclamation, "Ошибка"
+        Exit Sub
+    End If
+    
+    ' 4. Генерируем ключ
+    generatedKey = GenerateLicenseKey(CDate(expDateStr), targetHWID)
+    
+' 5. Копируем в буфер обмена (надежный системный способ Windows)
+    On Error Resume Next
+    CreateObject("WScript.Shell").Run "cmd.exe /c echo | set /p=" & generatedKey & " | clip", 0, True
+    On Error GoTo 0
+    
+    ' 6. Показываем результат
+    MsgBox "Ключ успешно сгенерирован:" & vbCrLf & vbCrLf & _
+           generatedKey & vbCrLf & vbCrLf & _
+           "(Ключ уже скопирован в буфер обмена, можно нажимать Вставить/Ctrl+V)", vbInformation, "Успех"
+End Sub
+

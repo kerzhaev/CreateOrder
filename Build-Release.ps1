@@ -73,7 +73,8 @@ $modulesToHide = @(
     "mdlUniversalPaymentExport", # Надбавки
     "mdlFRPExport",              # Отчеты Алушта
     "mdlWordImport",             # Импорт рапортов
-    "MdlBackup"                  # Бэкапер
+    "MdlBackup",                 # Бэкапер
+	"frmAbout"
 )
 
 foreach ($modName in $modulesToHide) {
