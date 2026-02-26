@@ -366,6 +366,7 @@ ErrorHandler:
     Set GroupPaymentsByType = CreateObject("Scripting.Dictionary")
 End Function
 
+
 ' =============================================
 ' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
 ' @description Generate Word order for specific payment type
@@ -388,9 +389,9 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
     Dim wordWasNotRunning As Boolean
     Dim successCount As Long
     Dim paymentDict As Object
-    Dim templateRange As Object
-    Dim newRange As Object
     Dim endRange As Object
+    Dim isListTemplate As Boolean
+    Dim listText As String
     
     ' Get payment type configuration
     config = mdlPaymentTypes.GetPaymentTypeConfig(paymentType)
@@ -411,21 +412,31 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
     
     wordApp.Visible = True
     
-    ' Create one document from template
+    ' Determine if we are using a List Template
+    isListTemplate = False
     If templatePath <> "" Then
-        ' Open template to copy content
-        Set templateDoc = wordApp.Documents.Open(templatePath)
-        ' Create new document
-        Set doc = wordApp.Documents.Add
-        ' Copy template content to new document (for first record)
-        templateDoc.content.Copy
-        doc.content.Paste
-        ' Close template
-        templateDoc.Close False
-        Set templateDoc = Nothing
+        Set doc = wordApp.Documents.Add(templatePath)
+        ' Проверяем наличие маркера списка
+        With doc.content.Find
+            .Text = "[СПИСОК_ВОЕННОСЛУЖАЩИХ]"
+            If .Execute Then
+                isListTemplate = True
+            End If
+        End With
+        
+        If Not isListTemplate Then
+            ' Если это не списочный шаблон, используем старую логику постраничного копирования
+            doc.Close False
+            Set doc = wordApp.Documents.Add
+            
+            Set templateDoc = wordApp.Documents.Open(templatePath)
+            templateDoc.content.Copy
+            doc.content.Paste
+            templateDoc.Close False
+            Set templateDoc = Nothing
+        End If
     Else
         Set doc = wordApp.Documents.Add
-        ' Set default font
         With doc.Styles(1).Font
             .Name = "Times New Roman"
             .Size = 12
@@ -434,60 +445,87 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
     
     successCount = 0
     
-    ' Add all records to one document
-    For i = 1 To payments.count
-        ' Extract Dictionary from Collection and convert to UDT
-        Set paymentDict = payments(i)
-        payment = DictionaryToPayment(paymentDict)
-        
-        If templatePath <> "" Then
-            ' For each record create a copy of template with marker replacement
-            If i = 1 Then
-                ' First record - use already created document
-                If FillPaymentTemplate(doc, payment) Then
-                    successCount = successCount + 1
-                End If
-            Else
-                ' For other records open template, replace markers and add to document
-                Set templateDoc = wordApp.Documents.Open(templatePath)
-                
-                ' Replace markers in template
-                If FillPaymentTemplate(templateDoc, payment) Then
-                    ' Copy template content
-                    templateDoc.content.Copy
-                    
-                    ' Paste at the end of main document
-                    Set endRange = doc.Range
-                    endRange.Collapse Direction:=0 ' wdCollapseEnd
-                    ' Add break between records
-                    If i > 1 Then
-                        endRange.InsertAfter vbCrLf & vbCrLf
-                        endRange.Collapse Direction:=0
-                    End If
-                    endRange.Paste
-                    
-                    successCount = successCount + 1
-                End If
-                
-                ' Close template without saving
-                templateDoc.Close False
-                Set templateDoc = Nothing
-            End If
-        Else
-            ' If no template, add text directly
-            If i > 1 Then
-                Set endRange = doc.Range
-                endRange.Collapse Direction:=0
-                endRange.InsertAfter vbCrLf & vbCrLf
+    If isListTemplate Then
+        ' ==========================================
+        ' НОВАЯ ЛОГИКА: ШАБЛОН СО СПИСКОМ
+        ' ==========================================
+        listText = ""
+        For i = 1 To payments.count
+            Set paymentDict = payments(i)
+            payment = DictionaryToPayment(paymentDict)
+            
+            ' Используем нашу новую функцию форматирования
+            Dim empText As String
+            empText = FormatEmployeePaymentText(payment, i)
+            
+            ' Разделитель между военнослужащими (пустая строка)
+            If i < payments.count Then
+                empText = empText & vbCrLf
             End If
             
-            If GeneratePaymentTextDirectly(doc, payment) Then
-                successCount = successCount + 1
+            listText = listText & empText
+        Next i
+        
+        ' Вставляем готовый список на место маркера, обходя ограничение в 255 символов
+        Dim rngFind As Object
+        Set rngFind = doc.content
+        With rngFind.Find
+            .ClearFormatting
+            .Text = "[СПИСОК_ВОЕННОСЛУЖАЩИХ]"
+            .Forward = True
+            .Wrap = 0 ' wdFindStop
+            If .Execute Then
+                rngFind.Text = listText
             End If
-        End If
-    Next i
+        End With
+        
+        successCount = payments.count
+        
+    Else
+        ' ==========================================
+        ' СТАРАЯ ЛОГИКА: ИНДИВИДУАЛЬНЫЕ МАРКЕРЫ (ИЛИ БЕЗ ШАБЛОНА)
+        ' ==========================================
+        For i = 1 To payments.count
+            Set paymentDict = payments(i)
+            payment = DictionaryToPayment(paymentDict)
+            
+            If templatePath <> "" Then
+                If i = 1 Then
+                    If FillPaymentTemplate(doc, payment) Then
+                        successCount = successCount + 1
+                    End If
+                Else
+                    Set templateDoc = wordApp.Documents.Open(templatePath)
+                    If FillPaymentTemplate(templateDoc, payment) Then
+                        templateDoc.content.Copy
+                        Set endRange = doc.Range
+                        endRange.Collapse Direction:=0
+                        If i > 1 Then
+                            endRange.InsertAfter vbCrLf & vbCrLf
+                            endRange.Collapse Direction:=0
+                        End If
+                        endRange.Paste
+                        successCount = successCount + 1
+                    End If
+                    templateDoc.Close False
+                    Set templateDoc = Nothing
+                End If
+            Else
+                If i > 1 Then
+                    Set endRange = doc.Range
+                    endRange.Collapse Direction:=0
+                    endRange.InsertAfter vbCrLf & vbCrLf
+                End If
+                
+                ' Передаем i для нумерации
+                If GeneratePaymentTextDirectly(doc, payment, i) Then
+                    successCount = successCount + 1
+                End If
+            End If
+        Next i
+    End If
     
-    ' Generate filename for order
+    ' Сохранение
     Dim cleanTypeName As String
     cleanTypeName = Replace(Replace(Replace(paymentType, " ", "_"), "/", "_"), "\", "_")
     fileName = "Приказ_" & cleanTypeName & "_" & Format(Date, "dd.mm.yyyy") & ".docx"
@@ -496,14 +534,8 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
     End If
     savePath = ThisWorkbook.Path & "\" & fileName
     
-    ' Save document
     Call mdlHelper.SaveWordDocumentSafe(doc, savePath)
     doc.Activate
-    
-    ' Close Word only if we created it
-    If wordWasNotRunning And Not wordApp Is Nothing Then
-        ' Leave document open, but do not close Word
-    End If
     
     MsgBox "Создан приказ с " & successCount & " записями из " & payments.count, vbInformation, "Экспорт завершен"
     
@@ -595,30 +627,87 @@ End Function
 ' @param payment As PaymentWithoutPeriod - payment data
 ' @return Boolean - True if successful
 ' =============================================
-Public Function GeneratePaymentTextDirectly(ByVal doc As Object, ByRef payment As PaymentWithoutPeriod) As Boolean
+' =============================================
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Generate order text directly in Word without template
+' =============================================
+Public Function GeneratePaymentTextDirectly(ByVal doc As Object, ByRef payment As PaymentWithoutPeriod, ByVal index As Long) As Boolean
     On Error GoTo ErrorHandler
     
     Dim rng As Object
     Dim textLine As String
     
-    ' Form order text
-    textLine = mdlHelper.SklonitZvanie(payment.Rank) & " " & _
-               mdlHelper.SklonitFIO(payment.fio) & ", личный номер " & payment.lichniyNomer & ", " & _
-               mdlHelper.SklonitDolzhnost(payment.Position, payment.VoinskayaChast) & vbCrLf
-    textLine = textLine & "Размер: " & payment.amount & vbCrLf
-    textLine = textLine & "Основание: " & payment.foundation & vbCrLf & vbCrLf
+    ' Используем общую функцию форматирования
+    textLine = FormatEmployeePaymentText(payment, index) & vbCrLf
     
-    ' Insert text into document
+    ' Вставляем текст в документ
     Set rng = doc.Range
     rng.Collapse Direction:=0
     rng.Text = textLine
     rng.Font.Name = "Times New Roman"
-    rng.Font.Size = 12
+    rng.Font.Size = 14
     
     GeneratePaymentTextDirectly = True
     Exit Function
     
 ErrorHandler:
     GeneratePaymentTextDirectly = False
+End Function
+
+' =============================================
+' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
+' @description Формирует готовый текст для одного военнослужащего со всеми проверками
+' =============================================
+Private Function FormatEmployeePaymentText(ByRef payment As PaymentWithoutPeriod, ByVal index As Long) As String
+    Dim cleanFIO As String, cleanRank As String, cleanPos As String, cleanVC As String, cleanFound As String
+    
+    ' 1. Очищаем все данные от случайных переносов строк (Alt+Enter из Excel)
+    cleanFIO = Replace(Replace(payment.fio, vbCr, ""), vbLf, " ")
+    cleanRank = Replace(Replace(payment.Rank, vbCr, ""), vbLf, " ")
+    cleanPos = Replace(Replace(payment.Position, vbCr, ""), vbLf, " ")
+    cleanVC = Replace(Replace(payment.VoinskayaChast, vbCr, ""), vbLf, " ")
+    cleanFound = Replace(Replace(payment.foundation, vbCr, ""), vbLf, " ")
+    
+    ' Убираем двойные пробелы, если они появились после замены
+    While InStr(cleanPos, "  ") > 0: cleanPos = Replace(cleanPos, "  ", " "): Wend
+    While InStr(cleanFound, "  ") > 0: cleanFound = Replace(cleanFound, "  ", " "): Wend
+    
+    ' 2. Преобразуем размер (0,3 -> 30) независимым от системы способом
+    Dim formattedAmount As String
+    Dim numVal As Double
+    
+    formattedAmount = Trim(payment.amount)
+    formattedAmount = Replace(formattedAmount, "%", "") ' Сначала убираем знак процента, если он был
+    
+    ' Функция Val понимает только точку, поэтому принудительно меняем запятую на точку
+    Dim dotAmount As String
+    dotAmount = Replace(formattedAmount, ",", ".")
+    
+    ' Если внутри действительно число
+    If IsNumeric(dotAmount) Or IsNumeric(formattedAmount) Then
+        numVal = val(dotAmount)
+        ' Если число дробное (от 0.01 до 1), умножаем на 100
+        If numVal > 0 And numVal <= 1 Then
+            formattedAmount = CStr(numVal * 100)
+        End If
+    End If
+    
+    ' 3. Формируем текст БЕЗ лишних переносов строк
+    Dim textLine As String
+    textLine = index & ". " & mdlHelper.SklonitZvanie(cleanRank) & " " & _
+               mdlHelper.SklonitFIO(cleanFIO) & ", личный номер " & payment.lichniyNomer & ", " & _
+               mdlHelper.SklonitDolzhnost(cleanPos, cleanVC)
+               
+    ' Добавляем размер через ПРОБЕЛ, продолжая строку
+    If formattedAmount <> "" And formattedAmount <> "0" Then
+        textLine = textLine & " в размере " & formattedAmount & " процентов оклада по воинской должности."
+    End If
+    
+    ' А вот основание спускаем на новую строку через vbCrLf
+    If cleanFound <> "" Then
+        textLine = textLine & vbCrLf & "Основание: " & cleanFound
+    End If
+    
+    FormatEmployeePaymentText = textLine
 End Function
 
