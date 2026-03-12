@@ -21,7 +21,7 @@ Sub RunMainExport(control As IRibbonControl)
     Exit Sub
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании основного приказа: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании основного приказа: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for DSO certificate (spravka)
@@ -34,7 +34,7 @@ Sub RunSpravkaExport(control As IRibbonControl)
     Exit Sub
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании справки: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании справки: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for report (raport) with CHOICE
@@ -65,7 +65,7 @@ Sub RunRaportExport(control As IRibbonControl)
 
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при создании рапорта: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании рапорта: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for "OrderForRisk" button
@@ -75,7 +75,7 @@ Public Sub OnRiskOrderClick(control As IRibbonControl)
     Call mdlRiskExport.ExportRiskAllowanceOrder
     Exit Sub
 ErrorHandler:
-    MsgBox "Ошибка при вызове приказа за риск: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при вызове приказа за риск: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for "Export Allowances" button
@@ -88,7 +88,7 @@ Public Sub OnExportAllowancesClick(control As IRibbonControl)
     Exit Sub
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при экспорте надбавок: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при экспорте надбавок: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for Excel reports (Alushta / FRP)
@@ -98,7 +98,7 @@ Public Sub OnPeriodsReportClick(control As IRibbonControl)
     Call mdlFRPExport.ExportPeriodsToExcel_WithChoice
     Exit Sub
 ErrorHandler:
-    MsgBox "Ошибка при создании Excel отчета: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании Excel отчета: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' ===============================================================================
@@ -129,7 +129,7 @@ Sub RunSmartValidation(control As IRibbonControl)
 ErrorHandler:
     Application.ScreenUpdating = True
     Application.StatusBar = False
-    MsgBox "Ошибка при проверке данных: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при проверке данных: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' НОВОЕ: Обработчик кнопки "О программе" (Заменил Диагностику)
@@ -138,7 +138,7 @@ Sub RunShowAbout(control As IRibbonControl)
     frmAbout.Show
     Exit Sub
 ErrorHandler:
-    MsgBox "Ошибка при открытии окна программы: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при открытии окна программы: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for data import
@@ -150,7 +150,7 @@ Sub RunImportData(control As IRibbonControl)
     Exit Sub
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при импорте данных: " & Err.Description, vbCritical, "Ошибка импорта"
+    MsgBox "Ошибка при импорте данных: " & Err.description, vbCritical, "Ошибка импорта"
 End Sub
 
 ' Handler for Word Raport Import
@@ -166,7 +166,7 @@ Sub RunWordRaportImport(control As IRibbonControl)
 ErrorHandler:
     Application.ScreenUpdating = True
     Application.StatusBar = False
-    MsgBox "Ошибка при вызове импорта: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при вызове импорта: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for "Mass Add Employees" button
@@ -179,7 +179,7 @@ Public Sub OnMassImportEmployeesClick(control As IRibbonControl)
     Call mdlUniversalPaymentExport.ImportEmployeesByNumbers
     Exit Sub
 ErrorHandler:
-    MsgBox "Ошибка при массовом добавлении сотрудников: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при массовом добавлении сотрудников: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for "Select Employee" button
@@ -217,7 +217,7 @@ Public Sub OnSelectEmployeeClick(control As IRibbonControl)
     End If
     Exit Sub
 ErrorHandler:
-    MsgBox "Ошибка при выборе сотрудника: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при выборе сотрудника: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for "References" button
@@ -238,7 +238,7 @@ Public Sub OnManageReferencesClick(control As IRibbonControl)
     Exit Sub
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при открытии справочников: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при открытии справочников: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 ' Handler for settings (Обновлено под новую систему лицензирования)
@@ -285,6 +285,17 @@ Public Sub OnRemoveDuplicateModulesClick(control As IRibbonControl)
     Exit Sub
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка при удалении дубликатов: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при удалении дубликатов: " & Err.description, vbCritical, "Ошибка"
+End Sub
+
+Public Sub RunValidateZP12(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    Application.ScreenUpdating = False
+    mdlZP12Validation.ValidateZP12Template
+    Application.ScreenUpdating = True
+    Exit Sub
+ErrorHandler:
+    Application.ScreenUpdating = True
+    MsgBox "Ошибка проверки ZP12: " & Err.description, vbCritical, "Проверка ZP12"
 End Sub
 

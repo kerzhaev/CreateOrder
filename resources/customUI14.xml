@@ -26,6 +26,7 @@
           <button id="excelReport" label="Выгрузка Алушта" onAction="OnPeriodsReportClick" imageMso="ExcelSpreadsheetInsert" size="large"/>
           <button id="importData" label="Обновить штат" onAction="RunImportData" imageMso="ImportExcel" size="large"/>
           <button id="importWordRaport" label="Импорт рапорта" onAction="RunWordRaportImport" imageMso="TextFromFileInsert" size="large" screentip="Импорт из Word" supertip="Извлекает периоды из рапорта"/>
+          <button id="validateZP12" label="Проверить ZP12" onAction="RunValidateZP12" imageMso="FileDocumentInspect" size="large" screentip="Проверка шаблона ZP12" supertip="Проверяет ZP12 по листу Штат, подсвечивает ошибки и ведет историю прогонов"/>
         </group>
 
         <group id="systemGroup" label="Проверка и Настройки">
