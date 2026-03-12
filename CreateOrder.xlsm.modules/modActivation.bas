@@ -8,7 +8,7 @@ Option Explicit
 
 ' --- ИНФОРМАЦИЯ О ПРОДУКТЕ (ДЛЯ ФОРМЫ FRMABOUT) ---
 Public Const PRODUCT_NAME As String = "Формирователь приказов"
-Public Const PRODUCT_VERSION As String = "2.4.0"
+Public Const PRODUCT_VERSION As String = "2.4.1"
 Public Const PRODUCT_AUTHOR As String = "Кержаев Евгений Алексеевич"
 Public Const PRODUCT_EMAIL As String = "nachfin@vk.com"
 Public Const PRODUCT_PHONE As String = "+7(989)906-88-91"

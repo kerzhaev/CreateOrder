@@ -127,7 +127,7 @@ from openpyxl import load_workbook
 
 path = Path(r'''$WorkbookFullPath''')
 wb = load_workbook(path)
-history_name = 'История_проверок_ZP12'
+history_name = 'История_проверок_Д89'
 if history_name not in wb.sheetnames:
     raise SystemExit('History sheet not found')
 
@@ -260,7 +260,7 @@ if (-not (Test-Path $moduleFullPath)) { throw "Не найден модуль: $
 if (-not (Test-Path $ribbonHandlersFullPath)) { throw "Не найден ribbon-модуль: $ribbonHandlersFullPath" }
 if (-not (Test-Path $sourceTemplateFullPath)) { throw "Не найден шаблон: $sourceTemplateFullPath" }
 
-Write-Host "=== ZP12 regression ===" -ForegroundColor Cyan
+Write-Host "=== D89 regression ===" -ForegroundColor Cyan
 Write-Host "Workbook: $workbookFullPath"
 Write-Host "Module:   $moduleFullPath"
 Write-Host "Ribbon:   $ribbonHandlersFullPath"

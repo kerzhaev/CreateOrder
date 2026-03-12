@@ -296,6 +296,6 @@ Public Sub RunValidateZP12(control As IRibbonControl)
     Exit Sub
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "Ошибка проверки ZP12: " & Err.description, vbCritical, "Проверка ZP12"
+    MsgBox "Ошибка проверки Д89: " & Err.description, vbCritical, "Проверка Д89"
 End Sub
 

@@ -1,7 +1,7 @@
 Attribute VB_Name = "mdlZP12Validation"
 Option Explicit
 
-Private Const HISTORY_SHEET_NAME As String = "История_проверок_ZP12"
+Private Const HISTORY_SHEET_NAME As String = "История_проверок_Д89"
 Private Const HISTORY_HEADER_ROW As Long = 1
 Private Const TEMPLATE_HEADER_ROW As Long = 1
 Private Const TEMPLATE_SUBHEADER_ROW As Long = 2
@@ -51,12 +51,12 @@ Public Sub ValidateZP12Template(Optional ByVal selectedFilePath As String = "", 
     Application.ScreenUpdating = False
     Application.EnableEvents = False
     Application.DisplayAlerts = False
-    Application.StatusBar = "Открытие шаблона ZP12..."
+    Application.StatusBar = "Открытие шаблона Д89..."
 
     Set templateWb = GetOrOpenWorkbook(CStr(selectedFile))
     Set templateWs = FindTemplateSheet(templateWb)
     If templateWs Is Nothing Then
-        MsgBox "Не удалось найти лист шаблона ZP12 с ожидаемой структурой.", vbExclamation, "Проверка ZP12"
+        MsgBox "Не удалось найти лист шаблона Д89 с ожидаемой структурой.", vbExclamation, "Проверка Д89"
         GoTo SafeExit
     End If
 
@@ -90,7 +90,7 @@ Public Sub ValidateZP12Template(Optional ByVal selectedFilePath As String = "", 
     Application.StatusBar = False
 
     If Not suppressSummary Then
-        MsgBox BuildSummaryMessage(checkedRows, counts, templateWb.Name, historyWs.Name), vbInformation, "Проверка ZP12"
+        MsgBox BuildSummaryMessage(checkedRows, counts, templateWb.Name, historyWs.Name), vbInformation, "Проверка Д89"
     End If
 
 SafeExit:
@@ -105,14 +105,14 @@ ErrorHandler:
     Application.EnableEvents = True
     Application.DisplayAlerts = True
     Application.StatusBar = False
-    MsgBox "Ошибка проверки ZP12: " & Err.description, vbCritical, "Проверка ZP12"
+    MsgBox "Ошибка проверки Д89: " & Err.description, vbCritical, "Проверка Д89"
 End Sub
 
 
 Private Function PickTemplateFile() As Variant
     PickTemplateFile = Application.GetOpenFilename( _
         FileFilter:="Excel Files (*.xlsx;*.xlsm;*.xls), *.xlsx;*.xlsm;*.xls", _
-        Title:="Выберите файл шаблона ZP12")
+        Title:="Выберите файл шаблона Д89")
 End Function
 
 Private Function GetOrOpenWorkbook(ByVal filePath As String) As Workbook
@@ -336,7 +336,7 @@ Private Sub ValidateTemplateRow(ByVal ws As Worksheet, ByVal rowNum As Long, ByV
     Set resolvedIdentity = ResolveTemplateEmployee(tableNumber, personalNumber, staffContext)
     If resolvedIdentity("HasError") Then
         AddIdentityErrors errors, rowNum, resolvedIdentity, rowIdentity, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
-        Exit Sub
+        If CLng(resolvedIdentity("ResolvedRow")) = 0 Then Exit Sub
     End If
 
     resolvedRow = CLng(resolvedIdentity("ResolvedRow"))
@@ -433,9 +433,17 @@ Private Function ResolveTemplateEmployee(ByVal tableNumber As String, ByVal pers
     If result("TableState") = "DUPLICATE" Or result("PersonalState") = "DUPLICATE" Then
         result("HasError") = True
         result("ErrorCode") = "STAFF_DUPLICATE"
-        result("ErrorMessage") = "В листе Штат обнаружены дублирующиеся идентификаторы сотрудника."
+        result("ErrorMessage") = "В листе Штат обнаружены дублирующиеся идентификаторы."
         Set ResolveTemplateEmployee = result
         Exit Function
+    End If
+
+    If tableRow > 0 Then
+        result("ResolvedRow") = tableRow
+        result("ResolvedKey") = BuildResolvedIdentityKey(context("Sheet"), tableRow, CLng(context("ColPersonal")))
+    ElseIf personalRow > 0 Then
+        result("ResolvedRow") = personalRow
+        result("ResolvedKey") = BuildResolvedIdentityKey(context("Sheet"), personalRow, CLng(context("ColPersonal")))
     End If
 
     If tableKey <> "" And tableRow = 0 Then
