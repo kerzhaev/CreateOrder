@@ -56,7 +56,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer(Optional RaportType As String =
         Exit Sub
     End If
     
-    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
+    If Not modActivation.CheckLicenseAndPrompt() Then Exit Sub
 
     On Error GoTo ErrorHandler
 
@@ -312,7 +312,7 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer(Optional RaportType As String =
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка на строке " & i & " (ФИО: " & currentFIO & "): " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка на строке " & i & " (ФИО: " & currentFIO & "): " & Err.description, vbCritical, "Ошибка"
     If Not wdDoc Is Nothing Then wdDoc.Close False
 CleanUp:
     Application.ScreenUpdating = True

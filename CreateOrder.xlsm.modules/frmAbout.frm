@@ -25,7 +25,7 @@ Private bIgnoreChange As Boolean
 
 
 Private Sub lblPhone_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
-    Call modActivation.AdminGenerateKeyUI
+    Call modActivation.AdminGeneratePersonalKeyUI
 End Sub
 
 Private Sub UserForm_Initialize()
@@ -43,10 +43,9 @@ Private Sub UserForm_Initialize()
     UpdateLicenseStatusUI
 End Sub
 
-' ПАСХАЛКА: Двойной клик по автору открывает панель администратора
+' ПАСХАЛКА: Двойной клик по автору открывает генератор корпоративного кода
 Private Sub lblAuthor_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
-    Call modActivation.AdminSetGlobalDate
-    UpdateLicenseStatusUI
+    Call modActivation.AdminGenerateCorporateKeyUI
 End Sub
 
 ' Кнопка активации
@@ -59,13 +58,12 @@ Private Sub btnActivate_Click()
         Exit Sub
     End If
     
-    ' Вызов функции проверки из модуля modActivation
-    If modActivation.ActivatePersonal(key) Then
-        MsgBox "Программа успешно активирована для данного ПК!", vbInformation
+    If modActivation.ActivateLicenseCode(key) Then
+        MsgBox "Код активации успешно применен.", vbInformation
         UpdateLicenseStatusUI
         txtActivationCode.Text = ""
     Else
-        MsgBox "Ключ не подходит. Проверьте правильность ввода или ID оборудования.", vbCritical
+        MsgBox "Код не подходит, не действует на этом ПК или срок его действия уже истек.", vbCritical
     End If
 End Sub
 
@@ -89,10 +87,10 @@ Private Sub UpdateLicenseStatusUI()
             btnActivate.Visible = False
             lblActivationHint.Visible = False
             
-        Case 3 ' ГЛОБАЛЬНАЯ ЛИЦЕНЗИЯ (Через пасхалку админа)
-            lblActivationStatus.Caption = "СТАТУС: КОРПОРАТИВНАЯ ВЕРСИЯ"
+        Case 3 ' КОРПОРАТИВНАЯ ЛИЦЕНЗИЯ (По коду без HWID)
+            lblActivationStatus.Caption = "СТАТУС: КОРПОРАТИВНАЯ ЛИЦЕНЗИЯ"
             lblActivationStatus.ForeColor = RGB(0, 150, 0) ' Зеленый
-            lblPremiumMessage.Caption = "Файл предварительно активирован администратором." & vbCrLf & _
+            lblPremiumMessage.Caption = "На этом ПК активирован корпоративный код доступа." & vbCrLf & _
                                         "Действует до: " & modActivation.GetLicenseExpiryDateStr()
             lblPremiumMessage.ForeColor = RGB(0, 100, 0)
             
@@ -106,7 +104,7 @@ Private Sub UpdateLicenseStatusUI()
             lblActivationStatus.ForeColor = RGB(200, 100, 0) ' Оранжевый
             lblPremiumMessage.Caption = "Ознакомительная версия активна до: " & modActivation.GetLicenseExpiryDateStr() & vbCrLf & _
                                         "ВАШ КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
-                                        "Если у вас уже есть персональный ключ активируйте его ниже, либо обратитесь для его получения по контактам, указанным выше:"
+                                        "Вы можете заранее активировать персональный или корпоративный код ниже."
             lblPremiumMessage.ForeColor = RGB(100, 50, 0)
             
             ' ПОКАЗЫВАЕМ ПОЛЯ для заблаговременной активации!
@@ -120,7 +118,7 @@ Private Sub UpdateLicenseStatusUI()
             lblActivationStatus.ForeColor = RGB(200, 0, 0) ' Красный
             lblPremiumMessage.Caption = "Защитная блокировка." & vbCrLf & _
                                         "КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
-                                        "Исправьте дату или введите ключ."
+                                        "Исправьте системную дату или примените новый код."
             lblPremiumMessage.ForeColor = RGB(200, 0, 0)
             
             txtActivationCode.Visible = True
@@ -131,9 +129,9 @@ Private Sub UpdateLicenseStatusUI()
         Case Else ' ИСТЕКЛО ИЛИ НЕТ ЛИЦЕНЗИИ (1)
             lblActivationStatus.Caption = "СТАТУС: ОГРАНИЧЕННАЯ ВЕРСИЯ"
             lblActivationStatus.ForeColor = RGB(200, 0, 0) ' Красный
-            lblPremiumMessage.Caption = "ОЗНАКОМИТЕЛЬНЫЙ период завершен." & vbCrLf & _
+            lblPremiumMessage.Caption = "Ознакомительный период или срок действия лицензии завершен." & vbCrLf & _
                                         "ВАШ КОД ОБОРУДОВАНИЯ: " & modActivation.GetHardwareID() & vbCrLf & _
-                                        "Для продолжения работы запросите по контактам указанным выше, персональный ключ."
+                                        "Для продолжения работы введите новый персональный или корпоративный код."
             lblPremiumMessage.ForeColor = RGB(50, 50, 50)
             
             txtActivationCode.Visible = True

@@ -24,7 +24,7 @@ Sub ExportToWordFromStaffByLichniyNomer()
     End If
     ' -------------------------------------
 
-    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
+    If Not modActivation.CheckLicenseAndPrompt() Then Exit Sub
 
     Dim wdApp As Object
     Dim wdDoc As Object
@@ -175,7 +175,7 @@ Sub ExportToWordFromStaffByLichniyNomer()
     Exit Sub
 
 ErrorHandler:
-    MsgBox "Ошибка экспорта: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка экспорта: " & Err.description, vbCritical, "Ошибка"
     If Not wdDoc Is Nothing Then wdDoc.Close False
 
 End Sub

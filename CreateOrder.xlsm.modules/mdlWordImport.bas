@@ -27,7 +27,7 @@ Public Sub ExecuteWordImport()
     Dim baseReasonVal As Variant
     Dim baseReason As String
     
-    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
+    If Not modActivation.CheckLicenseAndPrompt() Then Exit Sub
     
     ' 1. Выбор файла
     wordFilePath = SelectWordFile()
@@ -97,7 +97,7 @@ Public Sub ExecuteWordImport()
 ErrorHandler:
     Application.StatusBar = False
     Application.EnableEvents = True ' Возвращаем события при ошибке
-    MsgBox "Критическая ошибка в процессе импорта: " & Err.Description, vbCritical, "Ошибка импорта"
+    MsgBox "Критическая ошибка в процессе импорта: " & Err.description, vbCritical, "Ошибка импорта"
 End Sub
 
 ' =============================================
