@@ -78,7 +78,7 @@ SafeCleanup:
     isValidating = False
     
     If Err.number <> 0 Then
-        Debug.Print "Error in Worksheet_Change: " & Err.Description
+        Debug.Print "Error in Worksheet_Change: " & Err.description
         Err.Clear
     End If
 End Sub
