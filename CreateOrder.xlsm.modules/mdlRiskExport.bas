@@ -36,7 +36,7 @@ End Type
 '*/
 Public Sub ExportRiskAllowanceOrder()
 
-    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
+    If Not modActivation.CheckLicenseAndPrompt() Then Exit Sub
     
     On Error GoTo ErrorHandler
     
@@ -60,7 +60,7 @@ Public Sub ExportRiskAllowanceOrder()
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при формировании приказа за риск: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при формировании приказа за риск: " & Err.description, vbCritical, "Ошибка"
 End Sub
 
 '/**

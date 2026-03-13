@@ -15,7 +15,7 @@ Option Explicit
 ' =============================================
 Public Sub ImportEmployeesByNumbers()
 
-    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
+    If Not modActivation.CheckLicenseAndPrompt() Then Exit Sub
     
     On Error GoTo ErrorHandler
     
@@ -56,7 +56,7 @@ Public Sub ImportEmployeesByNumbers()
     GoTo CleanUp
     
 ErrorHandler:
-    MsgBox "Ошибка при массовом добавлении сотрудников: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при массовом добавлении сотрудников: " & Err.description, vbCritical, "Ошибка"
     
 CleanUp:
     Application.ScreenUpdating = True
@@ -141,7 +141,7 @@ NextCell:
     Exit Function
     
 ErrorHandler:
-    ProcessSelectedRangeForImport = "Ошибка при обработке диапазона: " & Err.Description
+    ProcessSelectedRangeForImport = "Ошибка при обработке диапазона: " & Err.description
 End Function
 
 ' =============================================
@@ -230,7 +230,7 @@ Public Sub ExportPaymentsWithoutPeriods()
     GoTo CleanUp
     
 ErrorHandler:
-    MsgBox "Ошибка при экспорте надбавок: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при экспорте надбавок: " & Err.description, vbCritical, "Ошибка"
     
 CleanUp:
     Application.ScreenUpdating = True
@@ -286,7 +286,7 @@ Public Function CollectPaymentsData() As Collection
         
         ' Skip empty rows
         If payment.lichniyNomer = "" Then
-            GoTo NextRow
+            GoTo nextRow
         End If
         
         ' Get serviceman data from "Staff" sheet
@@ -310,7 +310,7 @@ Public Function CollectPaymentsData() As Collection
         ' Convert UDT to Dictionary for storage in Collection
         result.Add PaymentToDictionary(payment)
         
-NextRow:
+nextRow:
     Next i
     
     Set CollectPaymentsData = result
@@ -547,7 +547,7 @@ ErrorHandler:
     If Not templateDoc Is Nothing Then templateDoc.Close False
     If Not doc Is Nothing Then doc.Close False
     If wordWasNotRunning And Not wordApp Is Nothing Then wordApp.Quit False
-    MsgBox "Ошибка при создании приказа: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании приказа: " & Err.description, vbCritical, "Ошибка"
 End Function
 
 ' =============================================

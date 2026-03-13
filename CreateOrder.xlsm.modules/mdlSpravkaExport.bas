@@ -17,7 +17,7 @@ Sub ExportToWordSpravkaFromTemplate()
         Exit Sub
     End If
     
-    If modActivation.GetLicenseStatus() = 1 Then Exit Sub
+    If Not modActivation.CheckLicenseAndPrompt() Then Exit Sub
 
     Dim wdApp As Object
     Dim wordWasNotRunning As Boolean
@@ -212,7 +212,7 @@ Sub ExportToWordSpravkaFromTemplate()
     GoTo CleanUp
 
 ErrorHandler:
-    MsgBox "Ошибка при создании справок: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "Ошибка при создании справок: " & Err.description, vbCritical, "Ошибка"
     If Not wdDoc Is Nothing Then
         wdDoc.Close False
         Set wdDoc = Nothing
