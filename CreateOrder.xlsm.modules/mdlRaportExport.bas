@@ -68,15 +68,12 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer(Optional RaportType As String =
         GoTo CleanUp
     End If
 
-    On Error Resume Next
-    Set wdApp = GetObject(, "Word.Application")
+    Set wdApp = CreateObject("Word.Application")
     If wdApp Is Nothing Then
-        Set wdApp = CreateObject("Word.Application")
-        wordWasNotRunning = True
-    Else
-        wordWasNotRunning = False
+        MsgBox "Не удалось создать отдельный экземпляр Word.", vbCritical, "Ошибка Word"
+        GoTo CleanUp
     End If
-    On Error GoTo 0
+    wordWasNotRunning = True
 
     wdApp.Visible = False ' Hide Word for batch processing
 
@@ -232,65 +229,16 @@ Sub ExportToWordRaportFromTemplateByLichniyNomer(Optional RaportType As String =
                     calculationText = "Нет актуальных периодов для расчета."
                 End If
 
-                ' Replace short placeholders Find+Replace as usual
-                With wdDoc.content.Find
-                    .ClearFormatting
-                    .Replacement.ClearFormatting
-                    .Text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
-                    .Replacement.Text = fio
-                    .Execute Replace:=2
-                    .Text = "[ЛИЧНЫЙ_НОМЕР]"
-                    .Replacement.Text = lichniyNomer
-                    .Execute Replace:=2
-                    .ClearFormatting
-                    .Replacement.ClearFormatting
-                    .Text = "[ЗВАНИЕ_СОКРАЩЕННО]"
-                    .Replacement.Text = mdlHelper.GetZvanieSkrasheno(zvanie)
-                    .Execute Replace:=2
-                
-                    .Text = "[ФИО_ИНИЦИАЛЫ]"
-                    .Replacement.Text = mdlHelper.GetFIOWithInitials(fio)
-                    .Execute Replace:=2
-                
-                    .Text = "[ДОЛЖНОСТЬ]"
-                    .Replacement.Text = mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast)
-                    .Execute Replace:=2
-                
-                    .Text = "[ПЕРИОД_УЧАСТИЯ]"
-                    .Replacement.Text = periodForRaport
-                    .Execute Replace:=2
-                
-                    .Text = "[РАСЧЕТ]"
-                    .Replacement.Text = calculationText
-                    .Execute Replace:=2
-                
-                    .Text = "[ЗВАНИЕ_ИМЕНИТЕЛЬНЫЙ]"
-                    .Replacement.Text = mdlHelper.GetZvanieImenitelnyForSignature(zvanie)
-                    .Execute Replace:=2
-                
-                    .Text = "[ФИО_ИНИЦИАЛЫ_ИМЕНИТЕЛЬНЫЙ]"
-                    .Replacement.Text = mdlHelper.GetFIOWithInitialsImenitelny(fio)
-                    .Execute Replace:=2
-                
-                    .Text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
-                    .Replacement.Text = fio
-                    .Execute Replace:=2
-                
-                    .Text = "[ЛИЧНЫЙ_НОМЕР]"
-                    .Replacement.Text = lichniyNomer
-                    .Execute Replace:=2
-                    
-                End With
-
-                ' Correct insertion of periodsText via Range.Text
-                Dim rng As Object
-                Set rng = wdDoc.content
-                With rng.Find
-                    .Text = "[ПЕРИОДЫ_СЛУЖБЫ]"
-                    If .Execute Then
-                        rng.Text = periodsText
-                    End If
-                End With
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ФИО_ИМЕНИТЕЛЬНЫЙ]", fio)
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ЛИЧНЫЙ_НОМЕР]", lichniyNomer)
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ЗВАНИЕ_СОКРАЩЕННО]", mdlHelper.GetZvanieSkrasheno(zvanie))
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ФИО_ИНИЦИАЛЫ]", mdlHelper.GetFIOWithInitials(fio))
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ДОЛЖНОСТЬ]", mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast))
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ПЕРИОД_УЧАСТИЯ]", periodForRaport)
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[РАСЧЕТ]", calculationText)
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ЗВАНИЕ_ИМЕНИТЕЛЬНЫЙ]", mdlHelper.GetZvanieImenitelnyForSignature(zvanie))
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ФИО_ИНИЦИАЛЫ_ИМЕНИТЕЛЬНЫЙ]", mdlHelper.GetFIOWithInitialsImenitelny(fio))
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ПЕРИОДЫ_СЛУЖБЫ]", periodsText)
 
                 ' Generate file name
                 Dim cleanFIO As String, periodForFileName As String
@@ -318,20 +266,11 @@ CleanUp:
     Application.ScreenUpdating = True
     Application.StatusBar = False
     On Error Resume Next
+    If Not wdDoc Is Nothing Then Set wdDoc = Nothing
     If Not wdApp Is Nothing Then
-        If wordWasNotRunning Then wdApp.Quit
+        wdApp.Quit
         Set wdApp = Nothing
     End If
-    
-    ' Force termination of extraneous Word processes via WMI
-    Dim wmi As Object, procs As Object, proc As Object
-    Set wmi = GetObject("winmgmts:")
-    Set procs = wmi.ExecQuery("SELECT * FROM Win32_Process WHERE Name='WINWORD.EXE'")
-    For Each proc In procs
-        On Error Resume Next
-        proc.Terminate
-        On Error GoTo 0
-    Next proc
 
     Set wdDoc = Nothing
     Set wsMain = Nothing

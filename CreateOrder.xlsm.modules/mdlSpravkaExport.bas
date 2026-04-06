@@ -51,21 +51,12 @@ Sub ExportToWordSpravkaFromTemplate()
         GoTo CleanUp
     End If
 
-    ' === CORRECTLY create Word instance ===
-    On Error Resume Next
-    Set wdApp = GetObject(, "Word.Application")
+    Set wdApp = CreateObject("Word.Application")
     If wdApp Is Nothing Then
-        Set wdApp = CreateObject("Word.Application")
-        wordWasNotRunning = True
-    Else
-        wordWasNotRunning = False
-    End If
-    On Error GoTo 0
-
-    If wdApp Is Nothing Then
-        MsgBox "Не удалось создать экземпляр Word. Операция невозможна.", vbCritical
+        MsgBox "Не удалось создать отдельный экземпляр Word. Операция невозможна.", vbCritical
         GoTo CleanUp
     End If
+    wordWasNotRunning = True
 
     wdApp.Visible = False
 
@@ -153,43 +144,11 @@ Sub ExportToWordSpravkaFromTemplate()
                     periodsText = "Нет актуальных периодов службы в зоне СВО." & vbCrLf
                 End If
 
-                With wdDoc.content.Find
-                    .ClearFormatting
-                    .Replacement.ClearFormatting
-
-                    .Text = "[ЗВАНИЕ]"
-                    .Replacement.Text = mdlHelper.GetZvanieImenitelny(zvanie)
-                    .Execute Replace:=2
-
-                    .Text = "[ФИО]"
-                    .Replacement.Text = fio
-                    .Execute Replace:=2
-
-                    .Text = "[ЛИЧНЫЙ_НОМЕР]"
-                    .Replacement.Text = lichniyNomer
-                    .Execute Replace:=2
-
-                    .Text = "[ДОЛЖНОСТЬ]"
-                    .Replacement.Text = mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast)
-                    .Execute Replace:=2
-                End With
-
-                ' === Inserting periodsText via Range.InsertAfter in chunks of 230 characters ===
-                Dim rng As Object
-                Set rng = wdDoc.content
-                With rng.Find
-                    .Text = "[ПЕРИОДЫ]"
-                    If .Execute Then
-                        rng.Select
-                        rng.Text = "" ' Clear placeholder
-                        Dim partLen As Integer, startPos As Integer, periodChunk As String
-                        partLen = 230
-                        For startPos = 1 To Len(periodsText) Step partLen
-                            periodChunk = Mid(periodsText, startPos, partLen)
-                            rng.InsertAfter periodChunk
-                        Next startPos
-                    End If
-                End With
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ЗВАНИЕ]", mdlHelper.GetZvanieImenitelny(zvanie))
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ФИО]", fio)
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ЛИЧНЫЙ_НОМЕР]", lichniyNomer)
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ДОЛЖНОСТЬ]", mdlHelper.GetDolzhnostImenitelny(dolzhnost, VoinskayaChast))
+                Call mdlWordTemplateSafe.ReplacePlaceholderText(wdDoc, "[ПЕРИОДЫ]", periodsText)
 
                 Dim cleanFIO As String, periodForFileName As String
                 cleanFIO = Replace(Replace(Replace(fio, " ", "_"), ".", ""), ",", "")
@@ -221,29 +180,11 @@ ErrorHandler:
 CleanUp:
     Application.ScreenUpdating = True
     Application.StatusBar = False
-    ' Additionally: Forced reset of hanging Word instances
     On Error Resume Next
     If Not wdApp Is Nothing Then
-        If wordWasNotRunning Then
-            wdApp.Quit
-        Else
-            ' Ensure no open documents
-            If wdApp.Documents.count = 0 Then
-                wdApp.Quit
-            End If
-        End If
+        wdApp.Quit
         Set wdApp = Nothing
     End If
-
-    ' Forced termination of extraneous Word processes via WMI
-    Dim wmi As Object, procs As Object, proc As Object
-    Set wmi = GetObject("winmgmts:")
-    Set procs = wmi.ExecQuery("SELECT * FROM Win32_Process WHERE Name='WINWORD.EXE'")
-    For Each proc In procs
-        On Error Resume Next
-        proc.Terminate
-        On Error GoTo 0
-    Next proc
 
     Set wsMain = Nothing
     Set wsStaff = Nothing

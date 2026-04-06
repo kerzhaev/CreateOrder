@@ -399,15 +399,11 @@ Public Function GeneratePaymentOrder(ByVal paymentType As String, ByVal payments
     ' Get template path with priority
     templatePath = mdlPaymentTypes.GetTemplatePathWithFallback(config)
     
-    ' Create Word application
-    On Error Resume Next
-    Set wordApp = GetObject(, "Word.Application")
+    Set wordApp = CreateObject("Word.Application")
     If wordApp Is Nothing Then
-        Set wordApp = CreateObject("Word.Application")
-        wordWasNotRunning = True
-    Else
-        wordWasNotRunning = False
+        Err.Raise vbObjectError + 713, "GeneratePaymentOrder", "Не удалось создать отдельный экземпляр Word."
     End If
+    wordWasNotRunning = True
     On Error GoTo ErrorHandler
     
     wordApp.Visible = True
@@ -560,58 +556,15 @@ End Function
 Public Function FillPaymentTemplate(ByVal doc As Object, ByRef payment As PaymentWithoutPeriod) As Boolean
     On Error GoTo ErrorHandler
     
-    Dim rng As Object
-    
-    ' Replace placeholders in template
-    With doc.content.Find
-        .ClearFormatting
-        .Replacement.ClearFormatting
-        
-        ' [ФИО]
-        .Text = "[ФИО]"
-        .Replacement.Text = payment.fio
-        .Execute Replace:=2
-        
-        ' [ФИО_ИМЕНИТЕЛЬНЫЙ]
-        .Text = "[ФИО_ИМЕНИТЕЛЬНЫЙ]"
-        .Replacement.Text = mdlHelper.SklonitFIO(payment.fio)
-        .Execute Replace:=2
-        
-        ' [ЗВАНИЕ]
-        .Text = "[ЗВАНИЕ]"
-        .Replacement.Text = payment.Rank
-        .Execute Replace:=2
-        
-        ' [ЗВАНИЕ_СКЛОНЕННОЕ]
-        .Text = "[ЗВАНИЕ_СКЛОНЕННОЕ]"
-        .Replacement.Text = mdlHelper.SklonitZvanie(payment.Rank)
-        .Execute Replace:=2
-        
-        ' [ЛИЧНЫЙ_НОМЕР]
-        .Text = "[ЛИЧНЫЙ_НОМЕР]"
-        .Replacement.Text = payment.lichniyNomer
-        .Execute Replace:=2
-        
-        ' [ДОЛЖНОСТЬ]
-        .Text = "[ДОЛЖНОСТЬ]"
-        .Replacement.Text = payment.Position
-        .Execute Replace:=2
-        
-        ' [ДОЛЖНОСТЬ_СКЛОНЕННАЯ]
-        .Text = "[ДОЛЖНОСТЬ_СКЛОНЕННАЯ]"
-        .Replacement.Text = mdlHelper.SklonitDolzhnost(payment.Position, payment.VoinskayaChast)
-        .Execute Replace:=2
-        
-        ' [РАЗМЕР]
-        .Text = "[РАЗМЕР]"
-        .Replacement.Text = payment.amount
-        .Execute Replace:=2
-        
-        ' [ОСНОВАНИЕ]
-        .Text = "[ОСНОВАНИЕ]"
-        .Replacement.Text = payment.foundation
-        .Execute Replace:=2
-    End With
+    Call mdlWordTemplateSafe.ReplacePlaceholderText(doc, "[ФИО]", payment.fio)
+    Call mdlWordTemplateSafe.ReplacePlaceholderText(doc, "[ФИО_ИМЕНИТЕЛЬНЫЙ]", mdlHelper.SklonitFIO(payment.fio))
+    Call mdlWordTemplateSafe.ReplacePlaceholderText(doc, "[ЗВАНИЕ]", payment.Rank)
+    Call mdlWordTemplateSafe.ReplacePlaceholderText(doc, "[ЗВАНИЕ_СКЛОНЕННОЕ]", mdlHelper.SklonitZvanie(payment.Rank))
+    Call mdlWordTemplateSafe.ReplacePlaceholderText(doc, "[ЛИЧНЫЙ_НОМЕР]", payment.lichniyNomer)
+    Call mdlWordTemplateSafe.ReplacePlaceholderText(doc, "[ДОЛЖНОСТЬ]", payment.Position)
+    Call mdlWordTemplateSafe.ReplacePlaceholderText(doc, "[ДОЛЖНОСТЬ_СКЛОНЕННАЯ]", mdlHelper.SklonitDolzhnost(payment.Position, payment.VoinskayaChast))
+    Call mdlWordTemplateSafe.ReplacePlaceholderText(doc, "[РАЗМЕР]", payment.amount)
+    Call mdlWordTemplateSafe.ReplacePlaceholderText(doc, "[ОСНОВАНИЕ]", payment.foundation)
     
     FillPaymentTemplate = True
     Exit Function
