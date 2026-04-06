@@ -1,31 +1,31 @@
 <#
 .SYNOPSIS
-    Сборщик релизной версии проекта CreateOrder.
+    пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ CreateOrder.
 .DESCRIPTION
-    Применяет двойную бинарную защиту: Unviewable Project (DPx) и Ghost Module (скрытие ключевых модулей).
-    Генерирует готовый файл с меткой даты и времени (например, CreateOrder_Release_20260225_153000.xlsm).
+    РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµС‚ Р·Р°С‰РёС‰С‘РЅРЅСѓСЋ СЂРµР»РёР·РЅСѓСЋ СЃР±РѕСЂРєСѓ: С€С‚Р°С‚РЅС‹Р№ РїР°СЂРѕР»СЊ РЅР° VBA-РїСЂРѕРµРєС‚ Рё Ghost Module (СЃРєСЂС‹С‚РёРµ РІР°Р¶РЅС‹С… РјРѕРґСѓР»РµР№).
+    пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, CreateOrder_Release_20260225_153000.xlsm).
 #>
 
 param(
     [string]$SourceFile = "CreateOrder.xlsm"
 )
 
-# Переключаем кодировку консоли на UTF-8 для корректного вывода русских букв
+# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ UTF-8 пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# Генерируем динамическое имя выходного файла с датой и временем
+# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $OutputFile = "CreateOrder_Release_$timestamp.xlsm"
 
-Write-Host "=== Запуск сборки защищенного релиза ===" -ForegroundColor Cyan
+Write-Host "=== пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ ===" -ForegroundColor Cyan
 
-# Проверка наличия исходного файла
+# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 if (-not (Test-Path $SourceFile)) {
-    Write-Host "[X] Ошибка: Исходный файл $SourceFile не найден!" -ForegroundColor Red
+    Write-Host "[X] пїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ $SourceFile пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ!" -ForegroundColor Red
     exit
 }
 
-# 1. Подготовка временных директорий
+# 1. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 $tempDir = Join-Path $env:TEMP "CreateOrderBuild_$timestamp"
 $tempZip = Join-Path $tempDir "temp_archive.zip"
 $extractDir = Join-Path $tempDir "extracted"
@@ -33,78 +33,104 @@ $extractDir = Join-Path $tempDir "extracted"
 New-Item -ItemType Directory -Path $extractDir -Force | Out-Null
 Copy-Item -Path $SourceFile -Destination $tempZip -Force
 
-Write-Host "[1/4] Распаковка архива xlsm..." -ForegroundColor Yellow
+Write-Host "[1/4] пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ xlsm..." -ForegroundColor Yellow
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory($tempZip, $extractDir)
 
-# 2. Поиск vbaProject.bin
+# 2. пїЅпїЅпїЅпїЅпїЅ vbaProject.bin
 $vbaBinPath = Join-Path $extractDir "xl\vbaProject.bin"
 if (-not (Test-Path $vbaBinPath)) {
-    Write-Host "[X] Ошибка: Файл vbaProject.bin не найден в архиве!" -ForegroundColor Red
+    Write-Host "[X] пїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅ vbaProject.bin пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ!" -ForegroundColor Red
     Remove-Item $tempDir -Recurse -Force
     exit
 }
 
-# 3. Бинарный патчинг (Raw Byte Patching)
-Write-Host "[2/4] Применение бинарной защиты..." -ForegroundColor Yellow
+# 3. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (Binary Byte Patching)
+Write-Host "[2/4] пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ..." -ForegroundColor Yellow
 
-# Читаем как текст в кодировке Default (ANSI/Windows-1251), чтобы сохранить 1-байтовые символы
 $bytes = [System.IO.File]::ReadAllBytes($vbaBinPath)
-$encoding = [System.Text.Encoding]::GetEncoding(1252) 
-$text = $encoding.GetString($bytes)
+$ascii = [System.Text.Encoding]::ASCII
 
-# --- Слой 1: Unviewable Project (DPB -> DPx) ---
-if ($text -match "DPB=") {
-    $text = $text -replace "DPB=", "DPx="
-    Write-Host "  -> [Unviewable]: Успешно (DPB -> DPx)" -ForegroundColor Green
-} else {
-    Write-Host "  -> [Unviewable]: Сигнатура DPB= не найдена (возможно, уже защищен)" -ForegroundColor DarkYellow
+function Replace-ByteSequence {
+    param(
+        [byte[]]$Buffer,
+        [byte[]]$Search,
+        [byte[]]$Replace
+    )
+
+    if ($Search.Length -ne $Replace.Length) {
+        throw "Search and replace sequences must have the same length."
+    }
+
+    $matches = 0
+    for ($i = 0; $i -le $Buffer.Length - $Search.Length; $i++) {
+        $found = $true
+        for ($j = 0; $j -lt $Search.Length; $j++) {
+            if ($Buffer[$i + $j] -ne $Search[$j]) {
+                $found = $false
+                break
+            }
+        }
+
+        if ($found) {
+            for ($j = 0; $j -lt $Replace.Length; $j++) {
+                $Buffer[$i + $j] = $Replace[$j]
+            }
+            $matches++
+        }
+    }
+
+    return $matches
 }
 
-# --- Слой 2: Ghost Modules (Скрытие из дерева) ---
-# ПОЛНЫЙ СПИСОК МОДУЛЕЙ ДЛЯ СКРЫТИЯ (Защита от запуска через Alt+F8)
+# --- РЎР»РѕР№ 1: С€С‚Р°С‚РЅС‹Р№ РїР°СЂРѕР»СЊ РЅР° VBA-РїСЂРѕРµРєС‚, Р±РµР· DPx-С…Р°РєРѕРІ ---
+
+# --- пїЅпїЅпїЅпїЅ 2: Ghost Modules (пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ) ---
+# пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ Alt+F8)
 $modulesToHide = @(
-    "modActivation",             # Логика лицензии
-    "mdlRibbonHandlers",         # Вызовы проверок с ленты
-    "mdlMainExport",             # Основной приказ
-    "mdlRaportExport",           # Рапорты
-    "mdlSpravkaExport",          # Справки ДСО
-    "mdlRiskExport",             # Приказ за риск
-    "mdlUniversalPaymentExport", # Надбавки
-    "mdlFRPExport",              # Отчеты Алушта
-    "mdlWordImport",             # Импорт рапортов
-    "MdlBackup",                 # Бэкапер
+    "modActivation",             # пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    "mdlRibbonHandlers",         # пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
+    "mdlMainExport",             # пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    "mdlRaportExport",           # пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    "mdlSpravkaExport",          # пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
+    "mdlRiskExport",             # пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
+    "mdlUniversalPaymentExport", # пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    "mdlFRPExport",              # пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    "mdlWordImport",             # пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    "MdlBackup",                 # пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	"frmAbout"
 )
 
+$ghostedCount = 0
 foreach ($modName in $modulesToHide) {
     $searchStr = "Module=$modName"
-    
-    if ($text.Contains($searchStr)) {
-        # Создаем строку из пробелов той же длины
-        $spaces = " " * $searchStr.Length
-        $text = $text.Replace($searchStr, $spaces)
-        Write-Host "  -> [Ghosting]: Модуль '$modName' скрыт." -ForegroundColor Green
+    $searchBytes = $ascii.GetBytes($searchStr)
+    $replaceBytes = $ascii.GetBytes((" " * $searchStr.Length))
+    $patchedCount = Replace-ByteSequence -Buffer $bytes -Search $searchBytes -Replace $replaceBytes
+
+    if ($patchedCount -gt 0) {
+        $ghostedCount += $patchedCount
+        Write-Host "  -> [Ghosting]: пїЅпїЅпїЅпїЅпїЅпїЅ '$modName' пїЅпїЅпїЅпїЅпїЅ. matches=$patchedCount" -ForegroundColor Green
     } else {
-        Write-Host "  -> [Ghosting]: Модуль '$modName' не найден в потоке PROJECT." -ForegroundColor DarkYellow
+        Write-Host "  -> [Ghosting]: пїЅпїЅпїЅпїЅпїЅпїЅ '$modName' пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ PROJECT." -ForegroundColor DarkYellow
     }
 }
 
-# Сохраняем патч обратно в байты
-$newBytes = $encoding.GetBytes($text)
-[System.IO.File]::WriteAllBytes($vbaBinPath, $newBytes)
+# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
+[System.IO.File]::WriteAllBytes($vbaBinPath, $bytes)
+Write-Host "  -> [Patch]: ghosted modules=$ghostedCount" -ForegroundColor Green
 
-# 4. Обратная запаковка
-Write-Host "[3/4] Запаковка релизного архива..." -ForegroundColor Yellow
+# 4. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+Write-Host "[3/4] пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ..." -ForegroundColor Yellow
 Remove-Item $tempZip -Force
 [System.IO.Compression.ZipFile]::CreateFromDirectory($extractDir, $tempZip)
 
-# 5. Перенос результата
-Write-Host "[4/4] Финализация..." -ForegroundColor Yellow
+# 5. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+Write-Host "[4/4] пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ..." -ForegroundColor Yellow
 Copy-Item -Path $tempZip -Destination $OutputFile -Force
 
-# Очистка мусора
+# пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 Remove-Item $tempDir -Recurse -Force
 
-Write-Host "=== ГОТОВО! ===" -ForegroundColor Cyan
-Write-Host "Защищенный файл создан: $OutputFile" -ForegroundColor Green
+Write-Host "=== пїЅпїЅпїЅпїЅпїЅпїЅ! ===" -ForegroundColor Cyan
+Write-Host "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ: $OutputFile" -ForegroundColor Green
