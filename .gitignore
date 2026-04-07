@@ -3,6 +3,7 @@
 *.tmp
 *.xlsx
 *.docx
+CreateOrder_Release_*.xlsm
 
 # Системные файлы
 thumbs.db
@@ -17,3 +18,5 @@ desktop.ini
 # Если ты не хочешь хранить архив в гите (так как файлы большие), можно раскомментировать строку ниже:
 _Archive/
 antigravity_glm_mcp/
+CreateOrderReleases/
+CreateOrderBackups/

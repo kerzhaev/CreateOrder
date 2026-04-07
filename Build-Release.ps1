@@ -15,9 +15,13 @@ param(
 
 # ���������� ������������ ��� ��������� ����� � ����� � ��������
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$OutputFile = "CreateOrder_Release_$timestamp.xlsm"
+$releaseDir = Join-Path (Get-Location) "CreateOrderReleases"
+$OutputFile = Join-Path $releaseDir "CreateOrder_Release_$timestamp.xlsm"
 
 Write-Host "=== ������ ������ ����������� ������ ===" -ForegroundColor Cyan
+
+# ������� ���������� ����� ��� �������� �������� �������
+New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
 
 # �������� ������� ��������� �����
 if (-not (Test-Path $SourceFile)) {
