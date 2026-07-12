@@ -29,3 +29,4 @@ _tmp*/
 
 # Воспроизводимый локальный кэш Graphify; итоговый граф и отчёт хранятся в Git
 graphify-out/cache/
+graphify-out/20*/

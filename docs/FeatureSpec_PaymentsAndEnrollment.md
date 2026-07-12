@@ -1,5 +1,7 @@
 # Feature Specification: Payments Without Periods and Enrollment Workflow
 
+> Детализированные и подтверждённые бизнес-правила будущего движка надбавок, включая ручную карточку сотрудника и шкалу ФИЗО, ведутся в `.spec/tasks/enrollment-allowance-rules/spec.md`.
+
 ## Status
 
 Accepted as the next implementation goal for `CreateOrder`.

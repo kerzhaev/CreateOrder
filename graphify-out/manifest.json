@@ -40,28 +40,28 @@
     "semantic_hash": ""
   },
   "Test-FIODeclension.ps1": {
-    "mtime": 1783698035.8983452,
-    "ast_hash": "6fe3af84b867e26229bed370b5793bbb",
+    "mtime": 1783890820.8257372,
+    "ast_hash": "2078eb0b9388ea3fc0513b1eea7a3243",
     "semantic_hash": ""
   },
   "Test-PaymentsEnrollmentAcceptance.ps1": {
-    "mtime": 1783889849.1858852,
-    "ast_hash": "934829b250e5e46b67e4afd1d2eb2462",
+    "mtime": 1783890820.8257372,
+    "ast_hash": "05c201cc033a483ac6c0eb6d932883b5",
     "semantic_hash": ""
   },
   "Test-ZP12Validation.ps1": {
-    "mtime": 1782795231.6119087,
-    "ast_hash": "e6c1e646fde71b269acab481d2e827af",
+    "mtime": 1783890820.830293,
+    "ast_hash": "0048ba16d0dd190be9f4eb45204ed2ca",
     "semantic_hash": ""
   },
   "tools/ensure_localization_sheet.py": {
-    "mtime": 1781297589.4260135,
-    "ast_hash": "17e0cea4deddbdefc5083918a7966a50",
+    "mtime": 1783890820.8394163,
+    "ast_hash": "6a73faea4ccfe63b7a9aa5c9aa8f443a",
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1782151885.7902718,
-    "ast_hash": "54376ba76a737078032f0ff975476982",
+    "mtime": 1783890820.7952178,
+    "ast_hash": "1af7de799158aa3d93d56d8dec271c74",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -115,13 +115,13 @@
     "semantic_hash": ""
   },
   ".spec/tasks/feature-licensing-v2/plan.md": {
-    "mtime": 1781296002.9921436,
-    "ast_hash": "828dea7985e86b8abbf95c8e69a9b17f",
+    "mtime": 1783890820.7952178,
+    "ast_hash": "069f7a0d5278a5852ed6737b917987b0",
     "semantic_hash": ""
   },
   ".spec/tasks/feature-licensing-v2/spec.md": {
-    "mtime": 1781295369.8962865,
-    "ast_hash": "d59460d05b322607780e99c1765e69b3",
+    "mtime": 1783890820.7952178,
+    "ast_hash": "29775eef77d59f9fa80fb0931fb20035",
     "semantic_hash": ""
   },
   ".spec/tasks/import-word-raport/tasks.md": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/release-protection.md": {
-    "mtime": 1781294283.3136873,
-    "ast_hash": "1caf733f3cdfef913715c7f3c807b6c6",
+    "mtime": 1783890820.7952178,
+    "ast_hash": "d6950d5983af55a1fe73014ea28d3d34",
     "semantic_hash": ""
   },
   ".spec/tasks/self-healing/plan.md": {
@@ -185,18 +185,28 @@
     "semantic_hash": ""
   },
   "docs/FeatureSpec_PaymentsAndEnrollment.md": {
-    "mtime": 1782967843.7137008,
-    "ast_hash": "9f5464090bec7166c5af2170be19abcb",
+    "mtime": 1783892642.129615,
+    "ast_hash": "14345a05fc0494562973f08e423bcff7",
     "semantic_hash": ""
   },
   "docs/TechnicalNotes.md": {
-    "mtime": 1783282136.108822,
-    "ast_hash": "728d25bf503c79afba3fa91832575966",
+    "mtime": 1783890820.830293,
+    "ast_hash": "e3580f819009eaa7ee0830c95ca751d5",
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1781297820.1780288,
-    "ast_hash": "f56f964b7ea2f2f8a31bcca2a464f198",
+    "mtime": 1783890820.830293,
+    "ast_hash": "98833701d8afc6c90634b95780f39e5d",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/enrollment-allowance-rules/plan.md": {
+    "mtime": 1783894267.7194772,
+    "ast_hash": "9d91b3900acc2e74101f41bc82093145",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/enrollment-allowance-rules/spec.md": {
+    "mtime": 1783894158.9275658,
+    "ast_hash": "6de57e5ec3ac527f8b38642df9f34048",
     "semantic_hash": ""
   }
 }
