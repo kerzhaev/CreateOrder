@@ -49,7 +49,7 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     If isValidating Then Exit Sub
     
     ' Фильтрация: если меняется слишком много ячеек (например, удаление строки), выходим
-    If Target.count > 50 Then Exit Sub
+    If Target.CountLarge > 50 Then Exit Sub
     
     ' Реагируем только на изменения в зоне периодов (столбец E и правее, строка 2+)
     If Target.Column < 5 Or Target.Row < 2 Then Exit Sub

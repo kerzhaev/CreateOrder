@@ -1,41 +1,71 @@
 <customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
   <ribbon>
     <tabs>
-      <tab id="customTab" label="СВО Макросы">
-        
-        <group id="docsGroup" label="Приказы и Рапорты">
-          <button id="mainExport" label="Приказ (Основной)" onAction="RunMainExport" imageMso="FileNew" size="large"/>
-          <button id="spravkaExport" label="Справка ДСО" onAction="RunSpravkaExport" imageMso="FileProperties" size="large"/>
-          <button id="raportExport" label="Рапорт" onAction="RunRaportExport" imageMso="FileSaveAs" size="large"/>
-        </group>
-        
-        <group id="financeGroup" label="Надбавки">
-          <button id="riskOrder" label="Приказ за Риск" onAction="OnRiskOrderClick" imageMso="AccountingFormat" size="large"/>
-          
-          <menu id="allowancesMenu" label="Доп. Надбавки" imageMso="TableDesign" size="large">
-              <button id="mnuExportAllowances" label="Экспорт приказов" onAction="OnExportAllowancesClick" imageMso="FileSaveAs"/>
-              <menuSeparator id="sep1" />
-              <button id="mnuMassImport" label="Массовое добавление" onAction="OnMassImportEmployeesClick" imageMso="GroupSmartArtAdd"/>
-              <button id="mnuSelectEmp" label="Найти сотрудника" onAction="OnSelectEmployeeClick" imageMso="FindDialog"/>
-              <menuSeparator id="sep2" />
-              <button id="mnuReferences" label="Справочники" onAction="OnManageReferencesClick" imageMso="AccessTableContacts"/>
-          </menu>
-        </group>
-        
-        <group id="dataGroup" label="Импорт и Отчеты">
-          <button id="excelReport" label="Выгрузка Алушта" onAction="OnPeriodsReportClick" imageMso="ExcelSpreadsheetInsert" size="large"/>
-          <button id="importData" label="Обновить штат" onAction="RunImportData" imageMso="ImportExcel" size="large"/>
-          <button id="importWordRaport" label="Импорт рапорта" onAction="RunWordRaportImport" imageMso="TextFromFileInsert" size="large" screentip="Импорт из Word" supertip="Извлекает периоды из рапорта"/>
-          <button id="validateZP12" label="Проверить Д89" onAction="RunValidateZP12" imageMso="FileDocumentInspect" size="large" screentip="Проверка шаблона Д89" supertip="Проверяет Д89 по листу Штат, подсвечивает ошибки и ведет историю прогонов"/>
+      <tab id="customTab" getLabel="GetRibbonLabel">
+        <group id="docsGroup" getLabel="GetRibbonLabel">
+          <button id="mainExport" getLabel="GetRibbonLabel" onAction="RunMainExport" imageMso="FileNew" size="large"/>
+          <button id="spravkaExport" getLabel="GetRibbonLabel" onAction="RunSpravkaExport" imageMso="FileProperties" size="large"/>
+          <button id="raportExport" getLabel="GetRibbonLabel" onAction="RunRaportExport" imageMso="FileSaveAs" size="large"/>
         </group>
 
-        <group id="systemGroup" label="Проверка и Настройки">
-          <button id="smartValidate" label="Проверить лист" onAction="RunSmartValidation" imageMso="Spelling" size="large" screentip="Умная проверка" supertip="Автоматически проверяет текущий открытый лист на ошибки"/>
-          
-          <button id="showSettings" label="Настройки" onAction="ShowSettings" imageMso="ControlsGallery" size="normal"/>
-          <button id="showAbout" label="О программе" onAction="RunShowAbout" imageMso="Info" size="normal"/>
+        <group id="financeGroup" getLabel="GetRibbonLabel">
+          <button id="riskOrder" getLabel="GetRibbonLabel" onAction="OnRiskOrderClick" imageMso="AccountingFormat" size="large"/>
+          <menu id="allowancesMenu" getLabel="GetRibbonLabel" imageMso="TableDesign" size="large">
+            <button id="mnuExportAllowances" getLabel="GetRibbonLabel" onAction="OnExportAllowancesClick" imageMso="FileSaveAs"/>
+            <menuSeparator id="sep1"/>
+            <button id="mnuMassImport" getLabel="GetRibbonLabel" onAction="OnMassImportEmployeesClick" imageMso="GroupSmartArtAdd"/>
+            <button id="mnuSelectEmp" getLabel="GetRibbonLabel" onAction="OnSelectEmployeeClick" imageMso="FindDialog"/>
+            <menuSeparator id="sep2"/>
+            <button id="mnuReferences" getLabel="GetRibbonLabel" onAction="OnManageReferencesClick" imageMso="AccessTableContacts"/>
+          </menu>
         </group>
-        
+
+        <group id="paymentsGroup" getLabel="GetRibbonLabel">
+          <button id="openPaymentsSheet" getLabel="GetRibbonLabel" onAction="OnOpenPaymentsSheetClick" imageMso="WorksheetMove" size="large"/>
+          <button id="paymentsSelectEmployee" getLabel="GetRibbonLabel" onAction="OnPaymentsSelectEmployeeClick" imageMso="FindDialog" size="large"/>
+          <button id="paymentsPasteNumbers" getLabel="GetRibbonLabel" onAction="OnPaymentsPasteNumbersClick" imageMso="PasteAsText" size="large"/>
+          <button id="paymentsCreatePackage" getLabel="GetRibbonLabel" onAction="OnPaymentsCreatePackageClick" imageMso="CreateListFromSelection" size="large"/>
+          <menu id="paymentsToolsMenu" getLabel="GetRibbonLabel" imageMso="TablePropertiesDialog">
+            <button id="paymentsFillShared" getLabel="GetRibbonLabel" onAction="OnPaymentsFillSharedClick" imageMso="TableInsertRowsAbove"/>
+            <button id="paymentsRecalc" getLabel="GetRibbonLabel" onAction="OnPaymentsRecalcClick" imageMso="CalculateSheet"/>
+            <button id="paymentsPreview" getLabel="GetRibbonLabel" onAction="OnPaymentsPreviewClick" imageMso="PrintPreviewAndPrint"/>
+            <button id="paymentsExportDocx" getLabel="GetRibbonLabel" onAction="OnPaymentsExportDocxClick" imageMso="FileSaveAsWordDocx"/>
+            <button id="paymentsOpenFolder" getLabel="GetRibbonLabel" onAction="OnOpenWorkbookFolderClick" imageMso="FileOpen"/>
+          </menu>
+        </group>
+
+        <group id="enrollmentGroup" getLabel="GetRibbonLabel">
+          <button id="openEnrollmentForm" getLabel="GetRibbonLabel" onAction="OnOpenEnrollmentFormClick" imageMso="ContactInsertFromOutlook" size="large"/>
+          <button id="enrollmentRefreshForm" getLabel="GetRibbonLabel" onAction="OnEnrollmentRefreshFormClick" imageMso="SpellingAndGrammar" size="large"/>
+          <button id="enrollmentSaveForm" getLabel="GetRibbonLabel" onAction="OnEnrollmentSaveFormClick" imageMso="FileSave" size="large"/>
+          <button id="enrollmentSaveAndGeneratePayments" getLabel="GetRibbonLabel" onAction="OnEnrollmentSaveAndGeneratePaymentsClick" imageMso="DataFormAddRecord" size="large"/>
+          <button id="enrollmentSaveAndContinuePackage" getLabel="GetRibbonLabel" onAction="OnEnrollmentSaveAndContinuePackageClick" imageMso="ContactInsert" size="large"/>
+          <button id="enrollmentSaveAndPrepare" getLabel="GetRibbonLabel" onAction="OnEnrollmentSaveAndPrepareClick" imageMso="FileSaveAsWordDocx" size="large"/>
+          <menu id="enrollmentJournalMenu" getLabel="GetRibbonLabel" imageMso="ReviewShowMarkupBalloonMenu">
+            <button id="openEnrollmentSheet" getLabel="GetRibbonLabel" onAction="OnOpenEnrollmentSheetClick" imageMso="WorksheetMove"/>
+            <button id="openSelectedEnrollmentRow" getLabel="GetRibbonLabel" onAction="OnEnrollmentOpenSelectedClick" imageMso="ContactInsertFromOutlook"/>
+            <button id="continueEnrollmentPackage" getLabel="GetRibbonLabel" onAction="OnEnrollmentContinuePackageClick" imageMso="ContactInsert"/>
+            <button id="exportSelectedEnrollmentPackage" getLabel="GetRibbonLabel" onAction="OnEnrollmentExportSelectedClick" imageMso="FileSaveAsWordDocx"/>
+            <button id="exportEnrollmentPackageById" getLabel="GetRibbonLabel" onAction="OnEnrollmentExportByDraftIdClick" imageMso="FileSaveAsWordDocx"/>
+            <button id="enrollmentRefresh" getLabel="GetRibbonLabel" onAction="OnEnrollmentRefreshClick" imageMso="RefreshAll"/>
+            <button id="enrollmentValidate" getLabel="GetRibbonLabel" onAction="OnEnrollmentValidateClick" imageMso="SpellingAndGrammar"/>
+            <button id="enrollmentTransfer" getLabel="GetRibbonLabel" onAction="OnEnrollmentTransferClick" imageMso="DataFormAddRecord"/>
+            <button id="enrollmentClearForm" getLabel="GetRibbonLabel" onAction="OnEnrollmentClearFormClick" imageMso="Clear"/>
+          </menu>
+        </group>
+
+        <group id="dataGroup" getLabel="GetRibbonLabel">
+          <button id="excelReport" getLabel="GetRibbonLabel" onAction="OnPeriodsReportClick" imageMso="ExcelSpreadsheetInsert" size="large"/>
+          <button id="importData" getLabel="GetRibbonLabel" onAction="RunImportData" imageMso="ImportExcel" size="large"/>
+          <button id="importWordRaport" getLabel="GetRibbonLabel" getScreentip="GetRibbonScreentip" getSupertip="GetRibbonSupertip" onAction="RunWordRaportImport" imageMso="TextFromFileInsert" size="large"/>
+          <button id="validateZP12" getLabel="GetRibbonLabel" getScreentip="GetRibbonScreentip" getSupertip="GetRibbonSupertip" onAction="RunValidateZP12" imageMso="FileDocumentInspect" size="large"/>
+        </group>
+
+        <group id="systemGroup" getLabel="GetRibbonLabel">
+          <button id="smartValidate" getLabel="GetRibbonLabel" getScreentip="GetRibbonScreentip" getSupertip="GetRibbonSupertip" onAction="RunSmartValidation" imageMso="Spelling" size="large"/>
+          <button id="showSettings" getLabel="GetRibbonLabel" onAction="ShowSettings" imageMso="ControlsGallery" size="normal"/>
+          <button id="showAbout" getLabel="GetRibbonLabel" onAction="RunShowAbout" imageMso="Info" size="normal"/>
+        </group>
       </tab>
     </tabs>
   </ribbon>

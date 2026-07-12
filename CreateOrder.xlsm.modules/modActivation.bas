@@ -7,13 +7,9 @@ Attribute VB_Name = "modActivation"
 Option Explicit
 
 ' --- ИНФОРМАЦИЯ О ПРОДУКТЕ (ДЛЯ ФОРМЫ FRMABOUT) ---
-Public Const PRODUCT_NAME As String = "Формирователь приказов"
 Public Const PRODUCT_VERSION As String = "2.5.0"
-Public Const PRODUCT_AUTHOR As String = "Кержаев Евгений Алексеевич"
 Public Const PRODUCT_EMAIL As String = "nachfin@vk.com"
 Public Const PRODUCT_PHONE As String = "+7(989)906-88-91"
-Public Const PRODUCT_COMPANY As String = "Отделение программирования 95 ФЭС МО РФ"
-Public Const ACTIVATION_HINT As String = "Введите код (формат: XXXX-XXXX-XXXX-XXXX)"
 
 ' --- ГЛОБАЛЬНЫЕ НАСТРОЙКИ ЗАЩИТЫ ---
 Private Const ADMIN_PASSWORD As String = "95FES_Admin"
@@ -37,12 +33,15 @@ Private Const LICENSE_PREFIX_PERSONAL As String = "P"
 Private Const LICENSE_PREFIX_CORPORATE As String = "C"
 Private Const CORPORATE_VALIDATION_SALT As String = "CORPORATE"
 Private Const LEGACY_GLOBAL_VALIDATION_SALT As String = "GLOBAL"
+Private Const ACTIVATION_REQUEST_HEADER As String = "CreateOrder Activation Request"
+Private Const ACTIVATION_RESPONSE_HEADER As String = "CreateOrder Activation Response"
+Private Const ACTIVATION_FILE_FORMAT_VERSION As String = "1"
 
 ' ===============================================================================
 ' 0. ЕДИНЫЙ ИСТОЧНИК ИСТИНЫ ДЛЯ ОЗНАКОМИТЕЛЬНОГО ПЕРИОДА
 ' ===============================================================================
 Private Function GetPublicExpiryDate() As Date
-    GetPublicExpiryDate = DateSerial(2026, 9, 1) ' 1 Сентября 2026
+    GetPublicExpiryDate = DateSerial(2026, 12, 31) ' 31 Декабря 2026
 End Function
 
 ' ===============================================================================
@@ -79,6 +78,58 @@ End Function
 
 Public Function GenerateCorporateLicenseKey(expiryDate As Date) As String
     GenerateCorporateLicenseKey = GenerateLicenseCode(expiryDate, LICENSE_TYPE_CORPORATE)
+End Function
+
+Public Function GetProductNameText() As String
+    GetProductNameText = t("product.name", "Формирователь приказов")
+End Function
+
+Public Function GetProductAuthorText() As String
+    GetProductAuthorText = t("product.author", "Кержаев Евгений Алексеевич")
+End Function
+
+Public Function GetProductCompanyText() As String
+    GetProductCompanyText = t("product.company", "Отделение программирования 95 ФЭС МО РФ")
+End Function
+
+Public Function GetActivationHintText() As String
+    GetActivationHintText = t("product.activation_hint", "Введите код (формат: XXXX-XXXX-XXXX-XXXX)")
+End Function
+
+Private Function TryParseDateExact(ByVal rawText As String, ByRef parsedDate As Date) As Boolean
+    Dim cleanText As String
+    Dim parts() As String
+    Dim dayValue As Integer
+    Dim monthValue As Integer
+    Dim yearValue As Integer
+
+    cleanText = Trim$(rawText)
+    If cleanText = "" Then Exit Function
+
+    parts = Split(cleanText, ".")
+    If UBound(parts) <> 2 Then Exit Function
+    If Not IsNumeric(parts(0)) Or Not IsNumeric(parts(1)) Or Not IsNumeric(parts(2)) Then Exit Function
+
+    dayValue = CInt(parts(0))
+    monthValue = CInt(parts(1))
+    yearValue = CInt(parts(2))
+
+    If yearValue < 100 Then yearValue = yearValue + 2000
+    If dayValue < 1 Or dayValue > 31 Then Exit Function
+    If monthValue < 1 Or monthValue > 12 Then Exit Function
+    If yearValue < 2000 Or yearValue > 2099 Then Exit Function
+
+    On Error GoTo ParseError
+    parsedDate = DateSerial(yearValue, monthValue, dayValue)
+    If Day(parsedDate) <> dayValue Or Month(parsedDate) <> monthValue Or Year(parsedDate) <> yearValue Then
+        Exit Function
+    End If
+
+    TryParseDateExact = True
+    Exit Function
+
+ParseError:
+    TryParseDateExact = False
 End Function
 
 Public Function GenerateLicenseCode(expiryDate As Date, _
@@ -123,29 +174,46 @@ Public Function ActivatePersonal(key As String) As Boolean
 End Function
 
 Public Function ActivateLicenseCode(key As String) As Boolean
+    Dim activationMessage As String
+
+    ActivateLicenseCode = TryActivateLicenseCodeDetailed(key, activationMessage)
+End Function
+
+Public Function TryActivateLicenseCodeDetailed(ByVal key As String, _
+                                               ByRef resultMessage As String) As Boolean
     Dim normalizedKey As String
     Dim licenseType As String
     Dim expiryDate As Date
+    Dim parseState As String
 
     normalizedKey = NormalizeLicenseCode(key)
     If normalizedKey = "" Then
-        ActivateLicenseCode = False
+        resultMessage = t("license.error.invalid_format", "Некорректный формат ключа. Используйте формат XXXX-XXXX-XXXX-XXXX.")
+        TryActivateLicenseCodeDetailed = False
         Exit Function
     End If
 
-    If Not TryParseLicenseCode(normalizedKey, licenseType, expiryDate) Then
-        ActivateLicenseCode = False
+    If Not TryParseLicenseCodeDetailed(normalizedKey, licenseType, expiryDate, parseState) Then
+        resultMessage = GetActivationParseErrorMessage(parseState, licenseType)
+        TryActivateLicenseCodeDetailed = False
         Exit Function
     End If
 
     If Date > expiryDate Then
-        ActivateLicenseCode = False
+        resultMessage = tf("license.error.expired", _
+                           "Срок действия этого ключа истек {date}.", _
+                           "{date}", Format$(expiryDate, "dd.mm.yyyy"))
+        TryActivateLicenseCodeDetailed = False
         Exit Function
     End If
 
     SaveLicenseCode normalizedKey
+    UpdateLastRun
     ClearLegacyLicenseData
-    ActivateLicenseCode = True
+    resultMessage = tf("license.success.activated", _
+                       "Ключ успешно активирован. Лицензия действует до {date}.", _
+                       "{date}", Format$(expiryDate, "dd.mm.yyyy"))
+    TryActivateLicenseCodeDetailed = True
 End Function
 
 ' ===============================================================================
@@ -228,6 +296,176 @@ Public Function GetLicenseExpiryDateStr() As String
     GetLicenseExpiryDateStr = Format(effectiveExpiry, "dd.mm.yyyy")
 End Function
 
+Public Function GetLicenseStatusCaption(Optional ByVal statusCode As Integer = -1) As String
+    If statusCode < 0 Then statusCode = GetLicenseStatus()
+
+    Select Case statusCode
+        Case 0
+            GetLicenseStatusCaption = t("license.status.personal_active", "Персональная лицензия активна")
+        Case 3
+            GetLicenseStatusCaption = t("license.status.corporate_active", "Корпоративная лицензия активна")
+        Case 4
+            GetLicenseStatusCaption = t("license.status.trial_active", "Ознакомительный период активен")
+        Case 2
+            GetLicenseStatusCaption = t("license.status.clock_lock", "Защитная блокировка по дате")
+        Case Else
+            GetLicenseStatusCaption = t("license.status.inactive", "Лицензия не активна")
+    End Select
+End Function
+
+Public Function GetLicenseStatusDetailsText() As String
+    Dim statusCode As Integer
+    Dim storedCode As String
+    Dim licenseType As String
+    Dim licenseExpiry As Date
+    Dim storedKeyLine As String
+    Dim lastRunStr As String
+    Dim publicExpiry As Date
+    Dim details As String
+    Dim publicExpiryLine As String
+
+    statusCode = GetLicenseStatus()
+    publicExpiry = GetPublicExpiryDate()
+    storedCode = NormalizeLicenseCode(ReadHidden(NAME_LICENSE_CODE))
+    lastRunStr = ReadHidden(NAME_LAST_RUN)
+
+    If statusCode = 0 Or statusCode = 3 Then
+        publicExpiryLine = tf("license.details.public_expiry_ignored", _
+                              "Ознакомительный период до: {date} (не влияет при активной лицензии)", _
+                              "{date}", Format$(publicExpiry, "dd.mm.yyyy"))
+    Else
+        publicExpiryLine = tf("license.details.public_expiry", _
+                              "Ознакомительный период до: {date}", _
+                              "{date}", Format$(publicExpiry, "dd.mm.yyyy"))
+    End If
+
+    details = tf("license.details.header", "Состояние лицензии: {status}", "{status}", GetLicenseStatusCaption(statusCode)) & vbCrLf & _
+              tf("license.details.status_code", "Код состояния: {code}", "{code}", CStr(statusCode)) & vbCrLf & _
+              tf("license.details.system_date", "Текущая дата системы: {date}", "{date}", Format$(Date, "dd.mm.yyyy")) & vbCrLf & _
+              tf("license.details.system_datetime", "Текущее время системы: {datetime}", "{datetime}", Format$(Now, "dd.mm.yyyy HH:nn:ss")) & vbCrLf & _
+              tf("license.details.hwid", "HWID: {hwid}", "{hwid}", GetHardwareID()) & vbCrLf & _
+              tf("license.details.version", "Версия программы: {version}", "{version}", PRODUCT_VERSION) & vbCrLf & _
+              tf("license.details.workbook_name", "Файл программы: {name}", "{name}", ThisWorkbook.Name) & vbCrLf & _
+              publicExpiryLine & vbCrLf
+
+    If lastRunStr <> "" Then
+        details = details & tf("license.details.last_run", _
+                               "Последний зафиксированный запуск: {date}", _
+                               "{date}", Format$(CLng(lastRunStr), "dd.mm.yyyy")) & vbCrLf
+    Else
+        details = details & t("license.details.last_run_none", "Последний зафиксированный запуск: нет данных") & vbCrLf
+    End If
+
+    If storedCode <> "" Then
+        If TryParseLicenseCode(storedCode, licenseType, licenseExpiry) Then
+            storedKeyLine = tf("license.details.stored_key_ok", _
+                               "Сохраненный ключ: {type}, до {date}, маска {mask}", _
+                               "{type}", GetLicenseTypeCaption(licenseType), _
+                               "{date}", Format$(licenseExpiry, "dd.mm.yyyy"), _
+                               "{mask}", MaskLicenseCode(storedCode))
+        Else
+            storedKeyLine = t("license.details.stored_key_bad", "Сохраненный ключ: обнаружен, но не распознан")
+        End If
+    Else
+        storedKeyLine = t("license.details.stored_key_none", "Сохраненный ключ: отсутствует")
+    End If
+
+    details = details & storedKeyLine & vbCrLf & _
+              tf("license.details.recommendation", "Рекомендация: {text}", _
+                 "{text}", GetLicenseRecommendation(statusCode))
+
+    GetLicenseStatusDetailsText = details
+End Function
+
+Public Function ExportActivationRequestPackage() As Boolean
+    Dim packageText As String
+    Dim defaultName As String
+
+    packageText = BuildActivationRequestText()
+    defaultName = "CreateOrder-activation-request-" & _
+                  Format$(Now, "yyyymmdd_HHnnss") & "-" & GetHardwareID() & ".txt"
+
+    ExportActivationRequestPackage = SaveTextPackage(packageText, defaultName, _
+                                                     t("license.export.file_filter", "Файлы активации (*.txt), *.txt"))
+End Function
+
+Public Function ImportActivationResponsePackage(Optional ByRef resultMessage As String) As Boolean
+    Dim filePath As Variant
+    Dim rawText As String
+    Dim activationCode As String
+
+    filePath = Application.GetOpenFilename(t("license.export.file_filter", "Файлы активации (*.txt), *.txt"), , _
+                                           t("license.export.choose_response", "Выберите файл лицензии"))
+    If VarType(filePath) = vbBoolean Then
+        resultMessage = t("license.export.file_cancelled", "Выбор файла отменен.")
+        Exit Function
+    End If
+
+    rawText = ReadTextFile(CStr(filePath))
+    If Trim$(rawText) = "" Then
+        resultMessage = t("license.export.file_read_error", "Не удалось прочитать файл лицензии.")
+        Exit Function
+    End If
+
+    activationCode = ExtractActivationCodeFromPackage(rawText)
+    If activationCode = "" Then
+        resultMessage = t("license.export.code_missing", "В файле не найден код активации.")
+        Exit Function
+    End If
+
+    ImportActivationResponsePackage = TryActivateLicenseCodeDetailed(activationCode, resultMessage)
+End Function
+
+Public Sub ShowLicenseServiceMenu()
+    Dim answer As VbMsgBoxResult
+    Dim importMessage As String
+
+    answer = MsgBox(t("license.service.menu", _
+                    "Да - подготовить файл запроса на лицензию" & vbCrLf & _
+                    "Нет - загрузить готовый файл лицензии" & vbCrLf & _
+                    "Отмена - показать подробное состояние лицензии"), _
+                    vbYesNoCancel + vbQuestion, t("license.caption.service", "Сервис лицензии"))
+
+    Select Case answer
+        Case vbYes
+            If ExportActivationRequestPackage() Then
+                MsgBox t("license.export.saved", "Файл запроса на лицензию успешно сохранен."), _
+                       vbInformation, t("license.caption.service", "Сервис лицензии")
+            End If
+
+        Case vbNo
+            If ImportActivationResponsePackage(importMessage) Then
+                MsgBox importMessage, vbInformation, t("license.caption.service", "Сервис лицензии")
+            ElseIf importMessage <> "" Then
+                MsgBox importMessage, vbExclamation, t("license.caption.service", "Сервис лицензии")
+            End If
+
+        Case Else
+            MsgBox GetLicenseStatusDetailsText(), vbInformation, t("license.caption.state", "Состояние лицензии")
+    End Select
+End Sub
+
+Public Sub ExportActivationRequestUI()
+    If ExportActivationRequestPackage() Then
+        MsgBox t("license.export.saved", "Файл запроса на лицензию успешно сохранен."), _
+               vbInformation, t("license.caption.service", "Сервис лицензии")
+    End If
+End Sub
+
+Public Sub ImportActivationResponseUI()
+    Dim importMessage As String
+
+    If ImportActivationResponsePackage(importMessage) Then
+        MsgBox importMessage, vbInformation, t("license.caption.service", "Сервис лицензии")
+    ElseIf importMessage <> "" Then
+        MsgBox importMessage, vbExclamation, t("license.caption.service", "Сервис лицензии")
+    End If
+End Sub
+
+Public Sub ShowLicenseStatusUI()
+    MsgBox GetLicenseStatusDetailsText(), vbInformation, t("license.caption.state", "Состояние лицензии")
+End Sub
+
 Public Function CheckLicenseAndPrompt() As Boolean
     Dim st As Integer
 
@@ -236,9 +474,9 @@ Public Function CheckLicenseAndPrompt() As Boolean
     If st = 0 Or st = 3 Or st = 4 Then
         CheckLicenseAndPrompt = True
     Else
-        MsgBox "Срок действия доступа завершен." & vbCrLf & _
-               "Для использования этой функции требуется действующий код активации.", _
-               vbExclamation, "Требуется активация"
+        MsgBox t("license.prompt.expired", _
+               "Срок действия доступа завершен." & vbCrLf & "Для использования этой функции требуется действующий код активации."), _
+               vbExclamation, t("license.caption.required", "Требуется активация")
         frmAbout.Show
 
         st = GetLicenseStatus()
@@ -278,49 +516,53 @@ Public Sub AdminGenerateKeyUI(Optional suggestedType As String = "")
     Dim licenseType As String
     Dim targetHWID As String
     Dim expDateStr As String
+    Dim expiryDate As Date
     Dim generatedKey As String
 
-    pwd = InputBox("Введите пароль администратора для доступа к генератору:", "Генератор ключей")
+    pwd = InputBox(t("license.admin.password_prompt", "Введите пароль администратора для доступа к генератору:"), _
+                   t("license.caption.generator", "Генератор ключей"))
     If pwd <> ADMIN_PASSWORD Then
-        If pwd <> "" Then MsgBox "Неверный пароль!", vbCritical, "Отказ в доступе"
+        If pwd <> "" Then MsgBox t("license.admin.password_invalid", "Неверный пароль!"), _
+                                 vbCritical, t("license.caption.access_denied", "Отказ в доступе")
         Exit Sub
     End If
 
     If suggestedType <> "" Then
         licenseType = NormalizeLicenseType(suggestedType)
     Else
-        licenseChoice = InputBox("Введите тип лицензии:" & vbCrLf & _
-                                 "P - персональная" & vbCrLf & _
-                                 "C - корпоративная", _
-                                 "Тип лицензии", "C")
+        licenseChoice = InputBox(t("license.admin.type_prompt", _
+                                 "Введите тип лицензии:" & vbCrLf & "P - персональная" & vbCrLf & "C - корпоративная"), _
+                                 t("license.admin.type_title", "Тип лицензии"), "C")
         licenseType = NormalizeLicenseType(licenseChoice)
     End If
 
     If licenseType = "" Then
-        MsgBox "Не удалось определить тип лицензии.", vbExclamation, "Генератор ключей"
+        MsgBox t("license.admin.type_unknown", "Не удалось определить тип лицензии."), _
+               vbExclamation, t("license.caption.generator", "Генератор ключей")
         Exit Sub
     End If
 
     If licenseType = LICENSE_TYPE_PERSONAL Then
-        targetHWID = InputBox("Введите HWID компьютера пользователя:" & vbCrLf & _
-                              "(Оставьте текущий, если делаете ключ для себя)", _
-                              "Ввод HWID", GetHardwareID())
+        targetHWID = InputBox(t("license.admin.hwid_prompt", _
+                              "Введите HWID компьютера пользователя:" & vbCrLf & "(Оставьте текущий, если делаете ключ для себя)"), _
+                              t("license.admin.hwid_title", "Ввод HWID"), GetHardwareID())
         If targetHWID = "" Then Exit Sub
     End If
 
-    expDateStr = InputBox("Введите дату окончания действия ключа (ДД.ММ.ГГГГ):", _
-                          "Дата окончания", "31.12.2026")
+    expDateStr = InputBox(t("license.admin.expiry_prompt", "Введите дату окончания действия ключа (ДД.ММ.ГГГГ):"), _
+                          t("license.admin.expiry_title", "Дата окончания"), "31.12.2026")
     If expDateStr = "" Then Exit Sub
 
-    If Not IsDate(expDateStr) Then
-        MsgBox "Некорректный формат даты! Используйте формат ДД.ММ.ГГГГ", _
-               vbExclamation, "Ошибка"
+    If Not TryParseDateExact(expDateStr, expiryDate) Then
+        MsgBox t("license.admin.expiry_invalid", "Некорректный формат даты! Используйте формат ДД.ММ.ГГГГ"), _
+               vbExclamation, t("common.error", "Ошибка")
         Exit Sub
     End If
 
-    generatedKey = GenerateLicenseCode(CDate(expDateStr), licenseType, targetHWID)
+    generatedKey = GenerateLicenseCode(expiryDate, licenseType, targetHWID)
     If generatedKey = "" Then
-        MsgBox "Не удалось сформировать код лицензии.", vbCritical, "Ошибка"
+        MsgBox t("license.admin.generate_failed", "Не удалось сформировать код лицензии."), _
+               vbCritical, t("common.error", "Ошибка")
         Exit Sub
     End If
 
@@ -328,12 +570,12 @@ Public Sub AdminGenerateKeyUI(Optional suggestedType As String = "")
     CreateObject("WScript.Shell").Run "cmd.exe /c echo | set /p=" & generatedKey & " | clip", 0, True
     On Error GoTo 0
 
-    MsgBox "Ключ успешно сгенерирован:" & vbCrLf & vbCrLf & _
-           generatedKey & vbCrLf & vbCrLf & _
-           "Тип: " & GetLicenseTypeCaption(licenseType) & vbCrLf & _
-           "Действует до: " & Format(CDate(expDateStr), "dd.mm.yyyy") & vbCrLf & vbCrLf & _
-           "(Ключ уже скопирован в буфер обмена)", _
-           vbInformation, "Успех"
+    MsgBox tf("license.admin.generate_success", _
+              "Ключ успешно сгенерирован:" & vbCrLf & vbCrLf & "{key}" & vbCrLf & vbCrLf & "Тип: {type}" & vbCrLf & "Действует до: {date}" & vbCrLf & vbCrLf & "(Ключ уже скопирован в буфер обмена)", _
+              "{key}", generatedKey, _
+              "{type}", GetLicenseTypeCaption(licenseType), _
+              "{date}", Format(expiryDate, "dd.mm.yyyy")), _
+           vbInformation, t("license.caption.success", "Успех")
 End Sub
 
 ' ===============================================================================
@@ -368,6 +610,15 @@ End Sub
 Private Function TryParseLicenseCode(ByVal key As String, _
                                      ByRef licenseType As String, _
                                      ByRef expiryDate As Date) As Boolean
+    Dim parseState As String
+
+    TryParseLicenseCode = TryParseLicenseCodeDetailed(key, licenseType, expiryDate, parseState)
+End Function
+
+Private Function TryParseLicenseCodeDetailed(ByVal key As String, _
+                                             ByRef licenseType As String, _
+                                             ByRef expiryDate As Date, _
+                                             Optional ByRef parseState As String = "") As Boolean
     Dim p() As String
     Dim normalizedKey As String
     Dim typePrefix As String
@@ -376,19 +627,38 @@ Private Function TryParseLicenseCode(ByVal key As String, _
     Dim validationSalt As String
 
     normalizedKey = NormalizeLicenseCode(key)
-    If normalizedKey = "" Then Exit Function
+    If normalizedKey = "" Then
+        parseState = "FORMAT"
+        Exit Function
+    End If
 
     p = Split(normalizedKey, "-")
-    If UBound(p) <> 3 Then Exit Function
+    If UBound(p) <> 3 Then
+        parseState = "FORMAT"
+        Exit Function
+    End If
 
     typePrefix = Left$(p(0), 1)
     licenseType = LicenseTypeFromPrefix(typePrefix)
-    If licenseType = "" Then Exit Function
+    If licenseType = "" Then
+        parseState = "TYPE"
+        Exit Function
+    End If
 
     validationSalt = GetValidationSaltForType(licenseType)
-    If validationSalt = "" Then Exit Function
+    If validationSalt = "" Then
+        parseState = "HWID"
+        Exit Function
+    End If
 
-    If p(3) <> CalculateHash(p(0) & p(1) & p(2), validationSalt) Then Exit Function
+    If p(3) <> CalculateHash(p(0) & p(1) & p(2), validationSalt) Then
+        If licenseType = LICENSE_TYPE_PERSONAL Then
+            parseState = "HWID_OR_CODE"
+        Else
+            parseState = "CHECKSUM"
+        End If
+        Exit Function
+    End If
 
     On Error Resume Next
     saltValue = CLng("&H" & Right$(p(0), 3))
@@ -396,11 +666,13 @@ Private Function TryParseLicenseCode(ByVal key As String, _
     expiryDate = CDate(decodedDate + MAGIC_SEED)
     If Err.Number <> 0 Then
         On Error GoTo 0
+        parseState = "DATE"
         Exit Function
     End If
     On Error GoTo 0
 
-    TryParseLicenseCode = True
+    parseState = "OK"
+    TryParseLicenseCodeDetailed = True
 End Function
 
 Private Function NormalizeLicenseCode(ByVal rawCode As String) As String
@@ -468,12 +740,158 @@ End Function
 Private Function GetLicenseTypeCaption(ByVal licenseType As String) As String
     Select Case NormalizeLicenseType(licenseType)
         Case LICENSE_TYPE_PERSONAL
-            GetLicenseTypeCaption = "Персональная"
+            GetLicenseTypeCaption = t("license.type.personal", "Персональная")
         Case LICENSE_TYPE_CORPORATE
-            GetLicenseTypeCaption = "Корпоративная"
+            GetLicenseTypeCaption = t("license.type.corporate", "Корпоративная")
         Case Else
-            GetLicenseTypeCaption = "Неизвестная"
+            GetLicenseTypeCaption = t("license.type.unknown", "Неизвестная")
     End Select
+End Function
+
+Private Function GetActivationParseErrorMessage(ByVal parseState As String, _
+                                                ByVal licenseType As String) As String
+    Select Case UCase$(parseState)
+        Case "FORMAT"
+            GetActivationParseErrorMessage = t("license.error.invalid_format", "Некорректный формат ключа. Используйте формат XXXX-XXXX-XXXX-XXXX.")
+        Case "TYPE"
+            GetActivationParseErrorMessage = t("license.parse.type", "Не удалось определить тип лицензии по введенному ключу.")
+        Case "DATE"
+            GetActivationParseErrorMessage = t("license.parse.date", "Ключ поврежден: не удалось прочитать дату окончания.")
+        Case "HWID"
+            GetActivationParseErrorMessage = t("license.parse.hwid", "Не удалось определить HWID этого компьютера для проверки персонального ключа.")
+        Case "HWID_OR_CODE"
+            GetActivationParseErrorMessage = t("license.parse.hwid_or_code", "Персональный ключ не подходит для этого ПК или был введен с ошибкой.")
+        Case "CHECKSUM"
+            If NormalizeLicenseType(licenseType) = LICENSE_TYPE_CORPORATE Then
+                GetActivationParseErrorMessage = t("license.parse.corporate_checksum", "Корпоративный ключ не распознан. Проверьте правильность введенного кода.")
+            Else
+                GetActivationParseErrorMessage = t("license.parse.generic", "Ключ не распознан. Проверьте правильность введенного кода.")
+            End If
+        Case Else
+            GetActivationParseErrorMessage = t("license.parse.generic", "Ключ не распознан. Проверьте правильность введенного кода.")
+    End Select
+End Function
+
+Private Function BuildActivationRequestText() As String
+    Dim statusCode As Integer
+    Dim storedCode As String
+    Dim requestId As String
+    Dim details As String
+
+    statusCode = GetLicenseStatus()
+    storedCode = NormalizeLicenseCode(ReadHidden(NAME_LICENSE_CODE))
+    requestId = Format$(Now, "yyyymmdd_HHnnss") & "_" & GetHardwareID()
+    details = Replace$(GetLicenseStatusDetailsText(), vbCrLf, vbLf)
+
+    BuildActivationRequestText = ACTIVATION_REQUEST_HEADER & vbCrLf & _
+                                 "FormatVersion: " & ACTIVATION_FILE_FORMAT_VERSION & vbCrLf & _
+                                 "RequestID: " & requestId & vbCrLf & _
+                                 "CreatedAt: " & Format$(Now, "dd.mm.yyyy HH:nn:ss") & vbCrLf & _
+                                 "Product: " & GetProductNameText() & vbCrLf & _
+                                 "ProductVersion: " & PRODUCT_VERSION & vbCrLf & _
+                                 "WorkbookName: " & ThisWorkbook.Name & vbCrLf & _
+                                 "WorkbookPath: " & ThisWorkbook.FullName & vbCrLf & _
+                                 "ComputerName: " & Environ$("COMPUTERNAME") & vbCrLf & _
+                                 "UserName: " & Environ$("USERNAME") & vbCrLf & _
+                                 "SystemDate: " & Format$(Date, "dd.mm.yyyy") & vbCrLf & _
+                                 "SystemDateTime: " & Format$(Now, "dd.mm.yyyy HH:nn:ss") & vbCrLf & _
+                                 "HWID: " & GetHardwareID() & vbCrLf & _
+                                 "LicenseStatusCode: " & CStr(statusCode) & vbCrLf & _
+                                 "LicenseStatusText: " & GetLicenseStatusCaption(statusCode) & vbCrLf & _
+                                 "LicenseExpiry: " & GetLicenseExpiryDateStr() & vbCrLf & _
+                                 "StoredLicenseMask: " & MaskLicenseCode(storedCode) & vbCrLf & _
+                                 "RecommendedLicenseType: PERSONAL" & vbCrLf & _
+                                 "Details: " & details & vbCrLf
+End Function
+
+Private Function GetLicenseRecommendation(ByVal statusCode As Integer) As String
+    Select Case statusCode
+        Case 0, 3
+            GetLicenseRecommendation = t("license.recommendation.active", "Лицензия уже активна. При необходимости можно подготовить диагностический файл.")
+        Case 4
+            GetLicenseRecommendation = t("license.recommendation.trial", "Можно заранее подготовить файл запроса на персональную или корпоративную лицензию.")
+        Case 2
+            GetLicenseRecommendation = t("license.recommendation.clock_lock", "Проверьте корректность системной даты. При необходимости загрузите новый файл лицензии.")
+        Case Else
+            GetLicenseRecommendation = t("license.recommendation.inactive", "Подготовьте файл запроса на лицензию или загрузите готовый файл лицензии.")
+    End Select
+End Function
+
+Private Function MaskLicenseCode(ByVal licenseCode As String) As String
+    Dim normalizedCode As String
+
+    normalizedCode = NormalizeLicenseCode(licenseCode)
+    If normalizedCode = "" Then
+        MaskLicenseCode = "нет"
+    Else
+        MaskLicenseCode = Left$(normalizedCode, 4) & "-****-****-" & Right$(normalizedCode, 4)
+    End If
+End Function
+
+Private Function SaveTextPackage(ByVal packageText As String, _
+                                 ByVal defaultFileName As String, _
+                                 Optional ByVal fileFilter As String = "Text Files (*.txt), *.txt") As Boolean
+    Dim targetPath As Variant
+    Dim fileNumber As Integer
+
+    If Trim$(packageText) = "" Then Exit Function
+
+    targetPath = Application.GetSaveAsFilename( _
+        InitialFileName:=defaultFileName, _
+        FileFilter:=fileFilter)
+
+    If VarType(targetPath) = vbBoolean Then Exit Function
+
+    fileNumber = FreeFile
+    Open CStr(targetPath) For Output As #fileNumber
+    Print #fileNumber, packageText
+    Close #fileNumber
+
+    SaveTextPackage = True
+End Function
+
+Private Function ReadTextFile(ByVal filePath As String) As String
+    Dim fileNumber As Integer
+
+    On Error GoTo ReadError
+
+    fileNumber = FreeFile
+    Open filePath For Input As #fileNumber
+    ReadTextFile = Input$(LOF(fileNumber), #fileNumber)
+    Close #fileNumber
+    Exit Function
+
+ReadError:
+    On Error Resume Next
+    If fileNumber > 0 Then Close #fileNumber
+    ReadTextFile = ""
+End Function
+
+Private Function ExtractActivationCodeFromPackage(ByVal packageText As String) As String
+    Dim normalizedText As String
+    Dim lines() As String
+    Dim i As Long
+    Dim currentLine As String
+
+    normalizedText = Replace$(packageText, vbCrLf, vbLf)
+    normalizedText = Replace$(normalizedText, vbCr, vbLf)
+    lines = Split(normalizedText, vbLf)
+
+    For i = LBound(lines) To UBound(lines)
+        currentLine = Trim$(lines(i))
+        If UCase$(Left$(currentLine, 5)) = "CODE:" Then
+            ExtractActivationCodeFromPackage = NormalizeLicenseCode(Trim$(Mid$(currentLine, 6)))
+            If ExtractActivationCodeFromPackage <> "" Then Exit Function
+
+            If i < UBound(lines) Then
+                ExtractActivationCodeFromPackage = NormalizeLicenseCode(Trim$(lines(i + 1)))
+                If ExtractActivationCodeFromPackage <> "" Then Exit Function
+            End If
+        ElseIf UCase$(Left$(currentLine, 15)) = "ACTIVATIONCODE:" Then
+            ExtractActivationCodeFromPackage = NormalizeLicenseCode(Trim$(Mid$(currentLine, 16)))
+            If ExtractActivationCodeFromPackage <> "" Then Exit Function
+        End If
+    Next i
 End Function
 
 Private Function GetDateFromHidden(ByVal dataName As String, _

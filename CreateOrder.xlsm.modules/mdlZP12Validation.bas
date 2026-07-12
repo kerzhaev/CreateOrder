@@ -1,7 +1,8 @@
 Attribute VB_Name = "mdlZP12Validation"
 Option Explicit
 
-Private Const HISTORY_SHEET_NAME As String = "История_проверок_Д89"
+Private Const STAFF_SHEET_INDEX As Long = 4
+Private Const HISTORY_SHEET_NAME As String = "D89_History"
 Private Const HISTORY_HEADER_ROW As Long = 1
 Private Const TEMPLATE_HEADER_ROW As Long = 1
 Private Const TEMPLATE_SUBHEADER_ROW As Long = 2
@@ -51,12 +52,12 @@ Public Sub ValidateZP12Template(Optional ByVal selectedFilePath As String = "", 
     Application.ScreenUpdating = False
     Application.EnableEvents = False
     Application.DisplayAlerts = False
-    Application.StatusBar = "Открытие шаблона Д89..."
+    Application.StatusBar = "Checking D89 template..."
 
     Set templateWb = GetOrOpenWorkbook(CStr(selectedFile))
     Set templateWs = FindTemplateSheet(templateWb)
     If templateWs Is Nothing Then
-        MsgBox "Не удалось найти лист шаблона Д89 с ожидаемой структурой.", vbExclamation, "Проверка Д89"
+        MsgBox "Could not find a D89 template sheet with the expected structure.", vbExclamation, "D89 validation"
         GoTo SafeExit
     End If
 
@@ -65,22 +66,22 @@ Public Sub ValidateZP12Template(Optional ByVal selectedFilePath As String = "", 
     currentRunId = previousRunId + 1
     startedAt = Now
 
-    Application.StatusBar = "Подготовка данных Штат..."
+    Application.StatusBar = "Preparing staff data..."
     Set staffContext = BuildStaffContext()
 
-    Application.StatusBar = "Очистка предыдущей разметки..."
+    Application.StatusBar = "Clearing previous validation..."
     ClearTemplateValidation templateWs
 
-    Application.StatusBar = "Проверка строк шаблона..."
+    Application.StatusBar = "Checking template rows..."
     Set currentErrors = ValidateTemplateRows(templateWs, staffContext, checkedRows)
     Set currentKeys = BuildCurrentKeyMap(currentErrors)
     ApplyStatuses currentErrors, previousErrors
     Set resolvedErrors = BuildResolvedErrors(previousErrors, currentKeys)
 
-    Application.StatusBar = "Подсветка ошибок в шаблоне..."
+    Application.StatusBar = "Highlighting issues..."
     ApplyErrorsToSheet templateWs, currentErrors
 
-    Application.StatusBar = "Запись истории проверки..."
+    Application.StatusBar = "Writing validation history..."
     AppendHistoryRecords historyWs, currentRunId, startedAt, templateWb.Name, templateWs.Name, currentErrors, resolvedErrors
 
     Set counts = BuildStatusCounts(currentErrors, resolvedErrors)
@@ -90,7 +91,7 @@ Public Sub ValidateZP12Template(Optional ByVal selectedFilePath As String = "", 
     Application.StatusBar = False
 
     If Not suppressSummary Then
-        MsgBox BuildSummaryMessage(checkedRows, counts, templateWb.Name, historyWs.Name), vbInformation, "Проверка Д89"
+        MsgBox BuildSummaryMessage(checkedRows, counts, templateWb.Name, historyWs.Name), vbInformation, "D89 validation"
     End If
 
 SafeExit:
@@ -105,14 +106,14 @@ ErrorHandler:
     Application.EnableEvents = True
     Application.DisplayAlerts = True
     Application.StatusBar = False
-    MsgBox "Ошибка проверки Д89: " & Err.description, vbCritical, "Проверка Д89"
+    MsgBox "D89 validation error: " & Err.description, vbCritical, "D89 validation"
 End Sub
 
 
 Private Function PickTemplateFile() As Variant
     PickTemplateFile = Application.GetOpenFilename( _
         FileFilter:="Excel Files (*.xlsx;*.xlsm;*.xls), *.xlsx;*.xlsm;*.xls", _
-        Title:="Выберите файл шаблона Д89")
+        Title:="Select D89 template file")
 End Function
 
 Private Function GetOrOpenWorkbook(ByVal filePath As String) As Workbook
@@ -141,16 +142,21 @@ End Function
 
 Private Function IsTemplateSheet(ByVal ws As Worksheet) As Boolean
     IsTemplateSheet = _
-        InStr(1, NormalizeText(GetCellText(ws, TEMPLATE_HEADER_ROW, COL_TABLE_NUMBER)), "табельный номер в изделии", vbTextCompare) > 0 And _
-        NormalizeText(GetCellText(ws, TEMPLATE_HEADER_ROW, COL_PERSONAL_NUMBER)) = "личный номер" And _
-        NormalizeText(GetCellText(ws, TEMPLATE_HEADER_ROW, COL_RANK)) = "воинское звание" And _
-        NormalizeText(GetCellText(ws, TEMPLATE_HEADER_ROW, COL_SURNAME)) = "фамилия" And _
-        NormalizeText(GetCellText(ws, TEMPLATE_HEADER_ROW, COL_NAME)) = "имя" And _
-        NormalizeText(GetCellText(ws, TEMPLATE_HEADER_ROW, COL_PATRONYMIC)) = "отчество" And _
-        NormalizeText(GetCellText(ws, TEMPLATE_HEADER_ROW, COL_BIRTHDATE)) = "дата рождения" And _
-        NormalizeText(GetCellText(ws, TEMPLATE_HEADER_ROW, COL_PERIOD_FROM)) = "период" And _
-        NormalizeText(GetCellText(ws, TEMPLATE_SUBHEADER_ROW, COL_PERIOD_FROM)) = "с" And _
-        NormalizeText(GetCellText(ws, TEMPLATE_SUBHEADER_ROW, COL_PERIOD_TO)) = "по"
+        GetCellText(ws, 3, 1) = "1" And _
+        GetCellText(ws, 3, 2) = "2" And _
+        GetCellText(ws, 3, 3) = "3" And _
+        GetCellText(ws, 3, 4) = "4" And _
+        GetCellText(ws, 3, 5) = "5" And _
+        GetCellText(ws, 3, 6) = "6" And _
+        GetCellText(ws, 3, 7) = "7" And _
+        GetCellText(ws, 3, 8) = "8" And _
+        GetCellText(ws, 3, 9) = "9" And _
+        GetCellText(ws, 3, 10) = "10" And _
+        GetCellText(ws, 3, 11) = "11" And _
+        Len(GetCellText(ws, 1, COL_TABLE_NUMBER)) > 0 And _
+        Len(GetCellText(ws, 1, COL_PERSONAL_NUMBER)) > 0 And _
+        Len(GetCellText(ws, 2, COL_PERIOD_FROM)) > 0 And _
+        Len(GetCellText(ws, 2, COL_PERIOD_TO)) > 0
 End Function
 
 Private Function BuildStaffContext() As Object
@@ -158,8 +164,6 @@ Private Function BuildStaffContext() As Object
     Dim colPersonal As Long
     Dim colRank As Long
     Dim colFIO As Long
-    Dim colPosition As Long
-    Dim colUnit As Long
     Dim colTable As Long
     Dim colBirth As Long
     Dim colContractKind As Long
@@ -168,21 +172,16 @@ Private Function BuildStaffContext() As Object
     Dim colEffectiveStart As Long
     Dim context As Object
 
-    Set wsStaff = ThisWorkbook.Worksheets("Штат")
-    If Not mdlHelper.FindColumnNumbers(wsStaff, colPersonal, colRank, colFIO, colPosition, colUnit) Then
-        Err.Raise vbObjectError + 701, "mdlZP12Validation", "Не удалось определить базовые столбцы листа Штат."
-    End If
-
-    colTable = mdlHelper.FindTableNumberColumn(wsStaff)
-    If colTable = 0 Then
-        Err.Raise vbObjectError + 703, "mdlZP12Validation", "На листе Штат не найден числовой столбец Лицо."
-    End If
-
-    colBirth = FindRequiredHeaderColumn(wsStaff, "Дата рождения")
-    colContractKind = FindRequiredHeaderColumn(wsStaff, "Вид контракта")
-    colContractType = FindRequiredHeaderColumn(wsStaff, "Тип контракта")
-    colEventType = FindRequiredHeaderColumn(wsStaff, "Вид мероприятия")
-    colEffectiveStart = FindRequiredHeaderColumn(wsStaff, "Начало срока действия")
+    Set wsStaff = ThisWorkbook.Worksheets(STAFF_SHEET_INDEX)
+    colTable = 1
+    colPersonal = 2
+    colRank = 3
+    colFIO = 4
+    colBirth = 5
+    colContractKind = 14
+    colContractType = 15
+    colEventType = 22
+    colEffectiveStart = 24
 
     Set context = CreateObject("Scripting.Dictionary")
     context.Add "Sheet", wsStaff
@@ -213,7 +212,7 @@ Private Function FindRequiredHeaderColumn(ByVal ws As Worksheet, ByVal headerNam
         End If
     Next i
 
-    Err.Raise vbObjectError + 702, "mdlZP12Validation", "На листе Штат не найден столбец '" & headerName & "'."
+    Err.Raise vbObjectError + 702, "mdlZP12Validation", "Required column not found: '" & headerName & "'."
 End Function
 
 Private Function BuildStaffIndex(ByVal ws As Worksheet, ByVal colNum As Long, ByVal numericMode As Boolean) As Object
@@ -318,19 +317,19 @@ Private Sub ValidateTemplateRow(ByVal ws As Worksheet, ByVal rowNum As Long, ByV
     periodToDate = mdlHelper.ParseDateSafe(periodToRaw)
 
     If birthRaw <> "" And birthDate = 0 Then
-        AddError errors, rowNum, "H", "BIRTHDATE_INVALID", "Некорректная дата рождения.", rowIdentity, tableNumber, personalNumber, templateFIO, 0, 0
+        AddError errors, rowNum, "H", "BIRTHDATE_INVALID", "Invalid birth date.", rowIdentity, tableNumber, personalNumber, templateFIO, 0, 0
     End If
 
     If periodFromRaw <> "" And periodFromDate = 0 Then
-        AddError errors, rowNum, "I", "PERIOD_INVALID", "Некорректная дата начала периода.", rowIdentity, tableNumber, personalNumber, templateFIO, 0, 0
+        AddError errors, rowNum, "I", "PERIOD_INVALID", "Invalid period start date.", rowIdentity, tableNumber, personalNumber, templateFIO, 0, 0
     End If
 
     If periodToRaw <> "" And periodToDate = 0 Then
-        AddError errors, rowNum, "J", "PERIOD_INVALID", "Некорректная дата окончания периода.", rowIdentity, tableNumber, personalNumber, templateFIO, 0, 0
+        AddError errors, rowNum, "J", "PERIOD_INVALID", "Invalid period end date.", rowIdentity, tableNumber, personalNumber, templateFIO, 0, 0
     End If
 
     If periodFromDate > 0 And periodToDate > 0 And periodToDate < periodFromDate Then
-        AddError errors, rowNum, "I:J", "PERIOD_REVERSED", "Дата окончания периода раньше даты начала.", rowIdentity, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
+        AddError errors, rowNum, "I:J", "PERIOD_REVERSED", "Period end date is earlier than start date.", rowIdentity, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
     End If
 
     Set resolvedIdentity = ResolveTemplateEmployee(tableNumber, personalNumber, staffContext)
@@ -348,30 +347,30 @@ Private Sub ValidateTemplateRow(ByVal ws As Worksheet, ByVal rowNum As Long, ByV
     staffBirthDate = mdlHelper.ParseDateSafe(GetCellText(staffWs, resolvedRow, CLng(staffContext("ColBirth"))))
 
     If NormalizeText(rankName) <> "" And NormalizeText(rankName) <> NormalizeText(staffRank) Then
-        AddError errors, rowNum, "D", "RANK_MISMATCH", "Воинское звание не совпадает со значением на листе Штат.", resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
+        AddError errors, rowNum, "D", "RANK_MISMATCH", "Rank does not match the Staff sheet.", resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
     End If
 
     If NormalizeText(templateFIO) <> "" And NormalizeFullNameText(templateFIO) <> NormalizeFullNameText(staffFIO) Then
-        AddError errors, rowNum, "E:G", "FIO_MISMATCH", "ФИО не совпадает со значением на листе Штат: " & staffFIO, resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
+        AddError errors, rowNum, "E:G", "FIO_MISMATCH", "Full name does not match the Staff sheet: " & staffFIO, resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
     End If
 
     If birthDate > 0 And staffBirthDate > 0 Then
         If NormalizeDateValue(birthDate) <> NormalizeDateValue(staffBirthDate) Then
-            AddError errors, rowNum, "H", "BIRTHDATE_MISMATCH", "Дата рождения не совпадает со значением на листе Штат.", resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
+            AddError errors, rowNum, "H", "BIRTHDATE_MISMATCH", "Birth date does not match the Staff sheet.", resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
         End If
     End If
 
     If ContainsMobilization( _
         GetCellText(staffWs, resolvedRow, CLng(staffContext("ColContractKind"))), _
         GetCellText(staffWs, resolvedRow, CLng(staffContext("ColContractType")))) Then
-        AddError errors, rowNum, "B:C", "MOBILIZATION_CONTRACT", "Для сотрудника указан контракт по мобилизации.", resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
+        AddError errors, rowNum, "B:C", "MOBILIZATION_CONTRACT", "Mobilization contract is not allowed for this template.", resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
     End If
 
     eventType = NormalizeText(GetCellText(staffWs, resolvedRow, CLng(staffContext("ColEventType"))))
     effectiveStartDate = mdlHelper.ParseDateSafe(GetCellText(staffWs, resolvedRow, CLng(staffContext("ColEffectiveStart"))))
-    If periodFromDate > 0 And eventType = NormalizeText("Зачисление в списки части") Then
+    If periodFromDate > 0 And eventType = NormalizeText(GetEnrollmentEventTypeName()) Then
         If effectiveStartDate > 0 And periodFromDate < effectiveStartDate Then
-            AddError errors, rowNum, "I", "START_BEFORE_EFFECTIVE", "Период начинается раньше даты 'Начало срока действия' на листе Штат.", resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
+            AddError errors, rowNum, "I", "START_BEFORE_EFFECTIVE", "Period start is earlier than effective enrollment date on the Staff sheet.", resolvedKey, tableNumber, personalNumber, templateFIO, periodFromDate, periodToDate
         End If
     End If
 
@@ -382,7 +381,7 @@ End Sub
 
 Private Sub ValidateRequiredField(ByVal rowNum As Long, ByVal fieldCode As String, ByVal value As String, ByVal identityKey As String, ByVal errors As Collection, ByVal tableNumber As String, ByVal personalNumber As String, ByVal fio As String)
     If Trim$(value) = "" Then
-        AddError errors, rowNum, fieldCode, "REQUIRED", "Не заполнено обязательное поле.", identityKey, tableNumber, personalNumber, fio, 0, 0
+        AddError errors, rowNum, fieldCode, "REQUIRED", "Required field is empty.", identityKey, tableNumber, personalNumber, fio, 0, 0
     End If
 End Sub
 
@@ -419,7 +418,7 @@ Private Function ResolveTemplateEmployee(ByVal tableNumber As String, ByVal pers
         If tableRow <> personalRow Then
             result("HasError") = True
             result("ErrorCode") = "ID_CONFLICT"
-            result("ErrorMessage") = "Табельный номер и личный номер указывают на разных сотрудников."
+            result("ErrorMessage") = "Table number and personal number point to different employees."
             Set ResolveTemplateEmployee = result
             Exit Function
         End If
@@ -433,7 +432,7 @@ Private Function ResolveTemplateEmployee(ByVal tableNumber As String, ByVal pers
     If result("TableState") = "DUPLICATE" Or result("PersonalState") = "DUPLICATE" Then
         result("HasError") = True
         result("ErrorCode") = "STAFF_DUPLICATE"
-        result("ErrorMessage") = "В листе Штат обнаружены дублирующиеся идентификаторы."
+        result("ErrorMessage") = "Duplicate employee identifiers were found on the Staff sheet."
         Set ResolveTemplateEmployee = result
         Exit Function
     End If
@@ -449,17 +448,17 @@ Private Function ResolveTemplateEmployee(ByVal tableNumber As String, ByVal pers
     If tableKey <> "" And tableRow = 0 Then
         result("HasError") = True
         result("ErrorCode") = "TABLE_NOT_FOUND"
-        result("ErrorMessage") = "Сотрудник не найден по табельному номеру."
+        result("ErrorMessage") = "Employee was not found by table number."
     End If
 
     If personalKey <> "" And personalRow = 0 Then
         result("HasError") = True
         If result("ErrorCode") = "TABLE_NOT_FOUND" Then
             result("ErrorCode") = "IDENTITY_NOT_FOUND"
-            result("ErrorMessage") = "Сотрудник не найден по табельному и/или личному номеру."
+            result("ErrorMessage") = "Employee was not found by both table and personal number."
         Else
             result("ErrorCode") = "PERSONAL_NOT_FOUND"
-            result("ErrorMessage") = "Сотрудник не найден по личному номеру."
+            result("ErrorMessage") = "Employee was not found by personal number."
         End If
     End If
 
@@ -542,11 +541,11 @@ Private Sub ApplyPeriodOverlapChecks(ByVal periodGroups As Object, ByVal errors 
                     otherKey = BuildPeriodOverlapKey(CStr(groupKey), entryB("PeriodFrom"), entryB("PeriodTo"), entryA("PeriodFrom"), entryA("PeriodTo"))
 
                     AddError errors, CLng(entryA("Row")), "I:J", "PERIOD_OVERLAP", _
-                        "Период пересекается со строкой " & entryB("Row") & ": " & Format(entryB("PeriodFrom"), "dd.mm.yyyy") & " - " & Format(entryB("PeriodTo"), "dd.mm.yyyy"), _
+                        "Period overlaps with row " & entryB("Row") & ": " & Format(entryB("PeriodFrom"), "dd.mm.yyyy") & " - " & Format(entryB("PeriodTo"), "dd.mm.yyyy"), _
                         ownKey, CStr(entryA("TableNumber")), CStr(entryA("PersonalNumber")), CStr(entryA("FIO")), entryA("PeriodFrom"), entryA("PeriodTo"), True
 
                     AddError errors, CLng(entryB("Row")), "I:J", "PERIOD_OVERLAP", _
-                        "Период пересекается со строкой " & entryA("Row") & ": " & Format(entryA("PeriodFrom"), "dd.mm.yyyy") & " - " & Format(entryA("PeriodTo"), "dd.mm.yyyy"), _
+                        "Period overlaps with row " & entryA("Row") & ": " & Format(entryA("PeriodFrom"), "dd.mm.yyyy") & " - " & Format(entryA("PeriodTo"), "dd.mm.yyyy"), _
                         otherKey, CStr(entryB("TableNumber")), CStr(entryB("PersonalNumber")), CStr(entryB("FIO")), entryB("PeriodFrom"), entryB("PeriodTo"), True
                 End If
             Next j
@@ -708,14 +707,14 @@ End Function
 
 Private Function BuildSummaryMessage(ByVal checkedRows As Long, ByVal counts As Object, ByVal workbookName As String, ByVal historySheetName As String) As String
     BuildSummaryMessage = _
-        "Проверка файла завершена." & vbCrLf & vbCrLf & _
-        "Файл: " & workbookName & vbCrLf & _
-        "Проверено строк: " & checkedRows & vbCrLf & _
-        "Текущих ошибок: " & counts("CURRENT") & vbCrLf & _
-        "Новых ошибок: " & counts("NEW") & vbCrLf & _
-        "Ошибок без изменений: " & counts("OPEN") & vbCrLf & _
-        "Исправлено ошибок: " & counts("RESOLVED") & vbCrLf & vbCrLf & _
-        "История записана на лист '" & historySheetName & "'."
+        "Template validation completed." & vbCrLf & vbCrLf & _
+        "Workbook: " & workbookName & vbCrLf & _
+        "Checked rows: " & checkedRows & vbCrLf & _
+        "Current issues: " & counts("CURRENT") & vbCrLf & _
+        "New issues: " & counts("NEW") & vbCrLf & _
+        "Repeated issues: " & counts("OPEN") & vbCrLf & _
+        "Resolved issues: " & counts("RESOLVED") & vbCrLf & vbCrLf & _
+        "History sheet: '" & historySheetName & "'."
 End Function
 
 Private Sub ApplyErrorsToSheet(ByVal ws As Worksheet, ByVal errors As Collection)
@@ -833,8 +832,8 @@ Private Function NormalizeText(ByVal value As String) As String
 
     cleaned = Trim$(Replace(Replace(CStr(value), vbCr, " "), vbLf, " "))
     cleaned = Replace(cleaned, Chr$(160), " ")
-    cleaned = Replace(cleaned, "ё", "е")
-    cleaned = Replace(cleaned, "Ё", "Е")
+    cleaned = Replace(cleaned, ChrW$(1105), ChrW$(1077))
+    cleaned = Replace(cleaned, ChrW$(1025), ChrW$(1045))
 
     Do While InStr(cleaned, "  ") > 0
         cleaned = Replace(cleaned, "  ", " ")
@@ -891,15 +890,16 @@ End Function
 
 Private Function ContainsMobilization(ByVal contractKind As String, ByVal contractType As String) As Boolean
     ContainsMobilization = _
-        InStr(1, NormalizeText(contractKind), "мобилиз", vbTextCompare) > 0 Or _
-        InStr(1, NormalizeText(contractType), "мобилиз", vbTextCompare) > 0
+        InStr(1, NormalizeText(contractKind), NormalizeText(GetMobilizationToken()), vbTextCompare) > 0 Or _
+        InStr(1, NormalizeText(contractType), NormalizeText(GetMobilizationToken()), vbTextCompare) > 0
 End Function
 
 Private Function GetOrCreateHistorySheet(ByVal wb As Workbook) As Worksheet
     Dim ws As Worksheet
 
     For Each ws In wb.Worksheets
-        If StrComp(ws.Name, HISTORY_SHEET_NAME, vbTextCompare) = 0 Then
+        If StrComp(ws.Name, HISTORY_SHEET_NAME, vbTextCompare) = 0 _
+            Or StrComp(ws.Name, GetLegacyHistorySheetName(), vbTextCompare) = 0 Then
             Set GetOrCreateHistorySheet = ws
             Exit Function
         End If
@@ -914,7 +914,7 @@ End Function
 Private Sub InitializeHistorySheet(ByVal ws As Worksheet)
     Dim headers As Variant
 
-    headers = Array("RunID", "Проверено", "Имя файла", "Лист", "Строка шаблона", "Табельный", "Личный номер", "ФИО", "Период с", "Период по", "Код ошибки", "Поле", "Описание", "Статус", "Ключ ошибки", "Предыдущий RunID")
+    headers = Array("RunID", "CheckedAt", "FileName", "SheetName", "TemplateRow", "TableNumber", "PersonalNumber", "FullName", "PeriodFrom", "PeriodTo", "ErrorCode", "FieldCode", "Description", "Status", "ErrorKey", "PreviousRunID")
     ws.Range("A1:P1").value = headers
 
     On Error Resume Next
@@ -927,6 +927,29 @@ Private Sub InitializeHistorySheet(ByVal ws As Worksheet)
     EnsureHistorySheetLayout ws
     On Error GoTo 0
 End Sub
+
+Private Function GetEnrollmentEventTypeName() As String
+    GetEnrollmentEventTypeName = BuildUnicodeText(1079, 1072, 1095, 1080, 1089, 1083, 1077, 1085, 1080, 1077, 32, 1074, 32, 1089, 1087, 1080, 1089, 1082, 1080, 32, 1095, 1072, 1089, 1090, 1080)
+End Function
+
+Private Function GetMobilizationToken() As String
+    GetMobilizationToken = BuildUnicodeText(1084, 1086, 1073, 1080, 1083, 1080, 1079, 1072, 1094)
+End Function
+
+Private Function GetLegacyHistorySheetName() As String
+    GetLegacyHistorySheetName = BuildUnicodeText(1048, 1089, 1090, 1086, 1088, 1080, 1103, 95, 1087, 1088, 1086, 1074, 1077, 1088, 1086, 1082, 95, 1044, 56, 57)
+End Function
+
+Private Function BuildUnicodeText(ParamArray codePoints() As Variant) As String
+    Dim i As Long
+    Dim result As String
+
+    For i = LBound(codePoints) To UBound(codePoints)
+        result = result & ChrW$(CLng(codePoints(i)))
+    Next i
+
+    BuildUnicodeText = result
+End Function
 
 Private Function LoadPreviousRunErrors(ByVal ws As Worksheet, ByRef lastRunId As Long) As Object
     Dim result As Object

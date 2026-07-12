@@ -2,6 +2,7 @@
 param(
     [string]$WorkbookPath = ".\CreateOrder.xlsm",
     [string]$ModulePath = ".\CreateOrder.xlsm.modules\mdlZP12Validation.bas",
+    [string]$HelperPath = ".\CreateOrder.xlsm.modules\mdlHelper.bas",
     [string]$RibbonHandlersPath = ".\CreateOrder.xlsm.modules\mdlRibbonHandlers.bas",
     [string]$SourceTemplatePath = "",
     [string]$RunTemplatePath = ".\ZP12_TEST_RUN.xlsx",
@@ -61,6 +62,7 @@ function Invoke-ZP12MacroRun {
     param(
         [string]$WorkbookFullPath,
         [string]$ModuleFullPath,
+        [string]$HelperFullPath,
         [string]$RibbonHandlersFullPath,
         [string]$TemplateFullPath
     )
@@ -82,6 +84,13 @@ function Invoke-ZP12MacroRun {
         }
 
         try {
+            $component = $vbProject.VBComponents.Item("mdlHelper")
+            $vbProject.VBComponents.Remove($component)
+        }
+        catch {
+        }
+
+        try {
             $component = $vbProject.VBComponents.Item("mdlRibbonHandlers")
             $vbProject.VBComponents.Remove($component)
         }
@@ -89,6 +98,7 @@ function Invoke-ZP12MacroRun {
         }
 
         $null = $vbProject.VBComponents.Import($ModuleFullPath)
+        $null = $vbProject.VBComponents.Import($HelperFullPath)
         $null = $vbProject.VBComponents.Import($RibbonHandlersFullPath)
         $macroWb.Save()
 
@@ -127,8 +137,20 @@ from openpyxl import load_workbook
 
 path = Path(r'''$WorkbookFullPath''')
 wb = load_workbook(path)
-history_name = 'История_проверок_Д89'
-if history_name not in wb.sheetnames:
+history_name = None
+for candidate in ('D89_History', 'История_проверок_Д89'):
+    if candidate in wb.sheetnames:
+        history_name = candidate
+        break
+
+if history_name is None:
+    for sheet_name in wb.sheetnames:
+        ws = wb[sheet_name]
+        if ws.cell(1, 1).value == 'RunID' and ws.cell(1, 14).value in ('Status', 'Статус'):
+            history_name = sheet_name
+            break
+
+if history_name is None:
     raise SystemExit('History sheet not found')
 
 main_ws = wb[wb.sheetnames[0]]
@@ -159,7 +181,7 @@ for r in range(2, history_ws.max_row + 1):
         rows.append(item)
         run_id = str(item['RunID'])
         status_by_run.setdefault(run_id, {})
-        status = item['Статус']
+        status = item.get('Status', item.get('Статус'))
         status_by_run[run_id][status] = status_by_run[run_id].get(status, 0) + 1
 
 print(json.dumps({
@@ -186,7 +208,7 @@ wb = load_workbook(path)
 ws = wb[wb.sheetnames[0]]
 
 ws['B5'] = 21463
-ws['G7'] = 'Владимирович'
+ws['G7'] = '\u0412\u043b\u0430\u0434\u0438\u043c\u0438\u0440\u043e\u0432\u0438\u0447'
 ws['I11'] = datetime(2023, 10, 21)
 ws['J11'] = datetime(2023, 10, 25)
 ws['I11'].number_format = 'dd.mm.yyyy'
@@ -250,6 +272,7 @@ function Assert-SetEqual {
 
 $workbookFullPath = Resolve-ProjectPath $WorkbookPath
 $moduleFullPath = Resolve-ProjectPath $ModulePath
+$helperFullPath = Resolve-ProjectPath $HelperPath
 $ribbonHandlersFullPath = Resolve-ProjectPath $RibbonHandlersPath
 $sourceTemplateFullPath = if ([string]::IsNullOrWhiteSpace($SourceTemplatePath)) { Get-DefaultSourceTemplate } else { Resolve-ProjectPath $SourceTemplatePath }
 $runTemplateFullPath = Resolve-ProjectPath $RunTemplatePath
@@ -257,12 +280,14 @@ $pass1SnapshotFullPath = Resolve-ProjectPath $Pass1SnapshotPath
 
 if (-not (Test-Path $workbookFullPath)) { throw "Не найден workbook: $workbookFullPath" }
 if (-not (Test-Path $moduleFullPath)) { throw "Не найден модуль: $moduleFullPath" }
+if (-not (Test-Path $helperFullPath)) { throw "Не найден helper-модуль: $helperFullPath" }
 if (-not (Test-Path $ribbonHandlersFullPath)) { throw "Не найден ribbon-модуль: $ribbonHandlersFullPath" }
 if (-not (Test-Path $sourceTemplateFullPath)) { throw "Не найден шаблон: $sourceTemplateFullPath" }
 
 Write-Host "=== D89 regression ===" -ForegroundColor Cyan
 Write-Host "Workbook: $workbookFullPath"
 Write-Host "Module:   $moduleFullPath"
+Write-Host "Helper:   $helperFullPath"
 Write-Host "Ribbon:   $ribbonHandlersFullPath"
 Write-Host "Fixture:  $sourceTemplateFullPath"
 
@@ -272,7 +297,7 @@ if (Test-Path $pass1SnapshotFullPath) {
 }
 
 Write-Host "[1/5] First validation run..." -ForegroundColor Yellow
-Invoke-ZP12MacroRun -WorkbookFullPath $workbookFullPath -ModuleFullPath $moduleFullPath -RibbonHandlersFullPath $ribbonHandlersFullPath -TemplateFullPath $runTemplateFullPath
+Invoke-ZP12MacroRun -WorkbookFullPath $workbookFullPath -ModuleFullPath $moduleFullPath -HelperFullPath $helperFullPath -RibbonHandlersFullPath $ribbonHandlersFullPath -TemplateFullPath $runTemplateFullPath
 $pass1State = Get-ZP12State -WorkbookFullPath $runTemplateFullPath
 Copy-Item -Path $runTemplateFullPath -Destination $pass1SnapshotFullPath -Force
 
@@ -280,7 +305,7 @@ Write-Host "[2/5] Apply controlled fixes..." -ForegroundColor Yellow
 Apply-RegressionFixes -WorkbookFullPath $runTemplateFullPath
 
 Write-Host "[3/5] Second validation run..." -ForegroundColor Yellow
-Invoke-ZP12MacroRun -WorkbookFullPath $workbookFullPath -ModuleFullPath $moduleFullPath -RibbonHandlersFullPath $ribbonHandlersFullPath -TemplateFullPath $runTemplateFullPath
+Invoke-ZP12MacroRun -WorkbookFullPath $workbookFullPath -ModuleFullPath $moduleFullPath -HelperFullPath $helperFullPath -RibbonHandlersFullPath $ribbonHandlersFullPath -TemplateFullPath $runTemplateFullPath
 $pass2State = Get-ZP12State -WorkbookFullPath $runTemplateFullPath
 
 Write-Host "[4/5] Assert expected status transitions..." -ForegroundColor Yellow

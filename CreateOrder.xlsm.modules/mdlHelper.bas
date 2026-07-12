@@ -13,6 +13,168 @@ Public colLichniyNomer_Global As Long
 Public colZvanie_Global As Long
 Public colDolzhnost_Global As Long
 Public colVoinskayaChast_Global As Long
+Private Const FIO_CASE_DATIVE As String = "D"
+Private Const FIO_CASE_GENITIVE As String = "R"
+Private Const FIO_CASE_NOMINATIVE As String = "N"
+Private Const FIO_GENDER_UNKNOWN As Long = 0
+Private Const FIO_GENDER_MALE As Long = 1
+Private Const FIO_GENDER_FEMALE As Long = 2
+
+Private Function StaffHeaderPersonalNumber() As String
+    StaffHeaderPersonalNumber = Ru(1083, 1080, 1095, 1085, 1099, 1081, 32, 1085, 1086, 1084, 1077, 1088)
+End Function
+
+Private Function StaffHeaderRank() As String
+    StaffHeaderRank = Ru(1074, 1086, 1080, 1085, 1089, 1082, 1086, 1077, 32, 1079, 1074, 1072, 1085, 1080, 1077)
+End Function
+
+Private Function StaffHeaderShortRank() As String
+    StaffHeaderShortRank = Ru(1079, 1074, 1072, 1085, 1080, 1077)
+End Function
+
+Private Function StaffHeaderPosition() As String
+    StaffHeaderPosition = Ru(1076, 1086, 1083, 1078, 1085, 1086, 1089, 1090, 1100)
+End Function
+
+Private Function StaffHeaderStaffPosition() As String
+    StaffHeaderStaffPosition = Ru(1096, 1090, 1072, 1090, 1085, 1072, 1103, 32, 1076, 1086, 1083, 1078, 1085, 1086, 1089, 1090, 1100)
+End Function
+
+Private Function StaffHeaderFio() As String
+    StaffHeaderFio = Ru(1083, 1080, 1094, 1086)
+End Function
+
+Private Function StaffHeaderUnit() As String
+    StaffHeaderUnit = Ru(1095, 1072, 1089, 1090, 1100)
+End Function
+
+Private Function StaffHeaderMilitaryUnit() As String
+    StaffHeaderMilitaryUnit = Ru(1074, 1086, 1080, 1085, 1089, 1082, 1072, 1103, 32, 1095, 1072, 1089, 1090, 1100)
+End Function
+
+Private Function StaffHeaderPersonnelSection() As String
+    StaffHeaderPersonnelSection = Ru(1088, 1072, 1079, 1076, 1077, 1083, 32, 1087, 1077, 1088, 1089, 1086, 1085, 1072, 1083, 1072)
+End Function
+
+Private Function StaffHeaderArmyUnitAlt() As String
+    StaffHeaderArmyUnitAlt = Ru(1074, 1086, 1081, 1089, 1082, 1086, 1074, 1072, 1103, 32, 1095, 1072, 1089, 1090, 1100)
+End Function
+
+Private Function StaffHeaderTableNumber() As String
+    StaffHeaderTableNumber = Ru(1090, 1072, 1073, 1077, 1083, 1100, 1085, 1099, 1081, 32, 1085, 1086, 1084, 1077, 1088)
+End Function
+
+Private Function StaffHeaderBirthDate() As String
+    StaffHeaderBirthDate = Ru(1076, 1072, 1090, 1072, 32, 1088, 1086, 1078, 1076, 1077, 1085, 1080, 1103)
+End Function
+
+Private Function StaffHeaderCitizenship() As String
+    StaffHeaderCitizenship = Ru(1075, 1088, 1072, 1078, 1076, 1072, 1085, 1089, 1090, 1074, 1086)
+End Function
+
+Private Function StaffHeaderEmployeeGroup() As String
+    StaffHeaderEmployeeGroup = Ru(1075, 1088, 1091, 1087, 1087, 1072, 32, 1089, 1086, 1090, 1088, 1091, 1076, 1085, 1080, 1082, 1086, 1074)
+End Function
+
+Private Function StaffHeaderContractKind() As String
+    StaffHeaderContractKind = Ru(1074, 1080, 1076, 32, 1082, 1086, 1085, 1090, 1088, 1072, 1082, 1090, 1072)
+End Function
+
+Private Function StaffHeaderContractType() As String
+    StaffHeaderContractType = Ru(1090, 1080, 1087, 32, 1082, 1086, 1085, 1090, 1088, 1072, 1082, 1090, 1072)
+End Function
+
+Private Function StaffHeaderContractStartDate() As String
+    StaffHeaderContractStartDate = Ru(1076, 1072, 1090, 1072, 32, 1085, 1072, 1095, 1072, 1083, 1072, 32, 1082, 1086, 1085, 1090, 1088, 1072, 1082, 1090, 1072)
+End Function
+
+Private Function StaffHeaderVus() As String
+    StaffHeaderVus = Ru(1042, 1059, 1057)
+End Function
+
+Private Function StaffHeaderTariffRank() As String
+    StaffHeaderTariffRank = Ru(1090, 1072, 1088, 1080, 1092, 1085, 1099, 1081, 32, 1088, 1072, 1079, 1088, 1103, 1076)
+End Function
+
+Private Function StaffHeaderBankAccount() As String
+    StaffHeaderBankAccount = Ru(1085, 1086, 1084, 1077, 1088, 32, 1089, 1095, 1077, 1090, 1072, 32, 1074, 32, 1073, 1072, 1085, 1082, 1077)
+End Function
+
+Private Function StaffMessageMissingColumnsTitle() As String
+    StaffMessageMissingColumnsTitle = Ru(1057, 1090, 1088, 1091, 1082, 1090, 1091, 1088, 1072, 32, 1083, 1080, 1089, 1090, 1072)
+End Function
+
+Private Function StaffMessageMissingColumnsIntro() As String
+    StaffMessageMissingColumnsIntro = Ru(1054, 1096, 1080, 1073, 1082, 1072, 32, 1087, 1088, 1080, 32, 1087, 1086, 1080, 1089, 1082, 1077, 32, 1086, 1073, 1103, 1079, 1072, 1090, 1077, 1083, 1100, 1085, 1099, 1093, 32, 1082, 1086, 1083, 1086, 1085, 1086, 1082, 32, 1083, 1080, 1089, 1090, 1072, 32, 39, 1064, 1090, 1072, 1090, 39, 46)
+End Function
+
+Private Function StaffMessageMissingColumnsList() As String
+    StaffMessageMissingColumnsList = Ru(1053, 1077, 32, 1091, 1076, 1072, 1083, 1086, 1089, 1100, 32, 1086, 1087, 1088, 1077, 1076, 1077, 1083, 1080, 1090, 1100, 32, 1089, 1083, 1077, 1076, 1091, 1102, 1097, 1080, 1077, 32, 1089, 1090, 1086, 1083, 1073, 1094, 1099, 58)
+End Function
+
+Private Function StaffMessageMissingColumnsHint() As String
+    StaffMessageMissingColumnsHint = Ru(1055, 1088, 1086, 1074, 1077, 1088, 1100, 1090, 1077, 32, 1079, 1072, 1075, 1086, 1083, 1086, 1074, 1082, 1080, 32, 1085, 1072, 32, 1083, 1080, 1089, 1090, 1077, 32, 39, 1064, 1090, 1072, 1090, 39, 46)
+End Function
+
+Private Function StaffKeyFio() As String
+    StaffKeyFio = Ru(1051, 1080, 1094, 1086)
+End Function
+
+Private Function StaffKeyPersonalNumber() As String
+    StaffKeyPersonalNumber = Ru(1051, 1080, 1095, 1085, 1099, 1081, 32, 1085, 1086, 1084, 1077, 1088)
+End Function
+
+Private Function StaffKeyRank() As String
+    StaffKeyRank = Ru(1042, 1086, 1080, 1085, 1089, 1082, 1086, 1077, 32, 1079, 1074, 1072, 1085, 1080, 1077)
+End Function
+
+Private Function StaffKeyUnit() As String
+    StaffKeyUnit = Ru(1063, 1072, 1089, 1090, 1100)
+End Function
+
+Private Function StaffKeyPosition() As String
+    StaffKeyPosition = Ru(1064, 1090, 1072, 1090, 1085, 1072, 1103, 32, 1076, 1086, 1083, 1078, 1085, 1086, 1089, 1090, 1100)
+End Function
+
+Private Function StaffKeyTableNumber() As String
+    StaffKeyTableNumber = Ru(1058, 1072, 1073, 1077, 1083, 1100, 1085, 1099, 1081, 32, 1085, 1086, 1084, 1077, 1088)
+End Function
+
+Private Function StaffKeyBirthDate() As String
+    StaffKeyBirthDate = Ru(1044, 1072, 1090, 1072, 32, 1088, 1086, 1078, 1076, 1077, 1085, 1080, 1103)
+End Function
+
+Private Function StaffKeyCitizenship() As String
+    StaffKeyCitizenship = Ru(1043, 1088, 1072, 1078, 1076, 1072, 1085, 1089, 1090, 1074, 1086)
+End Function
+
+Private Function StaffKeyServiceCategory() As String
+    StaffKeyServiceCategory = Ru(1043, 1088, 1091, 1087, 1087, 1072, 32, 1089, 1086, 1090, 1088, 1091, 1076, 1085, 1080, 1082, 1086, 1074)
+End Function
+
+Private Function StaffKeyContractKind() As String
+    StaffKeyContractKind = Ru(1042, 1080, 1076, 32, 1082, 1086, 1085, 1090, 1088, 1072, 1082, 1090, 1072)
+End Function
+
+Private Function StaffKeyContractType() As String
+    StaffKeyContractType = Ru(1058, 1080, 1087, 32, 1082, 1086, 1085, 1090, 1088, 1072, 1082, 1090, 1072)
+End Function
+
+Private Function StaffKeyContractStartDate() As String
+    StaffKeyContractStartDate = Ru(1044, 1072, 1090, 1072, 32, 1085, 1072, 1095, 1072, 1083, 1072, 32, 1082, 1086, 1085, 1090, 1088, 1072, 1082, 1090, 1072)
+End Function
+
+Private Function StaffKeyVus() As String
+    StaffKeyVus = Ru(1042, 1059, 1057)
+End Function
+
+Private Function StaffKeyTariffRank() As String
+    StaffKeyTariffRank = Ru(1058, 1072, 1088, 1080, 1092, 1085, 1099, 1081, 32, 1088, 1072, 1079, 1088, 1103, 1076)
+End Function
+
+Private Function StaffKeyBankAccount() As String
+    StaffKeyBankAccount = Ru(1053, 1086, 1084, 1077, 1088, 32, 1089, 1095, 1077, 1090, 1072, 32, 1074, 32, 1073, 1072, 1085, 1082, 1077)
+End Function
 
 ' ==============================================================================
 ' 1. INITIALIZATION & COLUMN FINDING
@@ -20,10 +182,11 @@ Public colVoinskayaChast_Global As Long
 
 Public Sub InitStaffColumnIndexes()
     Dim wsStaff As Worksheet
-    Set wsStaff = ThisWorkbook.Sheets("Штат")
+    Set wsStaff = GetStaffWorksheet()
+    If wsStaff Is Nothing Then Exit Sub
     
     If Not FindColumnNumbers(wsStaff, colLichniyNomer_Global, colZvanie_Global, colFIO_Global, colDolzhnost_Global, colVoinskayaChast_Global) Then
-        ' Сообщение уже выводится внутри FindColumnNumbers, здесь просто прерываем работу
+        ' ????????? ??? ????????? ?????? FindColumnNumbers, ????? ?????? ????????? ??????
         End
     End If
 End Sub
@@ -46,64 +209,131 @@ End Function
 
 Public Function FindColumnNumbers(ws As Worksheet, ByRef colLichniyNomer As Long, ByRef colZvanie As Long, ByRef colFIO As Long, ByRef colDolzhnost As Long, ByRef colVoinskayaChast As Long) As Boolean
     Dim lastCol As Long, i As Long, headerText As String
-    Dim foundFIO As Boolean, foundDolzhnost As Boolean
+    Dim fioCandidate As Long, personnelSectionFallback As Long
+    Dim personalNumberHeader As String
+    Dim rankHeader As String
+    Dim shortRankHeader As String
+    Dim positionHeader As String
+    Dim staffPositionHeader As String
+    Dim fioHeader As String
+    Dim unitHeader As String
+    Dim militaryUnitHeader As String
+    Dim personnelSectionHeader As String
 
     colLichniyNomer = 0: colZvanie = 0: colFIO = 0: colDolzhnost = 0: colVoinskayaChast = 0
-    foundFIO = False: foundDolzhnost = False
+
+    personalNumberHeader = NormalizeHeaderText(StaffHeaderPersonalNumber())
+    rankHeader = NormalizeHeaderText(StaffHeaderRank())
+    shortRankHeader = NormalizeHeaderText(StaffHeaderShortRank())
+    positionHeader = NormalizeHeaderText(StaffHeaderPosition())
+    staffPositionHeader = NormalizeHeaderText(StaffHeaderStaffPosition())
+    fioHeader = NormalizeHeaderText(StaffHeaderFio())
+    unitHeader = NormalizeHeaderText(StaffHeaderUnit())
+    militaryUnitHeader = NormalizeHeaderText(StaffHeaderMilitaryUnit())
+    personnelSectionHeader = NormalizeHeaderText(StaffHeaderPersonnelSection())
 
     lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
 
     For i = 1 To lastCol
-        headerText = LCase(Trim(ws.Cells(1, i).value))
-        
-        ' 1. Личный номер
-        If InStr(headerText, "личный номер") > 0 Then colLichniyNomer = i
-        
-        ' 2. Воинское звание (понимает "звание" или "воинское звание")
-        If InStr(headerText, "воинское звание") > 0 Or InStr(headerText, "звание") > 0 Then colZvanie = i
-        
-        ' 3. Часть
-        If InStr(headerText, "часть") > 0 Or InStr(headerText, "раздел персонала") > 0 Then colVoinskayaChast = i
-        
-        ' 4. ФИО (понимает "лицо", "фио", "фамилия")
-        If headerText = "лицо" Or InStr(headerText, "фио") > 0 Or InStr(headerText, "фамилия") > 0 Then
+        headerText = NormalizeHeaderText(CStr(ws.Cells(1, i).Value))
+
+        If headerText = personalNumberHeader Then
+            colLichniyNomer = i
+        ElseIf headerText = rankHeader Or headerText = shortRankHeader Then
+            colZvanie = i
+        ElseIf headerText = positionHeader Or headerText = staffPositionHeader Then
+            If IsTextColumn(ws, i) Or IsLongPositionColumn(ws, i) Then
+                colDolzhnost = i
+            ElseIf colDolzhnost = 0 Then
+                colDolzhnost = i
+            End If
+        ElseIf headerText = fioHeader Then
             If IsTextFIOColumn(ws, i) Then
-                colFIO = i: foundFIO = True
-            ElseIf colFIO = 0 Then
-                colFIO = i ' Fallback, если вдруг тест IsTextFIOColumn не прошел
+                colFIO = i
+            ElseIf fioCandidate = 0 Then
+                fioCandidate = i
             End If
+        ElseIf headerText = unitHeader Or headerText = militaryUnitHeader Then
+            colVoinskayaChast = i
+        ElseIf headerText = personnelSectionHeader Then
+            If personnelSectionFallback = 0 Then personnelSectionFallback = i
+            If ColumnContainsUnitText(ws, i) Then colVoinskayaChast = i
         End If
-        
-        ' 5. Должность (Ищем ДЛИННУЮ с цифрами приоритетно, понимает "должность")
-        If InStr(headerText, "штатная должность") > 0 Or InStr(headerText, "штатная") > 0 Then
-            If IsLongPositionColumn(ws, i) Then
-                colDolzhnost = i: foundDolzhnost = True
-            ElseIf colDolzhnost = 0 And IsTextColumn(ws, i) Then
-                colDolzhnost = i: foundDolzhnost = True
-            End If
-        End If
-       
-      
     Next i
+
+    If colFIO = 0 Then colFIO = fioCandidate
+    If colVoinskayaChast = 0 Then colVoinskayaChast = personnelSectionFallback
 
     If colLichniyNomer > 0 And colZvanie > 0 And colFIO > 0 And colDolzhnost > 0 And colVoinskayaChast > 0 Then
         FindColumnNumbers = True
     Else
         FindColumnNumbers = False
         
-        ' Формируем подробный отчет об отсутствующих колонках
+        ' ????????? ????????? ????? ?? ????????????? ????????
         Dim missingCols As String
         missingCols = ""
-        If colLichniyNomer = 0 Then missingCols = missingCols & "? Личный номер" & vbCrLf
-        If colZvanie = 0 Then missingCols = missingCols & "? Воинское звание" & vbCrLf
-        If colFIO = 0 Then missingCols = missingCols & "? Лицо (или ФИО)" & vbCrLf
-        If colDolzhnost = 0 Then missingCols = missingCols & "? Штатная должность" & vbCrLf
-        If colVoinskayaChast = 0 Then missingCols = missingCols & "? Часть (или Раздел персонала)" & vbCrLf
+        If colLichniyNomer = 0 Then missingCols = missingCols & "- " & StaffKeyPersonalNumber() & vbCrLf
+        If colZvanie = 0 Then missingCols = missingCols & "- " & StaffKeyRank() & vbCrLf
+        If colFIO = 0 Then missingCols = missingCols & "- " & Ru(1051, 1080, 1094, 1086, 32, 40, 1060, 1048, 1054, 41) & vbCrLf
+        If colDolzhnost = 0 Then missingCols = missingCols & "- " & StaffKeyPosition() & vbCrLf
+        If colVoinskayaChast = 0 Then missingCols = missingCols & "- " & Ru(1063, 1072, 1089, 1090, 1100, 32, 1080, 1083, 1080, 32, 1056, 1072, 1079, 1076, 1077, 1083, 32, 1087, 1077, 1088, 1089, 1086, 1085, 1072, 1083, 1072) & vbCrLf
         
-        MsgBox "Ошибка при проверке структуры листа 'Штат'." & vbCrLf & vbCrLf & _
-               "Не найдены следующие обязательные столбцы:" & vbCrLf & missingCols & vbCrLf & _
-               "Пожалуйста, проверьте заголовки в первой строке.", vbCritical, "Не хватает данных"
+        MsgBox StaffMessageMissingColumnsIntro() & vbCrLf & vbCrLf & _
+               StaffMessageMissingColumnsList() & vbCrLf & missingCols & vbCrLf & _
+               StaffMessageMissingColumnsHint(), vbCritical, StaffMessageMissingColumnsTitle()
     End If
+End Function
+
+Public Function GetStaffWorksheet() As Worksheet
+    On Error Resume Next
+    Set GetStaffWorksheet = ThisWorkbook.Worksheets(mdlReferenceData.SHEET_STAFF)
+    On Error GoTo 0
+End Function
+
+Public Function GetDsoWorksheet() As Worksheet
+    Dim ws As Worksheet
+    Dim targetName As String
+
+    targetName = Ru(1044, 1057, 1054)
+
+    On Error Resume Next
+    Set GetDsoWorksheet = ThisWorkbook.Worksheets(targetName)
+    On Error GoTo 0
+    If Not GetDsoWorksheet Is Nothing Then Exit Function
+
+    For Each ws In ThisWorkbook.Worksheets
+        If LCase$(Trim$(ws.CodeName)) = LCase$(Trim$(Ru(1051, 1080, 1089, 1090) & "1")) Then
+            Set GetDsoWorksheet = ws
+            Exit Function
+        End If
+    Next ws
+End Function
+
+Private Function NormalizeHeaderText(ByVal rawValue As String) As String
+    NormalizeHeaderText = LCase$(Trim$(Replace$(Replace$(rawValue, vbCr, " "), vbLf, " ")))
+    Do While InStr(NormalizeHeaderText, "  ") > 0
+        NormalizeHeaderText = Replace$(NormalizeHeaderText, "  ", " ")
+    Loop
+End Function
+
+Private Function ColumnContainsUnitText(ByVal ws As Worksheet, ByVal colNum As Long) As Boolean
+    Dim lastRow As Long, i As Long
+    Dim valueText As String
+
+    lastRow = ws.Cells(ws.Rows.count, colNum).End(xlUp).Row
+    If lastRow > 20 Then lastRow = 20
+
+    For i = 2 To lastRow
+        valueText = LCase$(Trim$(CStr(ws.Cells(i, colNum).Value)))
+        If valueText <> "" Then
+            If InStr(valueText, LCase$(StaffHeaderMilitaryUnit())) > 0 _
+               Or InStr(valueText, LCase$(StaffHeaderArmyUnitAlt())) > 0 _
+               Or InStr(valueText, "РІ/С‡") > 0 Then
+                ColumnContainsUnitText = True
+                Exit Function
+            End If
+        End If
+    Next i
 End Function
 
 Private Function IsTextFIOColumn(ws As Worksheet, colNum As Long) As Boolean
@@ -147,10 +377,20 @@ End Function
 ' ==============================================================================
 
 Public Function ContainsLetters(Text As String) As Boolean
-    Dim objRegExp As Object
-    Set objRegExp = CreateObject("VBScript.RegExp")
-    objRegExp.Pattern = "[a-zA-Zа-яА-Я]"
-    ContainsLetters = objRegExp.Test(Text)
+    Dim i As Long
+    Dim currentChar As String
+
+    For i = 1 To Len(Text)
+        currentChar = Mid$(Text, i, 1)
+        If currentChar <> "" Then
+            If LCase$(currentChar) <> UCase$(currentChar) Then
+                ContainsLetters = True
+                Exit Function
+            End If
+        End If
+    Next i
+
+    ContainsLetters = False
 End Function
 
 Public Function ContainsNumbers(Text As String) As Boolean
@@ -184,26 +424,26 @@ End Function
 Public Function GetSettingCutBattalion() As Boolean
     On Error Resume Next
     Dim ws As Worksheet, val As Variant
-    Set ws = ThisWorkbook.Sheets("Настройки")
+    Set ws = ThisWorkbook.Sheets("?????????")
     If ws Is Nothing Then GetSettingCutBattalion = True: Exit Function
     val = ws.Range("B2").value
     If IsEmpty(val) Then GetSettingCutBattalion = True: Exit Function
-    If UCase(CStr(val)) = "НЕТ" Or val = False Or val = 0 Then GetSettingCutBattalion = False Else GetSettingCutBattalion = True
+    If UCase(CStr(val)) = "???" Or val = False Or val = 0 Then GetSettingCutBattalion = False Else GetSettingCutBattalion = True
 End Function
 
 Public Sub SetupSettingsSheet()
     Dim ws As Worksheet
     On Error Resume Next
-    Set ws = ThisWorkbook.Sheets("Настройки")
+    Set ws = ThisWorkbook.Sheets("?????????")
     If ws Is Nothing Then
         Set ws = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.count))
-        ws.Name = "Настройки"
-        ws.Cells(1, 1).value = "Параметр": ws.Cells(1, 2).value = "Значение"
-        ws.Cells(2, 1).value = "Обрезать название батальона?": ws.Cells(2, 2).value = "ДА"
+        ws.Name = "?????????"
+        ws.Cells(1, 1).value = "????????": ws.Cells(1, 2).value = "????????"
+        ws.Cells(2, 1).value = "???????? ???????? ??????????": ws.Cells(2, 2).value = "??"
         ws.Columns("A:B").AutoFit
-        MsgBox "Лист 'Настройки' создан.", vbInformation
+        MsgBox "???? '?????????' ??????.", vbInformation
     Else
-        MsgBox "Лист 'Настройки' уже существует.", vbInformation
+        MsgBox "???? '?????????' ??? ??????????.", vbInformation
     End If
 End Sub
 
@@ -218,15 +458,24 @@ Public Function ParseDateSafe(val As Variant) As Date
     
     Dim d As Date, sVal As String
     sVal = Trim(CStr(val))
+
+    ' 0. Excel date serials (for example, 45220)
+    If IsNumeric(val) Or IsNumeric(sVal) Then
+        d = CDate(CDbl(val))
+        If Year(d) > 2000 And Year(d) < 2100 Then
+            ParseDateSafe = d
+            Exit Function
+        End If
+    End If
     
-    ' 1. Стандартная конвертация
+    ' 1. ??????????? ???????????
     If IsDate(sVal) Then
         d = CDate(sVal)
         If Year(d) < 2000 And Year(d) > 1900 Then d = DateSerial(Year(d) + 100, Month(d), Day(d))
         If Year(d) > 2000 And Year(d) < 2100 Then ParseDateSafe = d: Exit Function
     End If
     
-    ' 2. Ручной разбор
+    ' 2. ?????? ??????
     Dim parts() As String
     If InStr(sVal, ".") > 0 Then
         parts = Split(sVal, ".")
@@ -246,18 +495,18 @@ End Function
 Public Function GetStaffData(queryValue As String, Optional byLichniyNomer As Boolean = True) As Object
     Call EnsureStaffColumnsInitialized
     Dim ws As Worksheet, d As Object, r As Long, searchCol As Long
-    Set ws = ThisWorkbook.Sheets("Штат")
+    Set ws = GetStaffWorksheet()
     Set d = CreateObject("Scripting.Dictionary")
+    If ws Is Nothing Then
+        Set GetStaffData = d
+        Exit Function
+    End If
     
     If byLichniyNomer Then searchCol = colLichniyNomer_Global Else searchCol = colFIO_Global
     r = FindStaffRow(ws, queryValue, searchCol)
     
     If r > 0 Then
-        d("Лицо") = ws.Cells(r, colFIO_Global).value
-        d("Личный номер") = ws.Cells(r, colLichniyNomer_Global).value
-        d("Воинское звание") = ws.Cells(r, colZvanie_Global).value
-        d("Часть") = ws.Cells(r, colVoinskayaChast_Global).value
-        d("Штатная должность") = ws.Cells(r, colDolzhnost_Global).value
+        FillStaffDictionaryFromRow ws, r, d
     End If
     Set GetStaffData = d
 End Function
@@ -266,11 +515,15 @@ Public Function FindEmployeeByAnyNumber(number As String) As Object
     Dim res As Object
     Set res = GetStaffData(number, True)
     
-    ' Если не нашли по личному, пробуем по табельному
+    ' ???? ?? ????? ?? ???????, ??????? ?? ??????????
     If res.count = 0 Then
         Dim wsStaff As Worksheet
         Dim colTable As Long
-        Set wsStaff = ThisWorkbook.Sheets("Штат")
+        Set wsStaff = GetStaffWorksheet()
+        If wsStaff Is Nothing Then
+            Set FindEmployeeByAnyNumber = res
+            Exit Function
+        End If
         colTable = FindTableNumberColumn(wsStaff)
         
         If colTable > 0 Then
@@ -278,15 +531,87 @@ Public Function FindEmployeeByAnyNumber(number As String) As Object
             r = FindStaffRow(wsStaff, number, colTable)
             If r > 0 Then
                 Set res = CreateObject("Scripting.Dictionary")
-                res("Лицо") = wsStaff.Cells(r, colFIO_Global).value
-                res("Личный номер") = wsStaff.Cells(r, colLichniyNomer_Global).value
-                res("Воинское звание") = wsStaff.Cells(r, colZvanie_Global).value
-                res("Часть") = wsStaff.Cells(r, colVoinskayaChast_Global).value
-                res("Штатная должность") = wsStaff.Cells(r, colDolzhnost_Global).value
+                FillStaffDictionaryFromRow wsStaff, r, res
             End If
         End If
     End If
     Set FindEmployeeByAnyNumber = res
+End Function
+
+Private Sub FillStaffDictionaryFromRow(ByVal ws As Worksheet, ByVal rowNum As Long, ByVal targetDictionary As Object)
+    Dim colTable As Long
+    Dim colBirthDate As Long
+    Dim colCitizenship As Long
+    Dim colEmployeeGroup As Long
+    Dim colContractKind As Long
+    Dim colContractType As Long
+    Dim colContractStartDate As Long
+    Dim colVus As Long
+    Dim colTariffRank As Long
+    Dim colBankAccount As Long
+
+    If targetDictionary Is Nothing Then Exit Sub
+    If rowNum < 2 Then Exit Sub
+
+    targetDictionary(StaffKeyFio()) = ws.Cells(rowNum, colFIO_Global).Value
+    targetDictionary(StaffKeyPersonalNumber()) = ws.Cells(rowNum, colLichniyNomer_Global).Value
+    targetDictionary(StaffKeyRank()) = ws.Cells(rowNum, colZvanie_Global).Value
+    targetDictionary(StaffKeyUnit()) = ws.Cells(rowNum, colVoinskayaChast_Global).Value
+    targetDictionary(StaffKeyPosition()) = ws.Cells(rowNum, colDolzhnost_Global).Value
+
+    colTable = FindTableNumberColumn(ws)
+    If colTable > 0 Then targetDictionary(StaffKeyTableNumber()) = ws.Cells(rowNum, colTable).Value
+
+    colBirthDate = FindOptionalStaffColumn(ws, StaffHeaderBirthDate())
+    If colBirthDate > 0 Then targetDictionary(StaffKeyBirthDate()) = ws.Cells(rowNum, colBirthDate).Value
+
+    colCitizenship = FindOptionalStaffColumn(ws, StaffHeaderCitizenship())
+    If colCitizenship > 0 Then targetDictionary(StaffKeyCitizenship()) = ws.Cells(rowNum, colCitizenship).Value
+
+    colEmployeeGroup = FindOptionalStaffColumn(ws, StaffHeaderEmployeeGroup())
+    If colEmployeeGroup > 0 Then targetDictionary(StaffKeyServiceCategory()) = ws.Cells(rowNum, colEmployeeGroup).Value
+
+    colContractKind = FindOptionalStaffColumn(ws, StaffHeaderContractKind())
+    If colContractKind > 0 Then targetDictionary(StaffKeyContractKind()) = ws.Cells(rowNum, colContractKind).Value
+
+    colContractType = FindOptionalStaffColumn(ws, StaffHeaderContractType())
+    If colContractType > 0 Then targetDictionary(StaffKeyContractType()) = ws.Cells(rowNum, colContractType).Value
+
+    colContractStartDate = FindOptionalStaffColumn(ws, StaffHeaderContractStartDate())
+    If colContractStartDate > 0 Then targetDictionary(StaffKeyContractStartDate()) = ws.Cells(rowNum, colContractStartDate).Value
+
+    colVus = FindOptionalStaffColumn(ws, StaffHeaderVus())
+    If colVus > 0 Then targetDictionary(StaffKeyVus()) = ws.Cells(rowNum, colVus).Value
+
+    colTariffRank = FindOptionalStaffColumn(ws, StaffHeaderTariffRank())
+    If colTariffRank > 0 Then targetDictionary(StaffKeyTariffRank()) = ws.Cells(rowNum, colTariffRank).Value
+
+    colBankAccount = FindOptionalStaffColumn(ws, StaffHeaderBankAccount())
+    If colBankAccount > 0 Then targetDictionary(StaffKeyBankAccount()) = ws.Cells(rowNum, colBankAccount).Value
+End Sub
+
+Private Function FindOptionalStaffColumn(ByVal ws As Worksheet, ParamArray headerCandidates()) As Long
+    Dim lastCol As Long
+    Dim i As Long
+    Dim j As Long
+    Dim headerText As String
+    Dim candidateText As String
+
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    For i = 1 To lastCol
+        headerText = NormalizeHeaderText(CStr(ws.Cells(1, i).Value))
+        If headerText <> "" Then
+            For j = LBound(headerCandidates) To UBound(headerCandidates)
+                candidateText = NormalizeHeaderText(CStr(headerCandidates(j)))
+                If candidateText <> "" Then
+                    If headerText = candidateText Or InStr(headerText, candidateText) > 0 Then
+                        FindOptionalStaffColumn = i
+                        Exit Function
+                    End If
+                End If
+            Next j
+        End If
+    Next i
 End Function
 
 Public Function FindTableNumberColumn(ws As Worksheet) As Long
@@ -294,9 +619,8 @@ Public Function FindTableNumberColumn(ws As Worksheet) As Long
     Dim lastCol As Long: lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
     
     For i = 1 To lastCol
-        headerText = LCase(Trim(ws.Cells(1, i).value))
-        If headerText = "лицо" Or InStr(headerText, "табельн") > 0 Then
-            ' Проверяем, числовые ли там данные
+        headerText = NormalizeHeaderText(CStr(ws.Cells(1, i).Value))
+        If headerText = "в„–" Or headerText = NormalizeHeaderText(StaffHeaderTableNumber()) Or InStr(headerText, NormalizeHeaderText(StaffHeaderTableNumber())) > 0 Then
             val = ws.Cells(2, i).value
             If IsNumeric(val) And Not IsEmpty(val) Then
                 FindTableNumberColumn = i
@@ -308,15 +632,23 @@ Public Function FindTableNumberColumn(ws As Worksheet) As Long
 End Function
 
 Public Function GetStaffDataByTableNumber(tableNumber As String) As Object
-    ' Алиас для совместимости
+    ' ????? ??? ?????????????
     Set GetStaffDataByTableNumber = FindEmployeeByAnyNumber(tableNumber)
 End Function
 
 Public Sub SaveWordDocumentSafe(wdDoc As Object, filePath As String)
-    On Error Resume Next
+    On Error GoTo SaveAsFallback
     wdDoc.SaveAs2 filePath, 16 ' wdFormatXMLDocument
-    If Err.number <> 0 Then wdDoc.SaveAs filePath
-    On Error GoTo 0
+    Exit Sub
+
+SaveAsFallback:
+    Err.Clear
+    On Error GoTo SaveFailed
+    wdDoc.SaveAs filePath
+    Exit Sub
+
+SaveFailed:
+    Err.Raise vbObjectError + 901, "SaveWordDocumentSafe", "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ РґРѕРєСѓРјРµРЅС‚ Word: " & filePath & ". " & Err.Description
 End Sub
 
 Public Function IsWordAvailable() As Boolean
@@ -351,8 +683,8 @@ Public Function FormatPeriodsForWord(periods As Collection, cutoff As Date, ByRe
     For i = 1 To sorted.count
         Set p = sorted(i)
         t = t + p(3)
-        s = s & "- с " & Format(p(1), "dd.mm.yy") & " по " & Format(p(2), "dd.mm.yy") & " (" & p(3) & " сут.)"
-        If p(2) < cutoff Then s = s & " (НЕ АКТУАЛЕН)"
+        s = s & "- ? " & Format(p(1), "dd.mm.yy") & " ?? " & Format(p(2), "dd.mm.yy") & " (" & p(3) & " ???.)"
+        If p(2) < cutoff Then s = s & " (?? ????????)"
         s = s & vbCrLf
     Next i
     r = (t \ 3) * 2
@@ -388,7 +720,7 @@ End Function
 
 Public Function hasCriticalErrors() As Boolean
     On Error Resume Next
-    Dim ws As Worksheet: Set ws = ThisWorkbook.Sheets("ДСО")
+    Dim ws As Worksheet: Set ws = ThisWorkbook.Sheets("???")
     If ws Is Nothing Then hasCriticalErrors = True: Exit Function
     Dim lastRow As Long: lastRow = ws.Cells(ws.Rows.count, "C").End(xlUp).Row
     Dim lastCol As Long: lastCol = ws.Cells(1, ws.Columns.count).End(xlToLeft).Column
@@ -411,18 +743,18 @@ Public Function SklonitDolzhnost(dolzhnost As String, VoinskayaChast As String) 
     Dim clean As String, role As String, body As String, res As String
     clean = LCase(Trim(dolzhnost))
     
-    ' 1. Режем хвост
+    ' 1. ????? ?????
     clean = CutUnitTail(clean)
     
-    ' 2. Разделяем
+    ' 2. ?????????
     Call SplitRoleAndBody(clean, role, body)
     
-    ' 3. Склоняем роль
+    ' 3. ???????? ????
     role = SklonitVoennayaDolzhnost(role)
     
     res = role
     If body <> "" Then res = res & " " & body
-    SklonitDolzhnost = res & " войсковой части " & VoinskayaChast
+    SklonitDolzhnost = res & " ????????? ????? " & VoinskayaChast
 End Function
 
 Private Function CutUnitTail(Text As String) As String
@@ -430,26 +762,26 @@ Private Function CutUnitTail(Text As String) As String
     cutBattalion = GetSettingCutBattalion()
     Dim t As String: t = Text
     
-    ' 1. ОБЯЗАТЕЛЬНАЯ РЕЗКА: Юрлица
+    ' 1. ???????????? ?????: ??????
     patterns = Array( _
-        "(\d+\s+)?(отдельного|гвардейского|краснознаменного)\s+.*", _
-        "\d+\s+(армии|дивизии|бригады|полка|батальона).*" _
+        "(\d+\s+)?(??????????|????????????|????????????????)\s+.*", _
+        "\d+\s+(?????|???????|???????|?????|?????????).*" _
     )
     For i = LBound(patterns) To UBound(patterns)
         t = RegExpReplace(t, patterns(i), "")
     Next i
     
-    ' 2. Крупные соединения
+    ' 2. ??????? ??????????
     patterns = Array( _
-        "(управления|штаба)\s+(полка|бригады|дивизии).*" _
+        "(??????????|?????)\s+(?????|???????|???????).*" _
     )
     For i = LBound(patterns) To UBound(patterns)
         t = RegExpReplace(t, patterns(i), "")
     Next i
     
-    ' 3. Условная резка
+    ' 3. ???????? ?????
     If cutBattalion Then
-        patterns = Array("(\d+\s+)?(батальона|дивизиона|эскадрильи).*")
+        patterns = Array("(\d+\s+)?(?????????|?????????|??????????).*")
         For i = LBound(patterns) To UBound(patterns)
             t = RegExpReplace(t, patterns(i), "")
         Next i
@@ -479,7 +811,7 @@ End Sub
 
 Private Function IsUnitKeyword(word As String) As Boolean
     Select Case LCase(word)
-        Case "взвода", "роты", "отделения", "расчета", "расчёта", "группы", "команды", "экипажа", "батареи", "службы", "пункта", "узла", "центра", "поста", "станции", "части", "секретной", "склада", "столовой", "гауптвахты"
+        Case "??????", "????", "?????????", "???????", "???????", "??????", "???????", "???????", "???????", "??????", "??????", "????", "??????", "?????", "???????", "?????", "?????????", "??????", "????????", "??????????"
             IsUnitKeyword = True
         Case Else
             IsUnitKeyword = False
@@ -488,62 +820,62 @@ End Function
 
 Public Function SklonitVoennayaDolzhnost(dolzhnost As String) As String
     Dim res As String: res = dolzhnost
-    If Left(res, 8) = "старший " Then res = "старшему " & Mid(res, 9)
-    If Left(res, 8) = "младший " Then res = "младшему " & Mid(res, 9)
-    If Left(res, 8) = "главный " Then res = "главному " & Mid(res, 9)
-    If Left(res, 8) = "ведущий " Then res = "ведущему " & Mid(res, 9)
+    If Left(res, 8) = "??????? " Then res = "???????? " & Mid(res, 9)
+    If Left(res, 8) = "??????? " Then res = "???????? " & Mid(res, 9)
+    If Left(res, 8) = "??????? " Then res = "???????? " & Mid(res, 9)
+    If Left(res, 8) = "??????? " Then res = "???????? " & Mid(res, 9)
     
-    res = Replace(res, "командир", "командиру")
-    res = Replace(res, "начальник", "начальнику")
-    res = Replace(res, "заместитель", "заместителю")
-    res = Replace(res, "помощник", "помощнику")
-    res = Replace(res, "механик", "механику")
-    res = Replace(res, "водитель", "водителю")
-    res = Replace(res, "радиотелефонист", "радиотелефонисту")
-    res = Replace(res, "разведчик", "разведчику")
-    res = Replace(res, "оператор", "оператору")
-    res = Replace(res, "наводчик", "наводчику")
-    res = Replace(res, "инструктор", "инструктору")
-    res = Replace(res, "техник", "технику")
-    res = Replace(res, "электрик", "электрику")
-    res = Replace(res, "пулеметчик", "пулеметчику")
-    res = Replace(res, "гранатометчик", "гранатометчику")
-    res = Replace(res, "стрелок", "стрелку")
-    res = Replace(res, "сапер", "саперу")
-    res = Replace(res, "снайпер", "снайперу")
-    res = Replace(res, "курсант", "курсанту")
-    res = Replace(res, "делопроизводитель", "делопроизводителю")
-    res = Replace(res, "психолог", "психологу")
-    res = Replace(res, "старшина", "старшине")
-    res = Replace(res, "бухгалтер", "бухгалтеру")
-    res = Replace(res, "врач", "врачу")
-    res = Replace(res, "фельдшер", "фельдшеру")
+    res = Replace(res, "????????", "?????????")
+    res = Replace(res, "?????????", "??????????")
+    res = Replace(res, "???????????", "???????????")
+    res = Replace(res, "????????", "?????????")
+    res = Replace(res, "???????", "????????")
+    res = Replace(res, "????????", "????????")
+    res = Replace(res, "???????????????", "????????????????")
+    res = Replace(res, "?????????", "??????????")
+    res = Replace(res, "????????", "?????????")
+    res = Replace(res, "????????", "?????????")
+    res = Replace(res, "??????????", "???????????")
+    res = Replace(res, "??????", "???????")
+    res = Replace(res, "????????", "?????????")
+    res = Replace(res, "??????????", "???????????")
+    res = Replace(res, "?????????????", "??????????????")
+    res = Replace(res, "???????", "???????")
+    res = Replace(res, "?????", "??????")
+    res = Replace(res, "???????", "????????")
+    res = Replace(res, "???????", "????????")
+    res = Replace(res, "?????????????????", "?????????????????")
+    res = Replace(res, "????????", "?????????")
+    res = Replace(res, "????????", "????????")
+    res = Replace(res, "?????????", "??????????")
+    res = Replace(res, "????", "?????")
+    res = Replace(res, "????????", "?????????")
     SklonitVoennayaDolzhnost = res
 End Function
 
 Public Function GetDolzhnostImenitelny(dolzhnost As String, VoinskayaChast As String) As String
-    GetDolzhnostImenitelny = CutUnitTail(LCase(Trim(dolzhnost))) & " войсковой части " & VoinskayaChast
+    GetDolzhnostImenitelny = CutUnitTail(LCase(Trim(dolzhnost))) & " ????????? ????? " & VoinskayaChast
 End Function
 
 Public Function SklonitZvanie(zvanie As String) As String
     Dim z As String: z = LCase(Trim(zvanie))
     Select Case z
-        Case "рядовой": SklonitZvanie = "Рядовому"
-        Case "ефрейтор": SklonitZvanie = "Ефрейтору"
-        Case "младший сержант": SklonitZvanie = "Младшему сержанту"
-        Case "сержант": SklonitZvanie = "Сержанту"
-        Case "старший сержант": SklonitZvanie = "Старшему сержанту"
-        Case "старшина": SklonitZvanie = "Старшине"
-        Case "прапорщик": SklonitZvanie = "Прапорщику"
-        Case "старший прапорщик": SklonitZvanie = "Старшему прапорщику"
-        Case "младший лейтенант": SklonitZvanie = "Младшему лейтенанту"
-        Case "лейтенант": SklonitZvanie = "Лейтенанту"
-        Case "старший лейтенант": SklonitZvanie = "Старшему лейтенанту"
-        Case "капитан": SklonitZvanie = "Капитану"
-        Case "майор": SklonitZvanie = "Майору"
-        Case "подполковник": SklonitZvanie = "Подполковнику"
-        Case "полковник": SklonitZvanie = "Полковнику"
-        Case "генерал-майор": SklonitZvanie = "Генерал-майору"
+        Case "???????": SklonitZvanie = "????????"
+        Case "????????": SklonitZvanie = "?????????"
+        Case "??????? ???????": SklonitZvanie = "???????? ????????"
+        Case "???????": SklonitZvanie = "????????"
+        Case "??????? ???????": SklonitZvanie = "???????? ????????"
+        Case "????????": SklonitZvanie = "????????"
+        Case "?????????": SklonitZvanie = "??????????"
+        Case "??????? ?????????": SklonitZvanie = "???????? ??????????"
+        Case "??????? ?????????": SklonitZvanie = "???????? ??????????"
+        Case "?????????": SklonitZvanie = "??????????"
+        Case "??????? ?????????": SklonitZvanie = "???????? ??????????"
+        Case "???????": SklonitZvanie = "????????"
+        Case "?????": SklonitZvanie = "??????"
+        Case "????????????": SklonitZvanie = "?????????????"
+        Case "?????????": SklonitZvanie = "??????????"
+        Case "???????-?????": SklonitZvanie = "???????-??????"
         Case Else: SklonitZvanie = UCase(Left(z, 1)) & Mid(z, 2)
     End Select
 End Function
@@ -555,11 +887,11 @@ End Function
 Public Function GetZvanieSkrasheno(zvanie As String) As String
     Dim z As String: z = LCase(Trim(zvanie))
     Select Case z
-        Case "младший сержант": GetZvanieSkrasheno = "мл. сержанту"
-        Case "старший сержант": GetZvanieSkrasheno = "ст. сержанту"
-        Case "старший прапорщик": GetZvanieSkrasheno = "ст. прапорщику"
-        Case "младший лейтенант": GetZvanieSkrasheno = "мл. лейтенанту"
-        Case "старший лейтенант": GetZvanieSkrasheno = "ст. лейтенанту"
+        Case "??????? ???????": GetZvanieSkrasheno = "??. ????????"
+        Case "??????? ???????": GetZvanieSkrasheno = "??. ????????"
+        Case "??????? ?????????": GetZvanieSkrasheno = "??. ??????????"
+        Case "??????? ?????????": GetZvanieSkrasheno = "??. ??????????"
+        Case "??????? ?????????": GetZvanieSkrasheno = "??. ??????????"
         Case Else: GetZvanieSkrasheno = SklonitZvanie(z)
     End Select
 End Function
@@ -569,226 +901,774 @@ Public Function GetZvanieImenitelnyForSignature(zvanie As String) As String
 End Function
 
 Public Function GetFIOWithInitials(sName As String) As String
-    Dim s As String: s = fio(sName, "Д", True)
-    Dim p() As String: p = Split(s, " ") ' Добавлено As String
-    If UBound(p) = 1 Then GetFIOWithInitials = p(1) & " " & p(0) Else GetFIOWithInitials = s
+    GetFIOWithInitials = BuildInitialsDisplay(sName, FIO_CASE_DATIVE)
 End Function
 
 Public Function GetFIOWithInitialsImenitelny(sName As String) As String
-    Dim s As String: s = fio(sName, "И", True)
-    Dim p() As String: p = Split(s, " ") ' Добавлено As String
-    If UBound(p) = 1 Then GetFIOWithInitialsImenitelny = p(1) & " " & p(0) Else GetFIOWithInitialsImenitelny = s
+    GetFIOWithInitialsImenitelny = BuildInitialsDisplay(sName, FIO_CASE_NOMINATIVE)
 End Function
 
 Public Function SklonitFIO(sName As String) As String
-    SklonitFIO = fio(sName, "Д")
+    SklonitFIO = fio(sName, FIO_CASE_DATIVE)
 End Function
 
 Public Function GetMonthNameRussian(monthNumber As Integer) As String
     Select Case monthNumber
-        Case 1: GetMonthNameRussian = "января"
-        Case 2: GetMonthNameRussian = "февраля"
-        Case 3: GetMonthNameRussian = "марта"
-        Case 4: GetMonthNameRussian = "апреля"
-        Case 5: GetMonthNameRussian = "мая"
-        Case 6: GetMonthNameRussian = "июня"
-        Case 7: GetMonthNameRussian = "июля"
-        Case 8: GetMonthNameRussian = "августа"
-        Case 9: GetMonthNameRussian = "сентября"
-        Case 10: GetMonthNameRussian = "октября"
-        Case 11: GetMonthNameRussian = "ноября"
-        Case 12: GetMonthNameRussian = "декабря"
-        Case Else: GetMonthNameRussian = "неизвестного месяца"
+        Case 1: GetMonthNameRussian = BuildUnicodeTextHelper(1103, 1085, 1074, 1072, 1088, 1103)
+        Case 2: GetMonthNameRussian = BuildUnicodeTextHelper(1092, 1077, 1074, 1088, 1072, 1083, 1103)
+        Case 3: GetMonthNameRussian = BuildUnicodeTextHelper(1084, 1072, 1088, 1090, 1072)
+        Case 4: GetMonthNameRussian = BuildUnicodeTextHelper(1072, 1087, 1088, 1077, 1083, 1103)
+        Case 5: GetMonthNameRussian = BuildUnicodeTextHelper(1084, 1072, 1103)
+        Case 6: GetMonthNameRussian = BuildUnicodeTextHelper(1080, 1102, 1085, 1103)
+        Case 7: GetMonthNameRussian = BuildUnicodeTextHelper(1080, 1102, 1083, 1103)
+        Case 8: GetMonthNameRussian = BuildUnicodeTextHelper(1072, 1074, 1075, 1091, 1089, 1090, 1072)
+        Case 9: GetMonthNameRussian = BuildUnicodeTextHelper(1089, 1077, 1085, 1090, 1103, 1073, 1088, 1103)
+        Case 10: GetMonthNameRussian = BuildUnicodeTextHelper(1086, 1082, 1090, 1103, 1073, 1088, 1103)
+        Case 11: GetMonthNameRussian = BuildUnicodeTextHelper(1085, 1086, 1103, 1073, 1088, 1103)
+        Case 12: GetMonthNameRussian = BuildUnicodeTextHelper(1076, 1077, 1082, 1072, 1073, 1088, 1103)
+        Case Else: GetMonthNameRussian = BuildUnicodeTextHelper(1085, 1077, 1080, 1079, 1074, 1077, 1089, 1090, 1085, 1099, 1081, 32, 1084, 1077, 1089, 1103, 1094)
     End Select
+End Function
+
+Private Function BuildUnicodeTextHelper(ParamArray codePoints() As Variant) As String
+    Dim i As Long
+    Dim result As String
+
+    For i = LBound(codePoints) To UBound(codePoints)
+        result = result & ChrW$(CLng(codePoints(i)))
+    Next i
+
+    BuildUnicodeTextHelper = result
+End Function
+
+Public Function Ru(ParamArray codePoints() As Variant) As String
+    Dim i As Long
+    Dim resultText As String
+
+    For i = LBound(codePoints) To UBound(codePoints)
+        resultText = resultText & ChrW$(CLng(codePoints(i)))
+    Next i
+
+    Ru = resultText
+End Function
+
+Private Function NormalizeFioCaseCode(ByVal nameCase As String) As String
+    Dim normalizedCase As String
+
+    normalizedCase = UCase$(Trim$(nameCase))
+
+    Select Case normalizedCase
+        Case "", FIO_CASE_DATIVE, BuildUnicodeTextHelper(1044)
+            NormalizeFioCaseCode = FIO_CASE_DATIVE
+        Case FIO_CASE_GENITIVE, BuildUnicodeTextHelper(1056)
+            NormalizeFioCaseCode = FIO_CASE_GENITIVE
+        Case FIO_CASE_NOMINATIVE, "I", BuildUnicodeTextHelper(1048)
+            NormalizeFioCaseCode = FIO_CASE_NOMINATIVE
+        Case Else
+            If IsLikelyBrokenFioText(normalizedCase) Then
+                NormalizeFioCaseCode = FIO_CASE_DATIVE
+            Else
+                NormalizeFioCaseCode = normalizedCase
+            End If
+    End Select
+End Function
+
+Private Function IsLikelyBrokenFioText(ByVal text As String) As Boolean
+    Dim normalizedText As String
+
+    normalizedText = Trim$(text)
+
+    If Len(normalizedText) = 0 Then Exit Function
+
+    If InStr(normalizedText, ChrW$(65533)) > 0 Then
+        IsLikelyBrokenFioText = True
+        Exit Function
+    End If
+
+    If InStr(normalizedText, "?") > 0 Or InStr(normalizedText, "N") > 0 Or InStr(normalizedText, "?") > 0 Then
+        IsLikelyBrokenFioText = True
+    End If
+End Function
+
+Private Function BuildShortFioFallback(ByVal sourceText As String) As String
+    Dim parts() As String
+    Dim normalizedSource As String
+
+    normalizedSource = Application.WorksheetFunction.Trim(CStr(sourceText))
+    If Len(normalizedSource) = 0 Then Exit Function
+
+    parts = Split(normalizedSource, " ")
+
+    Select Case UBound(parts)
+        Case 0
+            BuildShortFioFallback = normalizedSource
+        Case 1
+            BuildShortFioFallback = parts(1) & " " & Left$(parts(0), 1) & "."
+        Case Else
+            BuildShortFioFallback = parts(0) & " " & Left$(parts(1), 1) & "." & Left$(parts(2), 1) & "."
+    End Select
+End Function
+
+Private Function BuildInitialsDisplay(ByVal sourceText As String, ByVal nameCase As String) As String
+    Dim surname As String
+    Dim firstName As String
+    Dim middleName As String
+    Dim gender As Long
+    Dim declinedSurname As String
+    Dim initialsText As String
+    Dim normalizedSource As String
+
+    normalizedSource = CleanFioSource(sourceText)
+    If Len(normalizedSource) = 0 Then Exit Function
+
+    ParseFioParts normalizedSource, surname, firstName, middleName, gender
+    declinedSurname = DeclineSurnameByCase(surname, gender, NormalizeFioCaseCode(nameCase))
+    initialsText = BuildInitialsText(firstName, middleName)
+
+    If Len(initialsText) > 0 And Len(declinedSurname) > 0 Then
+        BuildInitialsDisplay = initialsText & " " & declinedSurname
+    ElseIf Len(declinedSurname) > 0 Then
+        BuildInitialsDisplay = declinedSurname
+    ElseIf Len(initialsText) > 0 Then
+        BuildInitialsDisplay = initialsText
+    Else
+        BuildInitialsDisplay = BuildShortFioFallback(normalizedSource)
+    End If
+End Function
+
+Private Function ContainsLetterText(ByVal text As String) As Boolean
+    Dim i As Long
+    Dim codePoint As Long
+
+    For i = 1 To Len(text)
+        codePoint = AscW(Mid$(text, i, 1))
+        If (codePoint >= 65 And codePoint <= 90) _
+           Or (codePoint >= 97 And codePoint <= 122) _
+           Or (codePoint >= 1040 And codePoint <= 1103) _
+           Or codePoint = 1025 _
+           Or codePoint = 1105 Then
+            ContainsLetterText = True
+            Exit Function
+        End If
+    Next i
+End Function
+
+Private Function IsUsefulShortFioText(ByVal text As String) As Boolean
+    Dim normalizedText As String
+
+    normalizedText = Trim$(text)
+
+    If Len(normalizedText) < 4 Then Exit Function
+    If InStr(normalizedText, ".") = 0 Then Exit Function
+    If InStr(normalizedText, " ") = 0 Then Exit Function
+    If Not ContainsLetterText(normalizedText) Then Exit Function
+
+    IsUsefulShortFioText = True
+End Function
+
+Private Function FinalizeFioResult(ByVal resultText As String, ByVal sourceText As String, ByVal shortForm As Boolean) As String
+    Dim normalizedSource As String
+
+    normalizedSource = Application.WorksheetFunction.Trim(CStr(sourceText))
+
+    If Len(Trim$(resultText)) = 0 _
+       Or IsLikelyBrokenFioText(resultText) _
+       Or (shortForm And Not IsUsefulShortFioText(resultText)) _
+       Or ((Not shortForm) And Not ContainsLetterText(resultText)) Then
+        If shortForm Then
+            FinalizeFioResult = BuildShortFioFallback(normalizedSource)
+        Else
+            FinalizeFioResult = normalizedSource
+        End If
+    Else
+        FinalizeFioResult = Trim$(resultText)
+    End If
 End Function
 
 ' ==========================================================
 ' FIO ENGINE
 ' ==========================================================
 
-Private Function IsMan(ByVal sName As String) As Boolean
-    Dim arMenNames As Variant, i As Long
-    arMenNames = Array("Абай", "Абрам", "Абраам", "Аваз", "Авазбек", "Авдей", "Адилет", "Адольф", "Азамат", "Акбар", "Аксентий", "Агафон", "Айбек", "Айрат", "Алдар", "Алишер", "Алан", "Александр", "Алексей", "Али", "Алмат", "Альберт", "Альвиан", "Альфред", "Анатолий", "Андрей", "Антон", "Антонин", "Аристарх", "Аркадий", "Армен", "Арнольд", "Арон", "Арсен", "Арсений", "Артем", "Артём", "Артемий", _
-        "Артур", "Аскольд", "Афанасий", "Ашот", "Батыр", "Бауыржан", "Богдан", "Борис", "Вадим", "Валентин", "Валерий", "Валерьян", "Варлам", "Василий", "Вахтанг", "Венедикт", "Вениамин", "Виктор", "Виталий", "Влад", "Владилен", "Владимир", "Владислав", "Владлен", "Вольф", "Всеволод", "Вячеслав", "Гавриил", "Гаврил", "Гайдар", _
-        "Геласий", "Геннадий", "Генрих", "Георгий", "Герасим", "Герман", "Глеб", "Гордей", "Григорий", "Гурген", "Давид", "Дамир", "Даниил", "Данил", "Данияр", "Дастан", "Демьян", "Денис", "Диас", "Динишбек", "Дмитрий", _
-        "Дорофей", "Евгений", "Евграф", "Евдоким", "Евсей", "Егор", "Еремей", "Ернар", "Ермолай", "Ефим", "Жонибек", "Заур", "Зиновий", "Иакинф", "Иван", "Игнатий", "Игнат", "Игорь", "Иларион", "Илларион", "Ильдар", "Ильшат", "Илья", "Иннокентий", "Иосиф", "Ипполит", "Ирек", "Ириней", "Исидор", "Исаак", "Исхак", "Иулиан", "Казимир", "Кайрат", "Камиль", "Карл", "Касьян", "Керим", "Ким", "Кирилл", "Клавдий", "Кондрат", "Константин", _
-        "Кристиан", "Кузьма", "Куприян", "Лаврентий", "Лев", "Ленар", "Леонард", "Леонид", "Леонтий", "Лука", "Лукий", "Лукьян", "Людвиг", "Магомед", "Магомет", "Майк", "Макар", "Максат", "Макс", "Максим", "Марат", "Марк", "Мартын", "Матвей", "Махач", "Махмуд", "Мелентий", "Мирлан", "Мирослав", _
-        "Митрофан", "Михаил", "Модест", "Моисей", "Мстислав", "Мурад", "Мухамед", "Мухаммед", "Муса", "Мэлор", "Наум", "Никита", "Никифор", "Николай", "Нурбек", "Нуржан", "Нурлан", "Олег", "Онисим", "Осип", "Отар", "Павел", "Пантелеймон", "Парфений", "Пётр", "Петр", "Платон", "Порфирий", "Прокопий", "Протасий", "Прохор", "Радомир", "Разумник", "Рамазан", "Рамзан", "Рафаэль", _
-        "Рафик", "Ринат", "Роман", "Роберт", "Ростислав", "Рубен", "Рудольф", "Руслан", "Рустам", "Рустем", "Сабир", "Савва", "Савелий", "Святослав", "Семён", "Семен", "Серафим", "Сергей", "Серик", "Созон", "Соломон", "Спиридон", "Станислав", "Степан", "Султан", "Тагир", "Тарас", "Темир", "Темирхан", "Тигран", "Тимофей", "Тимур", "Тихон", "Трифон", _
-        "Трофим", "Фадей", "Фаддей", "Федор", "Фёдор", "Федосей", "Федот", "Феликс", "Филат", "Филипп", "Фома", "Фрол", "Харитон", "Хафиз", "Христофор", "Чеслав", "Шамиль", "Шамхал", "Эдуард", "Эльдар", "Эльман", "Эмиль", "Эммануил", "Эраст", "Юлиан", "Юлиус", "Юлий", "Юрий", "Юстин", "Яков", "Якун", "Ян", "Ярослав")
-    For i = LBound(arMenNames) To UBound(arMenNames)
-        If sName = arMenNames(i) Then IsMan = True: Exit Function
+Private Function CleanFioSource(ByVal sourceText As String) As String
+    Dim normalizedText As String
+
+    normalizedText = CStr(sourceText)
+    normalizedText = Replace(normalizedText, vbCr, " ")
+    normalizedText = Replace(normalizedText, vbLf, " ")
+    normalizedText = Replace(normalizedText, vbTab, " ")
+    normalizedText = Application.WorksheetFunction.Trim(normalizedText)
+
+    CleanFioSource = normalizedText
+End Function
+
+Private Function EndsWithText(ByVal sourceText As String, ByVal suffix As String) As Boolean
+    If Len(sourceText) < Len(suffix) Then Exit Function
+    EndsWithText = (StrComp(Right$(sourceText, Len(suffix)), suffix, vbTextCompare) = 0)
+End Function
+
+Private Function IsOneOf(ByVal sourceText As String, ParamArray values() As Variant) As Boolean
+    Dim i As Long
+
+    For i = LBound(values) To UBound(values)
+        If StrComp(sourceText, CStr(values(i)), vbTextCompare) = 0 Then
+            IsOneOf = True
+            Exit Function
+        End If
     Next i
 End Function
 
-Private Function IsWoman(ByVal sName As String) As Boolean
-    Dim arWomenNames As Variant, i As Long
-    arWomenNames = Array("Августа", "Авдотья", "Агафья", "Агриппина", "Адиля", "Аида", "Аиша", "Айару", "Айгерим", "Айгуль", "Айнур", "Айнура", "Аксинья", "Акулина", "Алевтина", "Александра", "Александрина", "Алексина", "Алёна", "Алеся", "Алина", "Алиса", "Алла", "Алсу", "Алтынай", "Альбина", "Альфия", "Амина", "Амра", "Анастасия", "Ангелина", _
-        "Анель", "Анжела", "Анжелика", "Анна", "Антонина", "Арина", "Армине", "Аружан", "Асель", "Асем", "Асмик", "Асоль", "Ася", "Аурика", "Ая", "Аяла", "Айя", "Белла", "Бэлла", "Бося", "Валентина", "Валерия", "Варвара", "Василиса", "Вера", "Вероника", "Виктория", "Виолетта", "Владилена", "Владислава", "Галина", "Глафира", "Гузель", "Гулнар", "Гульнара", _
-        "Гульшат", "Гюзель", "Давлят", "Дана", "Дарья", "Дария", "Джамиля", "Диана", "Диляра", "Дина", "Динара", "Ева", "Евгения", "Евдокия", "Евпраксия", "Евфросиния", "Екатерина", "Елена", "Елизавета", "Жанат", "Жанар", "Жанара", "Жанна", "Жанетта", "Жулдыз", "Зауре", "Земфира", "Зимфира", "Зинаида", "Злата", _
-        "Зоя", "Иванна", "Инга", "Инесса", "Инна", "Ираида", "Ирина", "Ирма", "Ия", "Капитолина", "Карина", "Каринэ", "Каролина", "Катерина", "Катрин", "Кира", "Клавдия", "Клара", "Кристина", "Ксения", "Лада", "Лариса", "Лейла", "Лейли", "Лейсан", "Лениза", "Леся", "Лиана", "Лига", "Лидия", _
-        "Лилия", "Лия", "Лэйсэн", "Любовь", "Людмила", "Ляйсан", "Мадина", "Майя", "Маргарита", "Маржан", "Мариана", "Марианна", "Марина", "Мария", "Марфа", "Матрёна", "Матрена", "Мацак", "Милена", "Милана", "Мира", "Мирослава", "Муза", "Муит", "Надежда", "Назира", "Наида", "Наина", "Наринэ", "Наталья", "Наталия", "Нелли", "Нигина", "Николета", _
-        "Нина", "Нинель", "Нонна", "Оксана", "Октябрина", "Олеся", "Ольга", "Пелагея", "Полина", "Прасковья", "Раиса", "Регина", "Ригина", "Римма", "Рита", "Роза", "Розалия", "Ромина", "Русина", "Руслана", "Руфина", "Сабина", "Салтанат", "Светлана", "Серафима", "Снежана", "София", "Софья", "Стелла", "Стефания", _
-        "Таисия", "Тайя", "Тамара", "Татевик", "Татьяна", "Томирис", "Ульяна", "Фаина", "Феврония", "Фёкла", "Феодора", "Ханзада", "Целестина", "Шамиля", "Элеонора", "Элина", "Элла", "Эльвира", "Эльза", "Эмилия", "Эмма", "Эсфирь", "Юлия", "Яна", "Ярослава")
-    For i = LBound(arWomenNames) To UBound(arWomenNames)
-        If sName = arWomenNames(i) Then IsWoman = True: Exit Function
-    Next i
+Private Function RemoveLastChars(ByVal sourceText As String, ByVal charCount As Long) As String
+    If charCount <= 0 Or Len(sourceText) <= charCount Then Exit Function
+    RemoveLastChars = Left$(sourceText, Len(sourceText) - charCount)
 End Function
 
-Private Function GetSex(ByVal cell As String) As Integer
-    Dim arWords, iGender As Integer, i As Integer
-    arWords = Split(Application.WorksheetFunction.Trim(cell), " ")
-    iGender = 0
-    For i = LBound(arWords) To UBound(arWords)
-        If IsMan(arWords(i)) Then iGender = -1
-        If IsWoman(arWords(i)) Then iGender = 1
-    Next i
-    If iGender = 0 Then
-        For i = LBound(arWords) To UBound(arWords)
-            If Right(arWords(i), 3) = "вна" Or Right(arWords(i), 3) = "чна" Then iGender = 1
-            If Right(arWords(i), 3) = "вич" Or Right(arWords(i), 3) = "ьич" Then iGender = -1
-        Next i
-    End If
-    GetSex = iGender
+Private Function GetLastLetterText(ByVal sourceText As String) As String
+    If Len(sourceText) = 0 Then Exit Function
+    GetLastLetterText = Right$(sourceText, 1)
 End Function
 
-Public Function fio(NameAsText As String, Optional NameCase As String = "И", Optional ShortForm As Boolean = False) As String
-    Dim iGender As Integer
-    Dim sName As String, sName2 As String, sMidName As String, sMidName2 As String, sSurName As String, sSurName2 As String
-    Dim arWords
-    
-    iGender = 0
-    iGender = GetSex(NameAsText)
-    arWords = Split(Application.WorksheetFunction.Trim(NameAsText), " ")
-        
-    If UBound(arWords) = 2 Then
-        If iGender = -1 Then
-            If Right(arWords(1), 3) = "вич" Or Right(arWords(1), 3) = "тич" Then
-                sSurName = arWords(2): sName = arWords(0): sMidName = arWords(1)
-            End If
-            If Right(arWords(2), 3) = "вич" Or Right(arWords(2), 3) = "тич" Then
-                sSurName = arWords(0): sName = arWords(1): sMidName = arWords(2)
-            End If
-        End If
-        If iGender = 1 Then
-            If Right(arWords(1), 3) = "вна" Or Right(arWords(1), 3) = "чна" Then
-                sSurName = arWords(2): sName = arWords(0): sMidName = arWords(1)
-            End If
-            If Right(arWords(2), 3) = "вна" Or Right(arWords(2), 3) = "чна" Then
-                sSurName = arWords(0): sName = arWords(1): sMidName = arWords(2)
-            End If
-        End If
-    End If
-        
-    If UBound(arWords) = 1 Then
-        If IsMan(arWords(0)) Or IsWoman(arWords(0)) Then sName = arWords(0): sSurName = arWords(1)
-        If IsMan(arWords(1)) Or IsWoman(arWords(1)) Then sName = arWords(1): sSurName = arWords(0)
-    End If
-    
-    If UBound(arWords) = 0 Then
-        If IsMan(arWords(0)) Or IsWoman(arWords(0)) Then
-            sName = arWords(0)
-        Else
-            sSurName = arWords(0)
-            If sSurName Like "*ов" Or sSurName Like "*ев" Or sSurName Like "*ин" Or sSurName Like "*ий" Or sSurName Like "*ой" Then iGender = -1
-            If sSurName Like "*ва" Or sSurName Like "*на" Or sSurName Like "*ая" Then iGender = -1
-            If iGender = 0 Then fio = "": Exit Function
-        End If
-    End If
+Private Function HasSurnameAdjectiveEnding(ByVal word As String) As Boolean
+    HasSurnameAdjectiveEnding = EndsWithText(word, Ru(1089, 1082, 1080, 1081)) _
+        Or EndsWithText(word, Ru(1094, 1082, 1080, 1081)) _
+        Or EndsWithText(word, Ru(1089, 1082, 1086, 1081)) _
+        Or EndsWithText(word, Ru(1079, 1082, 1086, 1081)) _
+        Or EndsWithText(word, Ru(1099, 1081)) _
+        Or EndsWithText(word, Ru(1080, 1081)) _
+        Or EndsWithText(word, Ru(1086, 1081))
+End Function
 
-    sName2 = sName: sSurName2 = sSurName: sMidName2 = sMidName
-        
-    If UCase(NameCase) = "Д" Or UCase(NameCase) = "D" Then
-        If sName <> "" Then
-            sName2 = sName
-            If iGender = -1 Then
-                If sName Like "*[ая]" Then sName2 = Left(sName, Len(sName) - 1) & "е"
-                If sName Like "*[бвгджзклмнпрстфхцчшщ]" Then sName2 = sName & "у"
-                If sName Like "*[йь]" Then sName2 = Left(sName, Len(sName) - 1) & "ю"
-            End If
-            If iGender = 1 Then
-                If sName Like "*а" Then sName2 = Left(sName, Len(sName) - 1) & "е"
-                If sName Like "*ия" Then sName2 = Left(sName, Len(sName) - 1) & "и"
-                If sName Like "*ея" Then sName2 = Left(sName, Len(sName) - 1) & "и"
-                If sName Like "*ья" Then sName2 = Left(sName, Len(sName) - 1) & "е"
-                If sName Like "*ь" Then sName2 = Left(sName, Len(sName) - 1) & "и"
-            End If
-        End If
-        
-        If sMidName <> "" Then
-            sMidName2 = sMidName
-            If Right(sMidName, 1) = "а" Then sMidName2 = Left(sMidName, Len(sMidName) - 1) & "е"
-            If Right(sMidName, 1) = "ч" Then sMidName2 = sMidName & "у"
-        End If
-        
-        If sSurName <> "" Then
-            sSurName2 = sSurName
-            If iGender = -1 Then
-                If sSurName Like "*а" Then sSurName2 = Left(sSurName, Len(sSurName) - 1) & "е"
-                If sSurName Like "*й" Then sSurName2 = Left(sSurName, Len(sSurName) - 2) & "ому"
-                If sSurName Like "*ай" Then sSurName2 = Left(sSurName, Len(sSurName) - 1) & "ю"
-                If sSurName Like "*ь" Then sSurName2 = Left(sSurName, Len(sSurName) - 1) & "ю"
-                If sSurName Like "*[бвгджзклмнпрстфхцчшщ]" Then sSurName2 = sSurName & "у"
-                If sSurName Like "*ых" Or sSurName Like "*их" Or sSurName Like "*иа" Or sSurName Like "*ия" Or sSurName Like "*уя" Or sSurName Like "*ая" Then sSurName2 = sSurName
-                If sSurName Like "*ок" Or sSurName Like "*их" Then sSurName2 = Left(sSurName, Len(sSurName) - 2) & "ку"
-            End If
-            If iGender = 1 Then
-                If sSurName Like "*а" Then sSurName2 = Left(sSurName, Len(sSurName) - 1) & "ой"
-                If sSurName Like "*ая" Then sSurName2 = Left(sSurName, Len(sSurName) - 2) & "ой"
-                If sSurName Like "*[бвгджзклмнпрстфхцчшщ]" Then sSurName2 = sSurName
-            End If
-        End If
-    End If
+Private Function IsLikelyIndeclinableSurname(ByVal word As String) As Boolean
+    Dim lowerWord As String
 
-    If UCase(NameCase) = "Р" Or UCase(NameCase) = "R" Then
-        If sName <> "" Then
-            sName2 = sName
-            If iGender = -1 Then
-                If sName Like "*а" Then sName2 = Left(sName, Len(sName) - 1) & "ы"
-                If sName Like "*[бвгджзклмнпрстфхцчшщ]" Then sName2 = sName & "а"
-                If sName Like "*[йь]" Then sName2 = Left(sName, Len(sName) - 1) & "я"
-            End If
-            If iGender = 1 Then
-                If sName Like "*а" Then sName2 = Left(sName, Len(sName) - 1) & "ы"
-                If sName Like "*ия" Then sName2 = Left(sName, Len(sName) - 1) & "и"
-                If sName Like "*ея" Then sName2 = Left(sName, Len(sName) - 1) & "и"
-                If sName Like "*ья" Then sName2 = Left(sName, Len(sName) - 1) & "и"
-                If sName Like "*ь" Then sName2 = Left(sName, Len(sName) - 1) & "и"
-            End If
-        End If
-        
-        If sMidName <> "" Then
-            sMidName2 = sMidName
-            If Right(sMidName, 1) = "а" Then sMidName2 = Left(sMidName, Len(sMidName) - 1) & "ы"
-            If Right(sMidName, 1) = "ч" Then sMidName2 = sMidName & "а"
-        End If
-        
-        If sSurName <> "" Then
-            sSurName2 = sSurName
-            If iGender = -1 Then
-                If sSurName Like "*а" Then sSurName2 = Left(sSurName, Len(sSurName) - 1) & "ы"
-                If sSurName Like "*й" Then sSurName2 = Left(sSurName, Len(sSurName) - 2) & "ого"
-                If sSurName Like "*ай" Then sSurName2 = Left(sSurName, Len(sSurName) - 1) & "я"
-                If sSurName Like "*ь" Then sSurName2 = Left(sSurName, Len(sSurName) - 1) & "я"
-                If sSurName Like "*[бвгджзклмнпрстфхцчшщ]" Then sSurName2 = sSurName & "а"
-                If sSurName Like "*ок" Then sSurName2 = Left(sSurName, Len(sSurName) - 2) & "ка"
-                If sSurName Like "*ых" Or sSurName Like "*их" Or sSurName Like "*иа" Or sSurName Like "*ия" Or sSurName Like "*уя" Or sSurName Like "*ая" Then sSurName2 = sSurName
-            End If
-            If iGender = 1 Then
-                If sSurName Like "*а" Then sSurName2 = Left(sSurName, Len(sSurName) - 1) & "ой"
-                If sSurName Like "*ая" Then sSurName2 = Left(sSurName, Len(sSurName) - 2) & "ой"
-                If sSurName Like "*[бвгджзклмнпрстфхцчшщ]" Then sSurName2 = sSurName
-            End If
-        End If
+    lowerWord = LCase$(word)
+
+    If EndsWithText(lowerWord, Ru(1082, 1086)) _
+       Or EndsWithText(lowerWord, Ru(1077, 1085, 1082, 1086)) _
+       Or EndsWithText(lowerWord, Ru(1080, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1091, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1080, 1093)) _
+       Or EndsWithText(lowerWord, Ru(1099, 1093)) _
+       Or EndsWithText(lowerWord, Ru(1086)) _
+       Or EndsWithText(lowerWord, Ru(1077)) _
+       Or EndsWithText(lowerWord, Ru(1101)) _
+       Or EndsWithText(lowerWord, Ru(1080)) _
+       Or EndsWithText(lowerWord, Ru(1091)) _
+       Or EndsWithText(lowerWord, Ru(1102)) Then
+        IsLikelyIndeclinableSurname = True
     End If
-    
-    If ShortForm Then
-        fio = sSurName2 & " " & Left(sName2, 1) & "." & Left(sMidName2, 1) & "."
+End Function
+
+Private Function RequiresIEnding(ByVal stemText As String) As Boolean
+    Dim lastLetter As String
+
+    lastLetter = LCase$(GetLastLetterText(stemText))
+    RequiresIEnding = IsOneOf(lastLetter, Ru(1075), Ru(1082), Ru(1093), Ru(1078), Ru(1095), Ru(1096), Ru(1097), Ru(1094))
+End Function
+
+Private Function ApplyAEndingGenitive(ByVal word As String) As String
+    Dim stemText As String
+    Dim lastLetter As String
+
+    lastLetter = LCase$(GetLastLetterText(word))
+    stemText = RemoveLastChars(word, 1)
+
+    Select Case lastLetter
+        Case Ru(1072)
+            If RequiresIEnding(stemText) Then
+                ApplyAEndingGenitive = stemText & Ru(1080)
+            Else
+                ApplyAEndingGenitive = stemText & Ru(1099)
+            End If
+        Case Ru(1103)
+            ApplyAEndingGenitive = stemText & Ru(1080)
+        Case Else
+            ApplyAEndingGenitive = word
+    End Select
+End Function
+
+Private Function ApplyAEndingDative(ByVal word As String) As String
+    Dim lastLetter As String
+
+    lastLetter = LCase$(GetLastLetterText(word))
+    If lastLetter = Ru(1072) Or lastLetter = Ru(1103) Then
+        ApplyAEndingDative = RemoveLastChars(word, 1) & Ru(1077)
     Else
-        fio = sSurName2 & " " & sName2 & " " & sMidName2
+        ApplyAEndingDative = word
     End If
-    If sMidName = "" Then fio = Left(fio, Len(fio) - 1)
-    fio = Trim(fio)
+End Function
+
+Private Function DetectPatronymicGender(ByVal word As String) As Long
+    Dim lowerWord As String
+
+    lowerWord = LCase$(word)
+
+    If EndsWithText(lowerWord, Ru(1086, 1075, 1083, 1099)) Then
+        DetectPatronymicGender = FIO_GENDER_MALE
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1082, 1099, 1079, 1099)) _
+       Or EndsWithText(lowerWord, Ru(1086, 1074, 1085, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1077, 1074, 1085, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1105, 1074, 1085, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1080, 1095, 1085, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1080, 1085, 1080, 1095, 1085, 1072)) Then
+        DetectPatronymicGender = FIO_GENDER_FEMALE
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1080, 1095)) Then
+        DetectPatronymicGender = FIO_GENDER_MALE
+    End If
+End Function
+
+Private Function IsLikelyPatronymic(ByVal word As String) As Boolean
+    IsLikelyPatronymic = (DetectPatronymicGender(word) <> FIO_GENDER_UNKNOWN)
+End Function
+
+Private Function DetectNameGender(ByVal word As String) As Long
+    Dim lowerWord As String
+    Dim lastLetter As String
+
+    lowerWord = LCase$(word)
+    If Len(lowerWord) = 0 Then Exit Function
+
+    Select Case lowerWord
+        Case Ru(1080, 1083, 1100, 1103), Ru(1085, 1080, 1082, 1080, 1090, 1072), Ru(1082, 1091, 1079, 1100, 1084, 1072), Ru(1092, 1086, 1084, 1072), Ru(1083, 1091, 1082, 1072), Ru(1083, 1077, 1074, 1072), Ru(1089, 1072, 1074, 1074, 1072)
+            DetectNameGender = FIO_GENDER_MALE
+            Exit Function
+        Case Ru(1083, 1102, 1073, 1086, 1074, 1100), Ru(1085, 1080, 1085, 1077, 1083, 1100)
+            DetectNameGender = FIO_GENDER_FEMALE
+            Exit Function
+    End Select
+
+    lastLetter = GetLastLetterText(lowerWord)
+
+    If lastLetter = Ru(1072) Or lastLetter = Ru(1103) Then
+        DetectNameGender = FIO_GENDER_FEMALE
+        Exit Function
+    End If
+
+    If lastLetter = Ru(1081) Or lastLetter = Ru(1085) Or lastLetter = Ru(1084) Or lastLetter = Ru(1088) _
+       Or lastLetter = Ru(1074) Or lastLetter = Ru(1075) Or lastLetter = Ru(1076) Or lastLetter = Ru(1073) _
+       Or lastLetter = Ru(1087) Or lastLetter = Ru(1083) Or lastLetter = Ru(1089) Or lastLetter = Ru(1090) _
+       Or lastLetter = Ru(1082) Or lastLetter = Ru(1093) Or lastLetter = Ru(1094) Then
+        DetectNameGender = FIO_GENDER_MALE
+        Exit Function
+    End If
+
+    If lastLetter = Ru(1100) Then
+        If IsOneOf(lowerWord, Ru(1080, 1075, 1086, 1088, 1100)) Then
+            DetectNameGender = FIO_GENDER_MALE
+        End If
+    End If
+End Function
+
+Private Function DetectSurnameGender(ByVal word As String) As Long
+    Dim lowerWord As String
+
+    lowerWord = LCase$(word)
+
+    If EndsWithText(lowerWord, Ru(1086, 1074, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1077, 1074, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1105, 1074, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1080, 1085, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1099, 1085, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1072, 1103)) _
+       Or EndsWithText(lowerWord, Ru(1103, 1103)) Then
+        DetectSurnameGender = FIO_GENDER_FEMALE
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1086, 1074)) _
+       Or EndsWithText(lowerWord, Ru(1077, 1074)) _
+       Or EndsWithText(lowerWord, Ru(1105, 1074)) _
+       Or EndsWithText(lowerWord, Ru(1080, 1085)) _
+       Or EndsWithText(lowerWord, Ru(1099, 1085)) _
+       Or HasSurnameAdjectiveEnding(lowerWord) Then
+        DetectSurnameGender = FIO_GENDER_MALE
+    End If
+End Function
+
+Private Function IsLikelyFirstName(ByVal word As String) As Boolean
+    IsLikelyFirstName = (DetectNameGender(word) <> FIO_GENDER_UNKNOWN)
+End Function
+
+Private Function ResolveFioGender(ByVal firstName As String, ByVal middleName As String, ByVal surname As String) As Long
+    ResolveFioGender = DetectPatronymicGender(middleName)
+    If ResolveFioGender <> FIO_GENDER_UNKNOWN Then Exit Function
+
+    ResolveFioGender = DetectNameGender(firstName)
+    If ResolveFioGender <> FIO_GENDER_UNKNOWN Then Exit Function
+
+    ResolveFioGender = DetectSurnameGender(surname)
+End Function
+
+Private Sub ParseFioParts(ByVal sourceText As String, ByRef surname As String, ByRef firstName As String, ByRef middleName As String, ByRef gender As Long)
+    Dim normalizedText As String
+    Dim parts() As String
+    Dim partCount As Long
+
+    normalizedText = CleanFioSource(sourceText)
+    If Len(normalizedText) = 0 Then Exit Sub
+
+    parts = Split(normalizedText, " ")
+    partCount = UBound(parts) - LBound(parts) + 1
+
+    Select Case partCount
+        Case 1
+            If IsLikelyFirstName(parts(0)) Then
+                firstName = parts(0)
+            Else
+                surname = parts(0)
+            End If
+        Case 2
+            If IsLikelyFirstName(parts(0)) And Not IsLikelyFirstName(parts(1)) Then
+                firstName = parts(0)
+                surname = parts(1)
+            Else
+                surname = parts(0)
+                firstName = parts(1)
+            End If
+        Case Else
+            If IsLikelyPatronymic(parts(2)) Then
+                surname = parts(0)
+                firstName = parts(1)
+                middleName = parts(2)
+            ElseIf IsLikelyPatronymic(parts(1)) Then
+                firstName = parts(0)
+                middleName = parts(1)
+                surname = parts(2)
+            Else
+                surname = parts(0)
+                firstName = parts(1)
+                middleName = parts(2)
+            End If
+    End Select
+
+    gender = ResolveFioGender(firstName, middleName, surname)
+End Sub
+
+Private Function ResolveIrregularFirstName(ByVal lowerWord As String, ByVal caseCode As String) As String
+    If caseCode = FIO_CASE_NOMINATIVE Then Exit Function
+
+    If StrComp(lowerWord, Ru(1083, 1077, 1074), vbTextCompare) = 0 Then
+        If caseCode = FIO_CASE_DATIVE Then
+            ResolveIrregularFirstName = Ru(1083, 1100, 1074, 1091)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            ResolveIrregularFirstName = Ru(1083, 1100, 1074, 1072)
+        End If
+        Exit Function
+    End If
+
+    If StrComp(lowerWord, Ru(1087, 1072, 1074, 1077, 1083), vbTextCompare) = 0 Then
+        If caseCode = FIO_CASE_DATIVE Then
+            ResolveIrregularFirstName = Ru(1087, 1072, 1074, 1083, 1091)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            ResolveIrregularFirstName = Ru(1087, 1072, 1074, 1083, 1072)
+        End If
+        Exit Function
+    End If
+End Function
+
+Private Function DeclineNameByCase(ByVal word As String, ByVal gender As Long, ByVal caseCode As String) As String
+    Dim lowerWord As String
+    Dim irregularForm As String
+
+    lowerWord = LCase$(word)
+    If Len(lowerWord) = 0 Or caseCode = FIO_CASE_NOMINATIVE Then
+        DeclineNameByCase = word
+        Exit Function
+    End If
+
+    irregularForm = ResolveIrregularFirstName(lowerWord, caseCode)
+    If Len(irregularForm) > 0 Then
+        DeclineNameByCase = UCase$(Left$(word, 1)) & Mid$(irregularForm, 2)
+        Exit Function
+    End If
+
+    If gender = FIO_GENDER_FEMALE Then
+        If EndsWithText(lowerWord, Ru(1072)) Or EndsWithText(lowerWord, Ru(1103)) Then
+            If caseCode = FIO_CASE_DATIVE Then
+                DeclineNameByCase = ApplyAEndingDative(word)
+            ElseIf caseCode = FIO_CASE_GENITIVE Then
+                DeclineNameByCase = ApplyAEndingGenitive(word)
+            Else
+                DeclineNameByCase = word
+            End If
+            Exit Function
+        End If
+
+        If EndsWithText(lowerWord, Ru(1100)) And (caseCode = FIO_CASE_DATIVE Or caseCode = FIO_CASE_GENITIVE) Then
+            DeclineNameByCase = RemoveLastChars(word, 1) & Ru(1080)
+            Exit Function
+        End If
+
+        DeclineNameByCase = word
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1072)) Or EndsWithText(lowerWord, Ru(1103)) Then
+        If caseCode = FIO_CASE_DATIVE Then
+            DeclineNameByCase = ApplyAEndingDative(word)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            DeclineNameByCase = ApplyAEndingGenitive(word)
+        Else
+            DeclineNameByCase = word
+            End If
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1081)) Or EndsWithText(lowerWord, Ru(1100)) Then
+        If caseCode = FIO_CASE_DATIVE Then
+            DeclineNameByCase = RemoveLastChars(word, 1) & Ru(1102)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            DeclineNameByCase = RemoveLastChars(word, 1) & Ru(1103)
+        Else
+            DeclineNameByCase = word
+        End If
+        Exit Function
+    End If
+
+    If Not IsLikelyFirstName(word) And Not ContainsLetterText(word) Then
+        DeclineNameByCase = word
+        Exit Function
+    End If
+
+    If caseCode = FIO_CASE_DATIVE Then
+        DeclineNameByCase = word & Ru(1091)
+    ElseIf caseCode = FIO_CASE_GENITIVE Then
+        DeclineNameByCase = word & Ru(1072)
+    Else
+        DeclineNameByCase = word
+    End If
+End Function
+
+Private Function DeclinePatronymicByCase(ByVal word As String, ByVal gender As Long, ByVal caseCode As String) As String
+    Dim lowerWord As String
+
+    lowerWord = LCase$(word)
+    If Len(lowerWord) = 0 Or caseCode = FIO_CASE_NOMINATIVE Then
+        DeclinePatronymicByCase = word
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1086, 1075, 1083, 1099)) Or EndsWithText(lowerWord, Ru(1082, 1099, 1079, 1099)) Then
+        DeclinePatronymicByCase = word
+        Exit Function
+    End If
+
+    If gender = FIO_GENDER_FEMALE Or EndsWithText(lowerWord, Ru(1085, 1072)) Then
+        If caseCode = FIO_CASE_DATIVE Then
+            DeclinePatronymicByCase = ApplyAEndingDative(word)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            DeclinePatronymicByCase = ApplyAEndingGenitive(word)
+        Else
+            DeclinePatronymicByCase = word
+        End If
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1080, 1095)) Then
+        If caseCode = FIO_CASE_DATIVE Then
+            DeclinePatronymicByCase = word & Ru(1091)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            DeclinePatronymicByCase = word & Ru(1072)
+        Else
+            DeclinePatronymicByCase = word
+        End If
+        Exit Function
+    End If
+
+    DeclinePatronymicByCase = DeclineNameByCase(word, gender, caseCode)
+End Function
+
+Private Function DeclineFemaleSurnameByCase(ByVal word As String, ByVal caseCode As String) As String
+    Dim lowerWord As String
+    Dim stemText As String
+
+    lowerWord = LCase$(word)
+
+    If IsLikelyIndeclinableSurname(lowerWord) Or caseCode = FIO_CASE_NOMINATIVE Then
+        DeclineFemaleSurnameByCase = word
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1086, 1074, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1077, 1074, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1105, 1074, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1080, 1085, 1072)) _
+       Or EndsWithText(lowerWord, Ru(1099, 1085, 1072)) Then
+        DeclineFemaleSurnameByCase = RemoveLastChars(word, 1) & Ru(1086, 1081)
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1072, 1103)) Then
+        stemText = RemoveLastChars(word, 2)
+        DeclineFemaleSurnameByCase = stemText & Ru(1086, 1081)
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1103, 1103)) Then
+        stemText = RemoveLastChars(word, 2)
+        DeclineFemaleSurnameByCase = stemText & Ru(1077, 1081)
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1072)) Or EndsWithText(lowerWord, Ru(1103)) Then
+        If caseCode = FIO_CASE_DATIVE Then
+            DeclineFemaleSurnameByCase = ApplyAEndingDative(word)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            DeclineFemaleSurnameByCase = ApplyAEndingGenitive(word)
+        Else
+            DeclineFemaleSurnameByCase = word
+            End If
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1100)) And (caseCode = FIO_CASE_DATIVE Or caseCode = FIO_CASE_GENITIVE) Then
+        DeclineFemaleSurnameByCase = RemoveLastChars(word, 1) & Ru(1080)
+        Exit Function
+    End If
+
+    DeclineFemaleSurnameByCase = word
+End Function
+
+Private Function DeclineMaleSurnameByCase(ByVal word As String, ByVal caseCode As String) As String
+    Dim lowerWord As String
+    Dim stemText As String
+
+    lowerWord = LCase$(word)
+
+    If Len(lowerWord) = 0 Or caseCode = FIO_CASE_NOMINATIVE Then
+        DeclineMaleSurnameByCase = word
+        Exit Function
+    End If
+
+    If IsLikelyIndeclinableSurname(lowerWord) Then
+        DeclineMaleSurnameByCase = word
+        Exit Function
+    End If
+
+    If HasSurnameAdjectiveEnding(lowerWord) Then
+        stemText = RemoveLastChars(word, 2)
+        If caseCode = FIO_CASE_DATIVE Then
+            DeclineMaleSurnameByCase = stemText & Ru(1086, 1084, 1091)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            DeclineMaleSurnameByCase = stemText & Ru(1086, 1075, 1086)
+        Else
+            DeclineMaleSurnameByCase = word
+        End If
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1072)) Or EndsWithText(lowerWord, Ru(1103)) Then
+        If caseCode = FIO_CASE_DATIVE Then
+            DeclineMaleSurnameByCase = ApplyAEndingDative(word)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            DeclineMaleSurnameByCase = ApplyAEndingGenitive(word)
+        Else
+            DeclineMaleSurnameByCase = word
+            End If
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1081)) Or EndsWithText(lowerWord, Ru(1100)) Then
+        If caseCode = FIO_CASE_DATIVE Then
+            DeclineMaleSurnameByCase = RemoveLastChars(word, 1) & Ru(1102)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            DeclineMaleSurnameByCase = RemoveLastChars(word, 1) & Ru(1103)
+        Else
+            DeclineMaleSurnameByCase = word
+        End If
+        Exit Function
+    End If
+
+    If EndsWithText(lowerWord, Ru(1077, 1094)) Then
+        stemText = RemoveLastChars(word, 2)
+        If caseCode = FIO_CASE_DATIVE Then
+            DeclineMaleSurnameByCase = stemText & Ru(1094, 1091)
+        ElseIf caseCode = FIO_CASE_GENITIVE Then
+            DeclineMaleSurnameByCase = stemText & Ru(1094, 1072)
+        Else
+            DeclineMaleSurnameByCase = word
+        End If
+        Exit Function
+    End If
+
+    If caseCode = FIO_CASE_DATIVE Then
+        DeclineMaleSurnameByCase = word & Ru(1091)
+    ElseIf caseCode = FIO_CASE_GENITIVE Then
+        DeclineMaleSurnameByCase = word & Ru(1072)
+    Else
+        DeclineMaleSurnameByCase = word
+    End If
+End Function
+
+Private Function DeclineSurnameByCase(ByVal word As String, ByVal gender As Long, ByVal caseCode As String) As String
+    If Len(Trim$(word)) = 0 Then Exit Function
+
+    If gender = FIO_GENDER_FEMALE Then
+        DeclineSurnameByCase = DeclineFemaleSurnameByCase(word, caseCode)
+    Else
+        DeclineSurnameByCase = DeclineMaleSurnameByCase(word, caseCode)
+    End If
+End Function
+
+Private Function BuildInitialsText(ByVal firstName As String, ByVal middleName As String) As String
+    If Len(firstName) > 0 Then
+        BuildInitialsText = Left$(firstName, 1) & "."
+    End If
+
+    If Len(middleName) > 0 Then
+        BuildInitialsText = BuildInitialsText & Left$(middleName, 1) & "."
+    End If
+End Function
+
+Private Function JoinFioParts(ByVal surname As String, ByVal firstName As String, ByVal middleName As String) As String
+    Dim resultText As String
+
+    If Len(surname) > 0 Then resultText = surname
+    If Len(firstName) > 0 Then
+        If Len(resultText) > 0 Then resultText = resultText & " "
+        resultText = resultText & firstName
+    End If
+    If Len(middleName) > 0 Then
+        If Len(resultText) > 0 Then resultText = resultText & " "
+        resultText = resultText & middleName
+    End If
+
+    JoinFioParts = resultText
+End Function
+
+Public Function fio(NameAsText As String, Optional NameCase As String = "D", Optional ShortForm As Boolean = False) As String
+    Dim normalizedCase As String
+    Dim normalizedSource As String
+    Dim surname As String
+    Dim firstName As String
+    Dim middleName As String
+    Dim gender As Long
+    Dim declinedSurname As String
+    Dim declinedFirstName As String
+    Dim declinedMiddleName As String
+
+    normalizedSource = CleanFioSource(NameAsText)
+    If Len(normalizedSource) = 0 Then Exit Function
+
+    normalizedCase = NormalizeFioCaseCode(NameCase)
+    ParseFioParts normalizedSource, surname, firstName, middleName, gender
+
+    declinedSurname = DeclineSurnameByCase(surname, gender, normalizedCase)
+    declinedFirstName = DeclineNameByCase(firstName, gender, normalizedCase)
+    declinedMiddleName = DeclinePatronymicByCase(middleName, gender, normalizedCase)
+
+    If ShortForm Then
+        fio = JoinFioParts(declinedSurname, BuildInitialsText(firstName, middleName), "")
+    Else
+        fio = JoinFioParts(declinedSurname, declinedFirstName, declinedMiddleName)
+    End If
+
+    fio = FinalizeFioResult(Trim$(fio), normalizedSource, ShortForm)
 End Function
 
 ' ==========================================================

@@ -9,17 +9,37 @@ Attribute VB_Name = "mdlReferenceData"
 
 Option Explicit
 
-' Sheet name constants
-Public Const SHEET_PAYMENTS_NO_PERIODS As String = "Выплаты_Без_Периодов"
-Public Const SHEET_REF_VUS_CREW As String = "Справочник_ВУС_Экипаж"
-Public Const SHEET_REF_PAYMENT_TYPES As String = "Справочник_Типы_Выплат"
-Public Const SHEET_STAFF As String = "Штат"
-
 ' Type for VUS-Position pair
 Public Type VUSPositionPair
     vus As String
     Position As String
 End Type
+
+' Sheet names must be built through Unicode-safe helpers so VBA import
+' does not depend on the source-file codepage.
+Public Property Get SHEET_PAYMENTS_NO_PERIODS() As String
+    SHEET_PAYMENTS_NO_PERIODS = mdlHelper.Ru(1042, 1099, 1087, 1083, 1072, 1090, 1099, 95, 1041, 1077, 1079, 95, 1055, 1077, 1088, 1080, 1086, 1076, 1086, 1074)
+End Property
+
+Public Property Get SHEET_REF_VUS_CREW() As String
+    SHEET_REF_VUS_CREW = mdlHelper.Ru(1057, 1087, 1088, 1072, 1074, 1086, 1095, 1085, 1080, 1082, 95, 1042, 1059, 1057, 95, 1069, 1082, 1080, 1087, 1072, 1078)
+End Property
+
+Public Property Get SHEET_REF_PAYMENT_TYPES() As String
+    SHEET_REF_PAYMENT_TYPES = mdlHelper.Ru(1057, 1087, 1088, 1072, 1074, 1086, 1095, 1085, 1080, 1082, 95, 1058, 1080, 1087, 1099, 95, 1042, 1099, 1087, 1083, 1072, 1090)
+End Property
+
+Public Property Get SHEET_STAFF() As String
+    SHEET_STAFF = mdlHelper.Ru(1064, 1090, 1072, 1090)
+End Property
+
+Public Property Get SHEET_ENROLLMENT() As String
+    SHEET_ENROLLMENT = mdlHelper.Ru(1047, 1072, 1095, 1080, 1089, 1083, 1077, 1085, 1080, 1077)
+End Property
+
+Public Property Get SHEET_ENROLLMENT_FORM() As String
+    SHEET_ENROLLMENT_FORM = "EnrollmentForm"
+End Property
 
 ' =============================================
 ' @author Kerzhaev Evgeniy, FKU "95 FES" MO RF
@@ -35,7 +55,7 @@ Public Sub InitializeReferencesSheet(ByVal ws As Worksheet)
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Ошибка при инициализации листа справочников: " & Err.Description, vbCritical, "Ошибка"
+    MsgBox "РћС€РёР±РєР° РїСЂРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё Р»РёСЃС‚Р° СЃРїСЂР°РІРѕС‡РЅРёРєРѕРІ: " & Err.Description, vbCritical, "РћС€РёР±РєР°"
 End Sub
 
 ' =============================================
@@ -56,7 +76,7 @@ Public Function LoadVUSPositionPairs() As Object
     
     Set result = CreateObject("Scripting.Dictionary")
     
-    ' Search for sheet "Справочник_ВУС_Экипаж"
+    ' Search for sheet "РЎРїСЂР°РІРѕС‡РЅРёРє_Р’РЈРЎ_Р­РєРёРїР°Р¶"
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
@@ -110,7 +130,7 @@ Public Function CheckVUSPositionPair(ByVal vus As String, ByVal Position As Stri
     Dim refVUS As String
     Dim refPosition As String
     
-    ' Search for sheet "Справочник_ВУС_Экипаж"
+    ' Search for sheet "РЎРїСЂР°РІРѕС‡РЅРёРє_Р’РЈРЎ_Р­РєРёРїР°Р¶"
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
@@ -168,7 +188,7 @@ Public Function GetPaymentTypeConfig(ByVal paymentType As String) As Object
     
     Set resultDict = CreateObject("Scripting.Dictionary")
     
-    ' Search for sheet "Справочник_Типы_Выплат"
+    ' Search for sheet "РЎРїСЂР°РІРѕС‡РЅРёРє_РўРёРїС‹_Р’С‹РїР»Р°С‚"
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets
@@ -183,7 +203,7 @@ Public Function GetPaymentTypeConfig(ByVal paymentType As String) As Object
         Exit Function
     End If
     
-    ' Search for payment type (col A = Type, B = Code, C = Template, D = Description)
+    ' Search for payment type (col A = Type, B = Code, C = Template, D = Description, E = RuleCode)
     lastRow = wsRef.Cells(wsRef.Rows.count, 1).End(xlUp).Row
     paymentType = Trim(LCase(paymentType))
     
@@ -195,6 +215,11 @@ Public Function GetPaymentTypeConfig(ByVal paymentType As String) As Object
             resultDict("TypeCode") = Trim(CStr(wsRef.Cells(i, 2).value))
             resultDict("WordTemplate") = Trim(CStr(wsRef.Cells(i, 3).value))
             resultDict("Description") = Trim(CStr(wsRef.Cells(i, 4).value))
+            resultDict("RuleCode") = Trim(CStr(wsRef.Cells(i, 5).value))
+            resultDict("EligibilityRule") = Trim(CStr(wsRef.Cells(i, 13).value))
+            resultDict("EligibilitySeverity") = Trim(CStr(wsRef.Cells(i, 14).value))
+            resultDict("EligibilityPositionKeywords") = Trim(CStr(wsRef.Cells(i, 17).value))
+            resultDict("EligibilityFoundationKeywords") = Trim(CStr(wsRef.Cells(i, 18).value))
             Set GetPaymentTypeConfig = resultDict
             Exit Function
         End If
@@ -224,7 +249,7 @@ Public Function GetAllPaymentTypes() As Collection
     
     Set result = New Collection
     
-    ' Search for sheet "Справочник_Типы_Выплат"
+    ' Search for sheet "РЎРїСЂР°РІРѕС‡РЅРёРє_РўРёРїС‹_Р’С‹РїР»Р°С‚"
     Set wsRef = Nothing
     Dim ws As Worksheet
     For Each ws In ThisWorkbook.Worksheets

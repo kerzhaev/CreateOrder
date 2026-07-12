@@ -10,14 +10,19 @@ Attribute VB_Name = "mdlPaymentTypes"
 Option Explicit
 
 ' Constants
-Public Const DEFAULT_TEMPLATE As String = "Шаблон_Универсальный.docx"
+Public Const DEFAULT_TEMPLATE As String = "РЁР°Р±Р»РѕРЅ_РЈРЅРёРІРµСЂСЃР°Р»СЊРЅС‹Р№.docx"
 
 ' Type for payment type configuration
 Public Type PaymentTypeConfig
     typeName As String              ' "Drivers CDE"
     TypeCode As String              ' "DRIVER_SDE"
-    WordTemplate As String          ' "Шаблон_Водители.docx"
+    WordTemplate As String          ' "РЁР°Р±Р»РѕРЅ_Р’РѕРґРёС‚РµР»Рё.docx"
     Description As String           ' Description
+    RuleCode As String              ' Optional calculation rule
+    EligibilityRule As String       ' Optional eligibility rule for payments sheet
+    EligibilitySeverity As String   ' WARNING or BLOCKED
+    EligibilityPositionKeywords As String
+    EligibilityFoundationKeywords As String
 End Type
 
 ' Type for payment data without periods
@@ -30,6 +35,14 @@ Public Type PaymentWithoutPeriod
     paymentType As String
     amount As String
     foundation As String
+    packageId As String
+    packageMode As String
+    parameterValue As String
+    sharedFoundation As String
+    groupExportFlag As String
+    noteText As String
+    statusText As String
+    sourceEnrollmentId As String
 End Type
 
 ' =============================================
@@ -53,12 +66,32 @@ Public Function GetPaymentTypeConfig(ByVal paymentType As String) As PaymentType
         config.TypeCode = CStr(configDict("TypeCode"))
         config.WordTemplate = CStr(configDict("WordTemplate"))
         config.Description = CStr(configDict("Description"))
+        If configDict.Exists("RuleCode") Then
+            config.RuleCode = CStr(configDict("RuleCode"))
+        End If
+        If configDict.Exists("EligibilityRule") Then
+            config.EligibilityRule = CStr(configDict("EligibilityRule"))
+        End If
+        If configDict.Exists("EligibilitySeverity") Then
+            config.EligibilitySeverity = CStr(configDict("EligibilitySeverity"))
+        End If
+        If configDict.Exists("EligibilityPositionKeywords") Then
+            config.EligibilityPositionKeywords = CStr(configDict("EligibilityPositionKeywords"))
+        End If
+        If configDict.Exists("EligibilityFoundationKeywords") Then
+            config.EligibilityFoundationKeywords = CStr(configDict("EligibilityFoundationKeywords"))
+        End If
     Else
         ' Default configuration
         config.typeName = paymentType
         config.TypeCode = ""
         config.WordTemplate = DEFAULT_TEMPLATE
-        config.Description = "Тип выплаты: " & paymentType
+        config.Description = "РўРёРї РІС‹РїР»Р°С‚С‹: " & paymentType
+        config.RuleCode = ""
+        config.EligibilityRule = ""
+        config.EligibilitySeverity = ""
+        config.EligibilityPositionKeywords = ""
+        config.EligibilityFoundationKeywords = ""
     End If
     
     GetPaymentTypeConfig = config
@@ -69,7 +102,12 @@ ErrorHandler:
     config.typeName = paymentType
     config.TypeCode = ""
     config.WordTemplate = DEFAULT_TEMPLATE
-    config.Description = "Тип выплаты: " & paymentType
+    config.Description = "РўРёРї РІС‹РїР»Р°С‚С‹: " & paymentType
+    config.RuleCode = ""
+    config.EligibilityRule = ""
+    config.EligibilitySeverity = ""
+    config.EligibilityPositionKeywords = ""
+    config.EligibilityFoundationKeywords = ""
     GetPaymentTypeConfig = config
 End Function
 
