@@ -26,3 +26,6 @@ Trash/
 _tmp*/
 *.log
 Копия CreateOrder.xlsm
+
+# Воспроизводимый локальный кэш Graphify; итоговый граф и отчёт хранятся в Git
+graphify-out/cache/

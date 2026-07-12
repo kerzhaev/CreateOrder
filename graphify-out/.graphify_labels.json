@@ -1,0 +1,15 @@
+{
+  "0": "Test-PaymentsEnrollmentAcceptance.ps1",
+  "1": "Block 2. Enrollment workflow: new tab and rules engine",
+  "2": "Руководство пользователя: Формирователь приказов (CreateOrder)",
+  "3": "Block 1. Payments Without Periods: list-based assignment mode",
+  "4": "Project Context & Knowledge Base",
+  "5": "ensure_localization_sheet.py",
+  "6": "Feature Specification: Payments Without Periods and Enrollment Workflow",
+  "7": "Test-ZP12Validation.ps1",
+  "8": "Technical Notes",
+  "9": "Спецификация: Гибридная система лицензирования (Time-Bomb + File-Based Activation)",
+  "10": "plan.md",
+  "11": "release-protection.md",
+  "12": "Test-FIODeclension.ps1"
+}

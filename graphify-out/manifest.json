@@ -1,0 +1,202 @@
+{
+  ".spec/templates/.specify/scripts/powershell/check-prerequisites.ps1": {
+    "mtime": 1770921143.0,
+    "ast_hash": "6f75f7b2e36c0a11edc67edb55fc5700",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/scripts/powershell/common.ps1": {
+    "mtime": 1770921143.0,
+    "ast_hash": "4ddd717dc8223f39edf40a899980ff75",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/scripts/powershell/create-new-feature.ps1": {
+    "mtime": 1770921143.0,
+    "ast_hash": "16fc18a1d56b0877f5df00b453a0756f",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/scripts/powershell/setup-plan.ps1": {
+    "mtime": 1770921143.0,
+    "ast_hash": "4e21417a8b19e920843c174ef916fb4f",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/scripts/powershell/update-agent-context.ps1": {
+    "mtime": 1770921143.0,
+    "ast_hash": "13383b6809832e3fa195e6837b3d6f06",
+    "semantic_hash": ""
+  },
+  ".vscode/settings.json": {
+    "mtime": 1766949398.1398675,
+    "ast_hash": "09092d6f29f977270848aab86abf5b97",
+    "semantic_hash": ""
+  },
+  "Build-Release.ps1": {
+    "mtime": 1775583196.2618568,
+    "ast_hash": "1c48fbbf63e9367e915e3d76f789fbbe",
+    "semantic_hash": ""
+  },
+  "Build-Ribbon.ps1": {
+    "mtime": 1771842496.0028565,
+    "ast_hash": "0ff2dd78706b28ef08d8a987adbfae0a",
+    "semantic_hash": ""
+  },
+  "Test-FIODeclension.ps1": {
+    "mtime": 1783698035.8983452,
+    "ast_hash": "6fe3af84b867e26229bed370b5793bbb",
+    "semantic_hash": ""
+  },
+  "Test-PaymentsEnrollmentAcceptance.ps1": {
+    "mtime": 1783889849.1858852,
+    "ast_hash": "934829b250e5e46b67e4afd1d2eb2462",
+    "semantic_hash": ""
+  },
+  "Test-ZP12Validation.ps1": {
+    "mtime": 1782795231.6119087,
+    "ast_hash": "e6c1e646fde71b269acab481d2e827af",
+    "semantic_hash": ""
+  },
+  "tools/ensure_localization_sheet.py": {
+    "mtime": 1781297589.4260135,
+    "ast_hash": "17e0cea4deddbdefc5083918a7966a50",
+    "semantic_hash": ""
+  },
+  ".spec/PROJECT_CONTEXT.md": {
+    "mtime": 1782151885.7902718,
+    "ast_hash": "54376ba76a737078032f0ff975476982",
+    "semantic_hash": ""
+  },
+  ".spec/archive/implementation-instructions.md": {
+    "mtime": 1766614759.6470613,
+    "ast_hash": "12d63728c6a3b4fe3a2c8a63e5532bd3",
+    "semantic_hash": ""
+  },
+  ".spec/archive/import-word-raport/plan.md": {
+    "mtime": 1771881506.5631497,
+    "ast_hash": "f5113d0ae998cbe6c8ca04644a656394",
+    "semantic_hash": ""
+  },
+  ".spec/archive/import-word-raport/spec.md": {
+    "mtime": 1771792988.837212,
+    "ast_hash": "3d36feee6716fce9b04dde853c4a18b8",
+    "semantic_hash": ""
+  },
+  ".spec/archive/import-word-raport/tasks.md": {
+    "mtime": 1771795797.2166817,
+    "ast_hash": "679ef796d8d9d5ce3f87718935a00382",
+    "semantic_hash": ""
+  },
+  ".spec/archive/mass-employee-import-plan.md": {
+    "mtime": 1768424008.848278,
+    "ast_hash": "e02e4851613b6e6ef48d41e52b60724e",
+    "semantic_hash": ""
+  },
+  ".spec/archive/mass-employee-import.md": {
+    "mtime": 1768424024.0265574,
+    "ast_hash": "6ad0141fc08775b4071a601d04d5e051",
+    "semantic_hash": ""
+  },
+  ".spec/archive/universal-payments-plan.md": {
+    "mtime": 1766613805.6688206,
+    "ast_hash": "78e1c3718d5444b58892764bcb98d8b5",
+    "semantic_hash": ""
+  },
+  ".spec/archive/universal-payments.md": {
+    "mtime": 1766613805.6757088,
+    "ast_hash": "e00a94dbb302fecbb31c96f34a21ac03",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/alu-frp-export-plan.md": {
+    "mtime": 1771190887.649721,
+    "ast_hash": "55a59da7b2ccd6dd978a7df2937e5e3a",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/alu-frp-export.md": {
+    "mtime": 1771190887.651047,
+    "ast_hash": "ae9c2ed4fa5d3b027adaf4e88e5cd239",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/feature-licensing-v2/plan.md": {
+    "mtime": 1781296002.9921436,
+    "ast_hash": "828dea7985e86b8abbf95c8e69a9b17f",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/feature-licensing-v2/spec.md": {
+    "mtime": 1781295369.8962865,
+    "ast_hash": "d59460d05b322607780e99c1765e69b3",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/import-word-raport/tasks.md": {
+    "mtime": 1771881497.3420844,
+    "ast_hash": "a063ae9a5d2b42c7120f8c4edea7ccef",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/release-protection.md": {
+    "mtime": 1781294283.3136873,
+    "ast_hash": "1caf733f3cdfef913715c7f3c807b6c6",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/self-healing/plan.md": {
+    "mtime": 1771851793.8771813,
+    "ast_hash": "7361b2d6d2aed33a2c62f7711d039658",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/self-healing/spec.md": {
+    "mtime": 1771851793.8771813,
+    "ast_hash": "56be7fa1b213b1743338a3c25eb25054",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/ui-search-enhancement.md": {
+    "mtime": 1771276060.831237,
+    "ast_hash": "3a0c8c69cec03964126ed3cb0adcf0fa",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/zp12-validation.md": {
+    "mtime": 1773353583.4554453,
+    "ast_hash": "b671109aee4ff59447e73dbe8560c4fc",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/templates/agent-file-template.md": {
+    "mtime": 1775583196.2618568,
+    "ast_hash": "5a6c4d8927a7022064fc66331cdde9d1",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/templates/checklist-template.md": {
+    "mtime": 1770921143.0,
+    "ast_hash": "87c4b390cebe71d15364bcd4690a102f",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/templates/constitution-template.md": {
+    "mtime": 1770921143.0,
+    "ast_hash": "dcefb6b60e7cb3db2e966977b6f02f18",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/templates/plan-template.md": {
+    "mtime": 1770921143.0,
+    "ast_hash": "da13d515cc460ff32df879f1878d7d60",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/templates/spec-template.md": {
+    "mtime": 1770921143.0,
+    "ast_hash": "51e09a9259a1b4021a6aae22d612052d",
+    "semantic_hash": ""
+  },
+  ".spec/templates/.specify/templates/tasks-template.md": {
+    "mtime": 1770921143.0,
+    "ast_hash": "9bbe5c1fbdbe93da7c522f085de7c0e1",
+    "semantic_hash": ""
+  },
+  "docs/FeatureSpec_PaymentsAndEnrollment.md": {
+    "mtime": 1782967843.7137008,
+    "ast_hash": "9f5464090bec7166c5af2170be19abcb",
+    "semantic_hash": ""
+  },
+  "docs/TechnicalNotes.md": {
+    "mtime": 1783282136.108822,
+    "ast_hash": "728d25bf503c79afba3fa91832575966",
+    "semantic_hash": ""
+  },
+  "docs/UserGuide.md": {
+    "mtime": 1781297820.1780288,
+    "ast_hash": "f56f964b7ea2f2f8a31bcca2a464f198",
+    "semantic_hash": ""
+  }
+}
