@@ -10,9 +10,12 @@ $HelperFullPath = (Resolve-Path $HelperPath).Path
 $TempHelperPath = Join-Path $env:TEMP "mdlHelper_fio_test_import.bas"
 $TempWorkbookPath = Join-Path $env:TEMP ("CreateOrder_FIO_Test_{0}.xlsm" -f ([guid]::NewGuid().ToString("N")))
 
-function Stop-ExcelProcesses {
-    Get-Process Excel -ErrorAction SilentlyContinue | Stop-Process -Force
-    Start-Sleep -Milliseconds 500
+function Assert-NoOfficeProcesses {
+    $officeProcesses = @(Get-Process Excel,WINWORD -ErrorAction SilentlyContinue)
+    if ($officeProcesses.Count -gt 0) {
+        $names = ($officeProcesses | ForEach-Object { "$($_.ProcessName) (PID $($_.Id))" }) -join ", "
+        throw "FIO acceptance test was not started because Office is already open: $names. Close only disposable Office sessions and run the test again; this script never terminates user sessions."
+    }
 }
 
 $cases = @(
@@ -72,7 +75,7 @@ $cases = @(
     }
 )
 
-Stop-ExcelProcesses
+Assert-NoOfficeProcesses
 
 $helperContent = [System.IO.File]::ReadAllText($HelperFullPath, [System.Text.Encoding]::UTF8)
 [System.IO.File]::WriteAllText($TempHelperPath, $helperContent, [System.Text.Encoding]::GetEncoding(1251))
@@ -147,5 +150,4 @@ finally {
     }
     [GC]::Collect()
     [GC]::WaitForPendingFinalizers()
-    Stop-ExcelProcesses
 }

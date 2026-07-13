@@ -51,5 +51,16 @@
   "49": "Build-Ribbon.ps1",
   "50": "tasks.md",
   "51": "check-prerequisites.ps1",
-  "52": "setup-plan.ps1"
+  "52": "setup-plan.ps1",
+  "53": "План: приказы о перемещении и исключении из списков",
+  "54": "Передача проекта — 14.07.2026",
+  "55": "Статус проекта CreateOrder",
+  "56": "Разбор источника: приказ МО РФ №430дсп — особые достижения",
+  "57": "Спецификация: единый мастер кадровых действий",
+  "58": "Правила работы с проектом CreateOrder",
+  "59": "Test-PersonnelEvents.ps1",
+  "60": "Test-PersonnelActionWizardSafe.ps1",
+  "61": "Test-PersonnelRibbonSafe.ps1",
+  "62": "plan.md",
+  "63": "Repair-FilterDatabaseNames.ps1"
 }

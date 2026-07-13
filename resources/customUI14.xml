@@ -54,6 +54,13 @@
           </menu>
         </group>
 
+        <group id="personnelActionsGroup" getLabel="GetRibbonLabel">
+          <button id="openPersonnelEnrollmentAction" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelEnrollmentActionClick" imageMso="ContactInsertFromOutlook" size="large"/>
+          <button id="openPersonnelTransferAction" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelTransferActionClick" imageMso="WorksheetMove" size="large"/>
+          <button id="openPersonnelExclusionAction" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelExclusionActionClick" imageMso="DeleteRecord" size="large"/>
+          <button id="openPersonnelHistoryAction" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelHistoryActionClick" imageMso="ReviewShowMarkupBalloonMenu"/>
+        </group>
+
         <group id="dataGroup" getLabel="GetRibbonLabel">
           <button id="excelReport" getLabel="GetRibbonLabel" onAction="OnPeriodsReportClick" imageMso="ExcelSpreadsheetInsert" size="large"/>
           <button id="importData" getLabel="GetRibbonLabel" onAction="RunImportData" imageMso="ImportExcel" size="large"/>

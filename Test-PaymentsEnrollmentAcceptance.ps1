@@ -1,12 +1,10 @@
 ﻿$ErrorActionPreference = "Stop"
 
-function Stop-ExcelProcesses {
-    Get-Process Excel,WINWORD -ErrorAction SilentlyContinue | ForEach-Object {
-        try {
-            $_ | Stop-Process -Force -ErrorAction Stop
-        }
-        catch {
-        }
+function Assert-NoOfficeProcesses {
+    $officeProcesses = @(Get-Process Excel,WINWORD -ErrorAction SilentlyContinue)
+    if ($officeProcesses.Count -gt 0) {
+        $names = ($officeProcesses | ForEach-Object { "$($_.ProcessName) (PID $($_.Id))" }) -join ", "
+        throw "Acceptance test was not started because Office is already open: $names. Close only the disposable Office sessions and run the test again; this script never terminates user sessions."
     }
 }
 
@@ -714,7 +712,7 @@ function New-ListTemplateDocx {
     }
 }
 
-Stop-ExcelProcesses
+Assert-NoOfficeProcesses
 
 $workspace = "C:\Users\Nachfin\Desktop\Projets\CreateOrder"
 $testDir = Join-Path $workspace "_tmp_acceptance_test"
@@ -2242,7 +2240,6 @@ try {
     $excel.Quit()
     $excel = $null
 
-    Stop-ExcelProcesses
     Write-Output "ACCEPTANCE_SMOKE_OK"
 }
 finally {
@@ -2253,5 +2250,4 @@ finally {
     if ($excel -ne $null) {
         try { $excel.Quit() } catch {}
     }
-    Stop-ExcelProcesses
 }

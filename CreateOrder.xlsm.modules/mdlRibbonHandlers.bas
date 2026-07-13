@@ -349,6 +349,28 @@ ErrorHandler:
     MsgBox tf("enrollment.ribbon.error.open_form", "Ошибка открытия мастера зачисления: {error}", "{error}", Err.Description), vbCritical, t("common.error", "Ошибка")
 End Sub
 
+Public Sub OnOpenPersonnelEnrollmentActionClick(control As IRibbonControl)
+    mdlPersonnelEvents.OpenPersonnelEnrollmentAction
+End Sub
+
+Public Sub OnOpenPersonnelTransferActionClick(control As IRibbonControl)
+    mdlPersonnelEvents.OpenPersonnelTransferAction
+End Sub
+
+Public Sub OnOpenPersonnelExclusionActionClick(control As IRibbonControl)
+    mdlPersonnelEvents.OpenPersonnelExclusionAction
+End Sub
+
+Public Sub OnOpenPersonnelHistoryActionClick(control As IRibbonControl)
+    mdlPersonnelEvents.OpenHistoryForPersonnelAction
+End Sub
+
+Public Sub OnSavePersonnelActionClick(control As IRibbonControl)
+    mdlPersonnelEvents.SaveCurrentPersonnelAction
+End Sub
+Public Sub OnExportSavedPersonnelActionClick(control As IRibbonControl)
+    mdlPersonnelEvents.ExportSavedPersonnelEventOrder
+End Sub
 Public Sub OnEnrollmentRefreshFormClick(control As IRibbonControl)
     On Error GoTo ErrorHandler
     mdlEnrollmentWorkflow.RefreshEnrollmentForm

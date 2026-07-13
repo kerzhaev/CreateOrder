@@ -1,16 +1,16 @@
-# Graph Report - CreateOrder  (2026-07-13)
+# Graph Report - CreateOrder  (2026-07-14)
 
 ## Corpus Check
-- 42 files · ~39,684 words
+- 53 files · ~56,221 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 543 nodes · 569 edges · 53 communities (47 shown, 6 thin omitted)
+- 667 nodes · 685 edges · 64 communities (54 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `37696bc1`
+- Built from commit: `f52dc19e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -62,10 +62,20 @@
 - alu-frp-export-plan.md
 - plan.md
 - spec.md
+- План: приказы о перемещении и исключении из списков
+- Передача проекта — 14.07.2026
+- Статус проекта CreateOrder
+- Разбор источника: приказ МО РФ №430дсп — особые достижения
+- Спецификация: единый мастер кадровых действий
+- Правила работы с проектом CreateOrder
+- Test-PersonnelEvents.ps1
+- Test-PersonnelActionWizardSafe.ps1
+- Test-PersonnelRibbonSafe.ps1
+- plan.md
 
 ## God Nodes (most connected - your core abstractions)
-1. `Спецификация: правила назначения надбавок при зачислении` - 17 edges
-2. `План реализации: кадровые события и движок надбавок` - 16 edges
+1. `План реализации: кадровые события и движок надбавок` - 23 edges
+2. `Спецификация: правила назначения надбавок при зачислении` - 17 edges
 3. `Tasks: [FEATURE NAME]` - 13 edges
 4. `11. Этапы реализации` - 12 edges
 5. `Block 1. Payments Without Periods: list-based assignment mode` - 12 edges
@@ -73,7 +83,7 @@
 7. `Технический план: Массовое добавление сотрудников на лист "Выплаты_Без_Периодов"` - 10 edges
 8. `Спецификация: Массовое добавление сотрудников на лист "Выплаты_Без_Периодов"` - 10 edges
 9. `������������: ������������� ������� ������ � ���������� ��� ��������` - 10 edges
-10. `4. Справочники правил` - 9 edges
+10. `План: приказы о перемещении и исключении из списков` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
@@ -81,7 +91,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (53 total, 6 thin omitted)
+## Communities (64 total, 10 thin omitted)
 
 ### Community 0 - "Test-PaymentsEnrollmentAcceptance.ps1"
 Cohesion: 0.09
@@ -92,16 +102,16 @@ Cohesion: 0.09
 Nodes (23): 1. Employee, 2. Enrollment event, 3. Allowance assignment, Acceptance criteria, Block 2. Enrollment workflow: new tab and rules engine, Business event model, Integration requirements, Main entities (+15 more)
 
 ### Community 2 - "Руководство пользователя: Формирователь приказов (CreateOrder)"
-Cohesion: 0.13
-Nodes (14): 1. Введение и подготовка к работе <a name="введение"></a>, 2.1. Группа «Приказы и Рапорты» <a name="группа-приказы"></a>, 2.2. Группа «Надбавки» <a name="группа-надбавки"></a>, 2.3. Группа «Импорт и Отчеты» <a name="группа-импорт"></a>, 2.4. Группа «Проверка и Настройки» <a name="группа-проверка"></a>, 2. Панель управления (Лента «СВО Макросы») <a name="панель-управления"></a>, 3.1. Лист «ДСО» (Периоды) <a name="лист-дсо"></a>, 3.2. Лист «Надбавки без периодов» <a name="лист-надбавки"></a> (+6 more)
+Cohesion: 0.07
+Nodes (28): 1. Введение и подготовка к работе <a name="введение"></a>, 2.1. Группа «Приказы и Рапорты» <a name="группа-приказы"></a>, 2.2. Группа «Надбавки» <a name="группа-надбавки"></a>, 2.3. Группа «Импорт и Отчеты» <a name="группа-импорт"></a>, 2.4. Группа «Проверка и Настройки» <a name="группа-проверка"></a>, 2. Панель управления (Лента «СВО Макросы») <a name="панель-управления"></a>, 3.1. Лист «ДСО» (Периоды) <a name="лист-дсо"></a>, 3.2. Лист «Надбавки без периодов» <a name="лист-надбавки"></a> (+20 more)
 
 ### Community 3 - "Block 1. Payments Without Periods: list-based assignment mode"
 Cohesion: 0.08
 Nodes (24): Acceptance criteria, Block 1. Payments Without Periods: list-based assignment mode, Current implementation scope, Export requirements, Feature Specification: Payments Without Periods and Enrollment Workflow, Functional concept, Implementation priority, Mandatory implementation workflow (+16 more)
 
 ### Community 4 - "Project Context & Knowledge Base"
-Cohesion: 0.15
-Nodes (12): 0. System Instructions (Agent Rules), 1. Глобальная цель, 2. Текущее состояние (Active State), 3.1. AI Factory / Pipeline Notes, 3. Архитектурные решения (ADR), 4.1. Основные модули экспорта документов, 4.2. Модули работы с данными, 4.3. Вспомогательные и Системные модули (+4 more)
+Cohesion: 0.14
+Nodes (13): 0. System Instructions (Agent Rules), 1. Глобальная цель, 2. Текущее состояние (Active State), 3.1. AI Factory / Pipeline Notes, 3. Архитектурные решения (ADR), 4.1. Основные модули экспорта документов, 4.2. Модули работы с данными, 4.3. Вспомогательные и Системные модули (+5 more)
 
 ### Community 5 - "ensure_localization_sheet.py"
 Cohesion: 0.38
@@ -124,12 +134,12 @@ Cohesion: 0.50
 Nodes (3): Описание, Спецификация: Гибридная система лицензирования (Time-Bomb + File-Based Activation), Требования
 
 ### Community 13 - "План реализации: кадровые события и движок надбавок"
-Cohesion: 0.25
-Nodes (7): 10. Миграция текущей реализации, 13. Приёмочные критерии, 14. Блокирующие условия финальной приёмки, 15. Порядок работы по каждой надбавке, 1. Назначение плана, 2. Обязательные ограничения реализации, План реализации: кадровые события и движок надбавок
+Cohesion: 0.13
+Nodes (14): 10. Миграция текущей реализации, 13. Приёмочные критерии, 14. Блокирующие условия финальной приёмки, 15. Порядок работы по каждой надбавке, 16. Контроль отклонений от подтверждённых норм, 17. Подготовка корректировки из истории, 18. Сохранность условий назначения выплат, 19. Безопасный сброс кадровой формы (+6 more)
 
 ### Community 14 - "Спецификация: правила назначения надбавок при зачислении"
-Cohesion: 0.10
-Nodes (20): 10. Разделение справочника сотрудников и журнала событий, 11. Сценарий исключения из списков организации, 12. Общая архитектура кадровых Word-документов, 13. Предварительное правило объединения особых достижений, 14. Связывание ручной карточки с последующей выгрузкой Штат, 15. Обязательный блокирующий вопрос перед окончательной приёмкой, 1. Карточка зачисляемого сотрудника, 2. Общая модель назначения выплат (+12 more)
+Cohesion: 0.05
+Nodes (36): 10. Разделение справочника сотрудников и журнала событий, 11. Сценарий исключения из списков организации, 12.1. Связь существующего Word-потока зачисления с кадровым событием, 12. Общая архитектура кадровых Word-документов, 13.1. Категория военнослужащих по мобилизации, 13.2. Формулировки Word-приказа для подтверждённых НПА, 13.3. Защитные ограничения подтверждённого набора, 13. Предварительное правило объединения особых достижений (+28 more)
 
 ### Community 15 - "11. Этапы реализации"
 Cohesion: 0.17
@@ -204,8 +214,8 @@ Cohesion: 0.25
 Nodes (7): Active Technologies, Code Style, Commands, [PROJECT NAME] Development Guidelines, Project Structure, Recent Changes, Workflow Rules
 
 ### Community 33 - "3. Целевая модель данных"
-Cohesion: 0.29
-Nodes (7): 3.1. Справочник сотрудников, 3.2. Текущее состояние сотрудника, 3.3. Журнал кадровых событий, 3.4. Снимки состояния, 3.5. Назначения выплат, 3.6. Реестр документов, 3. Целевая модель данных
+Cohesion: 0.22
+Nodes (9): 3.1. Справочник сотрудников, 3.2. Текущее состояние сотрудника, 3.3. Журнал кадровых событий, 3.4. Снимки состояния, 3.5. Назначения выплат, 3.6. Реестр документов, 3.7. Экран истории сотрудника — реализуемый этап, 3.8. Безопасное связывание с выгрузкой Штат — реализуемый этап (+1 more)
 
 ### Community 34 - "2. Требования"
 Cohesion: 0.29
@@ -220,8 +230,8 @@ Cohesion: 0.33
 Nodes (5): 1. Описание задачи, 2.1 Интерфейс, 2.2 Логика данных, 2. Требования, Спецификация: Обновление выгрузки Алушта/ФРП
 
 ### Community 37 - "6. Единый движок оценки выплат"
-Cohesion: 0.40
-Nodes (5): 6.1. Входные данные, 6.2. Результат оценки, 6.3. Применение ограничений, 6.4. Жизненный цикл выплат, 6. Единый движок оценки выплат
+Cohesion: 0.33
+Nodes (6): 6.1. Входные данные, 6.2. Результат оценки, 6.3. Применение ограничений, 6.4. Жизненный цикл выплат, 6.5. Особый профиль `MOBILIZED`, 6. Единый движок оценки выплат
 
 ### Community 38 - "[CHECKLIST TYPE] Checklist: [FEATURE NAME]"
 Cohesion: 0.40
@@ -247,25 +257,49 @@ Nodes (3): D89 Validation, Goal, Scope
 Cohesion: 0.67
 Nodes (3): 9.1. Разделы, 9.2. Требования, 9. Интерфейс
 
+### Community 53 - "План: приказы о перемещении и исключении из списков"
+Cohesion: 0.10
+Nodes (20): 1. Структура образцов, 2. Модель Word-экспорта, 3. Сценарий `EXCLUSION`, 4. Сценарий `TRANSFER`, 5. Изменения в приложении, 6. Валидация, 7. Этапы реализации, 8. Приёмочные сценарии (+12 more)
+
+### Community 54 - "Передача проекта — 14.07.2026"
+Cohesion: 0.12
+Nodes (16): Автоматические проверки, Где искать код и документацию, Единый вход в кадровые действия, Надбавки и нормативная логика, Ошибки VBA, встреченные при предыдущем импорте, Ошибки и ограничения Excel/интерфейса, Ошибки и принятые решения, Передача проекта — 14.07.2026 (+8 more)
+
+### Community 55 - "Статус проекта CreateOrder"
+Cohesion: 0.18
+Nodes (10): Аудит готовности на 13.07.2026, Документы и ориентиры, Единый вход в кадровые действия, Зафиксированные решения, Как продолжить работу, Направления работы, Общая картина, Открытые вопросы (+2 more)
+
+### Community 56 - "Разбор источника: приказ МО РФ №430дсп — особые достижения"
+Cohesion: 0.25
+Nodes (7): Влияние на текущую спецификацию, Ограничение источника, Правила, явно видимые в переданном фрагменте, Разбор источника: приказ МО РФ №430дсп — особые достижения, Решения, которые ожидаются от владельца проекта, Связанное локальное правило из другого НПА: военнослужащие по мобилизации, Условия расчёта, которые нужно реализовать отдельно от самих процентов
+
+### Community 57 - "Спецификация: единый мастер кадровых действий"
+Cohesion: 0.29
+Nodes (6): Вторая поставка: кадровый мастер, Принципы, Приёмка, Состав первой поставки, Спецификация: единый мастер кадровых действий, Цель
+
+### Community 58 - "Правила работы с проектом CreateOrder"
+Cohesion: 0.40
+Nodes (4): В начале каждой сессии, Документация — обязательная часть работы, Правила работы с проектом CreateOrder, Формат статуса
+
 ## Knowledge Gaps
-- **320 isolated node(s):** `1. Назначение плана`, `2. Обязательные ограничения реализации`, `3.1. Справочник сотрудников`, `3.2. Текущее состояние сотрудника`, `3.3. Журнал кадровых событий` (+315 more)
+- **404 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+399 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `План реализации: кадровые события и движок надбавок` connect `План реализации: кадровые события и движок надбавок` to `3. Целевая модель данных`, `6. Единый движок оценки выплат`, `12. Тестовая стратегия`, `5. Сервис связывания со Штат`, `9. Интерфейс`, `11. Этапы реализации`, `4. Справочники правил`, `7. Пользовательские сценарии`, `8. Word-архитектура`?**
-  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **Why does `Block 2. Enrollment workflow: new tab and rules engine` connect `Block 2. Enrollment workflow: new tab and rules engine` to `Block 1. Payments Without Periods: list-based assignment mode`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+  _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **Why does `Feature Specification: Payments Without Periods and Enrollment Workflow` connect `Block 1. Payments Without Periods: list-based assignment mode` to `Block 2. Enrollment workflow: new tab and rules engine`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **What connects `1. Назначение плана`, `2. Обязательные ограничения реализации`, `3.1. Справочник сотрудников` to the rest of the system?**
-  _320 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+- **What connects `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)` to the rest of the system?**
+  _404 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Test-PaymentsEnrollmentAcceptance.ps1` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Block 2. Enrollment workflow: new tab and rules engine` be split into smaller, more focused modules?**
   _Cohesion score 0.08695652173913043 - nodes in this community are weakly interconnected._
 - **Should `Руководство пользователя: Формирователь приказов (CreateOrder)` be split into smaller, more focused modules?**
-  _Cohesion score 0.13333333333333333 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06896551724137931 - nodes in this community are weakly interconnected._
