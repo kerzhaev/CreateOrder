@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784061185.456475,
-    "ast_hash": "33b4acb3b9cd456e209385fe4181c8e4",
+    "mtime": 1784061245.3914325,
+    "ast_hash": "11aaa1c9bfd4dc8273211b2cd6712966",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784061165.7586875,
-    "ast_hash": "7d67c015b20c550c09bcc0286b1e151c",
+    "mtime": 1784061245.3903737,
+    "ast_hash": "c38091e90bab8aaa9f28af6abcd34c9c",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/plan.md": {
-    "mtime": 1784061165.7586875,
-    "ast_hash": "6d193b8e142f8c5cbaf5dbcff6b342bd",
+    "mtime": 1784061256.5197113,
+    "ast_hash": "f3031890d84907b567e3f3ac8ba1d0bd",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/spec.md": {
@@ -282,6 +282,11 @@
   "tools/Test-EnrollmentMedalReferenceSafe.ps1": {
     "mtime": 1784061130.5634837,
     "ast_hash": "28177ddbc92b10f933c7b5828f120dff",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/enrollment-operator-ui/acceptance-matrix.md": {
+    "mtime": 1784061245.3898547,
+    "ast_hash": "1bd5b6ecdc020da632ee35ec4025f198",
     "semantic_hash": ""
   }
 }
