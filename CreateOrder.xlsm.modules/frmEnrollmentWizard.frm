@@ -167,7 +167,8 @@ Private Const PREVIEW_PAGE_INDEX As Long = 6
 Private Sub UserForm_Initialize()
     On Error GoTo ErrorHandler
 
-    mdlEnrollmentWorkflow.EnsureEnrollmentInfrastructure
+    ' Infrastructure is prepared by the public workflow command before Show.
+    ' Do not repeat template initialization during UserForm_Initialize.
     mdlHelper.EnsureStaffColumnsInitialized
 
     HideLegacyControls

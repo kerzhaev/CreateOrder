@@ -1,16 +1,16 @@
 # Graph Report - CreateOrder  (2026-07-14)
 
 ## Corpus Check
-- 55 files · ~58,627 words
+- 55 files · ~59,037 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 677 nodes · 693 edges · 66 communities (55 shown, 11 thin omitted)
+- 678 nodes · 694 edges · 66 communities (55 shown, 11 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2f917b0b`
+- Built from commit: `2d4608bc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -268,8 +268,8 @@ Cohesion: 0.12
 Nodes (16): Автоматические проверки, Где искать код и документацию, Единый вход в кадровые действия, Надбавки и нормативная логика, Ошибки VBA, встреченные при предыдущем импорте, Ошибки и ограничения Excel/интерфейса, Ошибки и принятые решения, Передача проекта — 14.07.2026 (+8 more)
 
 ### Community 55 - "Статус проекта CreateOrder"
-Cohesion: 0.17
-Nodes (11): Аудит готовности на 13.07.2026, Документы и ориентиры, Единый вход в кадровые действия, Зафиксированные решения, Как продолжить работу, Направления работы, Общая картина, Операторский интерфейс мастера зачисления (+3 more)
+Cohesion: 0.15
+Nodes (12): Аудит готовности на 13.07.2026, Документы и ориентиры, Единый вход в кадровые действия, Зафиксированные решения, Как продолжить работу, Мастер зачисления: повторная инициализация формы (14.07.2026), Направления работы, Общая картина (+4 more)
 
 ### Community 56 - "Разбор источника: приказ МО РФ №430дсп — особые достижения"
 Cohesion: 0.25
