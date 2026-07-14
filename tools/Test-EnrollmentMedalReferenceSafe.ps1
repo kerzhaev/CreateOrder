@@ -26,6 +26,7 @@ try {
     try { $excel.AutomationSecurity = 1 } catch {}
     $workbook = $excel.Workbooks.Open($testWorkbookPath, 0, $false)
     Import-CodeModuleText $workbook "mdlEnrollmentWorkflow" (Join-Path $workspace "CreateOrder.xlsm.modules\mdlEnrollmentWorkflow.bas")
+    Import-CodeModuleText $workbook "mdlPersonnelEvents" (Join-Path $workspace "CreateOrder.xlsm.modules\mdlPersonnelEvents.bas")
     $formPath = Join-Path $workspace "CreateOrder.xlsm.modules\frmEnrollmentWizard.frm"
     $components = $workbook.VBProject.VBComponents
     try { $components.Remove($components.Item("frmEnrollmentWizard")) } catch {}
@@ -38,6 +39,12 @@ try {
 Option Explicit
 Public Function ProbeEnrollmentMedalReferences() As String
     Dim values As Collection
+    Dim record As Object
+    Dim stateData As Object
+    Dim eventID As String
+    Dim employeeID As String
+    Dim medalCode As String
+    Dim rowNum As Long
     Dim i As Long
     Dim totalAmount As Long
     Load frmEnrollmentWizard
@@ -57,6 +64,50 @@ Public Function ProbeEnrollmentMedalReferences() As String
     Next i
     If totalAmount <> 80 Then
         ProbeEnrollmentMedalReferences = "FAILED: medal percentages must be 30, 20, 20 and 10"
+        Exit Function
+    End If
+    Set record = CreateObject("Scripting.Dictionary")
+    record("enrollment_id") = "MEDAL-REFERENCE-PROBE"
+    record("fio") = "Medal reference probe"
+    record("personal_number") = "MRP-001"
+    record("rank") = ""
+    record("position") = ""
+    record("section") = ""
+    record("military_unit") = ""
+    record("vus") = ""
+    record("tariff_rank") = ""
+    record("position_salary") = ""
+    record("rank_salary") = ""
+    record("service_category") = "CONTRACT"
+    record("contract_kind") = ""
+    record("contract_basis") = ""
+    record("order_date") = DateSerial(2026, 1, 15)
+    record("enroll_date") = DateSerial(2026, 1, 15)
+    record("duty_start_date") = DateSerial(2026, 1, 15)
+    record("order_number") = "MEDAL-PROBE"
+    record("basis_section1") = "test"
+    record("achievement_param") = CStr(values(1))
+    record("achievement_award_date") = DateSerial(2026, 1, 15)
+    record("achievement_document_reference") = "AWARD-15"
+    medalCode = mdlEnrollmentWorkflow.GetEnrollmentReferenceCode("ACHIEVEMENT", CStr(values(1)))
+    eventID = mdlPersonnelEvents.EnsureEnrollmentPersonnelEvent(record)
+    If eventID = "" Then
+        ProbeEnrollmentMedalReferences = "FAILED: enrollment event was not created"
+        Exit Function
+    End If
+    For rowNum = 2 To ThisWorkbook.Worksheets("PersonnelEvents").Cells(ThisWorkbook.Worksheets("PersonnelEvents").Rows.Count, 1).End(xlUp).Row
+        If CStr(ThisWorkbook.Worksheets("PersonnelEvents").Cells(rowNum, 1).Value) = eventID Then
+            employeeID = CStr(ThisWorkbook.Worksheets("PersonnelEvents").Cells(rowNum, 2).Value)
+            Exit For
+        End If
+    Next rowNum
+    Set stateData = mdlPersonnelEvents.GetCurrentPersonnelState(employeeID)
+    If stateData.Count = 0 Then
+        ProbeEnrollmentMedalReferences = "FAILED: current state is missing"
+        Exit Function
+    End If
+    If CStr(stateData("medal_code")) <> medalCode Or CStr(stateData("medal_award_document_reference")) <> "AWARD-15" Then
+        ProbeEnrollmentMedalReferences = "FAILED: medal data was not transferred to current state"
         Exit Function
     End If
     ProbeEnrollmentMedalReferences = "OK"
