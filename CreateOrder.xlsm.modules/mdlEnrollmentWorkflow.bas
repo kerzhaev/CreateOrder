@@ -558,7 +558,7 @@ Public Sub EnsureEnrollmentReferenceData()
         AddEnrollmentReference ws, "SECRECY", "LEVEL_2", "2 степень", "", "YES", "Заполните подтвержденный процент."
         AddEnrollmentReference ws, "SECRECY", "LEVEL_1", "1 степень", "", "YES", "Заполните подтвержденный процент."
         ws.Rows(1).Font.Bold = True
-        ws.Columns("A:F").AutoFit
+        FormatEnrollmentReferenceSheet ws
     End If
     If Not enrollmentReferencesSynced Then
         SyncEnrollmentReferencesFromStaff ws
@@ -570,8 +570,9 @@ Private Sub SyncEnrollmentReferencesFromStaff(ByVal wsReferences As Worksheet)
     Dim wsStaff As Worksheet
     Dim rowNum As Long
     Dim lastRow As Long
-    Dim staffData As Object
-    Dim personalNumber As String
+    Dim refRow As Long
+    Dim vusColumn As Long
+    Dim knownValues As Object
 
     On Error Resume Next
     mdlHelper.EnsureStaffColumnsInitialized
@@ -579,21 +580,57 @@ Private Sub SyncEnrollmentReferencesFromStaff(ByVal wsReferences As Worksheet)
     On Error GoTo 0
     If wsStaff Is Nothing Then Exit Sub
 
+    Set knownValues = CreateObject("Scripting.Dictionary")
+    knownValues.CompareMode = vbTextCompare
+    For refRow = 2 To wsReferences.Cells(wsReferences.Rows.Count, 1).End(xlUp).Row
+        If SafeText(wsReferences.Cells(refRow, 1).Value) <> "" And SafeText(wsReferences.Cells(refRow, 3).Value) <> "" Then
+            knownValues(UCase$(SafeText(wsReferences.Cells(refRow, 1).Value)) & "|" & UCase$(SafeText(wsReferences.Cells(refRow, 3).Value))) = True
+        End If
+    Next refRow
+
+    vusColumn = FindEnrollmentStaffColumn(wsStaff, mdlHelper.Ru(1042, 1059, 1057))
     lastRow = wsStaff.Cells(wsStaff.Rows.Count, mdlHelper.colLichniyNomer_Global).End(xlUp).Row
     For rowNum = 2 To lastRow
-        EnsureEnrollmentReference wsReferences, "RANK", SafeText(wsStaff.Cells(rowNum, mdlHelper.colZvanie_Global).Value), ""
-        EnsureEnrollmentReference wsReferences, "POSITION", SafeText(wsStaff.Cells(rowNum, mdlHelper.colDolzhnost_Global).Value), ""
-        EnsureEnrollmentReference wsReferences, "SECTION", SafeText(wsStaff.Cells(rowNum, mdlHelper.colVoinskayaChast_Global).Value), ""
-        EnsureEnrollmentReference wsReferences, "MILITARY_UNIT", SafeText(wsStaff.Cells(rowNum, mdlHelper.colVoinskayaChast_Global).Value), ""
-        personalNumber = SafeText(wsStaff.Cells(rowNum, mdlHelper.colLichniyNomer_Global).Value)
-        If personalNumber <> "" Then
-            Set staffData = mdlHelper.GetStaffData(personalNumber, True)
-            If Not staffData Is Nothing Then
-                If staffData.Exists(mdlHelper.Ru(1042, 1059, 1057)) Then EnsureEnrollmentReference wsReferences, "VUS", SafeText(staffData(mdlHelper.Ru(1042, 1059, 1057))), ""
-            End If
-        End If
+        AddStaffReferenceIfNew wsReferences, knownValues, "RANK", SafeText(wsStaff.Cells(rowNum, mdlHelper.colZvanie_Global).Value)
+        AddStaffReferenceIfNew wsReferences, knownValues, "POSITION", SafeText(wsStaff.Cells(rowNum, mdlHelper.colDolzhnost_Global).Value)
+        AddStaffReferenceIfNew wsReferences, knownValues, "SECTION", SafeText(wsStaff.Cells(rowNum, mdlHelper.colVoinskayaChast_Global).Value)
+        AddStaffReferenceIfNew wsReferences, knownValues, "MILITARY_UNIT", SafeText(wsStaff.Cells(rowNum, mdlHelper.colVoinskayaChast_Global).Value)
+        If vusColumn > 0 Then AddStaffReferenceIfNew wsReferences, knownValues, "VUS", SafeText(wsStaff.Cells(rowNum, vusColumn).Value)
     Next rowNum
-    wsReferences.Columns("A:F").AutoFit
+    FormatEnrollmentReferenceSheet wsReferences
+End Sub
+
+Private Sub FormatEnrollmentReferenceSheet(ByVal ws As Worksheet)
+    ws.Rows(1).Font.Bold = True
+    ws.Columns(1).ColumnWidth = 18
+    ws.Columns(2).ColumnWidth = 20
+    ws.Columns(3).ColumnWidth = 48
+    ws.Columns(4).ColumnWidth = 14
+    ws.Columns(5).ColumnWidth = 10
+    ws.Columns(6).ColumnWidth = 60
+    ws.Columns(6).WrapText = True
+End Sub
+Private Function FindEnrollmentStaffColumn(ByVal wsStaff As Worksheet, ByVal headerText As String) As Long
+    Dim columnNum As Long
+    Dim lastColumn As Long
+
+    lastColumn = wsStaff.Cells(1, wsStaff.Columns.Count).End(xlToLeft).Column
+    For columnNum = 1 To lastColumn
+        If StrComp(SafeText(wsStaff.Cells(1, columnNum).Value), headerText, vbTextCompare) = 0 Then
+            FindEnrollmentStaffColumn = columnNum
+            Exit Function
+        End If
+    Next columnNum
+End Function
+
+Private Sub AddStaffReferenceIfNew(ByVal wsReferences As Worksheet, ByVal knownValues As Object, ByVal referenceType As String, ByVal displayName As String)
+    Dim key As String
+
+    If displayName = "" Then Exit Sub
+    key = UCase$(referenceType) & "|" & UCase$(displayName)
+    If knownValues.Exists(key) Then Exit Sub
+    AddEnrollmentReference wsReferences, referenceType, displayName, displayName, "", "YES", "Импортировано из листа Штат; оператор может изменить или отключить строку."
+    knownValues(key) = True
 End Sub
 
 Private Sub EnsureEnrollmentReference(ByVal ws As Worksheet, ByVal referenceType As String, ByVal displayName As String, ByVal amountValue As String)
