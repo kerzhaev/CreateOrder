@@ -1,7 +1,7 @@
 # Graph Report - CreateOrder  (2026-07-14)
 
 ## Corpus Check
-- 53 files · ~56,372 words
+- 53 files · ~56,747 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `011d9405`
+- Built from commit: `4c434330`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

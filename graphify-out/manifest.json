@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784048256.4826503,
-    "ast_hash": "ef8386ee9b9b5f6c8d4c8dec88042bac",
+    "mtime": 1784048739.1623306,
+    "ast_hash": "0b3ec4c2a6965b08be0a5ae152c65b3e",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1783980489.1069317,
-    "ast_hash": "a16a7e68a9961769f0ba5664cbb5cb8f",
+    "mtime": 1784048785.936323,
+    "ast_hash": "8c836764dec2b889157c61f9e2b19165",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -220,8 +220,8 @@
     "semantic_hash": ""
   },
   "tools/Test-PersonnelActionWizardSafe.ps1": {
-    "mtime": 1783980326.0612793,
-    "ast_hash": "c5a4db71b4c3e668e2dcea0ff07c9c31",
+    "mtime": 1784048615.9836292,
+    "ast_hash": "899661a76968fdc1edd81316dd0ddebd",
     "semantic_hash": ""
   },
   "tools/Test-PersonnelRibbonSafe.ps1": {
@@ -240,13 +240,13 @@
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/plan.md": {
-    "mtime": 1783981890.5765457,
-    "ast_hash": "89c67cf66109ab3096e8ad4a7d07ed13",
+    "mtime": 1784048739.163875,
+    "ast_hash": "b223e0dbfb5df55671d602967650a3ed",
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/spec.md": {
-    "mtime": 1783980489.1059318,
-    "ast_hash": "f800b196905091416bf095bfdecf1334",
+    "mtime": 1784048615.9846303,
+    "ast_hash": "145548a1a355642c1d69c5486aa1659e",
     "semantic_hash": ""
   },
   "AGENTS.md": {
@@ -255,13 +255,13 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784048256.480649,
-    "ast_hash": "d670c80ec5f8aa8f899e7bc52e6de526",
+    "mtime": 1784048739.1612957,
+    "ast_hash": "18a0be7bfd6998e8bb7a378ae4800a0f",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
-    "mtime": 1784048256.4826503,
-    "ast_hash": "1f30bfb4f04db106b549d8774fae0fbb",
+    "mtime": 1784048739.162851,
+    "ast_hash": "5f114dd8929e95d85fd65573a050a141",
     "semantic_hash": ""
   }
 }

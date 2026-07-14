@@ -39,6 +39,7 @@ try {
     $workbook = $excel.Workbooks.Open($testWorkbookPath, 0, $false)
     Import-CodeModuleText $workbook "ModuleLocalization" (Join-Path $moduleDirectory "ModuleLocalization.bas")
     Import-CodeModuleText $workbook "mdlPersonnelEvents" (Join-Path $moduleDirectory "mdlPersonnelEvents.bas")
+    Import-CodeModuleText $workbook "mdlPersonnelEventOrderExport" (Join-Path $moduleDirectory "mdlPersonnelEventOrderExport.bas")
     Import-UserForm $workbook "frmPersonnelActionWizard" (Join-Path $moduleDirectory "frmPersonnelActionWizard.frm")
 
     try { $workbook.VBProject.VBComponents.Remove($workbook.VBProject.VBComponents.Item("personnel_action_wizard_probe")) } catch {}
@@ -47,7 +48,7 @@ try {
     $probe.CodeModule.AddFromString(@"
 Option Explicit
 Public Function ProbePersonnelActionWizard() As String
-    Dim enrollmentID As String, transferID As String, outputPath As String, employeeID As String, currentState As Object
+    Dim enrollmentID As String, transferID As String, exclusionID As String, outputPath As String, employeeID As String, currentState As Object, employeeRow As Long
     On Error GoTo Failed
     mdlPersonnelEvents.ResetPersonnelEventInput
     mdlPersonnelEvents.SetPersonnelWizardValue "event_type", "ENROLLMENT"
@@ -84,6 +85,26 @@ Public Function ProbePersonnelActionWizard() As String
     If CStr(currentState("position")) <> "Transferred position" Then Err.Raise 706, , "Wizard save did not update current state"
     outputPath = frmPersonnelActionWizard.ExportAction()
     If outputPath = "" Then Err.Raise 707, , "Wizard export did not return output path"
+    Unload frmPersonnelActionWizard
+
+    mdlPersonnelEvents.PrepareNewPersonnelAction "EXCLUSION"
+    Load frmPersonnelActionWizard
+    If frmPersonnelActionWizard.Controls("txt_employee_id") Is Nothing Then Err.Raise 708, , "Exclusion employee field missing"
+    frmPersonnelActionWizard.Controls("txt_employee_id").Value = employeeID
+    mdlPersonnelEvents.SetPersonnelWizardValue "employee_id", employeeID
+    If Not mdlPersonnelEvents.LoadPersonnelWizardCurrentState() Then Err.Raise 709, , "Exclusion wizard could not load current state"
+    frmPersonnelActionWizard.Controls("txt_event_date").Value = "03.07.2026"
+    frmPersonnelActionWizard.Controls("txt_effective_date").Value = "03.07.2026"
+    frmPersonnelActionWizard.Controls("txt_order_reference").Value = "WIZ-EXCLUSION-001"
+    frmPersonnelActionWizard.Controls("txt_basis_text").Value = "Wizard test exclusion"
+    exclusionID = frmPersonnelActionWizard.SaveAction()
+    If exclusionID = "" Then Err.Raise 710, , "Exclusion wizard save did not return EventID"
+    For employeeRow = 2 To ThisWorkbook.Worksheets("Employees").Cells(ThisWorkbook.Worksheets("Employees").Rows.Count, 1).End(xlUp).Row
+        If CStr(ThisWorkbook.Worksheets("Employees").Cells(employeeRow, 1).Value) = employeeID Then Exit For
+    Next employeeRow
+    If CStr(ThisWorkbook.Worksheets("Employees").Cells(employeeRow, 10).Value) <> "NO" Then Err.Raise 711, , "Exclusion wizard did not deactivate employee"
+    outputPath = frmPersonnelActionWizard.ExportAction()
+    If outputPath = "" Then Err.Raise 712, , "Exclusion wizard export did not return output path"
     Unload frmPersonnelActionWizard
     ProbePersonnelActionWizard = "OK"
     Exit Function

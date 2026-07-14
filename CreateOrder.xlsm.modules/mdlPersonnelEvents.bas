@@ -555,6 +555,7 @@ Private Sub EnsureEmployee(ByVal employeeID As String, ByVal beforeState As Obje
     For rowNum = 2 To lastRow
         If SafeText(ws.Cells(rowNum, 1).Value) = employeeID Then
             ws.Cells(rowNum, 9).Value = Now
+            ws.Cells(rowNum, 10).Value = ValueOrDefault(afterState, "is_active", "YES")
             Exit Sub
         End If
     Next rowNum
@@ -571,7 +572,7 @@ Private Sub EnsureEmployee(ByVal employeeID As String, ByVal beforeState As Obje
     ws.Cells(rowNum, 7).Value = ValueOf(sourceState, "staff_reference")
     ws.Cells(rowNum, 8).Value = Now
     ws.Cells(rowNum, 9).Value = Now
-    ws.Cells(rowNum, 10).Value = "YES"
+    ws.Cells(rowNum, 10).Value = ValueOrDefault(afterState, "is_active", "YES")
 End Sub
 
 Private Function SaveStateSnapshot(ByVal eventID As String, ByVal snapshotKind As String, ByVal employeeID As String, ByVal stateData As Object) As String
