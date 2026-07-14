@@ -17,6 +17,8 @@ Private Const DEFAULT_PREFERENTIAL_COEFF As String = "1.5"
 Private Const DEFAULT_EDV_AMOUNT As String = "400000"
 Private Const DEFAULT_PER_DIEM_DAYS As String = "1"
 
+Private enrollmentReferencesSynced As Boolean
+
 Private Const BACKEND_COL_KEY As Long = 1
 Private Const BACKEND_COL_LABEL As Long = 2
 Private Const BACKEND_COL_VALUE As Long = 3
@@ -558,8 +560,52 @@ Public Sub EnsureEnrollmentReferenceData()
         ws.Rows(1).Font.Bold = True
         ws.Columns("A:F").AutoFit
     End If
+    If Not enrollmentReferencesSynced Then
+        SyncEnrollmentReferencesFromStaff ws
+        enrollmentReferencesSynced = True
+    End If
 End Sub
 
+Private Sub SyncEnrollmentReferencesFromStaff(ByVal wsReferences As Worksheet)
+    Dim wsStaff As Worksheet
+    Dim rowNum As Long
+    Dim lastRow As Long
+    Dim staffData As Object
+    Dim personalNumber As String
+
+    On Error Resume Next
+    mdlHelper.EnsureStaffColumnsInitialized
+    Set wsStaff = mdlHelper.GetStaffWorksheet()
+    On Error GoTo 0
+    If wsStaff Is Nothing Then Exit Sub
+
+    lastRow = wsStaff.Cells(wsStaff.Rows.Count, mdlHelper.colLichniyNomer_Global).End(xlUp).Row
+    For rowNum = 2 To lastRow
+        EnsureEnrollmentReference wsReferences, "RANK", SafeText(wsStaff.Cells(rowNum, mdlHelper.colZvanie_Global).Value), ""
+        EnsureEnrollmentReference wsReferences, "POSITION", SafeText(wsStaff.Cells(rowNum, mdlHelper.colDolzhnost_Global).Value), ""
+        EnsureEnrollmentReference wsReferences, "SECTION", SafeText(wsStaff.Cells(rowNum, mdlHelper.colVoinskayaChast_Global).Value), ""
+        EnsureEnrollmentReference wsReferences, "MILITARY_UNIT", SafeText(wsStaff.Cells(rowNum, mdlHelper.colVoinskayaChast_Global).Value), ""
+        personalNumber = SafeText(wsStaff.Cells(rowNum, mdlHelper.colLichniyNomer_Global).Value)
+        If personalNumber <> "" Then
+            Set staffData = mdlHelper.GetStaffData(personalNumber, True)
+            If Not staffData Is Nothing Then
+                If staffData.Exists(mdlHelper.Ru(1042, 1059, 1057)) Then EnsureEnrollmentReference wsReferences, "VUS", SafeText(staffData(mdlHelper.Ru(1042, 1059, 1057))), ""
+            End If
+        End If
+    Next rowNum
+    wsReferences.Columns("A:F").AutoFit
+End Sub
+
+Private Sub EnsureEnrollmentReference(ByVal ws As Worksheet, ByVal referenceType As String, ByVal displayName As String, ByVal amountValue As String)
+    Dim rowNum As Long
+
+    If displayName = "" Then Exit Sub
+    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) _
+            And StrComp(SafeText(ws.Cells(rowNum, 3).Value), displayName, vbTextCompare) = 0 Then Exit Sub
+    Next rowNum
+    AddEnrollmentReference ws, referenceType, displayName, displayName, amountValue, "YES", "Импортировано из листа Штат; оператор может изменить или отключить строку."
+End Sub
 Private Sub AddEnrollmentReference(ByVal ws As Worksheet, ByVal referenceType As String, ByVal code As String, ByVal displayName As String, ByVal amountValue As String, ByVal activeValue As String, ByVal noteText As String)
     Dim rowNum As Long
     rowNum = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
