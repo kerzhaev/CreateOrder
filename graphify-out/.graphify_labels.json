@@ -67,5 +67,6 @@
   "65": "plan.md",
   "66": "Test-EnrollmentFizoReferenceSafe.ps1",
   "67": "Test-EnrollmentMedalReferenceSafe.ps1",
-  "68": "Матрица приёмки замечаний по мастеру зачисления"
+  "68": "Матрица приёмки замечаний по мастеру зачисления",
+  "69": "Test-EnrollmentTariffReferenceSafe.ps1"
 }

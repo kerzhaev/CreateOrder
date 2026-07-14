@@ -552,7 +552,7 @@ Public Sub EnsureEnrollmentReferenceData()
         AddEnrollmentReference ws, "SERVICE_CATEGORY", "MOBILIZED", "Мобилизация", "", "YES", ""
         AddEnrollmentReference ws, "SERVICE_CATEGORY", "CONSCRIPT", "Призыв", "", "YES", ""
         For i = 1 To 50
-            AddEnrollmentReference ws, "TARIFF_RANK", CStr(i), CStr(i) & " тарифный разряд", "", "YES", "Укажите оклад по должности для этого разряда."
+            AddEnrollmentReference ws, "TARIFF_RANK", CStr(i), TariffRankCaption(CStr(i)), "", "YES", "Specify the position salary for this rank."
         Next i
         AddEnrollmentReference ws, "RANK", "РЯДОВОЙ", "рядовой", "", "YES", "Укажите оклад по званию."
         AddEnrollmentReference ws, "RANK", "ЕФРЕЙТОР", "ефрейтор", "", "YES", "Укажите оклад по званию."
@@ -566,6 +566,7 @@ Public Sub EnsureEnrollmentReferenceData()
         ws.Rows(1).Font.Bold = True
         FormatEnrollmentReferenceSheet ws
     End If
+    EnsureCompactTariffRankReferenceLabels ws
     EnsureEnrollmentReference ws, "FIZO", "2 уровень", "15"
     EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "COMBAT_DISTINCTION", MedalDisplayName("COMBAT_DISTINCTION"), "30"
     EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "DEMINING", MedalDisplayName("DEMINING"), "20"
@@ -576,6 +577,55 @@ Public Sub EnsureEnrollmentReferenceData()
         SyncEnrollmentReferencesFromStaff ws
         enrollmentReferencesSynced = True
     End If
+End Sub
+
+Private Function TariffRankCaption(ByVal tariffRankCode As String) As String
+    TariffRankCaption = SafeText(tariffRankCode) & " " & mdlHelper.Ru(1090, 46, 1088, 46)
+End Function
+
+Private Sub EnsureCompactTariffRankReferenceLabels(ByVal ws As Worksheet)
+    Dim rowNum As Long
+    Dim rankCode As String
+    Dim legacyCaption As String
+
+    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = "TARIFF_RANK" Then
+            rankCode = SafeText(ws.Cells(rowNum, 2).Value)
+            legacyCaption = rankCode & " " & mdlHelper.Ru(1090, 1072, 1088, 1080, 1092, 1085, 1099, 1081, 32, 1088, 1072, 1079, 1088, 1103, 1076)
+            If StrComp(SafeText(ws.Cells(rowNum, 3).Value), legacyCaption, vbTextCompare) = 0 Then
+                ws.Cells(rowNum, 3).Value = TariffRankCaption(rankCode)
+            End If
+        End If
+    Next rowNum
+End Sub
+
+Private Function RankShortCaption(ByVal rankCode As String) As String
+    Select Case LCase$(Trim$(rankCode))
+        Case LCase$(mdlHelper.Ru(1088, 1103, 1076, 1086, 1074, 1086, 1081))
+            RankShortCaption = mdlHelper.Ru(1088, 1103, 1076, 46)
+        Case LCase$(mdlHelper.Ru(1077, 1092, 1088, 1077, 1081, 1090, 1086, 1088))
+            RankShortCaption = mdlHelper.Ru(1077, 1092, 1088, 46)
+        Case LCase$(mdlHelper.Ru(1089, 1077, 1088, 1078, 1072, 1085, 1090))
+            RankShortCaption = mdlHelper.Ru(1089, 1077, 1088, 1078, 46)
+        Case Else
+            RankShortCaption = rankCode
+    End Select
+End Function
+
+Private Sub EnsureCompactRankReferenceLabels(ByVal ws As Worksheet)
+    Dim rowNum As Long
+    Dim rankCode As String
+    Dim shortCaption As String
+
+    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = "RANK" Then
+            rankCode = SafeText(ws.Cells(rowNum, 2).Value)
+            shortCaption = RankShortCaption(rankCode)
+            If shortCaption <> rankCode And StrComp(SafeText(ws.Cells(rowNum, 3).Value), rankCode, vbTextCompare) = 0 Then
+                ws.Cells(rowNum, 3).Value = shortCaption
+            End If
+        End If
+    Next rowNum
 End Sub
 
 Private Sub SyncEnrollmentReferencesFromStaff(ByVal wsReferences As Worksheet)
@@ -734,12 +784,58 @@ Public Function GetEnrollmentReferenceCode(ByVal referenceType As String, ByVal 
     Next rowNum
 End Function
 
+Public Function GetEnrollmentReferenceDisplayName(ByVal referenceType As String, ByVal codeValue As String) As String
+    Dim ws As Worksheet
+    Dim rowNum As Long
+
+    EnsureEnrollmentReferenceData
+    Set ws = ThisWorkbook.Worksheets(ENROLLMENT_REFERENCE_SHEET)
+    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) _
+            And StrComp(SafeText(ws.Cells(rowNum, 2).Value), SafeText(codeValue), vbTextCompare) = 0 Then
+            GetEnrollmentReferenceDisplayName = SafeText(ws.Cells(rowNum, 3).Value)
+            Exit Function
+        End If
+    Next rowNum
+End Function
+
+Public Function GetEnrollmentReferenceDisplayNameOrCode(ByVal referenceType As String, ByVal codeValue As String) As String
+    GetEnrollmentReferenceDisplayNameOrCode = GetEnrollmentReferenceDisplayName(referenceType, codeValue)
+    If GetEnrollmentReferenceDisplayNameOrCode = "" Then GetEnrollmentReferenceDisplayNameOrCode = SafeText(codeValue)
+End Function
+
+Public Function GetEnrollmentReferenceAmountByCode(ByVal referenceType As String, ByVal codeValue As String) As String
+    Dim displayName As String
+    displayName = GetEnrollmentReferenceDisplayName(referenceType, codeValue)
+    If displayName <> "" Then GetEnrollmentReferenceAmountByCode = GetEnrollmentReferenceAmount(referenceType, displayName)
+End Function
+
+Public Function GetEnrollmentReferenceCodeOrDisplay(ByVal referenceType As String, ByVal displayName As String) As String
+    GetEnrollmentReferenceCodeOrDisplay = GetEnrollmentReferenceCode(referenceType, displayName)
+    If GetEnrollmentReferenceCodeOrDisplay = "" Then GetEnrollmentReferenceCodeOrDisplay = SafeText(displayName)
+End Function
+
+Public Function GetRankReferenceAmount(ByVal rankValue As String) As String
+    GetRankReferenceAmount = GetEnrollmentReferenceAmount("RANK", SafeText(rankValue))
+    If GetRankReferenceAmount = "" Then GetRankReferenceAmount = GetEnrollmentReferenceAmountByCode("RANK", SafeText(rankValue))
+End Function
+
+Public Function GetTariffRankReferenceAmount(ByVal tariffRankValue As String) As String
+    GetTariffRankReferenceAmount = GetEnrollmentReferenceAmount("TARIFF_RANK", SafeText(tariffRankValue))
+    If GetTariffRankReferenceAmount = "" Then
+        GetTariffRankReferenceAmount = GetEnrollmentReferenceAmount("TARIFF_RANK", TariffRankCaption(SafeText(tariffRankValue)))
+    End If
+    If GetTariffRankReferenceAmount = "" Then
+        GetTariffRankReferenceAmount = GetEnrollmentReferenceAmount("TARIFF_RANK", SafeText(tariffRankValue) & " " & mdlHelper.Ru(1090, 1072, 1088, 1080, 1092, 1085, 1099, 1081, 32, 1088, 1072, 1079, 1088, 1103, 1076))
+    End If
+End Function
+
 Public Sub ApplyEnrollmentReferenceValues(ByVal record As Object)
     Dim amountValue As String
 
-    amountValue = GetEnrollmentReferenceAmount("RANK", SafeText(record("rank")))
+    amountValue = GetRankReferenceAmount(SafeText(record("rank")))
     If amountValue <> "" Then record("rank_salary") = amountValue
-    amountValue = GetEnrollmentReferenceAmount("TARIFF_RANK", SafeText(record("tariff_rank")) & " тарифный разряд")
+    amountValue = GetTariffRankReferenceAmount(SafeText(record("tariff_rank")))
     If amountValue <> "" Then record("position_salary") = amountValue
     amountValue = GetEnrollmentReferenceAmount("CLASS", SafeText(record("class_param")))
     If amountValue <> "" Then record("class_percent") = amountValue

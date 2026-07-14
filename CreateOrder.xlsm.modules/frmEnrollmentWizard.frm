@@ -326,7 +326,7 @@ Public Sub LoadEmployeeFromStaffNumber(ByVal employeeNumber As String)
         txtEmployeeTableNumber.Value = ""
     End If
     txtEmployeeFIO.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colFIO_Global).Value))
-    txtEmployeeRank.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colZvanie_Global).Value))
+    txtEmployeeRank.Value = mdlEnrollmentWorkflow.GetEnrollmentReferenceDisplayNameOrCode("RANK", Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colZvanie_Global).Value)))
     txtEmployeePosition.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colDolzhnost_Global).Value))
     txtEmployeeSection.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colVoinskayaChast_Global).Value))
     txtEmployeeMilitaryUnit.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colVoinskayaChast_Global).Value))
@@ -1132,9 +1132,9 @@ End Sub
 
 Private Sub UpdateReferenceSalaryPreview()
     Dim amountValue As String
-    amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("RANK", SafeText(txtEmployeeRank.Value))
+    amountValue = mdlEnrollmentWorkflow.GetRankReferenceAmount(SafeText(txtEmployeeRank.Value))
     If amountValue <> "" Then txtEmployeeRankSalary.Value = amountValue
-    amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("TARIFF_RANK", SafeText(txtEmployeeTariff.Value) & " тарифный разряд")
+    amountValue = mdlEnrollmentWorkflow.GetTariffRankReferenceAmount(SafeText(txtEmployeeTariff.Value))
     If amountValue <> "" Then txtEmployeePositionSalary.Value = amountValue
     amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("CLASS", SafeText(txtClassParam.Value))
     If amountValue <> "" Then txtClassPercent.Value = amountValue
@@ -1244,7 +1244,7 @@ Private Sub PushFormToBackend()
     mdlEnrollmentWorkflow.SetBackendValue "fio", txtEmployeeFIO.Value
     mdlEnrollmentWorkflow.SetBackendValue "personal_number", txtEmployeeNumber.Value
     mdlEnrollmentWorkflow.SetBackendValue "table_number", txtEmployeeTableNumber.Value
-    mdlEnrollmentWorkflow.SetBackendValue "rank", txtEmployeeRank.Value
+    mdlEnrollmentWorkflow.SetBackendValue "rank", mdlEnrollmentWorkflow.GetEnrollmentReferenceCodeOrDisplay("RANK", txtEmployeeRank.Value)
     mdlEnrollmentWorkflow.SetBackendValue "service_category", txtEmployeeServiceCategory.Value
     mdlEnrollmentWorkflow.SetBackendValue "contract_kind", txtEmployeeServiceCategory.Value
     mdlEnrollmentWorkflow.SetBackendValue "contract_basis", txtEmployeeContractBasis.Value
@@ -1409,7 +1409,7 @@ Public Sub ReloadFromBackend()
     txtEmployeeFIO.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("fio"))
     txtEmployeeNumber.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("personal_number"))
     txtEmployeeTableNumber.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("table_number"))
-    txtEmployeeRank.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("rank"))
+    txtEmployeeRank.Value = mdlEnrollmentWorkflow.GetEnrollmentReferenceDisplayNameOrCode("RANK", SafeText(mdlEnrollmentWorkflow.GetBackendValue("rank")))
     txtEmployeeServiceCategory.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("service_category"))
     txtEmployeeContractBasis.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("contract_basis"))
     txtEmployeeVus.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("vus"))

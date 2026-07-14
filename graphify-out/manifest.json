@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784061245.3914325,
-    "ast_hash": "11aaa1c9bfd4dc8273211b2cd6712966",
+    "mtime": 1784061823.202173,
+    "ast_hash": "05062dae048d37b5a0899dd7f7a0e984",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784060957.556057,
-    "ast_hash": "68f3402d373b594bc7b84705c5ee447a",
+    "mtime": 1784061807.5681276,
+    "ast_hash": "574053112dd5eff340df77726d6e1958",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784061245.3903737,
-    "ast_hash": "c38091e90bab8aaa9f28af6abcd34c9c",
+    "mtime": 1784061823.1980536,
+    "ast_hash": "77a0728834eca877474a1492a4d60035",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -265,13 +265,13 @@
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/plan.md": {
-    "mtime": 1784061256.5197113,
-    "ast_hash": "f3031890d84907b567e3f3ac8ba1d0bd",
+    "mtime": 1784061807.5671299,
+    "ast_hash": "b444ce3276a8b3c940c9feb00824fc2c",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/spec.md": {
-    "mtime": 1784060134.2879264,
-    "ast_hash": "dc723d87635958c385ae381d12ea57ce",
+    "mtime": 1784061481.153905,
+    "ast_hash": "01097548f1311096bb5552506f781cb4",
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentFizoReferenceSafe.ps1": {
@@ -285,8 +285,13 @@
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/acceptance-matrix.md": {
-    "mtime": 1784061245.3898547,
-    "ast_hash": "1bd5b6ecdc020da632ee35ec4025f198",
+    "mtime": 1784061807.5661266,
+    "ast_hash": "913d9e17774ce5a08b1222fbfcf14f7c",
+    "semantic_hash": ""
+  },
+  "tools/Test-EnrollmentTariffReferenceSafe.ps1": {
+    "mtime": 1784061560.9010289,
+    "ast_hash": "86d23dd23e8c788f872312f56ee3dc7e",
     "semantic_hash": ""
   }
 }
