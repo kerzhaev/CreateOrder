@@ -158,6 +158,8 @@ Private WithEvents btnSaveCardDynamic As MSForms.CommandButton
 Private WithEvents btnExportPackageDynamic As MSForms.CommandButton
 Private WithEvents cboEmployeeRankDynamic As MSForms.ComboBox
 Private WithEvents cboEmployeeTariffDynamic As MSForms.ComboBox
+Private WithEvents cboClassDynamic As MSForms.ComboBox
+Private WithEvents cboSecrecyDynamic As MSForms.ComboBox
 
 Private currentSourceMode As String
 Private Const PREVIEW_PAGE_INDEX As Long = 6
@@ -887,76 +889,85 @@ Private Sub CreateDocsPage()
 End Sub
 
 Private Sub CreateMonthlyPage()
-    Set chkPreferential = AddPageCheckBoxT(pgMonthly, "enrollment.field.preferential_enabled", "Льготная выслуга", 12, 12)
-    Set txtPreferentialCoeff = AddPageTextBoxT(pgMonthly, "enrollment.field.preferential_coeff", "Коэффициент", 180, 8, 70)
-    Set chkStdDuty = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_duty", "Надбавка по должности", 12, 54)
-    Set txtStdDutyPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 210, 50, 60)
-    Set chkStdSpecial = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_special", "Особые условия", 290, 54)
-    Set txtStdSpecialPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 480, 50, 50)
-    Set chkStdTariff = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_tariff", "1-4 тариф", 12, 96)
-    Set txtStdTariffPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 210, 92, 60)
-    Set chkStdContract430 = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_contract430", "430 ДСП / контракт", 290, 96)
-    Set txtStdContract430Percent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 480, 92, 50)
-    Set chkPremium = AddPageCheckBoxT(pgMonthly, "enrollment.field.premium", "Премия", 12, 138)
-    Set txtPremiumPercent = AddPageTextBoxT(pgMonthly, "enrollment.field.premium_percent", "Премия %", 80, 134, 60)
-    Set txtPremiumStart = AddPageTextBoxT(pgMonthly, "enrollment.field.premium_start", "Начало премии", 160, 134, 120)
-    Set txtPremiumEnd = AddPageTextBoxT(pgMonthly, "enrollment.field.premium_end", "Окончание премии", 300, 134, 120)
+    AddPageSectionLabel pgMonthly, "Приказ МО РФ № 727: стандартные ежемесячные выплаты", 12, 2, 520
+    Set chkPreferential = AddPageCheckBoxT(pgMonthly, "enrollment.field.preferential_enabled", "Льготная выслуга", 12, 28)
+    Set txtPreferentialCoeff = AddPageTextBoxT(pgMonthly, "enrollment.field.preferential_coeff", "Коэффициент", 180, 24, 70)
+    Set chkStdDuty = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_duty", "Надбавка по должности", 12, 70)
+    Set txtStdDutyPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 210, 66, 60)
+    Set chkStdSpecial = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_special", "Особые условия", 290, 70)
+    Set txtStdSpecialPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 480, 66, 50)
+    Set chkStdTariff = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_tariff", "1–4 тариф", 12, 112)
+    Set txtStdTariffPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 210, 108, 60)
+    Set chkStdContract430 = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_contract430", "Контракт по приказу № 430дсп", 290, 112)
+    Set txtStdContract430Percent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 480, 108, 50)
+    Set chkPremium = AddPageCheckBoxT(pgMonthly, "enrollment.field.premium", "Премия", 12, 154)
+    Set txtPremiumPercent = AddPageTextBoxT(pgMonthly, "enrollment.field.premium_percent", "Премия %", 80, 150, 60)
+    Set txtPremiumStart = AddPageTextBoxT(pgMonthly, "enrollment.field.premium_start", "Начало премии", 160, 150, 120)
+    Set txtPremiumEnd = AddPageTextBoxT(pgMonthly, "enrollment.field.premium_end", "Окончание премии", 300, 150, 120)
 
-    Set txtClassParam = AddPageTextBoxT(pgMonthly, "enrollment.field.class_param", "Классность", 12, 188, 120)
-    Set chkClass = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Вкл", 150, 206)
-    Set txtClassPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 210, 188, 60)
-    Set txtFizoParam = AddPageTextBoxT(pgMonthly, "enrollment.field.fizo_param", "ФИЗО", 290, 188, 120)
-    Set chkFizo = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Вкл", 428, 206)
-    Set txtFizoPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 480, 188, 50)
+    AddPageSectionLabel pgMonthly, "Приказ МО РФ № 430дсп: индивидуальные основания", 12, 196, 520
+    Set txtClassParam = AddPageComboBoxT(pgMonthly, "enrollment.field.class_param", "Классность", 12, 220, 120)
+    Set chkClass = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 150, 238)
+    Set txtClassPercent = AddPageTextBoxT(pgMonthly, "common.percent", "% (из справочника)", 210, 220, 90, 18, False, True)
+    Set txtFizoParam = AddPageTextBoxT(pgMonthly, "enrollment.field.fizo_param", "ФИЗО", 320, 220, 120)
+    Set chkFizo = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 458, 238)
+    Set txtFizoPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 548, 220, 50)
 
-    Set txtSecrecyParam = AddPageTextBoxT(pgMonthly, "enrollment.field.secrecy_param", "Секретность", 12, 242, 180)
-    Set chkSecrecy = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Вкл", 210, 260)
-    Set txtSecrecyPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 260, 242, 60)
-    Set txtAchievementParam = AddPageTextBoxT(pgMonthly, "enrollment.field.achievement_param", "Особые достижения / медаль", 12, 296, 348, 34, True)
-    Set chkAchievement = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Вкл", 380, 314)
-    Set txtAchievementAmount = AddPageTextBoxT(pgMonthly, "enrollment.field.achievement_amount", "% / сумма", 430, 296, 100)
+    Set txtSecrecyParam = AddPageComboBoxT(pgMonthly, "enrollment.field.secrecy_param", "Секретность", 12, 274, 180)
+    Set chkSecrecy = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 210, 292)
+    Set txtSecrecyPercent = AddPageTextBoxT(pgMonthly, "common.percent", "% (из справочника)", 260, 274, 90, 18, False, True)
+    Set txtAchievementParam = AddPageTextBoxT(pgMonthly, "enrollment.field.achievement_param", "Особые достижения / медаль", 12, 328, 348, 34, True)
+    Set chkAchievement = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 380, 346)
+    Set txtAchievementAmount = AddPageTextBoxT(pgMonthly, "enrollment.field.achievement_amount", "% / сумма", 430, 328, 100)
+    ConfigureScrollablePage pgMonthly, 410
 End Sub
 
 Private Sub CreateOneTimePage()
-    Set chkLift = AddPageCheckBoxT(pgOneTime, "enrollment.field.lift_enabled", "Подъёмное пособие", 12, 12)
-    Set txtLiftAmount = AddPageTextBoxT(pgOneTime, "common.amount", "Сумма", 130, 8, 120)
-    Set txtLiftDate = AddPageTextBoxT(pgOneTime, "common.date", "Дата", 270, 8, 120)
-    Set chkPerDiem = AddPageCheckBoxT(pgOneTime, "enrollment.field.per_diem_enabled", "Суточные", 12, 54)
-    Set txtPerDiemDays = AddPageTextBoxT(pgOneTime, "common.days", "Дни", 130, 50, 60)
-    Set txtPerDiemAmount = AddPageTextBoxT(pgOneTime, "common.amount", "Сумма", 210, 50, 120)
-    Set txtPerDiemDate = AddPageTextBoxT(pgOneTime, "common.date", "Дата", 350, 50, 120)
-    Set chkEdv = AddPageCheckBoxT(pgOneTime, "enrollment.field.edv_enabled", "ЕДВ 400000", 12, 96)
-    Set txtEdvAmount = AddPageTextBoxT(pgOneTime, "common.amount", "Сумма", 130, 92, 120)
-    Set txtEdvDate = AddPageTextBoxT(pgOneTime, "common.date", "Дата", 270, 92, 120)
-    Set txtBirthDate = AddPageTextBoxT(pgOneTime, "enrollment.field.birth_date", "Дата рождения", 12, 146, 120)
-    Set txtBirthPlace = AddPageTextBoxT(pgOneTime, "enrollment.field.birth_place", "Место рождения", 150, 146, 320)
-    Set txtCitizenship = AddPageTextBoxT(pgOneTime, "enrollment.field.citizenship", "Гражданство", 12, 188, 120)
-    Set txtInn = AddPageTextBoxT(pgOneTime, "enrollment.field.inn", "ИНН", 150, 188, 120)
-    Set txtSnils = AddPageTextBoxT(pgOneTime, "enrollment.field.snils", "СНИЛС", 290, 188, 180)
-    Set txtPassportSeries = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_series", "Серия паспорта", 12, 230, 120)
-    Set txtPassportNumber = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_number", "Номер паспорта", 150, 230, 120)
-    Set txtPassportIssueDate = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_issue_date", "Дата выдачи", 290, 230, 120)
-    Set txtPassportCode = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_code", "Код подразделения", 430, 230, 102)
-    Set txtPassportIssuer = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_issuer", "Кем выдан", 550, 146, 250, 50, True)
-    Set txtBankAccount = AddPageTextBoxT(pgOneTime, "enrollment.field.bank_account", "Лицевой / банковский счёт", 550, 218, 250)
-    Set txtBankName = AddPageTextBoxT(pgOneTime, "enrollment.field.bank_name", "Банк", 550, 260, 250)
-    Set txtRequisitesNote = AddPageTextBoxT(pgOneTime, "enrollment.field.requisites_note", "Примечание по реквизитам", 550, 302, 250, 64, True)
+    AddPageSectionLabel pgOneTime, "Разовые выплаты", 12, 2, 500
+    Set chkLift = AddPageCheckBoxT(pgOneTime, "enrollment.field.lift_enabled", "Подъёмное пособие", 12, 28)
+    Set txtLiftAmount = AddPageTextBoxT(pgOneTime, "common.amount", "Сумма", 130, 24, 120)
+    Set txtLiftDate = AddPageTextBoxT(pgOneTime, "common.date", "Дата", 270, 24, 120)
+    Set chkPerDiem = AddPageCheckBoxT(pgOneTime, "enrollment.field.per_diem_enabled", "Суточные", 12, 70)
+    Set txtPerDiemDays = AddPageTextBoxT(pgOneTime, "common.days", "Дни", 130, 66, 60)
+    Set txtPerDiemAmount = AddPageTextBoxT(pgOneTime, "common.amount", "Сумма", 210, 66, 120)
+    Set txtPerDiemDate = AddPageTextBoxT(pgOneTime, "common.date", "Дата", 350, 66, 120)
+    Set chkEdv = AddPageCheckBoxT(pgOneTime, "enrollment.field.edv_enabled", "ЕДВ 400000", 12, 112)
+    Set txtEdvAmount = AddPageTextBoxT(pgOneTime, "common.amount", "Сумма", 130, 108, 120)
+    Set txtEdvDate = AddPageTextBoxT(pgOneTime, "common.date", "Дата", 270, 108, 120)
+
+    AddPageSectionLabel pgOneTime, "Персональные данные и банковские реквизиты", 12, 138, 500
+    Set txtBirthDate = AddPageTextBoxT(pgOneTime, "enrollment.field.birth_date", "Дата рождения", 12, 162, 120)
+    Set txtBirthPlace = AddPageTextBoxT(pgOneTime, "enrollment.field.birth_place", "Место рождения", 150, 162, 320)
+    Set txtCitizenship = AddPageTextBoxT(pgOneTime, "enrollment.field.citizenship", "Гражданство", 12, 204, 120)
+    Set txtInn = AddPageTextBoxT(pgOneTime, "enrollment.field.inn", "ИНН", 150, 204, 120)
+    Set txtSnils = AddPageTextBoxT(pgOneTime, "enrollment.field.snils", "СНИЛС", 290, 204, 180)
+    Set txtPassportSeries = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_series", "Серия паспорта", 12, 246, 120)
+    Set txtPassportNumber = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_number", "Номер паспорта", 150, 246, 120)
+    Set txtPassportIssueDate = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_issue_date", "Дата выдачи", 290, 246, 120)
+    Set txtPassportCode = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_code", "Код подразделения", 430, 246, 102)
+    Set txtPassportIssuer = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_issuer", "Кем выдан", 550, 162, 250, 50, True)
+    Set txtBankAccount = AddPageTextBoxT(pgOneTime, "enrollment.field.bank_account", "Лицевой / банковский счёт", 550, 234, 250)
+    Set txtBankName = AddPageTextBoxT(pgOneTime, "enrollment.field.bank_name", "Банк", 550, 276, 250)
+    Set txtRequisitesNote = AddPageTextBoxT(pgOneTime, "enrollment.field.requisites_note", "Примечание по реквизитам", 550, 318, 250, 48, True)
+    ConfigureScrollablePage pgOneTime, 430
 End Sub
 
 Private Sub CreateAdvancedPage()
-    Set txtPreferentialBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.preferential_basis", "Основание льготной выслуги", 12, 12, 248, 34, True)
-    Set txtPremiumBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.premium_basis", "Основание премии", 280, 12, 248, 34, True)
-    Set txtStdDutyBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_duty_basis", "Основание надбавки по должности", 12, 68, 248, 34, True)
-    Set txtStdSpecialBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_special_basis", "Основание особых условий", 280, 68, 248, 34, True)
-    Set txtStdTariffBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_tariff_basis", "Основание тарифной надбавки", 12, 124, 248, 34, True)
-    Set txtStdContract430Basis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_contract430_basis", "Основание 430 ДСП", 280, 124, 248, 34, True)
-    Set txtClassBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.class_basis", "Основание классности", 12, 180, 248, 34, True)
-    Set txtFizoBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.fizo_basis", "Основание ФИЗО", 280, 180, 248, 34, True)
-    Set txtSecrecyBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.secrecy_basis", "Основание секретности", 12, 236, 248, 34, True)
-    Set txtAchievementBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.achievement_basis", "Основание особых достижений", 280, 236, 248, 34, True)
-    Set txtLiftBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.lift_basis", "Основание подъёмного пособия", 12, 292, 248, 34, True)
-    Set txtPerDiemBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.per_diem_basis", "Основание суточных", 280, 292, 248, 34, True)
-    Set txtEdvBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.edv_basis", "Основание ЕДВ", 12, 348, 516, 34, True)
+    AddPageSectionLabel pgAdvanced, "Основания выплат: заполните только для отмеченных выплат", 12, 2, 520
+    Set txtPreferentialBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.preferential_basis", "Основание льготной выслуги", 12, 28, 248, 34, True)
+    Set txtPremiumBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.premium_basis", "Основание премии", 280, 28, 248, 34, True)
+    Set txtStdDutyBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_duty_basis", "Основание надбавки по должности", 12, 84, 248, 34, True)
+    Set txtStdSpecialBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_special_basis", "Основание особых условий", 280, 84, 248, 34, True)
+    Set txtStdTariffBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_tariff_basis", "Основание тарифной надбавки", 12, 140, 248, 34, True)
+    Set txtStdContract430Basis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_contract430_basis", "Основание по приказу № 430дсп", 280, 140, 248, 34, True)
+    Set txtClassBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.class_basis", "Основание классности", 12, 196, 248, 34, True)
+    Set txtFizoBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.fizo_basis", "Основание ФИЗО", 280, 196, 248, 34, True)
+    Set txtSecrecyBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.secrecy_basis", "Основание секретности", 12, 252, 248, 34, True)
+    Set txtAchievementBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.achievement_basis", "Основание особых достижений", 280, 252, 248, 34, True)
+    Set txtLiftBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.lift_basis", "Основание подъёмного пособия", 12, 308, 248, 34, True)
+    Set txtPerDiemBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.per_diem_basis", "Основание суточных", 280, 308, 248, 34, True)
+    Set txtEdvBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.edv_basis", "Основание ЕДВ", 12, 364, 516, 34, True)
+    ConfigureScrollablePage pgAdvanced, 420
 End Sub
 
 Private Sub CreateExtrasPage()
@@ -964,11 +975,14 @@ Private Sub CreateExtrasPage()
     Dim topPos As Single
     Const MONTHLY_STEP As Single = 126
     Const ONE_TIME_STEP As Single = 120
-    Const ONE_TIME_START As Single = 536
+    Const ONE_TIME_START As Single = 560
+
+    AddPageSectionLabel pgExtras, "Дополнительные ежемесячные выплаты", 12, 2, 420
+    AddPageSectionLabel pgExtras, "Дополнительные разовые выплаты", 12, 532, 420
 
     For i = 1 To 4
-        topPos = 12 + (i - 1) * MONTHLY_STEP
-        Set txtExtraMonthlyName(i) = AddPageTextBox(pgExtras, tf("enrollment.field.extra_monthly_name_short", "Ежемес. #{index}: вид", "{index}", i), 12, topPos, 300)
+        topPos = 34 + (i - 1) * MONTHLY_STEP
+        Set txtExtraMonthlyName(i) = AddPageComboBoxT(pgExtras, "enrollment.field.extra_monthly_name_short", "Вид ежемесячной выплаты", 12, topPos, 300)
         txtExtraMonthlyName(i).Tag = CStr(i)
         Set chkExtraMonthly(i) = AddPageCheckBoxT(pgExtras, "common.enabled_short", "Вкл", 324, topPos + 18)
         chkExtraMonthly(i).Width = 44
@@ -980,7 +994,7 @@ Private Sub CreateExtrasPage()
 
     For i = 1 To 3
         topPos = ONE_TIME_START + (i - 1) * ONE_TIME_STEP
-        Set txtExtraOneTimeName(i) = AddPageTextBox(pgExtras, tf("enrollment.field.extra_onetime_name_short", "Разовая #{index}: вид", "{index}", i), 12, topPos, 300)
+        Set txtExtraOneTimeName(i) = AddPageComboBoxT(pgExtras, "enrollment.field.extra_onetime_name_short", "Вид разовой выплаты", 12, topPos, 300)
         txtExtraOneTimeName(i).Tag = CStr(i)
         Set chkExtraOneTime(i) = AddPageCheckBoxT(pgExtras, "common.enabled_short", "Вкл", 324, topPos + 18)
         chkExtraOneTime(i).Width = 44
@@ -989,17 +1003,19 @@ Private Sub CreateExtrasPage()
         Set txtExtraOneTimeBasis(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_onetime_basis", "Основание", 12, topPos + 52, 724, 42, True)
     Next i
 
-    ConfigureScrollablePage pgExtras, 920
+    ConfigureScrollablePage pgExtras, 950
 End Sub
 
 Private Sub CreatePreviewPage()
-    Set txtPreviewStatus = AddPageTextBoxT(pgPreview, "enrollment.preview.status", "Статус", 12, 12, 140, 18, False, True)
-    Set txtPreviewReady = AddPageTextBoxT(pgPreview, "enrollment.preview.word_ready", "WordReady", 170, 12, 80, 18, False, True)
-    Set txtPreviewIssues = AddPageTextBoxT(pgPreview, "enrollment.preview.issues", "Замечания", 12, 54, 520, 90, True, True)
-    Set txtPreviewStandard = AddPageTextBoxT(pgPreview, "enrollment.preview.standard", "Стандартные выплаты", 12, 164, 520, 60, True, True)
-    Set txtPreviewPersonal = AddPageTextBoxT(pgPreview, "enrollment.preview.personal", "Именные выплаты", 12, 244, 520, 60, True, True)
-    Set txtPreviewSection1 = AddPageTextBoxT(pgPreview, "enrollment.preview.section1", "Текст §1", 12, 324, 520, 80, True, True)
-    Set txtPreviewSection2 = AddPageTextBoxT(pgPreview, "enrollment.preview.section2", "Текст §2", 12, 424, 520, 60, True, True)
+    AddPageSectionLabel pgPreview, "Проверьте результат перед формированием Word", 12, 2, 520
+    Set txtPreviewStatus = AddPageTextBox(pgPreview, "Статус проверки", 12, 28, 160, 18, False, True)
+    Set txtPreviewReady = AddPageTextBox(pgPreview, "Можно формировать Word", 190, 28, 140, 18, False, True)
+    Set txtPreviewIssues = AddPageTextBox(pgPreview, "Что нужно исправить", 12, 70, 520, 76, True, True)
+    Set txtPreviewStandard = AddPageTextBox(pgPreview, "Выплаты по приказу МО РФ № 727", 12, 166, 520, 58, True, True)
+    Set txtPreviewPersonal = AddPageTextBox(pgPreview, "Выплаты по приказу МО РФ № 430дсп", 12, 244, 520, 58, True, True)
+    Set txtPreviewSection1 = AddPageTextBox(pgPreview, "Текст приказа — пункт 1", 12, 322, 520, 72, True, True)
+    Set txtPreviewSection2 = AddPageTextBox(pgPreview, "Текст приказа — пункт 2", 12, 414, 520, 58, True, True)
+    ConfigureScrollablePage pgPreview, 490
 End Sub
 
 Private Sub RemoveDefaultWizardPages()
@@ -1015,6 +1031,21 @@ Private Sub ConfigureScrollablePage(ByVal pageHost As Object, ByVal pageScrollHe
     On Error GoTo 0
 End Sub
 
+Private Sub AddPageSectionLabel(ByVal pageHost As Object, ByVal captionText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal labelWidth As Single)
+    Dim lbl As Object
+    Set lbl = pageHost.Controls.Add("Forms.Label.1", "lbl_section_" & CStr(pageHost.Controls.Count + 1), True)
+    With lbl
+        .Caption = captionText
+        .Left = leftPos
+        .Top = topPos
+        .Width = labelWidth
+        .Height = 16
+        .BackStyle = fmBackStyleTransparent
+        .Font.Name = "Times New Roman"
+        .Font.Size = 10
+        .Font.Bold = True
+    End With
+End Sub
 Private Function AddPageComboBoxT(ByVal pageHost As Object, ByVal localizationKey As String, ByVal fallbackText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal controlWidth As Single, Optional ByVal controlHeight As Single = 18, Optional ByVal ignoredMultiline As Boolean = False) As Object
     Dim lbl As Object
     Dim cbo As Object
@@ -1052,10 +1083,32 @@ Private Sub PopulateOperatorReferenceLists()
     PopulateComboBox txtEmployeeSection, "SECTION"
     PopulateComboBox txtEmployeeMilitaryUnit, "MILITARY_UNIT"
     PopulateComboBox txtEmployeeTariff, "TARIFF_RANK"
+    PopulateComboBox txtClassParam, "CLASS"
+    PopulateComboBox txtSecrecyParam, "SECRECY"
     Set cboEmployeeRankDynamic = txtEmployeeRank
     Set cboEmployeeTariffDynamic = txtEmployeeTariff
+    Set cboClassDynamic = txtClassParam
+    Set cboSecrecyDynamic = txtSecrecyParam
+    PopulateExtraPaymentTypeLists
 End Sub
 
+
+Private Sub PopulateExtraPaymentTypeLists()
+    Dim i As Long
+
+    For i = 1 To 4
+        txtExtraMonthlyName(i).Clear
+        txtExtraMonthlyName(i).AddItem "Ежемесячная надбавка"
+        txtExtraMonthlyName(i).AddItem "Ежемесячная доплата"
+        txtExtraMonthlyName(i).AddItem "Иная ежемесячная выплата"
+    Next i
+    For i = 1 To 3
+        txtExtraOneTimeName(i).Clear
+        txtExtraOneTimeName(i).AddItem "Разовая выплата"
+        txtExtraOneTimeName(i).AddItem "Материальная помощь"
+        txtExtraOneTimeName(i).AddItem "Иная разовая выплата"
+    Next i
+End Sub
 Private Sub PopulateComboBox(ByVal comboBox As Object, ByVal referenceType As String)
     Dim values As Collection
     Dim itemValue As Variant
@@ -1072,6 +1125,10 @@ Private Sub UpdateReferenceSalaryPreview()
     If amountValue <> "" Then txtEmployeeRankSalary.Value = amountValue
     amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("TARIFF_RANK", SafeText(txtEmployeeTariff.Value) & " тарифный разряд")
     If amountValue <> "" Then txtEmployeePositionSalary.Value = amountValue
+    amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("CLASS", SafeText(txtClassParam.Value))
+    If amountValue <> "" Then txtClassPercent.Value = amountValue
+    amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("SECRECY", SafeText(txtSecrecyParam.Value))
+    If amountValue <> "" Then txtSecrecyPercent.Value = amountValue
 End Sub
 
 Private Sub cboEmployeeRankDynamic_Change()
@@ -1079,6 +1136,14 @@ Private Sub cboEmployeeRankDynamic_Change()
 End Sub
 
 Private Sub cboEmployeeTariffDynamic_Change()
+    UpdateReferenceSalaryPreview
+End Sub
+
+Private Sub cboClassDynamic_Change()
+    UpdateReferenceSalaryPreview
+End Sub
+
+Private Sub cboSecrecyDynamic_Change()
     UpdateReferenceSalaryPreview
 End Sub
 Private Function AddPageTextBoxT(ByVal pageHost As Object, ByVal localizationKey As String, ByVal fallbackText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal textWidth As Single, Optional ByVal textHeight As Single = 18, Optional ByVal isMultiline As Boolean = False, Optional ByVal isReadOnly As Boolean = False) As Object
@@ -1333,6 +1398,7 @@ Public Sub ReloadFromBackend()
     txtEmployeeTariff.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("tariff_rank"))
     txtEmployeePositionSalary.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("position_salary"))
     txtEmployeeRankSalary.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("rank_salary"))
+    UpdateReferenceSalaryPreview
 
     txtOrderDraftId.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("order_draft_id"))
     txtOrderDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("order_date"))
