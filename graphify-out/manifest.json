@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784056854.504238,
-    "ast_hash": "46c75803adc11072e953ea8baef9367a",
+    "mtime": 1784057736.538968,
+    "ast_hash": "22d845da95f1f9a2dfefd29e3857dfe4",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784056826.4215083,
-    "ast_hash": "fa38e3e7ae3dc0defbc3351145d5b631",
+    "mtime": 1784057736.5370028,
+    "ast_hash": "fb4d50071e42adbd713883a0958000c2",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/plan.md": {
-    "mtime": 1784056826.4231405,
-    "ast_hash": "7ba733e28592ea49f0242c6c56eaaa7b",
+    "mtime": 1784057736.5394828,
+    "ast_hash": "ca60840294b79276258509cfc1ed1f88",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/spec.md": {
