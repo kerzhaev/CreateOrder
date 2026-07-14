@@ -175,6 +175,8 @@ Public Const COL_ENROLLMENT_EXTRA_ONE_TIME3_AMOUNT As Long = 145
 Public Const COL_ENROLLMENT_EXTRA_ONE_TIME3_DATE As Long = 146
 Public Const COL_ENROLLMENT_EXTRA_ONE_TIME3_BASIS As Long = 147
 Public Const COL_ENROLLMENT_EXTRA_ONE_TIME3_ENABLED As Long = 148
+Public Const COL_ENROLLMENT_ACHIEVEMENT_AWARD_DATE As Long = 149
+Public Const COL_ENROLLMENT_ACHIEVEMENT_DOCUMENT_REFERENCE As Long = 150
 
 Public Const ENROLLMENT_REFERENCE_SHEET As String = "EnrollmentReferenceData"
 
@@ -304,6 +306,8 @@ Public Sub EnsureEnrollmentSheetStructure(ByVal ws As Worksheet)
     SetEnrollmentHeader ws, COL_ENROLLMENT_ACHIEVEMENT_ENABLED, "enrollment.header.achievement_enabled", "Особые достижения вкл", 12
     SetEnrollmentHeader ws, COL_ENROLLMENT_ACHIEVEMENT_AMOUNT, "enrollment.header.achievement_amount", "Особое достижение %/сумма", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_ACHIEVEMENT_BASIS, "enrollment.header.achievement_basis", "Основание особых достижений", 26
+    SetEnrollmentHeader ws, COL_ENROLLMENT_ACHIEVEMENT_AWARD_DATE, "common.date", "Award order date", 18
+    SetEnrollmentHeader ws, COL_ENROLLMENT_ACHIEVEMENT_DOCUMENT_REFERENCE, "enrollment.header.order_number", "Award order reference", 28
     SetEnrollmentHeader ws, COL_ENROLLMENT_STD_DUTY_ENABLED, "enrollment.header.std_duty_enabled", "Надбавка по должности вкл", 12
     SetEnrollmentHeader ws, COL_ENROLLMENT_STD_DUTY_PERCENT, "enrollment.header.std_duty_percent", "Надбавка по должности %", 16
     SetEnrollmentHeader ws, COL_ENROLLMENT_STD_DUTY_DATE, "enrollment.header.std_duty_date", "Дата надбавки по должности", 18
@@ -480,6 +484,8 @@ Public Sub EnsureEnrollmentFormSheetStructure(ByVal ws As Worksheet)
     EnsureBackendField ws, "achievement_enabled", "Особое достижение вкл"
     EnsureBackendField ws, "achievement_amount", "Особое достижение % / сумма"
     EnsureBackendField ws, "achievement_basis", "Основание особых достижений"
+    EnsureBackendField ws, "achievement_award_date", "Award order date"
+    EnsureBackendField ws, "achievement_document_reference", "Award order reference"
     EnsureBackendField ws, "std_duty_enabled", "Надбавка по должности вкл"
     EnsureBackendField ws, "std_duty_percent", "Надбавка по должности %"
     EnsureBackendField ws, "std_duty_date", "Дата надбавки по должности"
@@ -560,7 +566,13 @@ Public Sub EnsureEnrollmentReferenceData()
         ws.Rows(1).Font.Bold = True
         FormatEnrollmentReferenceSheet ws
     End If
-    If Not enrollmentReferencesSynced Then
+    EnsureEnrollmentReference ws, "FIZO", "2 уровень", "15"
+    EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "COMBAT_DISTINCTION", MedalDisplayName("COMBAT_DISTINCTION"), "30"
+    EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "DEMINING", MedalDisplayName("DEMINING"), "20"
+    EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "MILITARY_VALOR_I", MedalDisplayName("MILITARY_VALOR_I"), "20"
+    EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "MILITARY_VALOR_II", MedalDisplayName("MILITARY_VALOR_II"), "10"
+    FormatEnrollmentReferenceSheet ws
+        If Not enrollmentReferencesSynced Then
         SyncEnrollmentReferencesFromStaff ws
         enrollmentReferencesSynced = True
     End If
@@ -643,6 +655,29 @@ Private Sub EnsureEnrollmentReference(ByVal ws As Worksheet, ByVal referenceType
     Next rowNum
     AddEnrollmentReference ws, referenceType, displayName, displayName, amountValue, "YES", "Импортировано из листа Штат; оператор может изменить или отключить строку."
 End Sub
+Private Function MedalDisplayName(ByVal medalCode As String) As String
+    Select Case UCase$(medalCode)
+        Case "COMBAT_DISTINCTION"
+            MedalDisplayName = mdlHelper.Ru(1052, 1077, 1076, 1072, 1083, 1100, 58, 32, 1073, 1086, 1077, 1074, 1099, 1077, 32, 1086, 1090, 1083, 1080, 1095, 1080, 1103)
+        Case "DEMINING"
+            MedalDisplayName = mdlHelper.Ru(1052, 1077, 1076, 1072, 1083, 1100, 58, 32, 1088, 1072, 1079, 1084, 1080, 1085, 1080, 1088, 1086, 1074, 1072, 1085, 1080, 1077)
+        Case "MILITARY_VALOR_I"
+            MedalDisplayName = mdlHelper.Ru(1052, 1077, 1076, 1072, 1083, 1100, 58, 32, 1074, 1086, 1080, 1085, 1089, 1082, 1072, 1103, 32, 1076, 1086, 1073, 1083, 1077, 1089, 1090, 1100, 32, 73)
+        Case "MILITARY_VALOR_II"
+            MedalDisplayName = mdlHelper.Ru(1052, 1077, 1076, 1072, 1083, 1100, 58, 32, 1074, 1086, 1080, 1085, 1089, 1082, 1072, 1103, 32, 1076, 1086, 1073, 1083, 1077, 1089, 1090, 1100, 32, 73, 73)
+    End Select
+End Function
+
+Private Sub EnsureEnrollmentReferenceWithCode(ByVal ws As Worksheet, ByVal referenceType As String, ByVal code As String, ByVal displayName As String, ByVal amountValue As String)
+    Dim rowNum As Long
+
+    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) _
+            And UCase$(SafeText(ws.Cells(rowNum, 2).Value)) = UCase$(code) Then Exit Sub
+    Next rowNum
+    AddEnrollmentReference ws, referenceType, code, displayName, amountValue, "YES", "Reference value; operator may amend it after confirming the supporting document."
+End Sub
+
 Private Sub AddEnrollmentReference(ByVal ws As Worksheet, ByVal referenceType As String, ByVal code As String, ByVal displayName As String, ByVal amountValue As String, ByVal activeValue As String, ByVal noteText As String)
     Dim rowNum As Long
     rowNum = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
@@ -684,6 +719,21 @@ Public Function GetEnrollmentReferenceAmount(ByVal referenceType As String, ByVa
     Next rowNum
 End Function
 
+Public Function GetEnrollmentReferenceCode(ByVal referenceType As String, ByVal displayName As String) As String
+    Dim ws As Worksheet
+    Dim rowNum As Long
+
+    EnsureEnrollmentReferenceData
+    Set ws = ThisWorkbook.Worksheets(ENROLLMENT_REFERENCE_SHEET)
+    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) _
+            And StrComp(SafeText(ws.Cells(rowNum, 3).Value), SafeText(displayName), vbTextCompare) = 0 Then
+            GetEnrollmentReferenceCode = SafeText(ws.Cells(rowNum, 2).Value)
+            Exit Function
+        End If
+    Next rowNum
+End Function
+
 Public Sub ApplyEnrollmentReferenceValues(ByVal record As Object)
     Dim amountValue As String
 
@@ -693,8 +743,12 @@ Public Sub ApplyEnrollmentReferenceValues(ByVal record As Object)
     If amountValue <> "" Then record("position_salary") = amountValue
     amountValue = GetEnrollmentReferenceAmount("CLASS", SafeText(record("class_param")))
     If amountValue <> "" Then record("class_percent") = amountValue
+    amountValue = GetEnrollmentReferenceAmount("FIZO", SafeText(record("fizo_param")))
+    If amountValue <> "" Then record("fizo_percent") = amountValue
     amountValue = GetEnrollmentReferenceAmount("SECRECY", SafeText(record("secrecy_param")))
     If amountValue <> "" Then record("secrecy_percent") = amountValue
+    amountValue = GetEnrollmentReferenceAmount("ACHIEVEMENT", SafeText(record("achievement_param")))
+    If amountValue <> "" Then record("achievement_amount") = amountValue
 End Sub
 Public Sub OpenEnrollmentForm()
     EnsureEnrollmentInfrastructure
@@ -932,7 +986,7 @@ Public Function GeneratePaymentsFromEnrollmentRowDirect(ByVal rowNum As Long) As
         GeneratePaymentsFromEnrollmentRowDirect = GeneratePaymentsFromEnrollmentRowDirect + 1
     End If
     If IsEnabledRecord(record, "achievement_enabled") Then
-        AppendPaymentRowFromEnrollment wsPayments, record, packageId, CStr(GetEnrollmentPaymentDefinition("achievement")("label")), SafeText(record("achievement_param")), SafeText(record("achievement_amount")) & "%", SafeText(record("basis_section1"))
+        AppendPaymentRowFromEnrollment wsPayments, record, packageId, CStr(GetEnrollmentPaymentDefinition("achievement")("label")), SafeText(record("achievement_param")), SafeText(record("achievement_amount")) & "%", SafeText(record("achievement_basis"))
         GeneratePaymentsFromEnrollmentRowDirect = GeneratePaymentsFromEnrollmentRowDirect + 1
     End If
     If IsEnabledRecord(record, "std_duty_enabled") Then
@@ -1082,6 +1136,8 @@ Public Function GetEnrollmentRecordFromWorksheet(ByVal ws As Worksheet, ByVal ro
     record("achievement_enabled") = ws.Cells(rowNum, COL_ENROLLMENT_ACHIEVEMENT_ENABLED).Value
     record("achievement_amount") = ws.Cells(rowNum, COL_ENROLLMENT_ACHIEVEMENT_AMOUNT).Value
     record("achievement_basis") = ws.Cells(rowNum, COL_ENROLLMENT_ACHIEVEMENT_BASIS).Value
+    record("achievement_award_date") = ws.Cells(rowNum, COL_ENROLLMENT_ACHIEVEMENT_AWARD_DATE).Value
+    record("achievement_document_reference") = ws.Cells(rowNum, COL_ENROLLMENT_ACHIEVEMENT_DOCUMENT_REFERENCE).Value
     record("std_duty_enabled") = ws.Cells(rowNum, COL_ENROLLMENT_STD_DUTY_ENABLED).Value
     record("std_duty_percent") = ws.Cells(rowNum, COL_ENROLLMENT_STD_DUTY_PERCENT).Value
     record("std_duty_date") = ws.Cells(rowNum, COL_ENROLLMENT_STD_DUTY_DATE).Value
@@ -1536,6 +1592,8 @@ Private Sub WriteRecordToSheet(ByVal ws As Worksheet, ByVal rowNum As Long, ByVa
     ws.Cells(rowNum, COL_ENROLLMENT_ACHIEVEMENT_ENABLED).Value = record("achievement_enabled")
     ws.Cells(rowNum, COL_ENROLLMENT_ACHIEVEMENT_AMOUNT).Value = record("achievement_amount")
     ws.Cells(rowNum, COL_ENROLLMENT_ACHIEVEMENT_BASIS).Value = record("achievement_basis")
+    ws.Cells(rowNum, COL_ENROLLMENT_ACHIEVEMENT_AWARD_DATE).Value = record("achievement_award_date")
+    WriteTextCell ws, rowNum, COL_ENROLLMENT_ACHIEVEMENT_DOCUMENT_REFERENCE, record("achievement_document_reference")
     ws.Cells(rowNum, COL_ENROLLMENT_STD_DUTY_ENABLED).Value = record("std_duty_enabled")
     ws.Cells(rowNum, COL_ENROLLMENT_STD_DUTY_PERCENT).Value = record("std_duty_percent")
     ws.Cells(rowNum, COL_ENROLLMENT_STD_DUTY_DATE).Value = record("std_duty_date")
@@ -1663,7 +1721,7 @@ Private Function BuildNextPackageRecord(ByVal sourceRecord As Object) As Object
         "bank_account", "bank_name", "requisites_note", "class_param", "class_enabled", _
         "class_percent", "class_basis", "fizo_param", "fizo_enabled", "fizo_percent", _
         "fizo_basis", "secrecy_param", "secrecy_enabled", "secrecy_percent", "secrecy_basis", _
-        "achievement_param", "achievement_enabled", "achievement_amount", "achievement_basis", _
+        "achievement_param", "achievement_enabled", "achievement_amount", "achievement_basis", "achievement_award_date", "achievement_document_reference", _
         "basis_section1", "basis_section2", "standard_types", "payment_basis", "comment", _
         "word_ready", "validation_severity", "validation_issues", "last_derived_at")
 
@@ -2257,6 +2315,8 @@ Private Sub EnsureRecordKeys(ByVal record As Object)
     EnsureRecordKey record, "achievement_enabled"
     EnsureRecordKey record, "achievement_amount"
     EnsureRecordKey record, "achievement_basis"
+    EnsureRecordKey record, "achievement_award_date"
+    EnsureRecordKey record, "achievement_document_reference"
     EnsureRecordKey record, "std_duty_enabled"
     EnsureRecordKey record, "std_duty_percent"
     EnsureRecordKey record, "std_duty_date"
@@ -2339,7 +2399,18 @@ Private Sub ValidatePersonalPaymentAmounts(ByVal record As Object, ByRef issues 
     If IsEnabledRecord(record, "achievement_enabled") And IsBlankOrZeroAmount(record("achievement_amount")) Then
         AppendIssue issues, ET("enrollment.issue.achievement_amount_missing", "Включены особые достижения, но не заполнен размер выплаты."), severity, STATUS_BLOCKED
     End If
+    If IsMedalAchievement(record) Then
+        AppendIssueIfBlank issues, severity, record("achievement_award_date"), "A medal requires the award-order date.", STATUS_BLOCKED
+        AppendIssueIfBlank issues, severity, record("achievement_document_reference"), "A medal requires the award-order number or reference.", STATUS_BLOCKED
+    End If
 End Sub
+
+Private Function IsMedalAchievement(ByVal record As Object) As Boolean
+    Select Case UCase$(GetEnrollmentReferenceCode("ACHIEVEMENT", SafeText(record("achievement_param"))))
+        Case "COMBAT_DISTINCTION", "DEMINING", "MILITARY_VALOR_I", "MILITARY_VALOR_II"
+            IsMedalAchievement = True
+    End Select
+End Function
 
 Private Function IsBlankOrZeroAmount(ByVal valueText As Variant) As Boolean
     Dim normalized As String

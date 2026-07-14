@@ -1,16 +1,16 @@
 # Graph Report - CreateOrder  (2026-07-14)
 
 ## Corpus Check
-- 55 files · ~59,500 words
+- 57 files · ~60,610 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 679 nodes · 695 edges · 66 communities (55 shown, 11 thin omitted)
+- 683 nodes · 697 edges · 68 communities (57 shown, 11 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8bbd73b3`
+- Built from commit: `e1b1cc42`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -93,7 +93,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (66 total, 11 thin omitted)
+## Communities (68 total, 11 thin omitted)
 
 ### Community 0 - "Test-PaymentsEnrollmentAcceptance.ps1"
 Cohesion: 0.09

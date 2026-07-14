@@ -88,6 +88,8 @@ Private txtSecrecyPercent As Object
 Private txtAchievementParam As Object
 Private chkAchievement As Object
 Private txtAchievementAmount As Object
+Private txtAchievementAwardDate As Object
+Private txtAchievementDocumentReference As Object
 Private chkPreferential As Object
 Private txtPreferentialCoeff As Object
 
@@ -160,6 +162,8 @@ Private WithEvents cboEmployeeRankDynamic As MSForms.ComboBox
 Private WithEvents cboEmployeeTariffDynamic As MSForms.ComboBox
 Private WithEvents cboClassDynamic As MSForms.ComboBox
 Private WithEvents cboSecrecyDynamic As MSForms.ComboBox
+Private WithEvents cboFizoDynamic As MSForms.ComboBox
+Private WithEvents cboAchievementDynamic As MSForms.ComboBox
 
 Private currentSourceMode As String
 Private Const PREVIEW_PAGE_INDEX As Long = 6
@@ -910,17 +914,19 @@ Private Sub CreateMonthlyPage()
     Set txtClassParam = AddPageComboBoxT(pgMonthly, "enrollment.field.class_param", "Классность", 12, 220, 120)
     Set chkClass = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 150, 238)
     Set txtClassPercent = AddPageTextBoxT(pgMonthly, "common.percent", "% (из справочника)", 210, 220, 90, 18, False, True)
-    Set txtFizoParam = AddPageTextBoxT(pgMonthly, "enrollment.field.fizo_param", "ФИЗО", 320, 220, 120)
+    Set txtFizoParam = AddPageComboBoxT(pgMonthly, "enrollment.field.fizo_param", "ФИЗО", 320, 220, 120)
     Set chkFizo = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 458, 238)
-    Set txtFizoPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 548, 220, 50)
+    Set txtFizoPercent = AddPageTextBoxT(pgMonthly, "common.percent", "% (из справочника)", 548, 220, 50, 18, False, True)
 
     Set txtSecrecyParam = AddPageComboBoxT(pgMonthly, "enrollment.field.secrecy_param", "Секретность", 12, 274, 180)
     Set chkSecrecy = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 210, 292)
     Set txtSecrecyPercent = AddPageTextBoxT(pgMonthly, "common.percent", "% (из справочника)", 260, 274, 90, 18, False, True)
-    Set txtAchievementParam = AddPageTextBoxT(pgMonthly, "enrollment.field.achievement_param", "Особые достижения / медаль", 12, 328, 348, 34, True)
+    Set txtAchievementParam = AddPageComboBoxT(pgMonthly, "enrollment.field.achievement_param", "Achievement / medal", 12, 328, 348)
     Set chkAchievement = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 380, 346)
-    Set txtAchievementAmount = AddPageTextBoxT(pgMonthly, "enrollment.field.achievement_amount", "% / сумма", 430, 328, 100)
-    ConfigureScrollablePage pgMonthly, 410
+    Set txtAchievementAmount = AddPageTextBoxT(pgMonthly, "enrollment.field.achievement_amount", "% / amount (reference)", 430, 328, 100, 18, False, True)
+    Set txtAchievementAwardDate = AddPageTextBoxT(pgMonthly, "common.date", "Award order date", 12, 380, 160)
+    Set txtAchievementDocumentReference = AddPageTextBoxT(pgMonthly, "enrollment.field.order_number", "Award order reference", 190, 380, 340)
+    ConfigureScrollablePage pgMonthly, 440
 End Sub
 
 Private Sub CreateOneTimePage()
@@ -1086,10 +1092,14 @@ Private Sub PopulateOperatorReferenceLists()
     PopulateComboBox txtEmployeeTariff, "TARIFF_RANK"
     PopulateComboBox txtClassParam, "CLASS"
     PopulateComboBox txtSecrecyParam, "SECRECY"
+    PopulateComboBox txtFizoParam, "FIZO"
+    PopulateComboBox txtAchievementParam, "ACHIEVEMENT"
     Set cboEmployeeRankDynamic = txtEmployeeRank
     Set cboEmployeeTariffDynamic = txtEmployeeTariff
     Set cboClassDynamic = txtClassParam
     Set cboSecrecyDynamic = txtSecrecyParam
+    Set cboFizoDynamic = txtFizoParam
+    Set cboAchievementDynamic = txtAchievementParam
     PopulateExtraPaymentTypeLists
 End Sub
 
@@ -1130,6 +1140,10 @@ Private Sub UpdateReferenceSalaryPreview()
     If amountValue <> "" Then txtClassPercent.Value = amountValue
     amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("SECRECY", SafeText(txtSecrecyParam.Value))
     If amountValue <> "" Then txtSecrecyPercent.Value = amountValue
+    amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("FIZO", SafeText(txtFizoParam.Value))
+    If amountValue <> "" Then txtFizoPercent.Value = amountValue
+    amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("ACHIEVEMENT", SafeText(txtAchievementParam.Value))
+    If amountValue <> "" Then txtAchievementAmount.Value = amountValue
 End Sub
 
 Private Sub cboEmployeeRankDynamic_Change()
@@ -1141,6 +1155,10 @@ Private Sub cboEmployeeTariffDynamic_Change()
 End Sub
 
 Private Sub cboClassDynamic_Change()
+    UpdateReferenceSalaryPreview
+End Sub
+
+Private Sub cboFizoDynamic_Change()
     UpdateReferenceSalaryPreview
 End Sub
 
@@ -1289,6 +1307,8 @@ Private Sub PushFormToBackend()
     mdlEnrollmentWorkflow.SetBackendValue "achievement_enabled", CheckValue(chkAchievement.Value)
     mdlEnrollmentWorkflow.SetBackendValue "achievement_amount", txtAchievementAmount.Value
     mdlEnrollmentWorkflow.SetBackendValue "achievement_basis", txtAchievementBasis.Value
+    mdlEnrollmentWorkflow.SetBackendValue "achievement_award_date", txtAchievementAwardDate.Value
+    mdlEnrollmentWorkflow.SetBackendValue "achievement_document_reference", txtAchievementDocumentReference.Value
     mdlEnrollmentWorkflow.SetBackendValue "preferential_basis", txtPreferentialBasis.Value
     mdlEnrollmentWorkflow.SetBackendValue "std_duty_basis", txtStdDutyBasis.Value
     mdlEnrollmentWorkflow.SetBackendValue "std_special_basis", txtStdSpecialBasis.Value
@@ -1452,6 +1472,8 @@ Public Sub ReloadFromBackend()
     chkAchievement.Value = BackendYesNo("achievement_enabled")
     txtAchievementAmount.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("achievement_amount"))
     txtAchievementBasis.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("achievement_basis"))
+    txtAchievementAwardDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("achievement_award_date"))
+    txtAchievementDocumentReference.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("achievement_document_reference"))
     txtPreferentialBasis.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("preferential_basis"))
     txtStdDutyBasis.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("std_duty_basis"))
     txtStdSpecialBasis.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("std_special_basis"))

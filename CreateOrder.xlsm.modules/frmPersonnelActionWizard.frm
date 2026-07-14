@@ -24,14 +24,14 @@ Private WithEvents mMenuHistory As MSForms.CommandButton
 Private WithEvents mMenuClose As MSForms.CommandButton
 
 Private Sub UserForm_Initialize()
+    mSelectionMode = mdlPersonnelEvents.ConsumePersonnelActionMenuRequest()
     ConfigureWizard
-    LoadValues
+    If Not mSelectionMode Then LoadValues
 End Sub
 
-Public Sub ShowActionMenu()
-    mSelectionMode = True
-    Me.Show
-End Sub
+Public Property Get IsActionMenu() As Boolean
+    IsActionMenu = mSelectionMode
+End Property
 
 Private Sub ConfigureWizard()
     Dim actionType As String

@@ -50,6 +50,10 @@ Option Explicit
 Public Function ProbePersonnelActionWizard() As String
     Dim enrollmentID As String, transferID As String, exclusionID As String, outputPath As String, employeeID As String, currentState As Object, employeeRow As Long
     On Error GoTo Failed
+    mdlPersonnelEvents.PreparePersonnelActionMenu
+    Load frmPersonnelActionWizard
+    If Not frmPersonnelActionWizard.IsActionMenu Then Err.Raise 698, , "Personnel action menu did not initialize in selection mode"
+    Unload frmPersonnelActionWizard
     mdlPersonnelEvents.ResetPersonnelEventInput
     mdlPersonnelEvents.SetPersonnelWizardValue "event_type", "ENROLLMENT"
     mdlPersonnelEvents.SetPersonnelWizardValue "event_date", DateSerial(2026, 7, 1)

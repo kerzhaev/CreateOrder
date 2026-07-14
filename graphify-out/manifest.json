@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784059414.9148178,
-    "ast_hash": "787f2d2776014273a5bdd5c12c9d0a81",
+    "mtime": 1784061036.7308733,
+    "ast_hash": "daec1c3b64cae81d60ce96eb8b04350a",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784059224.187949,
-    "ast_hash": "feebc14ed2bb029f5a3913c73250ee96",
+    "mtime": 1784060957.556057,
+    "ast_hash": "68f3402d373b594bc7b84705c5ee447a",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -220,8 +220,8 @@
     "semantic_hash": ""
   },
   "tools/Test-PersonnelActionWizardSafe.ps1": {
-    "mtime": 1784048615.9836292,
-    "ast_hash": "899661a76968fdc1edd81316dd0ddebd",
+    "mtime": 1784059520.7845027,
+    "ast_hash": "3eecee1da4f924e622968765448d41f1",
     "semantic_hash": ""
   },
   "tools/Test-PersonnelRibbonSafe.ps1": {
@@ -240,8 +240,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/plan.md": {
-    "mtime": 1784059276.9505446,
-    "ast_hash": "eba81f715ce5fae36ed536b33f939fec",
+    "mtime": 1784059586.9677641,
+    "ast_hash": "749f974da8ed322100ed1a6cb1f0f4ca",
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/spec.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784059224.1890025,
-    "ast_hash": "659965b928e4bf97b75f2b2cd164ace6",
+    "mtime": 1784060974.7122507,
+    "ast_hash": "60899cb02bf24ef400db99372ceed62a",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -265,13 +265,23 @@
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/plan.md": {
-    "mtime": 1784057736.5394828,
-    "ast_hash": "ca60840294b79276258509cfc1ed1f88",
+    "mtime": 1784060957.5550208,
+    "ast_hash": "842450538c3fcc4403042a014ab21981",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/spec.md": {
-    "mtime": 1784057833.7983158,
-    "ast_hash": "0309c8eb38fcaf22d1e6d51a2dc491d7",
+    "mtime": 1784060134.2879264,
+    "ast_hash": "dc723d87635958c385ae381d12ea57ce",
+    "semantic_hash": ""
+  },
+  "tools/Test-EnrollmentFizoReferenceSafe.ps1": {
+    "mtime": 1784059861.879006,
+    "ast_hash": "9cec0d50910920184332d021933abd1f",
+    "semantic_hash": ""
+  },
+  "tools/Test-EnrollmentMedalReferenceSafe.ps1": {
+    "mtime": 1784060619.021795,
+    "ast_hash": "de1a555b5f99bf3b0abac48a86d53cf8",
     "semantic_hash": ""
   }
 }

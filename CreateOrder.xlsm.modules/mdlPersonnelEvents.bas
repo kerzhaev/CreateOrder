@@ -14,6 +14,8 @@ Private Const SHEET_DOCUMENTS As String = "DocumentRegistry"
 Private Const SHEET_LEGAL_ACTS As String = "LegalActs"
 Private Const SHEET_EVENT_INPUT As String = "PersonnelEventInput"
 
+Private mPersonnelActionMenuPending As Boolean
+
 Public Const EVENT_TYPE_ENROLLMENT As String = "ENROLLMENT"
 Public Const EVENT_TYPE_TRANSFER As String = "TRANSFER"
 Public Const EVENT_TYPE_EXCLUSION As String = "EXCLUSION"
@@ -100,8 +102,18 @@ End Sub
 
 Public Sub OpenPersonnelActionMenu()
     EnsurePersonnelEventInfrastructure
-    frmPersonnelActionWizard.ShowActionMenu
+    PreparePersonnelActionMenu
+    frmPersonnelActionWizard.Show
 End Sub
+
+Public Sub PreparePersonnelActionMenu()
+    mPersonnelActionMenuPending = True
+End Sub
+
+Public Function ConsumePersonnelActionMenuRequest() As Boolean
+    ConsumePersonnelActionMenuRequest = mPersonnelActionMenuPending
+    mPersonnelActionMenuPending = False
+End Function
 
 Public Sub OpenPersonnelTransferAction()
     OpenPersonnelActionWizard EVENT_TYPE_TRANSFER
@@ -471,6 +483,10 @@ Public Function EnsureEnrollmentPersonnelEvent(ByVal enrollmentRecord As Object)
     afterState("service_category") = EnrollmentValue(enrollmentRecord, "service_category")
     afterState("contract_kind") = EnrollmentValue(enrollmentRecord, "contract_kind")
     afterState("contract_basis") = EnrollmentValue(enrollmentRecord, "contract_basis")
+    afterState("fizo_level") = EnrollmentFizoLevel(EnrollmentValue(enrollmentRecord, "fizo_param"))
+    afterState("medal_code") = mdlEnrollmentWorkflow.GetEnrollmentReferenceCode("ACHIEVEMENT", EnrollmentValue(enrollmentRecord, "achievement_param"))
+    afterState("medal_award_date") = EnrollmentValue(enrollmentRecord, "achievement_award_date")
+    afterState("medal_award_document_reference") = EnrollmentValue(enrollmentRecord, "achievement_document_reference")
     afterState("state_date") = effectiveDate
     afterState("is_active") = "YES"
     Set eventData = CreateObject("Scripting.Dictionary")
@@ -482,6 +498,14 @@ Public Function EnsureEnrollmentPersonnelEvent(ByVal enrollmentRecord As Object)
     eventData("basis_text") = EnrollmentValue(enrollmentRecord, "basis_section1")
     eventData("comment") = "EnrollmentID: " & enrollmentID
     EnsureEnrollmentPersonnelEvent = SavePersonnelEvent(eventData, beforeState, afterState)
+End Function
+
+Private Function EnrollmentFizoLevel(ByVal displayValue As String) As String
+    If UCase$(Trim$(displayValue)) = "SECOND" Then
+        EnrollmentFizoLevel = "SECOND"
+    ElseIf InStr(1, displayValue, "2", vbTextCompare) > 0 Then
+        EnrollmentFizoLevel = "SECOND"
+    End If
 End Function
 
 Private Function FindEnrollmentEventByEnrollmentID(ByVal enrollmentID As String) As String

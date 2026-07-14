@@ -64,5 +64,7 @@
   "62": "plan.md",
   "63": "Repair-FilterDatabaseNames.ps1",
   "64": "Спецификация: операторский интерфейс мастера зачисления",
-  "65": "plan.md"
+  "65": "plan.md",
+  "66": "Test-EnrollmentFizoReferenceSafe.ps1",
+  "67": "Test-EnrollmentMedalReferenceSafe.ps1"
 }
