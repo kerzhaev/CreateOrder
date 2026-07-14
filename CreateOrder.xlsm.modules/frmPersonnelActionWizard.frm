@@ -16,14 +16,30 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private mSavedEventID As String
+Private mSelectionMode As Boolean
+Private WithEvents mMenuEnrollment As MSForms.CommandButton
+Private WithEvents mMenuTransfer As MSForms.CommandButton
+Private WithEvents mMenuExclusion As MSForms.CommandButton
+Private WithEvents mMenuHistory As MSForms.CommandButton
+Private WithEvents mMenuClose As MSForms.CommandButton
 
 Private Sub UserForm_Initialize()
     ConfigureWizard
     LoadValues
 End Sub
 
+Public Sub ShowActionMenu()
+    mSelectionMode = True
+    Me.Show
+End Sub
+
 Private Sub ConfigureWizard()
     Dim actionType As String
+
+    If mSelectionMode Then
+        ConfigureActionMenu
+        Exit Sub
+    End If
 
     lblDescription.Visible = False
     actionType = UCase$(CStr(mdlPersonnelEvents.GetPersonnelWizardValue("event_type")))
@@ -64,6 +80,71 @@ Private Sub ConfigureWizard()
     Me.Controls("txt_status").Locked = True
 End Sub
 
+Private Sub ConfigureActionMenu()
+    HideLegacyActionButtons
+    Me.Caption = t("ribbon.ui.personnelActionsGroup.label", "Personnel actions")
+    Me.ScrollBars = fmScrollBarsNone
+    Me.ScrollHeight = 0
+    Me.Width = 520
+    Me.Height = 300
+    lblDescription.Visible = True
+    lblDescription.Caption = t("ribbon.ui.personnelActionsGroup.label", "Personnel actions")
+    lblDescription.Left = 24
+    lblDescription.Top = 24
+    lblDescription.Width = 420
+    lblDescription.Height = 24
+    lblDescription.Font.Bold = True
+
+    Set mMenuEnrollment = AddMenuButton("menuEnrollment", t("ribbon.ui.openPersonnelEnrollmentAction.label", "Enrollment"), 24, 66)
+    Set mMenuTransfer = AddMenuButton("menuTransfer", t("ribbon.ui.openPersonnelTransferAction.label", "Transfer"), 24, 108)
+    Set mMenuExclusion = AddMenuButton("menuExclusion", t("ribbon.ui.openPersonnelExclusionAction.label", "Exclusion"), 24, 150)
+    Set mMenuHistory = AddMenuButton("menuHistory", t("ribbon.ui.openPersonnelHistoryAction.label", "Employee history"), 24, 192)
+    Set mMenuClose = AddMenuButton("menuClose", t("personnel.wizard.close", "Close"), 316, 232)
+    mMenuClose.Width = 128
+End Sub
+
+Private Sub HideLegacyActionButtons()
+    btnExportRequest.Visible = False
+    btnImportResponse.Visible = False
+    btnLicenseStatus.Visible = False
+    btnClose.Visible = False
+End Sub
+
+Private Function AddMenuButton(ByVal controlName As String, ByVal captionText As String, ByVal leftValue As Single, ByVal topValue As Single) As MSForms.CommandButton
+    Dim buttonControl As MSForms.CommandButton
+
+    Set buttonControl = Me.Controls.Add("Forms.CommandButton.1", controlName, True)
+    buttonControl.Caption = captionText
+    buttonControl.Left = leftValue
+    buttonControl.Top = topValue
+    buttonControl.Width = 420
+    buttonControl.Height = 28
+    Set AddMenuButton = buttonControl
+End Function
+
+Private Sub mMenuEnrollment_Click()
+    Unload Me
+    mdlPersonnelEvents.OpenPersonnelEnrollmentAction
+End Sub
+
+Private Sub mMenuTransfer_Click()
+    Unload Me
+    mdlPersonnelEvents.OpenPersonnelTransferAction
+End Sub
+
+Private Sub mMenuExclusion_Click()
+    Unload Me
+    mdlPersonnelEvents.OpenPersonnelExclusionAction
+End Sub
+
+Private Sub mMenuHistory_Click()
+    Unload Me
+    mdlPersonnelHistory.OpenPersonnelHistory
+End Sub
+
+Private Sub mMenuClose_Click()
+    Unload Me
+End Sub
 Private Sub AddField(ByVal fieldKey As String, ByVal captionText As String, ByVal topValue As Single, ByVal multiline As Boolean)
     Dim labelControl As Object
     Dim textControl As Object

@@ -55,10 +55,7 @@
         </group>
 
         <group id="personnelActionsGroup" getLabel="GetRibbonLabel">
-          <button id="openPersonnelEnrollmentAction" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelEnrollmentActionClick" imageMso="ContactInsertFromOutlook" size="large"/>
-          <button id="openPersonnelTransferAction" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelTransferActionClick" imageMso="WorksheetMove" size="large"/>
-          <button id="openPersonnelExclusionAction" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelExclusionActionClick" imageMso="DeleteRecord" size="large"/>
-          <button id="openPersonnelHistoryAction" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelHistoryActionClick" imageMso="ReviewShowMarkupBalloonMenu"/>
+          <button id="openPersonnelActionsMenu" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelActionsMenuClick" imageMso="ContactInsertFromOutlook" size="large"/>
         </group>
 
         <group id="dataGroup" getLabel="GetRibbonLabel">

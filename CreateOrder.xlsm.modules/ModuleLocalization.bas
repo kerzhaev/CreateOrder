@@ -605,6 +605,7 @@ Private Sub LoadEnrollmentLocalizationSafe()
     AddSafe "personnel.wizard.close", "1047, 1072, 1082, 1088, 1099, 1090, 1100"
     AddSafe "personnel.wizard.saved_prefix", "1057, 1086, 1093, 1088, 1072, 1085, 1077, 1085, 1086, 58, 32"
     AddSafe "ribbon.ui.personnelActionsGroup.label", "1050, 1072, 1076, 1088, 1086, 1074, 1099, 1077, 32, 1076, 1077, 1081, 1089, 1090, 1074, 1080, 1103"
+    AddSafe "ribbon.ui.openPersonnelActionsMenu.label", "1054, 1090, 1082, 1088, 1099, 1090, 1100, 32, 1082, 1072, 1076, 1088, 1086, 1074, 1099, 1077, 32, 1076, 1077, 1081, 1089, 1090, 1074, 1080, 1103"
     AddSafe "ribbon.ui.openPersonnelEnrollmentAction.label", "1047, 1072, 1095, 1080, 1089, 1083, 1077, 1085, 1080, 1077"
     AddSafe "ribbon.ui.openPersonnelTransferAction.label", "1055, 1077, 1088, 1077, 1084, 1077, 1097, 1077, 1085, 1080, 1077"
     AddSafe "ribbon.ui.openPersonnelExclusionAction.label", "1048, 1089, 1082, 1083, 1102, 1095, 1077, 1085, 1080, 1077"

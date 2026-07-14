@@ -349,6 +349,14 @@ ErrorHandler:
     MsgBox tf("enrollment.ribbon.error.open_form", "Ошибка открытия мастера зачисления: {error}", "{error}", Err.Description), vbCritical, t("common.error", "Ошибка")
 End Sub
 
+Public Sub OnOpenPersonnelActionsMenuClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    mdlPersonnelEvents.OpenPersonnelActionMenu
+    Exit Sub
+ErrorHandler:
+    MsgBox Err.Description, vbCritical, t("common.error", "Error")
+End Sub
+
 Public Sub OnOpenPersonnelEnrollmentActionClick(control As IRibbonControl)
     mdlPersonnelEvents.OpenPersonnelEnrollmentAction
 End Sub

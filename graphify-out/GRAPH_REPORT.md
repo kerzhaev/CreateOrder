@@ -1,16 +1,16 @@
 # Graph Report - CreateOrder  (2026-07-14)
 
 ## Corpus Check
-- 55 files · ~59,037 words
+- 55 files · ~59,500 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 678 nodes · 694 edges · 66 communities (55 shown, 11 thin omitted)
+- 679 nodes · 695 edges · 66 communities (55 shown, 11 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2d4608bc`
+- Built from commit: `8bbd73b3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -276,8 +276,8 @@ Cohesion: 0.25
 Nodes (7): Влияние на текущую спецификацию, Ограничение источника, Правила, явно видимые в переданном фрагменте, Разбор источника: приказ МО РФ №430дсп — особые достижения, Решения, которые ожидаются от владельца проекта, Связанное локальное правило из другого НПА: военнослужащие по мобилизации, Условия расчёта, которые нужно реализовать отдельно от самих процентов
 
 ### Community 57 - "Спецификация: единый мастер кадровых действий"
-Cohesion: 0.29
-Nodes (6): Вторая поставка: кадровый мастер, Принципы, Приёмка, Состав первой поставки, Спецификация: единый мастер кадровых действий, Цель
+Cohesion: 0.25
+Nodes (7): Вторая поставка: кадровый мастер, Принципы, Приёмка, Состав первой поставки, Спецификация: единый мастер кадровых действий, Уточнение интерфейса: работа только через формы, Цель
 
 ### Community 58 - "Правила работы с проектом CreateOrder"
 Cohesion: 0.40
@@ -288,7 +288,7 @@ Cohesion: 0.33
 Nodes (5): Не утверждённые нормативные размеры, Подтверждённые решения, Приёмка, Спецификация: операторский интерфейс мастера зачисления, Цель
 
 ## Knowledge Gaps
-- **410 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+405 more)
+- **411 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+406 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -302,7 +302,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `Feature Specification: Payments Without Periods and Enrollment Workflow` connect `Block 1. Payments Without Periods: list-based assignment mode` to `Block 2. Enrollment workflow: new tab and rules engine`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **What connects `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)` to the rest of the system?**
-  _410 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _411 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Test-PaymentsEnrollmentAcceptance.ps1` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Block 2. Enrollment workflow: new tab and rules engine` be split into smaller, more focused modules?**

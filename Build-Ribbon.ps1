@@ -45,7 +45,16 @@ if ($null -eq $ribbonNode) {
 
 # 4. ”паковываем обратно в ZIP и переименовываем в XLSM
 Remove-Item $zipPath -Force
-Compress-Archive -Path "$tempDir\*" -DestinationPath $zipPath -Force
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive = [System.IO.Compression.ZipFile]::Open($zipPath, [System.IO.Compression.ZipArchiveMode]::Create)
+try {
+    Get-ChildItem -LiteralPath $tempDir -Recurse -File | ForEach-Object {
+        $entryName = $_.FullName.Substring($tempDir.Length + 1).Replace("\", "/")
+        [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $_.FullName, $entryName, [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
+    }
+} finally {
+    $archive.Dispose()
+}
 Move-Item -Path $zipPath -Destination $ExcelFilePath -Force
 
 # ќчистка

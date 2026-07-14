@@ -35,8 +35,8 @@
     "semantic_hash": ""
   },
   "Build-Ribbon.ps1": {
-    "mtime": 1771842496.0028565,
-    "ast_hash": "0ff2dd78706b28ef08d8a987adbfae0a",
+    "mtime": 1784059365.1327858,
+    "ast_hash": "0134c8c2dfa786989346aad934b4e95c",
     "semantic_hash": ""
   },
   "Test-FIODeclension.ps1": {
@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784057736.538968,
-    "ast_hash": "22d845da95f1f9a2dfefd29e3857dfe4",
+    "mtime": 1784059414.9148178,
+    "ast_hash": "787f2d2776014273a5bdd5c12c9d0a81",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784055694.395821,
-    "ast_hash": "f8e2ecc34c3bf7cb473ddfc0a38e9f13",
+    "mtime": 1784059224.187949,
+    "ast_hash": "feebc14ed2bb029f5a3913c73250ee96",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -225,8 +225,8 @@
     "semantic_hash": ""
   },
   "tools/Test-PersonnelRibbonSafe.ps1": {
-    "mtime": 1783979143.2972467,
-    "ast_hash": "633f7c312eef5e06a3f515796a800bb0",
+    "mtime": 1784059132.6110346,
+    "ast_hash": "36be5360a280d204deff144f7abc18f4",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/order-forms-move-exclusion.md": {
@@ -240,13 +240,13 @@
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/plan.md": {
-    "mtime": 1784051165.7928803,
-    "ast_hash": "be016b565977b820665a9324ba5bdfc2",
+    "mtime": 1784059276.9505446,
+    "ast_hash": "eba81f715ce5fae36ed536b33f939fec",
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/spec.md": {
-    "mtime": 1784049723.1815307,
-    "ast_hash": "d95124003e342e238128284c2cb2607d",
+    "mtime": 1784058842.679905,
+    "ast_hash": "ac315386ef915bebd3f05c31d10562d9",
     "semantic_hash": ""
   },
   "AGENTS.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784057736.5370028,
-    "ast_hash": "fb4d50071e42adbd713883a0958000c2",
+    "mtime": 1784059224.1890025,
+    "ast_hash": "659965b928e4bf97b75f2b2cd164ace6",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -270,8 +270,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/spec.md": {
-    "mtime": 1784053105.110296,
-    "ast_hash": "d29c61949b93c721f305808d3a8da282",
+    "mtime": 1784057833.7983158,
+    "ast_hash": "0309c8eb38fcaf22d1e6d51a2dc491d7",
     "semantic_hash": ""
   }
 }

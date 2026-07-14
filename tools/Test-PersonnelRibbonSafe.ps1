@@ -40,6 +40,10 @@ try {
     $expected = -join @(1050,1072,1076,1088,1086,1074,1099,1077,32,1076,1077,1081,1089,1090,1074,1080,1103 | ForEach-Object { [char]$_ })
     if ($result -ne $expected) { throw "Personnel ribbon localization failed. Actual: $result" }
 
+    $result = $excel.Run("'$($workbook.Name)'!mdlRibbonHandlers.GetRibbonUiTextById", "openPersonnelActionsMenu", "label")
+    $expected = -join @(1054,1090,1082,1088,1099,1090,1100,32,1082,1072,1076,1088,1086,1074,1099,1077,32,1076,1077,1081,1089,1090,1074,1080,1103 | ForEach-Object { [char]$_ })
+    if ($result -ne $expected) { throw "Personnel action menu localization failed. Actual: $result" }
+
     $workbook.Close($false)
     $workbook = $null
     $excel.Quit()

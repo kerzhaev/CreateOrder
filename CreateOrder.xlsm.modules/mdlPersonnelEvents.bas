@@ -98,6 +98,11 @@ Public Sub OpenPersonnelEventInput()
     ThisWorkbook.Worksheets(SHEET_EVENT_INPUT).Activate
 End Sub
 
+Public Sub OpenPersonnelActionMenu()
+    EnsurePersonnelEventInfrastructure
+    frmPersonnelActionWizard.ShowActionMenu
+End Sub
+
 Public Sub OpenPersonnelTransferAction()
     OpenPersonnelActionWizard EVENT_TYPE_TRANSFER
 End Sub
@@ -167,7 +172,6 @@ Public Sub PrepareNewPersonnelAction(ByVal eventType As String)
 
     ResetPersonnelEventInput
     SetInputValue ThisWorkbook.Worksheets(SHEET_EVENT_INPUT), "event_type", normalizedType
-    ThisWorkbook.Worksheets(SHEET_EVENT_INPUT).Activate
 End Sub
 
 Public Sub SaveCurrentPersonnelAction()

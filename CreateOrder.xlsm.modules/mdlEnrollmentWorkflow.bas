@@ -700,6 +700,8 @@ Public Sub OpenEnrollmentForm()
     EnsureEnrollmentInfrastructure
     ' The normal ribbon command always starts a new card. Existing cards are opened explicitly.
     ClearEnrollmentForm
+    ' Apply configured standard-payment defaults before the operator sees the blank card.
+    RefreshEnrollmentForm
     frmEnrollmentWizard.Show
 End Sub
 
