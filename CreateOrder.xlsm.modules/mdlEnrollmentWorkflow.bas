@@ -391,6 +391,7 @@ Public Sub EnsureEnrollmentFormSheetStructure(ByVal ws As Worksheet)
     EnsureBackendField ws, "current_row", "Текущая строка"
     EnsureBackendField ws, "enrollment_id", "ID зачисления"
     EnsureBackendField ws, "order_draft_id", "ID проекта приказа"
+    EnsureBackendField ws, "personnel_event_id", "Personnel Event ID"
     EnsureBackendField ws, "source_mode", "Источник данных"
     EnsureBackendField ws, "fio", "ФИО"
     EnsureBackendField ws, "personal_number", "Личный номер"
@@ -570,6 +571,7 @@ Public Sub RefreshEnrollmentForm()
     Set evaluation = EvaluateEnrollmentRecord(record)
     SetBackendRecord record
     WritePreviewToBackend record, evaluation
+    SetBackendValue "personnel_event_id", mdlPersonnelEvents.EnsureEnrollmentPersonnelEvent(record)
     SyncEnrollmentWizardIfOpen
 End Sub
 
@@ -588,13 +590,17 @@ Public Function SaveEnrollmentFormToSheet(Optional ByVal createPayments As Boole
 
     rowNum = ResolveTargetRow(ws, record)
     WriteRecordToSheet ws, rowNum, record, evaluation
+    Set record = GetResolvedEnrollmentRecordByRow(rowNum)
+
     SaveEnrollmentFormToSheet = rowNum
 
     SetBackendRecord record
+
     SetBackendValue "current_row", CStr(rowNum)
     SetBackendValue "enrollment_id", CStr(record("enrollment_id"))
     SetBackendValue "order_draft_id", CStr(record("order_draft_id"))
     WritePreviewToBackend record, evaluation
+    SetBackendValue "personnel_event_id", mdlPersonnelEvents.EnsureEnrollmentPersonnelEvent(record)
 
     If createPayments Then
         Call GeneratePaymentsFromEnrollmentRowDirect(rowNum)

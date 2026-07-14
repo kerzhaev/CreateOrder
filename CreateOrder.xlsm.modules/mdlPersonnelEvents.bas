@@ -424,6 +424,91 @@ Public Function SavePersonnelEvent(ByVal eventData As Object, ByVal beforeState 
     SavePersonnelEvent = eventID
 End Function
 
+Public Function EnsureEnrollmentPersonnelEvent(ByVal enrollmentRecord As Object) As String
+    Dim employeeID As String
+    Dim enrollmentID As String
+    Dim existingEventID As String
+    Dim eventData As Object
+    Dim beforeState As Object
+    Dim afterState As Object
+    Dim eventDate As Date
+    Dim effectiveDate As Date
+
+    If enrollmentRecord Is Nothing Then Err.Raise vbObjectError + 661, "mdlPersonnelEvents", "Enrollment record is required."
+    EnsurePersonnelEventInfrastructure
+    enrollmentID = EnrollmentValue(enrollmentRecord, "enrollment_id")
+    If enrollmentID = "" Then Err.Raise vbObjectError + 662, "mdlPersonnelEvents", "EnrollmentID is required."
+    existingEventID = FindEnrollmentEventByEnrollmentID(enrollmentID)
+    If existingEventID <> "" Then
+        EnsureEnrollmentPersonnelEvent = existingEventID
+        Exit Function
+    End If
+    eventDate = EnrollmentDate(enrollmentRecord, "order_date", Date)
+    effectiveDate = EnrollmentDate(enrollmentRecord, "duty_start_date", EnrollmentDate(enrollmentRecord, "enroll_date", eventDate))
+    If effectiveDate < eventDate Then effectiveDate = eventDate
+    employeeID = BuildIdentifier("EMP")
+    Set beforeState = CreateObject("Scripting.Dictionary")
+    beforeState("employee_id") = employeeID
+    beforeState("is_active") = "NO"
+    Set afterState = CreateObject("Scripting.Dictionary")
+    afterState("employee_id") = employeeID
+    afterState("fio") = EnrollmentValue(enrollmentRecord, "fio")
+    afterState("personal_number") = EnrollmentValue(enrollmentRecord, "personal_number")
+    afterState("table_number") = EnrollmentValue(enrollmentRecord, "table_number")
+    afterState("source_mode") = EnrollmentValue(enrollmentRecord, "source_mode")
+    afterState("rank") = EnrollmentValue(enrollmentRecord, "rank")
+    afterState("position") = EnrollmentValue(enrollmentRecord, "position")
+    afterState("section") = EnrollmentValue(enrollmentRecord, "section")
+    afterState("military_unit") = EnrollmentValue(enrollmentRecord, "military_unit")
+    afterState("vus") = EnrollmentValue(enrollmentRecord, "vus")
+    afterState("tariff_rank") = EnrollmentValue(enrollmentRecord, "tariff_rank")
+    afterState("position_salary") = EnrollmentValue(enrollmentRecord, "position_salary")
+    afterState("rank_salary") = EnrollmentValue(enrollmentRecord, "rank_salary")
+    afterState("service_category") = EnrollmentValue(enrollmentRecord, "service_category")
+    afterState("contract_kind") = EnrollmentValue(enrollmentRecord, "contract_kind")
+    afterState("contract_basis") = EnrollmentValue(enrollmentRecord, "contract_basis")
+    afterState("state_date") = effectiveDate
+    afterState("is_active") = "YES"
+    Set eventData = CreateObject("Scripting.Dictionary")
+    eventData("employee_id") = employeeID
+    eventData("event_type") = EVENT_TYPE_ENROLLMENT
+    eventData("event_date") = eventDate
+    eventData("effective_date") = effectiveDate
+    eventData("order_reference") = EnrollmentValue(enrollmentRecord, "order_number")
+    eventData("basis_text") = EnrollmentValue(enrollmentRecord, "basis_section1")
+    eventData("comment") = "EnrollmentID: " & enrollmentID
+    EnsureEnrollmentPersonnelEvent = SavePersonnelEvent(eventData, beforeState, afterState)
+End Function
+
+Private Function FindEnrollmentEventByEnrollmentID(ByVal enrollmentID As String) As String
+    Dim ws As Worksheet
+    Dim rowNum As Long
+    Dim marker As String
+    Set ws = ThisWorkbook.Worksheets(SHEET_EVENTS)
+    marker = "EnrollmentID: " & enrollmentID
+    For rowNum = 2 To LastDataRow(ws)
+        If UCase$(SafeText(ws.Cells(rowNum, 3).Value)) = EVENT_TYPE_ENROLLMENT Then
+            If SafeText(ws.Cells(rowNum, 15).Value) = marker Then
+                FindEnrollmentEventByEnrollmentID = SafeText(ws.Cells(rowNum, 1).Value)
+                Exit Function
+            End If
+        End If
+    Next rowNum
+End Function
+
+Private Function EnrollmentValue(ByVal enrollmentRecord As Object, ByVal fieldName As String) As String
+    If enrollmentRecord.Exists(fieldName) Then EnrollmentValue = SafeText(enrollmentRecord(fieldName))
+End Function
+
+Private Function EnrollmentDate(ByVal enrollmentRecord As Object, ByVal fieldName As String, ByVal fallbackValue As Date) As Date
+    If enrollmentRecord.Exists(fieldName) Then
+        If IsDate(enrollmentRecord(fieldName)) Then
+            EnrollmentDate = CDate(enrollmentRecord(fieldName))
+            Exit Function
+        End If
+    End If
+    EnrollmentDate = fallbackValue
+End Function
 Public Function GetCurrentPersonnelState(ByVal employeeID As String) As Object
     Dim ws As Worksheet
     Dim lastRow As Long

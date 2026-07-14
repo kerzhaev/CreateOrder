@@ -535,8 +535,24 @@ try {
     if ($result -like "ERROR:*") { throw $result }
     $events = $workbook.Worksheets("PersonnelEvents")
     $assignments = $workbook.Worksheets("PaymentAssignments")
-    if ($events.Cells(3, 3).Value2 -ne "EXCLUSION") { throw "Exclusion event was not persisted." }
-    if ($assignments.Cells(2, 11).Value2 -ne "TERMINATED") { throw "Active payment was not terminated by exclusion." }
+    $eventIds = $result.Split("|")
+    $exclusionId = $eventIds[1]
+    $exclusionRow = 0
+    for ($rowNum = 2; $rowNum -le $events.Cells($events.Rows.Count, 1).End(-4162).Row; $rowNum++) {
+        if ([string]$events.Cells($rowNum, 1).Value2 -eq $exclusionId) {
+            $exclusionRow = $rowNum
+            break
+        }
+    }
+    if ($exclusionRow -eq 0 -or $events.Cells($exclusionRow, 3).Value2 -ne "EXCLUSION") { throw "Exclusion event was not persisted." }
+    $terminatedByExclusion = $false
+    for ($rowNum = 2; $rowNum -le $assignments.Cells($assignments.Rows.Count, 1).End(-4162).Row; $rowNum++) {
+        if ([string]$assignments.Cells($rowNum, 12).Value2 -eq $exclusionId -and $assignments.Cells($rowNum, 11).Value2 -eq "TERMINATED") {
+            $terminatedByExclusion = $true
+            break
+        }
+    }
+    if (-not $terminatedByExclusion) { throw "Active payment was not terminated by exclusion." }
     $allowanceResult = [string]$excel.Run("'$($workbook.Name)'!personnel_events_probe.ProbeAllowanceRules")
     if ($allowanceResult -ne "OK") { throw "Allowance rule test failed: $allowanceResult" }
     $capResult = [string]$excel.Run("'$($workbook.Name)'!personnel_events_probe.ProbePoint2Cap")

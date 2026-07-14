@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784048739.1623306,
-    "ast_hash": "0b3ec4c2a6965b08be0a5ae152c65b3e",
+    "mtime": 1784050975.9790103,
+    "ast_hash": "8ea79d6de6b6512caef86e641df032fc",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784048785.936323,
-    "ast_hash": "8c836764dec2b889157c61f9e2b19165",
+    "mtime": 1784050953.1209824,
+    "ast_hash": "c79f0347c45bf21ca7aa958a094dec2b",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -210,8 +210,8 @@
     "semantic_hash": ""
   },
   "Test-PersonnelEvents.ps1": {
-    "mtime": 1783976635.2667117,
-    "ast_hash": "d586c6989cd032ffc4cb3e294629931c",
+    "mtime": 1784050690.912636,
+    "ast_hash": "30aadbde895d297c95d6c7ff177ba53b",
     "semantic_hash": ""
   },
   "tools/Repair-FilterDatabaseNames.ps1": {
@@ -240,13 +240,13 @@
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/plan.md": {
-    "mtime": 1784048739.163875,
-    "ast_hash": "b223e0dbfb5df55671d602967650a3ed",
+    "mtime": 1784049723.1828501,
+    "ast_hash": "0146c6e7f7cdab6c524dde43d3183196",
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/spec.md": {
-    "mtime": 1784048615.9846303,
-    "ast_hash": "145548a1a355642c1d69c5486aa1659e",
+    "mtime": 1784049723.1815307,
+    "ast_hash": "d95124003e342e238128284c2cb2607d",
     "semantic_hash": ""
   },
   "AGENTS.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784048739.1612957,
-    "ast_hash": "18a0be7bfd6998e8bb7a378ae4800a0f",
+    "mtime": 1784050953.1198373,
+    "ast_hash": "9e6a2532459b716013e08f88f81bc6b3",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {

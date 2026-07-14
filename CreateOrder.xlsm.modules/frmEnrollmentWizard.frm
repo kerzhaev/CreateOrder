@@ -435,7 +435,7 @@ End Sub
 Private Sub btnDeletePeriod_Click()
     On Error GoTo ErrorHandler
 
-    PerformExportPackage True
+    PerformExportPackage False
     Exit Sub
 
 ErrorHandler:
@@ -595,11 +595,13 @@ Private Function PerformExportPackage(Optional ByVal showMessage As Boolean = Tr
     Dim exportScope As String
     Dim outputPath As String
     Dim exportErrorText As String
+    Dim personnelEventID As String
 
     On Error GoTo ExportBlocked
 
     PushFormToBackend
     targetRow = mdlEnrollmentWorkflow.SaveEnrollmentFormToSheet(False)
+    personnelEventID = CStr(mdlEnrollmentWorkflow.GetBackendValue("personnel_event_id"))
     orderDraftId = mdlEnrollmentOrderExport.GetOrderDraftIdForRow(targetRow)
     exportScope = mdlEnrollmentOrderExport.GetExportScopeText(orderDraftId, targetRow)
     exportErrorText = mdlEnrollmentOrderExport.GetEnrollmentExportBlockingIssues(orderDraftId, targetRow)
@@ -615,9 +617,8 @@ Private Function PerformExportPackage(Optional ByVal showMessage As Boolean = Tr
     mpWizard.Value = PREVIEW_PAGE_INDEX
 
     lblStatus.Caption = tf("enrollment.form.status.exported", "Сформирован пакет приказа: {scope}.", "{scope}", exportScope)
-    If showMessage Then
-        MsgBox tf("enrollment.form.message.exported", "Пакет приказа сформирован ({scope}).{nl}Файл: {path}", "{scope}", exportScope, "{nl}", vbCrLf, "{path}", outputPath), vbInformation, t("enrollment.caption.main", "Зачисление")
-    End If
+    mdlEnrollmentEventLink.RegisterEnrollmentOrderForEvent personnelEventID, outputPath, CStr(mdlEnrollmentWorkflow.GetBackendValue("order_number"))
+    lblStatus.Caption = tf("enrollment.form.status.exported", "Пакет приказа сформирован: {scope}.", "{scope}", exportScope) & " " & outputPath
 
     PerformExportPackage = outputPath
     Exit Function
