@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "Test-PaymentsEnrollmentAcceptance.ps1": {
-    "mtime": 1783979196.0776243,
-    "ast_hash": "a378948a3fae2f1ddcd8d83be693839c",
+    "mtime": 1784053976.8860865,
+    "ast_hash": "c98764c0aed74a7c625f3d4b7e44eaaa",
     "semantic_hash": ""
   },
   "Test-ZP12Validation.ps1": {
@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784051184.5759864,
-    "ast_hash": "9df521ae781ad1d0051f98c36ebce4a6",
+    "mtime": 1784054399.085648,
+    "ast_hash": "a52fde7cc496926d4b47d46651eaec03",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784050953.1209824,
-    "ast_hash": "c79f0347c45bf21ca7aa958a094dec2b",
+    "mtime": 1784054410.6802115,
+    "ast_hash": "e717d59c7bfccfb64aa891a0e3903a6f",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -255,13 +255,23 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784051165.793923,
-    "ast_hash": "1c33a1f2d3dc22245ad0ca436f1f175a",
+    "mtime": 1784054371.0256393,
+    "ast_hash": "77e4a6b2c41002114a7be891fe637e3e",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
     "mtime": 1784048739.162851,
     "ast_hash": "5f114dd8929e95d85fd65573a050a141",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/enrollment-operator-ui/plan.md": {
+    "mtime": 1784053105.110823,
+    "ast_hash": "ffb143009990c34f98847909f8eed66a",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/enrollment-operator-ui/spec.md": {
+    "mtime": 1784053105.110296,
+    "ast_hash": "d29c61949b93c721f305808d3a8da282",
     "semantic_hash": ""
   }
 }

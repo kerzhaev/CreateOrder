@@ -970,7 +970,7 @@ try {
     Write-Output "2a. Enrollment wizard staff selector flow"
     $wizardStaffLoad = [string]$excel.Run("'$($workbook.Name)'!codex_acceptance_probe.ProbeEnrollmentWizardStaffLoad", $ln1.Trim())
     Assert-True ($wizardStaffLoad -like ("staff|" + $fio1.Trim() + "|" + $ln1.Trim() + "|*")) "Enrollment wizard did not load employee data from the shared staff selector."
-    Assert-True ($wizardStaffLoad -like ("*|" + $serviceCategory1.Trim() + "|" + $contractKind1.Trim() + "|" + $vus1.Trim() + "|" + $tariff1.Trim() + "|" + $birthDate1.Trim() + "|" + $citizenship1.Trim() + "|*")) "Enrollment wizard did not hydrate extended staff fields into the enrollment form. Snapshot: $wizardStaffLoad"
+    Assert-True ($wizardStaffLoad -like ("*|" + $serviceCategory1.Trim() + "|" + $vus1.Trim() + "|" + $tariff1.Trim() + "|" + $birthDate1.Trim() + "|" + $citizenship1.Trim() + "|*")) "Enrollment wizard did not hydrate extended staff fields into the enrollment form. Snapshot: $wizardStaffLoad"
     $wizardInlineUiText = [string]$excel.Run("'$($workbook.Name)'!codex_acceptance_probe.ProbeEnrollmentWizardInlineSearchUiText")
     Assert-Eq $wizardInlineUiText "Введите ФИО, личный или табельный номер.|Загрузить из поиска" "Enrollment wizard inline-search UI is not fully localized."
     $wizardLayout = [string]$excel.Run("'$($workbook.Name)'!codex_acceptance_probe.ProbeEnrollmentWizardLayout")

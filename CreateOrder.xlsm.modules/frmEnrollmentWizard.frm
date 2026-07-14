@@ -35,7 +35,6 @@ Private txtEmployeeNumber As Object
 Private txtEmployeeTableNumber As Object
 Private txtEmployeeRank As Object
 Private txtEmployeeServiceCategory As Object
-Private txtEmployeeContractKind As Object
 Private txtEmployeeContractBasis As Object
 Private txtEmployeeVus As Object
 Private txtEmployeePosition As Object
@@ -157,6 +156,8 @@ Private WithEvents btnLoadFromInlineSearchDynamic As MSForms.CommandButton
 Private WithEvents btnCheckDynamic As MSForms.CommandButton
 Private WithEvents btnSaveCardDynamic As MSForms.CommandButton
 Private WithEvents btnExportPackageDynamic As MSForms.CommandButton
+Private WithEvents cboEmployeeRankDynamic As MSForms.ComboBox
+Private WithEvents cboEmployeeTariffDynamic As MSForms.ComboBox
 
 Private currentSourceMode As String
 Private Const PREVIEW_PAGE_INDEX As Long = 6
@@ -173,6 +174,7 @@ Private Sub UserForm_Initialize()
     ConfigureWindow
     ConfigureButtons
     CreateWizardUi
+    PopulateOperatorReferenceLists
     currentSourceMode = "manual"
     ReloadFromBackend
     lblStatus.Caption = t("enrollment.form.status.ready_to_pick", "Выберите сотрудника из листа 'Штат' или заполните карточку вручную. После выбора проверьте страницы мастера.")
@@ -322,7 +324,6 @@ Public Sub LoadEmployeeFromStaffNumber(ByVal employeeNumber As String)
     txtEmployeeSection.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colVoinskayaChast_Global).Value))
     txtEmployeeMilitaryUnit.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colVoinskayaChast_Global).Value))
     txtEmployeeServiceCategory.Value = StaffDictValue(staffData, mdlHelper.Ru(1043, 1088, 1091, 1087, 1087, 1072, 32, 1089, 1086, 1090, 1088, 1091, 1076, 1085, 1080, 1082, 1086, 1074))
-    txtEmployeeContractKind.Value = StaffDictValue(staffData, mdlHelper.Ru(1042, 1080, 1076, 32, 1082, 1086, 1085, 1090, 1088, 1072, 1082, 1090, 1072))
     txtEmployeeVus.Value = StaffDictValue(staffData, mdlHelper.Ru(1042, 1059, 1057))
     txtEmployeeTariff.Value = StaffDictValue(staffData, mdlHelper.Ru(1058, 1072, 1088, 1080, 1092, 1085, 1099, 1081, 32, 1088, 1072, 1079, 1088, 1103, 1076))
     txtBirthDate.Value = StaffDictDateValue(staffData, mdlHelper.Ru(1044, 1072, 1090, 1072, 32, 1088, 1086, 1078, 1076, 1077, 1085, 1080, 1103))
@@ -365,7 +366,6 @@ Public Function GetEmployeeSnapshot() As String
         Trim$(CStr(txtEmployeeMilitaryUnit.Value)) & "|" & _
         Trim$(CStr(txtEmployeeTableNumber.Value)) & "|" & _
         Trim$(CStr(txtEmployeeServiceCategory.Value)) & "|" & _
-        Trim$(CStr(txtEmployeeContractKind.Value)) & "|" & _
         Trim$(CStr(txtEmployeeVus.Value)) & "|" & _
         Trim$(CStr(txtEmployeeTariff.Value)) & "|" & _
         Trim$(CStr(txtBirthDate.Value)) & "|" & _
@@ -852,17 +852,16 @@ Private Sub CreateEmployeePage()
     Set txtEmployeeFIO = AddPageTextBoxT(pgEmployee, "enrollment.field.fio", "ФИО", 12, 12, 520)
     Set txtEmployeeNumber = AddPageTextBoxT(pgEmployee, "enrollment.field.personal_number", "Личный номер", 12, 54, 130)
     Set txtEmployeeTableNumber = AddPageTextBoxT(pgEmployee, "enrollment.field.table_number", "Табельный номер", 160, 54, 120)
-    Set txtEmployeeRank = AddPageTextBoxT(pgEmployee, "enrollment.field.rank", "Воинское звание", 298, 54, 120)
-    Set txtEmployeeServiceCategory = AddPageTextBoxT(pgEmployee, "enrollment.field.service_category", "Категория службы", 436, 54, 96)
-    Set txtEmployeeContractKind = AddPageTextBoxT(pgEmployee, "enrollment.field.contract_kind", "Признак контракта", 12, 96, 130)
+    Set txtEmployeeRank = AddPageComboBoxT(pgEmployee, "enrollment.field.rank", "Воинское звание", 298, 54, 120)
+    Set txtEmployeeServiceCategory = AddPageComboBoxT(pgEmployee, "enrollment.field.service_category", "Категория службы", 436, 54, 96)
     Set txtEmployeeContractBasis = AddPageTextBoxT(pgEmployee, "enrollment.field.contract_basis", "Основание контракта", 160, 96, 372)
-    Set txtEmployeeVus = AddPageTextBoxT(pgEmployee, "enrollment.field.vus", "ВУС", 12, 138, 120)
-    Set txtEmployeePosition = AddPageTextBoxT(pgEmployee, "enrollment.field.position", "Штатная должность", 150, 138, 382, 34, True)
-    Set txtEmployeeSection = AddPageTextBoxT(pgEmployee, "enrollment.field.section", "Раздел персонала", 12, 192, 250, 34, True)
-    Set txtEmployeeMilitaryUnit = AddPageTextBoxT(pgEmployee, "enrollment.field.military_unit", "Воинская часть", 280, 192, 252, 34, True)
-    Set txtEmployeeTariff = AddPageTextBoxT(pgEmployee, "enrollment.field.tariff", "Тарифный разряд", 12, 246, 120)
-    Set txtEmployeePositionSalary = AddPageTextBoxT(pgEmployee, "enrollment.field.position_salary", "Оклад по должности", 150, 246, 140)
-    Set txtEmployeeRankSalary = AddPageTextBoxT(pgEmployee, "enrollment.field.rank_salary", "Оклад по званию", 308, 246, 140)
+    Set txtEmployeeVus = AddPageComboBoxT(pgEmployee, "enrollment.field.vus", "ВУС", 12, 138, 120)
+    Set txtEmployeePosition = AddPageComboBoxT(pgEmployee, "enrollment.field.position", "Штатная должность", 150, 138, 382, 34, True)
+    Set txtEmployeeSection = AddPageComboBoxT(pgEmployee, "enrollment.field.section", "Раздел персонала", 12, 192, 250, 34, True)
+    Set txtEmployeeMilitaryUnit = AddPageComboBoxT(pgEmployee, "enrollment.field.military_unit", "Воинская часть", 280, 192, 252, 34, True)
+    Set txtEmployeeTariff = AddPageComboBoxT(pgEmployee, "enrollment.field.tariff", "Тарифный разряд", 12, 246, 120)
+    Set txtEmployeePositionSalary = AddPageTextBoxT(pgEmployee, "enrollment.field.position_salary", "Оклад по должности (из справочника)", 150, 246, 140, 18, False, True)
+    Set txtEmployeeRankSalary = AddPageTextBoxT(pgEmployee, "enrollment.field.rank_salary", "Оклад по званию (из справочника)", 308, 246, 140, 18, False, True)
 End Sub
 
 Private Sub CreateDocsPage()
@@ -1016,6 +1015,72 @@ Private Sub ConfigureScrollablePage(ByVal pageHost As Object, ByVal pageScrollHe
     On Error GoTo 0
 End Sub
 
+Private Function AddPageComboBoxT(ByVal pageHost As Object, ByVal localizationKey As String, ByVal fallbackText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal controlWidth As Single, Optional ByVal controlHeight As Single = 18, Optional ByVal ignoredMultiline As Boolean = False) As Object
+    Dim lbl As Object
+    Dim cbo As Object
+    Set lbl = pageHost.Controls.Add("Forms.Label.1", "lbl_cbo_" & CStr(pageHost.Controls.Count + 1), True)
+    With lbl
+        .Caption = t(localizationKey, fallbackText)
+        .Left = leftPos
+        .Top = topPos
+        .Width = controlWidth
+        .Height = 14
+        .BackStyle = fmBackStyleTransparent
+        .Font.Name = "Times New Roman"
+        .Font.Size = 9
+    End With
+    Set cbo = pageHost.Controls.Add("Forms.ComboBox.1", "cbo_" & CStr(pageHost.Controls.Count + 1), True)
+    With cbo
+        .Left = leftPos
+        .Top = topPos + 15
+        .Width = controlWidth
+        .Height = 18
+        .Font.Name = "Times New Roman"
+        .Font.Size = 10
+        .Style = fmStyleDropDownCombo
+        .MatchRequired = False
+        .MatchEntry = fmMatchEntryComplete
+    End With
+    Set AddPageComboBoxT = cbo
+End Function
+
+Private Sub PopulateOperatorReferenceLists()
+    PopulateComboBox txtEmployeeRank, "RANK"
+    PopulateComboBox txtEmployeeServiceCategory, "SERVICE_CATEGORY"
+    PopulateComboBox txtEmployeeVus, "VUS"
+    PopulateComboBox txtEmployeePosition, "POSITION"
+    PopulateComboBox txtEmployeeSection, "SECTION"
+    PopulateComboBox txtEmployeeMilitaryUnit, "MILITARY_UNIT"
+    PopulateComboBox txtEmployeeTariff, "TARIFF_RANK"
+    Set cboEmployeeRankDynamic = txtEmployeeRank
+    Set cboEmployeeTariffDynamic = txtEmployeeTariff
+End Sub
+
+Private Sub PopulateComboBox(ByVal comboBox As Object, ByVal referenceType As String)
+    Dim values As Collection
+    Dim itemValue As Variant
+    Set values = mdlEnrollmentWorkflow.GetEnrollmentReferenceValues(referenceType)
+    comboBox.Clear
+    For Each itemValue In values
+        comboBox.AddItem CStr(itemValue)
+    Next itemValue
+End Sub
+
+Private Sub UpdateReferenceSalaryPreview()
+    Dim amountValue As String
+    amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("RANK", SafeText(txtEmployeeRank.Value))
+    If amountValue <> "" Then txtEmployeeRankSalary.Value = amountValue
+    amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("TARIFF_RANK", SafeText(txtEmployeeTariff.Value) & " тарифный разряд")
+    If amountValue <> "" Then txtEmployeePositionSalary.Value = amountValue
+End Sub
+
+Private Sub cboEmployeeRankDynamic_Change()
+    UpdateReferenceSalaryPreview
+End Sub
+
+Private Sub cboEmployeeTariffDynamic_Change()
+    UpdateReferenceSalaryPreview
+End Sub
 Private Function AddPageTextBoxT(ByVal pageHost As Object, ByVal localizationKey As String, ByVal fallbackText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal textWidth As Single, Optional ByVal textHeight As Single = 18, Optional ByVal isMultiline As Boolean = False, Optional ByVal isReadOnly As Boolean = False) As Object
     Set AddPageTextBoxT = AddPageTextBox(pageHost, t(localizationKey, fallbackText), leftPos, topPos, textWidth, textHeight, isMultiline, isReadOnly)
 End Function
@@ -1097,7 +1162,7 @@ Private Sub PushFormToBackend()
     mdlEnrollmentWorkflow.SetBackendValue "table_number", txtEmployeeTableNumber.Value
     mdlEnrollmentWorkflow.SetBackendValue "rank", txtEmployeeRank.Value
     mdlEnrollmentWorkflow.SetBackendValue "service_category", txtEmployeeServiceCategory.Value
-    mdlEnrollmentWorkflow.SetBackendValue "contract_kind", txtEmployeeContractKind.Value
+    mdlEnrollmentWorkflow.SetBackendValue "contract_kind", txtEmployeeServiceCategory.Value
     mdlEnrollmentWorkflow.SetBackendValue "contract_basis", txtEmployeeContractBasis.Value
     mdlEnrollmentWorkflow.SetBackendValue "vus", txtEmployeeVus.Value
     mdlEnrollmentWorkflow.SetBackendValue "position", txtEmployeePosition.Value
@@ -1260,7 +1325,6 @@ Public Sub ReloadFromBackend()
     txtEmployeeTableNumber.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("table_number"))
     txtEmployeeRank.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("rank"))
     txtEmployeeServiceCategory.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("service_category"))
-    txtEmployeeContractKind.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("contract_kind"))
     txtEmployeeContractBasis.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("contract_basis"))
     txtEmployeeVus.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("vus"))
     txtEmployeePosition.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("position"))

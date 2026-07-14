@@ -62,5 +62,7 @@
   "60": "Test-PersonnelActionWizardSafe.ps1",
   "61": "Test-PersonnelRibbonSafe.ps1",
   "62": "plan.md",
-  "63": "Repair-FilterDatabaseNames.ps1"
+  "63": "Repair-FilterDatabaseNames.ps1",
+  "64": "Спецификация: операторский интерфейс мастера зачисления",
+  "65": "plan.md"
 }

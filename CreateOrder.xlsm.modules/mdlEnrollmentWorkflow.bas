@@ -174,6 +174,8 @@ Public Const COL_ENROLLMENT_EXTRA_ONE_TIME3_DATE As Long = 146
 Public Const COL_ENROLLMENT_EXTRA_ONE_TIME3_BASIS As Long = 147
 Public Const COL_ENROLLMENT_EXTRA_ONE_TIME3_ENABLED As Long = 148
 
+Public Const ENROLLMENT_REFERENCE_SHEET As String = "EnrollmentReferenceData"
+
 Public Sub EnsureEnrollmentInfrastructure()
     Dim wsJournal As Worksheet
     Dim wsBackend As Worksheet
@@ -184,6 +186,7 @@ Public Sub EnsureEnrollmentInfrastructure()
     EnsureEnrollmentSheetStructure wsJournal
     EnsureEnrollmentFormSheetStructure wsBackend
     EnsureEnrollmentSettings
+    EnsureEnrollmentReferenceData
     mdlEnrollmentOrderExport.EnsureEnrollmentTemplateAvailable
 
     On Error Resume Next
@@ -518,11 +521,102 @@ Private Function IsBackendHeaderMatch(ByVal rawValue As Variant, ByVal localized
         StrComp(normalizedValue, legacyValue, vbTextCompare) = 0)
 End Function
 
+
+Public Sub EnsureEnrollmentReferenceData()
+    Dim ws As Worksheet
+    Dim i As Long
+
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets(ENROLLMENT_REFERENCE_SHEET)
+    On Error GoTo 0
+    If ws Is Nothing Then
+        Set ws = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Worksheets(ThisWorkbook.Worksheets.Count))
+        ws.Name = ENROLLMENT_REFERENCE_SHEET
+    End If
+    If SafeText(ws.Cells(1, 1).Value) = "" Then
+        ws.Cells(1, 1).Value = "ReferenceType"
+        ws.Cells(1, 2).Value = "Code"
+        ws.Cells(1, 3).Value = "DisplayName"
+        ws.Cells(1, 4).Value = "Amount"
+        ws.Cells(1, 5).Value = "Active"
+        ws.Cells(1, 6).Value = "Notes"
+        AddEnrollmentReference ws, "SERVICE_CATEGORY", "CONTRACT", "Контракт", "", "YES", ""
+        AddEnrollmentReference ws, "SERVICE_CATEGORY", "MOBILIZED", "Мобилизация", "", "YES", ""
+        AddEnrollmentReference ws, "SERVICE_CATEGORY", "CONSCRIPT", "Призыв", "", "YES", ""
+        For i = 1 To 50
+            AddEnrollmentReference ws, "TARIFF_RANK", CStr(i), CStr(i) & " тарифный разряд", "", "YES", "Укажите оклад по должности для этого разряда."
+        Next i
+        AddEnrollmentReference ws, "RANK", "РЯДОВОЙ", "рядовой", "", "YES", "Укажите оклад по званию."
+        AddEnrollmentReference ws, "RANK", "ЕФРЕЙТОР", "ефрейтор", "", "YES", "Укажите оклад по званию."
+        AddEnrollmentReference ws, "RANK", "СЕРЖАНТ", "сержант", "", "YES", "Укажите оклад по званию."
+        AddEnrollmentReference ws, "CLASS", "THIRD", "3 класс", "", "YES", "Заполните подтвержденный процент."
+        AddEnrollmentReference ws, "CLASS", "SECOND", "2 класс", "", "YES", "Заполните подтвержденный процент."
+        AddEnrollmentReference ws, "CLASS", "FIRST", "1 класс", "", "YES", "Заполните подтвержденный процент."
+        AddEnrollmentReference ws, "SECRECY", "LEVEL_3", "3 степень", "", "YES", "Заполните подтвержденный процент."
+        AddEnrollmentReference ws, "SECRECY", "LEVEL_2", "2 степень", "", "YES", "Заполните подтвержденный процент."
+        AddEnrollmentReference ws, "SECRECY", "LEVEL_1", "1 степень", "", "YES", "Заполните подтвержденный процент."
+        ws.Rows(1).Font.Bold = True
+        ws.Columns("A:F").AutoFit
+    End If
+End Sub
+
+Private Sub AddEnrollmentReference(ByVal ws As Worksheet, ByVal referenceType As String, ByVal code As String, ByVal displayName As String, ByVal amountValue As String, ByVal activeValue As String, ByVal noteText As String)
+    Dim rowNum As Long
+    rowNum = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
+    ws.Cells(rowNum, 1).Value = referenceType
+    ws.Cells(rowNum, 2).Value = code
+    ws.Cells(rowNum, 3).Value = displayName
+    ws.Cells(rowNum, 4).Value = amountValue
+    ws.Cells(rowNum, 5).Value = activeValue
+    ws.Cells(rowNum, 6).Value = noteText
+End Sub
+
+Public Function GetEnrollmentReferenceValues(ByVal referenceType As String) As Collection
+    Dim ws As Worksheet
+    Dim rowNum As Long
+    Dim values As New Collection
+
+    EnsureEnrollmentReferenceData
+    Set ws = ThisWorkbook.Worksheets(ENROLLMENT_REFERENCE_SHEET)
+    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) Then
+            If UCase$(SafeText(ws.Cells(rowNum, 5).Value)) <> "NO" Then values.Add SafeText(ws.Cells(rowNum, 3).Value)
+        End If
+    Next rowNum
+    Set GetEnrollmentReferenceValues = values
+End Function
+
+Public Function GetEnrollmentReferenceAmount(ByVal referenceType As String, ByVal displayName As String) As String
+    Dim ws As Worksheet
+    Dim rowNum As Long
+
+    EnsureEnrollmentReferenceData
+    Set ws = ThisWorkbook.Worksheets(ENROLLMENT_REFERENCE_SHEET)
+    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) _
+            And StrComp(SafeText(ws.Cells(rowNum, 3).Value), SafeText(displayName), vbTextCompare) = 0 Then
+            GetEnrollmentReferenceAmount = SafeText(ws.Cells(rowNum, 4).Value)
+            Exit Function
+        End If
+    Next rowNum
+End Function
+
+Public Sub ApplyEnrollmentReferenceValues(ByVal record As Object)
+    Dim amountValue As String
+
+    amountValue = GetEnrollmentReferenceAmount("RANK", SafeText(record("rank")))
+    If amountValue <> "" Then record("rank_salary") = amountValue
+    amountValue = GetEnrollmentReferenceAmount("TARIFF_RANK", SafeText(record("tariff_rank")) & " тарифный разряд")
+    If amountValue <> "" Then record("position_salary") = amountValue
+    amountValue = GetEnrollmentReferenceAmount("CLASS", SafeText(record("class_param")))
+    If amountValue <> "" Then record("class_percent") = amountValue
+    amountValue = GetEnrollmentReferenceAmount("SECRECY", SafeText(record("secrecy_param")))
+    If amountValue <> "" Then record("secrecy_percent") = amountValue
+End Sub
 Public Sub OpenEnrollmentForm()
     EnsureEnrollmentInfrastructure
-    If ShouldLoadActiveEnrollmentRow() Then
-        LoadEnrollmentRowToBackend ActiveCell.Row
-    End If
+    ' The normal ribbon command always starts a new card. Existing cards are opened explicitly.
+    ClearEnrollmentForm
     frmEnrollmentWizard.Show
 End Sub
 
@@ -1043,6 +1137,7 @@ Public Sub NormalizeEnrollmentRecord(ByVal record As Object)
         End If
     End If
 
+    ApplyEnrollmentReferenceValues record
     If SafeText(record("military_unit")) = "" Then record("military_unit") = SafeText(record("section"))
     If SafeText(record("order_draft_id")) = "" Then record("order_draft_id") = BuildEnrollmentOrderDraftId()
     If SafeText(record("enrollment_id")) = "" Then record("enrollment_id") = BuildEnrollmentId()
@@ -1183,6 +1278,22 @@ Public Function EvaluateEnrollmentRecord(ByVal record As Object) As Object
     AppendIssueIfBlank issues, severity, record("accept_date"), ET("enrollment.issue.accept_date_missing", "Не заполнена дата принятия дел и должности."), STATUS_BLOCKED
     AppendIssueIfBlank issues, severity, record("enroll_date"), ET("enrollment.issue.enroll_date_missing", "Не заполнена дата зачисления."), STATUS_BLOCKED
     AppendIssueIfBlank issues, severity, record("duty_start_date"), ET("enrollment.issue.duty_start_missing", "Не заполнена дата вступления в исполнение обязанностей."), STATUS_BLOCKED
+    ValidateDateField record, "order_date", "Дата приказа", issues, severity
+    ValidateDateField record, "prescription_date", "Дата предписания", issues, severity
+    ValidateDateField record, "report_date", "Дата рапорта", issues, severity
+    ValidateDateField record, "accept_date", "Дата принятия дел и должности", issues, severity
+    ValidateDateField record, "enroll_date", "Дата зачисления", issues, severity
+    ValidateDateField record, "duty_start_date", "Дата вступления в обязанности", issues, severity
+    ValidateDateField record, "manual_start_date", "Ручная дата старта", issues, severity
+    ValidateDateField record, "standard_start_date", "Старт стандартных выплат", issues, severity
+    ValidateDateField record, "preferential_start_date", "Старт льготной выслуги", issues, severity
+    ValidateDateField record, "premium_start", "Начало премии", issues, severity
+    ValidateDateField record, "premium_end", "Окончание премии", issues, severity
+    ValidateDateField record, "lift_date", "Дата подъёмного пособия", issues, severity
+    ValidateDateField record, "per_diem_date", "Дата суточных", issues, severity
+    ValidateDateField record, "edv_date", "Дата ЕДВ", issues, severity
+    ValidateDateField record, "birth_date", "Дата рождения", issues, severity
+    ValidateDateField record, "passport_issue_date", "Дата выдачи паспорта", issues, severity
     ValidateStaffConsistency record, issues, severity
 
     If IsAllBlank(record("prescription_number"), record("prescription_date"), record("assignment_info")) Then
@@ -1202,6 +1313,11 @@ Public Function EvaluateEnrollmentRecord(ByVal record As Object) As Object
     AppendIssueIfBlank issues, severity, record("passport_issue_date"), ET("enrollment.issue.passport_date_missing", "Не заполнена дата выдачи паспорта."), STATUS_BLOCKED
     AppendIssueIfBlank issues, severity, record("inn"), ET("enrollment.issue.inn_missing", "Не заполнен ИНН."), STATUS_BLOCKED
     AppendIssueIfBlank issues, severity, record("snils"), ET("enrollment.issue.snils_missing", "Не заполнен СНИЛС."), STATUS_BLOCKED
+    ValidateExactDigits record, "inn", "ИНН", 10, 12, issues, severity
+    ValidateExactDigits record, "snils", "СНИЛС", 11, 11, issues, severity, True
+    ValidateExactDigits record, "passport_series", "Серия паспорта", 4, 4, issues, severity
+    ValidateExactDigits record, "passport_number", "Номер паспорта", 6, 6, issues, severity
+    ValidatePassportCode record, issues, severity
     AppendIssueIfBlank issues, severity, record("bank_account"), ET("enrollment.issue.bank_account_missing", "Не заполнен лицевой / банковский счёт."), STATUS_BLOCKED
     AppendIssueIfBlank issues, severity, record("bank_name"), ET("enrollment.issue.bank_name_missing", "Не заполнено наименование банка."), STATUS_BLOCKED
     AppendIssueIfBlank issues, severity, record("basis_section1"), ET("enrollment.issue.basis_section1_missing", "Не заполнен общий блок оснований для §1."), STATUS_BLOCKED
@@ -1741,6 +1857,48 @@ Private Sub NormalizeExtraPaymentFields(ByVal record As Object, ByVal standardSt
     Next i
 End Sub
 
+
+Private Sub ValidateDateField(ByVal record As Object, ByVal fieldKey As String, ByVal fieldLabel As String, ByRef issues As String, ByRef severity As Long)
+    If SafeText(record(fieldKey)) <> "" And Not IsDate(record(fieldKey)) Then
+        AppendIssue issues, fieldLabel & ": укажите корректную дату в формате дд.мм.гггг.", severity, STATUS_BLOCKED
+    End If
+End Sub
+
+Private Sub ValidateExactDigits(ByVal record As Object, ByVal fieldKey As String, ByVal fieldLabel As String, ByVal minLength As Long, ByVal maxLength As Long, ByRef issues As String, ByRef severity As Long, Optional ByVal allowSeparators As Boolean = False)
+    Dim normalized As String
+    Dim comparable As String
+
+    normalized = DigitsOnly(SafeText(record(fieldKey)))
+    comparable = SafeText(record(fieldKey))
+    If allowSeparators Then comparable = Replace$(Replace$(comparable, "-", ""), " ", "")
+    If SafeText(record(fieldKey)) <> "" And (normalized <> comparable Or Len(normalized) < minLength Or Len(normalized) > maxLength) Then
+        If minLength = maxLength Then
+            AppendIssue issues, fieldLabel & ": требуется ровно " & CStr(minLength) & " цифр.", severity, STATUS_BLOCKED
+        Else
+            AppendIssue issues, fieldLabel & ": требуется " & CStr(minLength) & " или " & CStr(maxLength) & " цифр.", severity, STATUS_BLOCKED
+        End If
+    End If
+End Sub
+
+Private Sub ValidatePassportCode(ByVal record As Object, ByRef issues As String, ByRef severity As Long)
+    Dim normalized As String
+
+    If SafeText(record("passport_code")) = "" Then Exit Sub
+    normalized = Replace$(SafeText(record("passport_code")), "-", "")
+    If Len(normalized) <> 6 Or DigitsOnly(normalized) <> normalized Then
+        AppendIssue issues, "Код подразделения: укажите шесть цифр, например 123-456.", severity, STATUS_BLOCKED
+    End If
+End Sub
+
+Private Function DigitsOnly(ByVal rawValue As String) As String
+    Dim i As Long
+    Dim ch As String
+
+    For i = 1 To Len(rawValue)
+        ch = Mid$(rawValue, i, 1)
+        If ch >= "0" And ch <= "9" Then DigitsOnly = DigitsOnly & ch
+    Next i
+End Function
 Private Sub ValidateExtraPaymentFields(ByVal record As Object, ByRef issues As String, ByRef severity As Long)
     Dim i As Long
 
