@@ -47,7 +47,7 @@ try {
     try { $workbook.VBProject.VBComponents.Remove($workbook.VBProject.VBComponents.Item("frmEnrollmentWizard")) } catch {}
     $form = $workbook.VBProject.VBComponents.Import((Join-Path $workspace "CreateOrder.xlsm.modules\frmEnrollmentWizard.frm"))
     if ($form.Type -ne 3) { throw "Enrollment form was imported as component type $($form.Type), expected 3." }
-    $excel.Run("'$($workbook.Name)'!mdlEnrollmentWorkflow.EnsureEnrollmentReferenceData") | Out-Null
+    $excel.Run("'$($workbook.Name)'!mdlEnrollmentWorkflow.EnsureEnrollmentInfrastructure") | Out-Null
 
     $workbook.Save()
     $workbook.Close($true)

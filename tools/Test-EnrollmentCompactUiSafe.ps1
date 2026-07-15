@@ -52,6 +52,8 @@ Public Function ProbeEnrollmentCompactUi() As String
     Dim controlItem As Object
     Dim hasPersonalToggle As Boolean
     Dim hasBankToggle As Boolean
+    Dim tariffDefinition As Object
+    Dim secrecyDefinition As Object
     On Error GoTo Failed
     startedAt = Timer
     mdlEnrollmentWorkflow.EnsureEnrollmentInfrastructure
@@ -64,6 +66,10 @@ Public Function ProbeEnrollmentCompactUi() As String
         If referenceType = "POSITION" Or referenceType = "VUS" Or referenceType = "SECTION" Or referenceType = "MILITARY_UNIT" Then _
             Err.Raise 807, , "Staff data remained in EnrollmentReferenceData: " & referenceType
     Next rowNum
+    Set tariffDefinition = mdlEnrollmentWorkflow.GetEnrollmentPaymentDefinition("std_tariff")
+    Set secrecyDefinition = mdlEnrollmentWorkflow.GetEnrollmentPaymentDefinition("secrecy")
+    If tariffDefinition("word_block_target") <> "Section1MonthlyPersonal" Then Err.Raise 810, , "1-4 tariff allowance is not assigned to order 430"
+    If secrecyDefinition("word_block_target") <> "Section1MonthlyStandard" Then Err.Raise 811, , "Secrecy allowance is not assigned to order 727"
     exportResult = mdlEnrollmentOrderExport.ExportEnrollmentOrderByDraftId("", 0)
     If Left`$(exportResult, 6) <> "ERROR:" Then Err.Raise 806, , "Empty export did not return the expected safe error"
     Load frmEnrollmentWizard
@@ -72,6 +78,10 @@ Public Function ProbeEnrollmentCompactUi() As String
     If frameHost Is Nothing Then Err.Raise 804, , "Order 727 frame is missing"
     Set frameHost = frmEnrollmentWizard.Controls("mpWizard").Pages(2).Controls("fraOrder430")
     If frameHost Is Nothing Then Err.Raise 805, , "Order 430 frame is missing"
+    Set frameHost = frmEnrollmentWizard.Controls("mpWizard").Pages(1).Controls("fraDocsArrival")
+    If frameHost Is Nothing Then Err.Raise 812, , "Arrival-details frame is missing"
+    Set frameHost = frmEnrollmentWizard.Controls("mpWizard").Pages(1).Controls("fraDocsReport")
+    If frameHost Is Nothing Then Err.Raise 813, , "Report-details frame is missing"
     For Each controlItem In frmEnrollmentWizard.Controls("mpWizard").Pages(3).Controls
         If controlItem.Top = 138 Then
             If controlItem.Left = 12 Then hasPersonalToggle = True

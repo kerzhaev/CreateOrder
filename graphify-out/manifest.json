@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784149893.965378,
-    "ast_hash": "7a7990a8f1a5a4c38b0546cd1b267d54",
+    "mtime": 1784151373.9120474,
+    "ast_hash": "8954a57413ddd57490cd4f622e155f3d",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784149807.6359923,
-    "ast_hash": "c24996489ef5e47afec21569a0e19536",
+    "mtime": 1784151373.9062936,
+    "ast_hash": "272a44d0108bd63e08876d9a3498fded",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784149893.964332,
-    "ast_hash": "5f489c40986a9989b56f7ca8b43849d2",
+    "mtime": 1784151373.9062936,
+    "ast_hash": "6a78f3f0ad3253b5fb4386a6b2ac7b0b",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -290,8 +290,8 @@
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentTariffReferenceSafe.ps1": {
-    "mtime": 1784149622.7127244,
-    "ast_hash": "05ee7e7f3d89caaa12690d8708e97ebc",
+    "mtime": 1784151225.5465062,
+    "ast_hash": "d1cbf2255300264f80d933d82a31b1bd",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-clarity-2026-07-15.md": {
@@ -325,18 +325,18 @@
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentCompactUiSafe.ps1": {
-    "mtime": 1784149709.9128544,
-    "ast_hash": "424285e52f85c804d872ff0edf32fc30",
+    "mtime": 1784151225.5472243,
+    "ast_hash": "5e29dbb02f934d29d25fb7a0ab346231",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-compact-performance-2026-07-15.md": {
-    "mtime": 1784149893.9664288,
-    "ast_hash": "bd3e7ff0aeece3ed7e17b1406c51da63",
+    "mtime": 1784151373.9140537,
+    "ast_hash": "584380b9693a5eecaf3dbaa6ffcaf1d5",
     "semantic_hash": ""
   },
   "tools/Install-EnrollmentCompactUiSafe.ps1": {
-    "mtime": 1784148017.0549924,
-    "ast_hash": "4853d53bb5c8c65cc7d2d6fa93da08ff",
+    "mtime": 1784151342.0636759,
+    "ast_hash": "dd0b4be597a82ebaa2d167e709ca3271",
     "semantic_hash": ""
   }
 }

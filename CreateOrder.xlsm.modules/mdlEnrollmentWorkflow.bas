@@ -440,9 +440,11 @@ Public Sub EnsureEnrollmentFormSheetStructure(ByVal ws As Worksheet)
     EnsureBackendField ws, "order_date", "Дата приказа"
     EnsureBackendField ws, "order_number", "Номер приказа"
     EnsureBackendField ws, "order_issuer", "Кем издан приказ"
+    EnsureBackendField ws, "arrival_details_enabled", "Сведения о прибытии включены"
     EnsureBackendField ws, "arrival_source", "Источник прибытия"
     EnsureBackendField ws, "prescription_number", "Номер предписания"
     EnsureBackendField ws, "prescription_date", "Дата предписания"
+    EnsureBackendField ws, "report_details_enabled", "Сведения о рапорте включены"
     EnsureBackendField ws, "report_number", "Номер рапорта"
     EnsureBackendField ws, "report_date", "Дата рапорта"
     EnsureBackendField ws, "report_info", "Рапорт / регистрация"
@@ -1539,6 +1541,8 @@ Public Sub NormalizeEnrollmentRecord(ByVal record As Object)
     If SafeText(record("std_tariff_percent")) = "" Then record("std_tariff_percent") = DEFAULT_TARIFF_PERCENT
     If SafeText(record("std_tariff_basis")) = "" Then record("std_tariff_basis") = ET("enrollment.default.std_tariff_basis", "Надбавка по должностям 1-4 тарифных разрядов")
 
+    NormalizeOptionalDocumentBlocks record
+
     contractDate = ExtractContractDate(record)
     If SafeText(record("std_contract430_enabled")) = "" Then
         record("std_contract430_enabled") = IIf(IsContract430Candidate(record, contractDate), YES_VALUE, NO_VALUE)
@@ -1608,6 +1612,27 @@ FallbackValue:
     FormatStaffDateValue = SafeText(rawValue)
 End Function
 
+Private Sub NormalizeOptionalDocumentBlocks(ByVal record As Object)
+    If SafeText(record("arrival_details_enabled")) = "" Then
+        record("arrival_details_enabled") = IIf(Not IsAllBlank(record("arrival_source"), record("prescription_number"), record("prescription_date"), record("assignment_info")), YES_VALUE, NO_VALUE)
+    End If
+    If NormalizeYesNo(record("arrival_details_enabled")) <> YES_VALUE Then
+        record("arrival_source") = ""
+        record("prescription_number") = ""
+        record("prescription_date") = ""
+        record("assignment_info") = ""
+    End If
+
+    If SafeText(record("report_details_enabled")) = "" Then
+        record("report_details_enabled") = IIf(Not IsAllBlank(record("report_number"), record("report_date"), record("report_info")), YES_VALUE, NO_VALUE)
+    End If
+    If NormalizeYesNo(record("report_details_enabled")) <> YES_VALUE Then
+        record("report_number") = ""
+        record("report_date") = ""
+        record("report_info") = ""
+    End If
+End Sub
+
 Public Function EvaluateEnrollmentRecord(ByVal record As Object) As Object
     Dim result As Object
     Dim issues As String
@@ -1648,10 +1673,10 @@ Public Function EvaluateEnrollmentRecord(ByVal record As Object) As Object
     ValidateDateField record, "edv_date", "Дата ЕДВ", issues, severity
     ValidateStaffConsistency record, issues, severity
 
-    If IsAllBlank(record("prescription_number"), record("prescription_date"), record("assignment_info")) Then
+    If NormalizeYesNo(record("arrival_details_enabled")) = YES_VALUE And IsAllBlank(record("prescription_number"), record("prescription_date"), record("assignment_info")) Then
         AppendIssue issues, ET("enrollment.issue.assignment_missing", "Не заполнены сведения о предписании / основании прибытия."), severity, STATUS_WARNING
     End If
-    If IsAllBlank(record("report_number"), record("report_date"), record("report_info")) Then
+    If NormalizeYesNo(record("report_details_enabled")) = YES_VALUE And IsAllBlank(record("report_number"), record("report_date"), record("report_info")) Then
         AppendIssue issues, ET("enrollment.issue.report_missing", "Не заполнены сведения о рапорте / регистрации."), severity, STATUS_WARNING
     End If
 
@@ -1932,8 +1957,8 @@ Private Function BuildNextPackageRecord(ByVal sourceRecord As Object) As Object
     ClearRecordFields nextRecord, Array( _
         "current_row", "enrollment_id", "fio", "personal_number", "table_number", "rank", _
         "service_category", "contract_kind", "contract_basis", "vus", "position", "section", _
-        "military_unit", "tariff_rank", "position_salary", "rank_salary", "prescription_number", _
-        "prescription_date", "report_number", "report_date", "report_info", "assignment_info", _
+        "military_unit", "tariff_rank", "position_salary", "rank_salary", "arrival_source", "prescription_number", _
+        "prescription_date", "arrival_details_enabled", "report_number", "report_date", "report_details_enabled", "report_info", "assignment_info", _
         "birth_date", "birth_place", "citizenship", "personal_details_enabled", "inn", "snils", "passport_series", _
         "passport_number", "passport_issuer", "passport_issue_date", "passport_code", _
         "bank_account", "bank_name", "bank_bik", "bank_details_enabled", "requisites_note", "class_param", "class_enabled", _
@@ -2468,9 +2493,11 @@ Private Sub EnsureRecordKeys(ByVal record As Object)
     EnsureRecordKey record, "order_date"
     EnsureRecordKey record, "order_number"
     EnsureRecordKey record, "order_issuer"
+    EnsureRecordKey record, "arrival_details_enabled"
     EnsureRecordKey record, "arrival_source"
     EnsureRecordKey record, "prescription_number"
     EnsureRecordKey record, "prescription_date"
+    EnsureRecordKey record, "report_details_enabled"
     EnsureRecordKey record, "report_number"
     EnsureRecordKey record, "report_date"
     EnsureRecordKey record, "report_info"
@@ -2960,15 +2987,19 @@ Private Function BuildSection1Basis(ByVal record As Object) As String
         If SafeText(record("order_date")) <> "" Then resultText = Trim$(resultText & " от " & SafeText(record("order_date")))
         If SafeText(record("order_number")) <> "" Then resultText = Trim$(resultText & " № " & SafeText(record("order_number")))
     End If
-    If SafeText(record("prescription_number")) <> "" Or SafeText(record("prescription_date")) <> "" Then
-        resultText = AppendListValue(resultText, ET("enrollment.basis.prescription_prefix", "предписание") & " № " & SafeText(record("prescription_number")) & IIf(SafeText(record("prescription_date")) <> "", " от " & SafeText(record("prescription_date")), ""))
-    ElseIf SafeText(record("assignment_info")) <> "" Then
-        resultText = AppendListValue(resultText, SafeText(record("assignment_info")))
+    If NormalizeYesNo(record("arrival_details_enabled")) = YES_VALUE Then
+        If SafeText(record("prescription_number")) <> "" Or SafeText(record("prescription_date")) <> "" Then
+            resultText = AppendListValue(resultText, ET("enrollment.basis.prescription_prefix", "предписание") & " № " & SafeText(record("prescription_number")) & IIf(SafeText(record("prescription_date")) <> "", " от " & SafeText(record("prescription_date")), ""))
+        ElseIf SafeText(record("assignment_info")) <> "" Then
+            resultText = AppendListValue(resultText, SafeText(record("assignment_info")))
+        End If
     End If
-    If SafeText(record("report_number")) <> "" Or SafeText(record("report_date")) <> "" Then
-        resultText = AppendListValue(resultText, ET("enrollment.basis.report_prefix", "рапорт") & " № " & SafeText(record("report_number")) & IIf(SafeText(record("report_date")) <> "", " от " & SafeText(record("report_date")), ""))
-    ElseIf SafeText(record("report_info")) <> "" Then
-        resultText = AppendListValue(resultText, SafeText(record("report_info")))
+    If NormalizeYesNo(record("report_details_enabled")) = YES_VALUE Then
+        If SafeText(record("report_number")) <> "" Or SafeText(record("report_date")) <> "" Then
+            resultText = AppendListValue(resultText, ET("enrollment.basis.report_prefix", "рапорт") & " № " & SafeText(record("report_number")) & IIf(SafeText(record("report_date")) <> "", " от " & SafeText(record("report_date")), ""))
+        ElseIf SafeText(record("report_info")) <> "" Then
+            resultText = AppendListValue(resultText, SafeText(record("report_info")))
+        End If
     End If
 
     BuildSection1Basis = resultText
@@ -3078,11 +3109,11 @@ Private Sub EnsureEnrollmentPaymentDefinitions(ByVal ws As Worksheet)
     EnsureEnrollmentPaymentDefinition ws, "core", "core", "Section1Core", "core", "", "manual", "blocked", ET("enrollment.word.block.core", "Основное кадровое действие")
     EnsureEnrollmentPaymentDefinition ws, "std_duty", "standard", "Section1MonthlyStandard", "std_duty", "basis", "standard_start_date", "warning", ET("payments.type.std_duty", "Надбавка по воинской должности")
     EnsureEnrollmentPaymentDefinition ws, "std_special", "standard", "Section1MonthlyStandard", "std_special", "basis", "standard_start_date", "warning", ET("payments.type.std_special", "Особые условия службы")
-    EnsureEnrollmentPaymentDefinition ws, "std_tariff", "standard", "Section1MonthlyStandard", "std_tariff", "basis", "standard_start_date", "warning", ET("payments.type.std_tariff", "Надбавка 1-4 тарифных разрядов")
+    EnsureEnrollmentPaymentDefinition ws, "std_tariff", "personal", "Section1MonthlyPersonal", "std_tariff", "basis", "standard_start_date", "warning", ET("payments.type.std_tariff", "Надбавка 1-4 тарифных разрядов")
     EnsureEnrollmentPaymentDefinition ws, "std_contract430", "standard", "Section1MonthlyStandard", "std_contract430", "basis", "standard_start_date", "warning", ET("payments.type.std_contract430", "Надбавка 430 приказ")
     EnsureEnrollmentPaymentDefinition ws, "class", "personal", "Section1MonthlyPersonal", "class", "param,basis", "standard_start_date", "blocked", ET("payments.type.class_qualification", "Классная квалификация")
     EnsureEnrollmentPaymentDefinition ws, "fizo", "personal", "Section1MonthlyPersonal", "fizo", "param,basis", "standard_start_date", "blocked", ET("payments.type.fizo", "ФИЗО")
-    EnsureEnrollmentPaymentDefinition ws, "secrecy", "personal", "Section1MonthlyPersonal", "secrecy", "param,basis", "standard_start_date", "blocked", ET("payments.type.secrecy", "Секретность")
+    EnsureEnrollmentPaymentDefinition ws, "secrecy", "standard", "Section1MonthlyStandard", "secrecy", "param,basis", "standard_start_date", "blocked", ET("payments.type.secrecy", "Секретность")
     EnsureEnrollmentPaymentDefinition ws, "achievement", "personal", "Section1MonthlyPersonal", "achievement", "param,basis", "standard_start_date", "blocked", ET("payments.type.achievement", "Особые достижения")
     EnsureEnrollmentPaymentDefinition ws, "lift", "onetime", "Section1OneTime", "lift", "amount,date,basis", "enroll_date", "warning", ET("enrollment.field.lift_enabled", "Подъёмное пособие")
     EnsureEnrollmentPaymentDefinition ws, "per_diem", "onetime", "Section1OneTime", "per_diem", "amount,date,basis", "enroll_date", "warning", ET("enrollment.field.per_diem_enabled", "Суточные")
@@ -3094,6 +3125,8 @@ Private Sub EnsureEnrollmentPaymentDefinitions(ByVal ws As Worksheet)
     UpgradeSettingValueIfEquals ws, "enrollment.def.core.text_template", ET("enrollment.word.block.core", "Основное кадровое действие"), "{core_text}"
     UpgradeSettingValueIfEquals ws, "enrollment.def.requisites.text_template", ET("enrollment.word.block.requisites", "Реквизиты и основания"), "{requisites_text}"
     UpgradeSettingValueIfEquals ws, "enrollment.def.edv.required_docs", "amount,date,basis_section2", "amount,date,basis_section2,contract_basis"
+    UpgradeSettingValueIfEquals ws, "enrollment.def.std_tariff.word_block_target", "Section1MonthlyStandard", "Section1MonthlyPersonal"
+    UpgradeSettingValueIfEquals ws, "enrollment.def.secrecy.word_block_target", "Section1MonthlyPersonal", "Section1MonthlyStandard"
 End Sub
 
 Private Sub EnsureEnrollmentPaymentDefinition(ByVal ws As Worksheet, ByVal defCode As String, ByVal paymentKind As String, ByVal wordBlockTarget As String, ByVal journalBinding As String, ByVal requiredDocs As String, ByVal startDateSource As String, ByVal validationSeverity As String, ByVal labelText As String)

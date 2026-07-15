@@ -671,7 +671,7 @@ Private Function BuildDefaultCoreEnrollmentSentence(ByVal record As Object) As S
     Dim acceptText As String
 
     resultText = SafeText(record("rank")) & " " & SafeText(record("fio")) & ", " & SafeText(record("personal_number"))
-    If SafeText(record("arrival_source")) <> "" Then
+    If NormalizeYesNo(record("arrival_details_enabled")) = "YES" And SafeText(record("arrival_source")) <> "" Then
         resultText = resultText & ", " & L("enrollment.word.core.arrived_from", "прибывшего") & " " & SafeText(record("arrival_source"))
     End If
 
@@ -914,7 +914,7 @@ Private Function BuildDefaultRequisitesText(ByVal record As Object) As String
     Dim resultText As String
     Dim personalText As String
 
-    If SafeText(record("birth_date")) <> "" Or SafeText(record("birth_place")) <> "" Or SafeText(record("citizenship")) <> "" Then
+    If NormalizeYesNo(record("personal_details_enabled")) = "YES" And (SafeText(record("birth_date")) <> "" Or SafeText(record("birth_place")) <> "" Or SafeText(record("citizenship")) <> "") Then
         If SafeText(record("birth_date")) <> "" Then
             personalText = L("enrollment.word.requisites.birth_date", "Дата рождения:") & " " & SafeText(record("birth_date"))
         End If
@@ -929,17 +929,21 @@ Private Function BuildDefaultRequisitesText(ByVal record As Object) As String
         resultText = personalText & "." & vbCrLf
     End If
 
-    resultText = resultText & L("enrollment.word.requisites.passport_series", "Паспорт серия") & " " & SafeText(record("passport_series")) & " " & L("enrollment.word.header.no", "№") & " " & SafeText(record("passport_number"))
-    resultText = resultText & ", " & L("enrollment.word.requisites.issued_by", "выдан") & " " & SafeText(record("passport_issuer"))
-    If SafeText(record("passport_issue_date")) <> "" Then resultText = resultText & ", " & L("enrollment.word.requisites.issue_date", "дата выдачи:") & " " & SafeText(record("passport_issue_date"))
-    If SafeText(record("passport_code")) <> "" Then resultText = resultText & ", " & L("enrollment.word.requisites.passport_code", "код подразделения") & " " & SafeText(record("passport_code"))
-    resultText = resultText & "." & vbCrLf
-    resultText = resultText & L("enrollment.word.requisites.inn", "ИНН") & " - " & SafeText(record("inn")) & ", " & L("enrollment.word.requisites.snils", "СНИЛС") & " - " & SafeText(record("snils")) & "." & vbCrLf
-    resultText = resultText & L("enrollment.word.requisites.bank", "Лицевой счёт / банк:") & " " & SafeText(record("bank_name")) & " - " & SafeText(record("bank_account"))
-    If SafeText(record("bank_bik")) <> "" Then resultText = resultText & "; БИК " & SafeText(record("bank_bik"))
-    resultText = resultText & "." & vbCrLf
-    If SafeText(record("requisites_note")) <> "" Then
-        resultText = resultText & SafeText(record("requisites_note")) & "." & vbCrLf
+    If NormalizeYesNo(record("personal_details_enabled")) = "YES" Then
+        resultText = resultText & L("enrollment.word.requisites.passport_series", "Паспорт серия") & " " & SafeText(record("passport_series")) & " " & L("enrollment.word.header.no", "№") & " " & SafeText(record("passport_number"))
+        resultText = resultText & ", " & L("enrollment.word.requisites.issued_by", "выдан") & " " & SafeText(record("passport_issuer"))
+        If SafeText(record("passport_issue_date")) <> "" Then resultText = resultText & ", " & L("enrollment.word.requisites.issue_date", "дата выдачи:") & " " & SafeText(record("passport_issue_date"))
+        If SafeText(record("passport_code")) <> "" Then resultText = resultText & ", " & L("enrollment.word.requisites.passport_code", "код подразделения") & " " & SafeText(record("passport_code"))
+        resultText = resultText & "." & vbCrLf
+        resultText = resultText & L("enrollment.word.requisites.inn", "ИНН") & " - " & SafeText(record("inn")) & ", " & L("enrollment.word.requisites.snils", "СНИЛС") & " - " & SafeText(record("snils")) & "." & vbCrLf
+    End If
+    If NormalizeYesNo(record("bank_details_enabled")) = "YES" Then
+        resultText = resultText & L("enrollment.word.requisites.bank", "Лицевой счёт / банк:") & " " & SafeText(record("bank_name")) & " - " & SafeText(record("bank_account"))
+        If SafeText(record("bank_bik")) <> "" Then resultText = resultText & "; БИК " & SafeText(record("bank_bik"))
+        resultText = resultText & "." & vbCrLf
+        If SafeText(record("requisites_note")) <> "" Then
+            resultText = resultText & SafeText(record("requisites_note")) & "." & vbCrLf
+        End If
     End If
     resultText = resultText & L("enrollment.word.requisites.basis", "Основание:") & " " & SafeText(record("basis_section1")) & "."
 

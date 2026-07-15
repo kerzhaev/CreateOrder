@@ -26,6 +26,7 @@ try {
     try { $excel.AutomationSecurity = 1 } catch {}
     $workbook = $excel.Workbooks.Open($testWorkbookPath, 0, $false)
     Import-CodeModuleText $workbook "mdlEnrollmentWorkflow" (Join-Path $workspace "CreateOrder.xlsm.modules\mdlEnrollmentWorkflow.bas")
+    Import-CodeModuleText $workbook "mdlEnrollmentOrderExport" (Join-Path $workspace "CreateOrder.xlsm.modules\mdlEnrollmentOrderExport.bas")
     try { $workbook.VBProject.VBComponents.Remove($workbook.VBProject.VBComponents.Item("enr_tariff_probe")) } catch {}
     $probe = $workbook.VBProject.VBComponents.Add(1)
     $probe.Name = "enr_tariff_probe"
@@ -96,9 +97,18 @@ Public Function ProbeEnrollmentTariffReference() As String
             record("basis_section1") = "Тестовое основание"
             record("personal_details_enabled") = "NO"
             record("bank_details_enabled") = "NO"
+            record("arrival_details_enabled") = "NO"
+            record("arrival_source") = "СКРЫТЬ-ПРИБЫТИЕ"
+            record("prescription_number") = "СКРЫТЬ-ПРЕДПИСАНИЕ"
+            record("report_details_enabled") = "NO"
+            record("report_info") = "СКРЫТЬ-РАПОРТ"
             Set evaluation = mdlEnrollmentWorkflow.EvaluateEnrollmentRecord(record)
             If evaluation("word_ready") <> "YES" Then
                 ProbeEnrollmentTariffReference = "FAILED: optional empty personal or bank fields blocked the order"
+                Exit Function
+            End If
+            If InStr(1, evaluation("preview_section1"), "СКРЫТЬ-", vbTextCompare) > 0 Then
+                ProbeEnrollmentTariffReference = "FAILED: disabled arrival or report details leaked into Word preview"
                 Exit Function
             End If
             record("personal_details_enabled") = "YES"

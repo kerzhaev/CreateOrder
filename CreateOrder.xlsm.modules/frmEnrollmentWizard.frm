@@ -50,6 +50,8 @@ Private txtOrderDate As Object
 Private txtOrderDraftId As Object
 Private txtOrderNumber As Object
 Private txtOrderIssuer As Object
+Private chkArrivalDetails As Object
+Private chkReportDetails As Object
 Private txtArrivalSource As Object
 Private txtPrescriptionNumber As Object
 Private txtPrescriptionDate As Object
@@ -877,66 +879,76 @@ Private Sub CreateEmployeePage()
 End Sub
 
 Private Sub CreateDocsPage()
-    AddPageSectionLabel pgDocs, "Реквизиты приказа", 12, 2, 700
-    Set txtOrderDraftId = AddPageTextBoxT(pgDocs, "enrollment.field.order_draft_id", "OrderDraftId", 12, 20, 170)
-    Set txtOrderDate = AddPageTextBoxT(pgDocs, "enrollment.field.order_date", "Дата приказа", 200, 20, 120)
-    Set txtOrderNumber = AddPageTextBoxT(pgDocs, "enrollment.field.order_number", "Номер приказа", 338, 20, 110)
-    Set txtOrderIssuer = AddPageTextBoxT(pgDocs, "enrollment.field.order_issuer", "Кем издан", 466, 20, 290)
+    Dim fraOrder As Object
+    Dim fraArrival As Object
+    Dim fraReport As Object
+    Dim fraDates As Object
+    Dim fraBasis As Object
 
-    AddPageSectionLabel pgDocs, "Документы прибытия", 12, 62, 700
-    Set txtArrivalSource = AddPageTextBoxT(pgDocs, "enrollment.field.arrival_source", "Источник прибытия", 12, 80, 350, 26, True)
-    Set txtPrescriptionNumber = AddPageTextBoxT(pgDocs, "enrollment.field.prescription_number", "Предписание №", 380, 80, 120)
-    Set txtPrescriptionDate = AddPageTextBoxT(pgDocs, "enrollment.field.prescription_date", "Дата", 518, 80, 100)
-    Set txtReportNumber = AddPageTextBoxT(pgDocs, "enrollment.field.report_number", "Рапорт №", 636, 80, 120)
-    Set txtReportDate = AddPageTextBoxT(pgDocs, "enrollment.field.report_date", "Дата", 380, 124, 120)
-    Set txtReportInfo = AddPageTextBoxT(pgDocs, "enrollment.field.report_info", "Рапорт / регистрация", 12, 124, 350, 26, True)
-    Set txtAssignmentInfo = AddPageTextBoxT(pgDocs, "enrollment.field.assignment_info", "Предписание / основание", 518, 124, 238, 26, True)
+    Set fraOrder = AddPageFrame(pgDocs, "fraDocsOrder", "Реквизиты приказа", 12, 8, 744, 64)
+    Set txtOrderDraftId = AddPageTextBoxT(fraOrder, "enrollment.field.order_draft_id", "Проект", 12, 14, 150)
+    Set txtOrderDate = AddPageTextBoxT(fraOrder, "enrollment.field.order_date", "Дата приказа", 180, 14, 120)
+    Set txtOrderNumber = AddPageTextBoxT(fraOrder, "enrollment.field.order_number", "Номер", 318, 14, 110)
+    Set txtOrderIssuer = AddPageTextBoxT(fraOrder, "enrollment.field.order_issuer", "Кем издан", 446, 14, 270)
 
-    AddPageSectionLabel pgDocs, "Даты", 12, 166, 700
-    Set txtAcceptDate = AddPageTextBoxT(pgDocs, "enrollment.field.accept_date", "Принял дела", 12, 184, 120)
-    Set txtEnrollDate = AddPageTextBoxT(pgDocs, "enrollment.field.enroll_date", "Зачислен", 150, 184, 120)
-    Set txtDutyStartDate = AddPageTextBoxT(pgDocs, "enrollment.field.duty_start_date", "Приступил", 288, 184, 120)
-    Set txtManualStart = AddPageTextBoxT(pgDocs, "enrollment.field.manual_start", "Ручной старт", 426, 184, 120)
-    Set txtStandardStart = AddPageTextBoxT(pgDocs, "enrollment.field.standard_start", "Старт выплат", 564, 184, 120)
-    Set txtPreferentialStart = AddPageTextBoxT(pgDocs, "enrollment.field.preferential_start", "Старт выслуги", 12, 228, 150)
+    Set fraArrival = AddPageFrame(pgDocs, "fraDocsArrival", "Прибытие и предписание", 12, 80, 360, 142)
+    Set chkArrivalDetails = AddPageCheckBoxT(fraArrival, "enrollment.field.arrival_details_enabled", "Внести сведения о прибытии", 12, 14)
+    Set txtArrivalSource = AddPageTextBoxT(fraArrival, "enrollment.field.arrival_source", "Источник прибытия", 12, 38, 324, 24, True)
+    Set txtPrescriptionNumber = AddPageTextBoxT(fraArrival, "enrollment.field.prescription_number", "Предписание №", 12, 78, 130)
+    Set txtPrescriptionDate = AddPageTextBoxT(fraArrival, "enrollment.field.prescription_date", "Дата", 160, 78, 100)
+    Set txtAssignmentInfo = AddPageTextBoxT(fraArrival, "enrollment.field.assignment_info", "Основание / примечание", 12, 112, 324, 18)
 
-    AddPageSectionLabel pgDocs, "Основания для текста приказа", 12, 270, 700
-    Set txtBasisSection1 = AddPageTextBoxT(pgDocs, "enrollment.field.basis_section1", "Пункт 1", 12, 288, 360, 42, True)
-    Set txtBasisSection2 = AddPageTextBoxT(pgDocs, "enrollment.field.basis_section2", "Пункт 2", 390, 288, 366, 42, True)
+    Set fraReport = AddPageFrame(pgDocs, "fraDocsReport", "Рапорт и регистрация", 384, 80, 372, 142)
+    Set chkReportDetails = AddPageCheckBoxT(fraReport, "enrollment.field.report_details_enabled", "Внести сведения о рапорте", 12, 14)
+    Set txtReportNumber = AddPageTextBoxT(fraReport, "enrollment.field.report_number", "Рапорт №", 12, 38, 130)
+    Set txtReportDate = AddPageTextBoxT(fraReport, "enrollment.field.report_date", "Дата", 160, 38, 100)
+    Set txtReportInfo = AddPageTextBoxT(fraReport, "enrollment.field.report_info", "Рапорт / регистрация", 12, 78, 336, 52, True)
+
+    Set fraDates = AddPageFrame(pgDocs, "fraDocsDates", "Кадровые даты", 12, 232, 744, 74)
+    Set txtAcceptDate = AddPageTextBoxT(fraDates, "enrollment.field.accept_date", "Принял дела", 12, 16, 120)
+    Set txtEnrollDate = AddPageTextBoxT(fraDates, "enrollment.field.enroll_date", "Зачислен", 150, 16, 120)
+    Set txtDutyStartDate = AddPageTextBoxT(fraDates, "enrollment.field.duty_start_date", "Приступил", 288, 16, 120)
+    Set txtManualStart = AddPageTextBoxT(fraDates, "enrollment.field.manual_start", "Ручной старт", 426, 16, 120)
+    Set txtStandardStart = AddPageTextBoxT(fraDates, "enrollment.field.standard_start", "Старт выплат", 564, 16, 120)
+    Set txtPreferentialStart = AddPageTextBoxT(fraDates, "enrollment.field.preferential_start", "Старт выслуги", 12, 48, 150)
+
+    Set fraBasis = AddPageFrame(pgDocs, "fraDocsBasis", "Общие основания для текста приказа", 12, 316, 744, 84)
+    Set txtBasisSection1 = AddPageTextBoxT(fraBasis, "enrollment.field.basis_section1", "Пункт 1", 12, 16, 342, 44, True)
+    Set txtBasisSection2 = AddPageTextBoxT(fraBasis, "enrollment.field.basis_section2", "Пункт 2", 372, 16, 342, 44, True)
 End Sub
 
 Private Sub CreateMonthlyPage()
-    Set fraOrder727 = AddPageFrame(pgMonthly, "fraOrder727", "Приказ МО РФ № 727 — стандартные ежемесячные выплаты", 12, 8, 744, 136)
+    Set fraOrder727 = AddPageFrame(pgMonthly, "fraOrder727", "Приказ МО РФ № 727 — ежемесячные выплаты", 12, 8, 744, 178)
     Set chkPreferential = AddPageCheckBoxT(fraOrder727, "enrollment.field.preferential_enabled", "Льготная выслуга", 12, 18)
     Set txtPreferentialCoeff = AddPageTextBoxT(fraOrder727, "enrollment.field.preferential_coeff", "Коэффициент", 180, 14, 70)
     Set chkStdDuty = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_duty", "Надбавка по должности", 12, 56)
     Set txtStdDutyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 210, 52, 60)
     Set chkStdSpecial = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_special", "Особые условия", 290, 56)
     Set txtStdSpecialPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 480, 52, 50)
-    Set chkStdTariff = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_tariff", "1–4 тариф", 12, 94)
-    Set txtStdTariffPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 210, 90, 60)
-    Set chkPremium = AddPageCheckBoxT(fraOrder727, "enrollment.field.premium", "Премия", 290, 94)
-    Set txtPremiumPercent = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_percent", "Премия %", 360, 90, 60)
-    Set txtPremiumStart = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_start", "Начало", 440, 90, 110)
-    Set txtPremiumEnd = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_end", "Окончание", 570, 90, 120)
+    Set txtSecrecyParam = AddPageComboBoxT(fraOrder727, "enrollment.field.secrecy_param", "Секретность", 12, 94, 180)
+    Set chkSecrecy = AddPageCheckBoxT(fraOrder727, "common.enabled_short", "Вкл", 210, 112)
+    Set txtSecrecyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "% (из справочника)", 260, 94, 100, 18, False, True)
+    Set chkPremium = AddPageCheckBoxT(fraOrder727, "enrollment.field.premium", "Премия", 12, 136)
+    Set txtPremiumPercent = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_percent", "Премия %", 110, 132, 60)
+    Set txtPremiumStart = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_start", "Начало", 190, 132, 110)
+    Set txtPremiumEnd = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_end", "Окончание", 320, 132, 120)
 
-    Set fraOrder430 = AddPageFrame(pgMonthly, "fraOrder430", "Приказ МО РФ № 430дсп — индивидуальные основания", 12, 154, 744, 246)
+    Set fraOrder430 = AddPageFrame(pgMonthly, "fraOrder430", "Приказ МО РФ № 430дсп — индивидуальные основания", 12, 196, 744, 204)
     Set chkStdContract430 = AddPageCheckBoxT(fraOrder430, "enrollment.field.std_contract430", "Контракт", 12, 18)
     Set txtStdContract430Percent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 130, 14, 60)
-    Set txtClassParam = AddPageComboBoxT(fraOrder430, "enrollment.field.class_param", "Классность", 12, 56, 120)
-    Set chkClass = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 150, 74)
-    Set txtClassPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 205, 56, 90, 18, False, True)
-    Set txtFizoParam = AddPageComboBoxT(fraOrder430, "enrollment.field.fizo_param", "ФИЗО", 320, 56, 120)
-    Set chkFizo = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 458, 74)
-    Set txtFizoPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 512, 56, 90, 18, False, True)
-    Set txtSecrecyParam = AddPageComboBoxT(fraOrder430, "enrollment.field.secrecy_param", "Секретность", 12, 110, 180)
-    Set chkSecrecy = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 210, 128)
-    Set txtSecrecyPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 260, 110, 90, 18, False, True)
-    Set txtAchievementParam = AddPageComboBoxT(fraOrder430, "enrollment.field.achievement_param", "Особые достижения / медаль", 12, 164, 348)
-    Set chkAchievement = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 380, 182)
-    Set txtAchievementAmount = AddPageTextBoxT(fraOrder430, "enrollment.field.achievement_amount", "% / сумма", 430, 164, 100, 18, False, True)
-    Set txtAchievementAwardDate = AddPageTextBoxT(fraOrder430, "common.date", "Дата приказа", 12, 216, 160)
-    Set txtAchievementDocumentReference = AddPageTextBoxT(fraOrder430, "enrollment.field.order_number", "Реквизиты приказа", 190, 216, 340)
+    Set chkStdTariff = AddPageCheckBoxT(fraOrder430, "enrollment.field.std_tariff", "1–4 тариф", 12, 56)
+    Set txtStdTariffPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 130, 52, 60)
+    Set txtClassParam = AddPageComboBoxT(fraOrder430, "enrollment.field.class_param", "Классность", 12, 94, 120)
+    Set chkClass = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 150, 112)
+    Set txtClassPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 205, 94, 90, 18, False, True)
+    Set txtFizoParam = AddPageComboBoxT(fraOrder430, "enrollment.field.fizo_param", "ФИЗО", 320, 94, 120)
+    Set chkFizo = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 458, 112)
+    Set txtFizoPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 512, 94, 90, 18, False, True)
+    Set txtAchievementParam = AddPageComboBoxT(fraOrder430, "enrollment.field.achievement_param", "Особые достижения / медаль", 12, 140, 300)
+    Set chkAchievement = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 330, 158)
+    Set txtAchievementAmount = AddPageTextBoxT(fraOrder430, "enrollment.field.achievement_amount", "% / сумма", 380, 140, 90, 18, False, True)
+    Set txtAchievementAwardDate = AddPageTextBoxT(fraOrder430, "common.date", "Дата приказа", 490, 140, 100)
+    Set txtAchievementDocumentReference = AddPageTextBoxT(fraOrder430, "enrollment.field.order_number", "Номер приказа", 608, 140, 110)
 End Sub
 
 Private Sub CreateOneTimePage()
@@ -972,21 +984,29 @@ Private Sub CreateOneTimePage()
 End Sub
 
 Private Sub CreateAdvancedPage()
-    AddPageSectionLabel pgAdvanced, "Основания выплат: заполните только для отмеченных выплат", 12, 2, 520
-    Set txtPreferentialBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.preferential_basis", "Основание льготной выслуги", 12, 28, 248, 34, True)
-    Set txtPremiumBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.premium_basis", "Основание премии", 280, 28, 248, 34, True)
-    Set txtStdDutyBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_duty_basis", "Основание надбавки по должности", 12, 74, 248, 26, True)
-    Set txtStdSpecialBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_special_basis", "Основание особых условий", 280, 74, 248, 26, True)
-    Set txtStdTariffBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_tariff_basis", "Основание тарифной надбавки", 12, 120, 248, 26, True)
-    Set txtStdContract430Basis = AddPageTextBoxT(pgAdvanced, "enrollment.field.std_contract430_basis", "Основание по приказу № 430дсп", 280, 120, 248, 26, True)
-    Set txtClassBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.class_basis", "Основание классности", 12, 166, 248, 26, True)
-    Set txtFizoBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.fizo_basis", "Основание ФИЗО", 280, 166, 248, 26, True)
-    Set txtSecrecyBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.secrecy_basis", "Основание секретности", 12, 212, 248, 26, True)
-    Set txtAchievementBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.achievement_basis", "Основание особых достижений", 280, 212, 248, 26, True)
-    Set txtLiftBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.lift_basis", "Основание подъёмного пособия", 12, 258, 248, 26, True)
-    Set txtPerDiemBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.per_diem_basis", "Основание суточных", 280, 258, 248, 26, True)
-    Set txtEdvBasis = AddPageTextBoxT(pgAdvanced, "enrollment.field.edv_basis", "Основание ЕДВ", 12, 304, 516, 26, True)
-    ConfigureScrollablePage pgAdvanced, 420
+    Dim fraBasis727 As Object
+    Dim fraBasis430 As Object
+    Dim fraBasisOneTime As Object
+
+    AddPageSectionLabel pgAdvanced, "Текст основания включается в Word только для отмеченной выплаты", 12, 2, 700
+    Set fraBasis727 = AddPageFrame(pgAdvanced, "fraBasis727", "Приказ МО РФ № 727", 12, 24, 360, 178)
+    Set txtPreferentialBasis = AddPageTextBoxT(fraBasis727, "enrollment.field.preferential_basis", "Льготная выслуга", 12, 16, 324, 26, True)
+    Set txtStdDutyBasis = AddPageTextBoxT(fraBasis727, "enrollment.field.std_duty_basis", "Надбавка по должности", 12, 48, 324, 22, True)
+    Set txtStdSpecialBasis = AddPageTextBoxT(fraBasis727, "enrollment.field.std_special_basis", "Особые условия", 12, 80, 324, 22, True)
+    Set txtSecrecyBasis = AddPageTextBoxT(fraBasis727, "enrollment.field.secrecy_basis", "Секретность", 12, 112, 324, 22, True)
+    Set txtPremiumBasis = AddPageTextBoxT(fraBasis727, "enrollment.field.premium_basis", "Премия", 12, 144, 324, 18)
+
+    Set fraBasis430 = AddPageFrame(pgAdvanced, "fraBasis430", "Приказ МО РФ № 430дсп", 384, 24, 372, 178)
+    Set txtStdTariffBasis = AddPageTextBoxT(fraBasis430, "enrollment.field.std_tariff_basis", "1–4 тариф", 12, 16, 336, 26, True)
+    Set txtStdContract430Basis = AddPageTextBoxT(fraBasis430, "enrollment.field.std_contract430_basis", "Контракт / 430дсп", 12, 48, 336, 22, True)
+    Set txtClassBasis = AddPageTextBoxT(fraBasis430, "enrollment.field.class_basis", "Классность", 12, 80, 336, 22, True)
+    Set txtFizoBasis = AddPageTextBoxT(fraBasis430, "enrollment.field.fizo_basis", "ФИЗО", 12, 112, 336, 22, True)
+    Set txtAchievementBasis = AddPageTextBoxT(fraBasis430, "enrollment.field.achievement_basis", "Особые достижения / медаль", 12, 144, 336, 18)
+
+    Set fraBasisOneTime = AddPageFrame(pgAdvanced, "fraBasisOneTime", "Разовые выплаты", 12, 214, 744, 112)
+    Set txtLiftBasis = AddPageTextBoxT(fraBasisOneTime, "enrollment.field.lift_basis", "Подъёмное пособие", 12, 16, 220, 30, True)
+    Set txtPerDiemBasis = AddPageTextBoxT(fraBasisOneTime, "enrollment.field.per_diem_basis", "Суточные", 250, 16, 220, 30, True)
+    Set txtEdvBasis = AddPageTextBoxT(fraBasisOneTime, "enrollment.field.edv_basis", "ЕДВ", 488, 16, 220, 30, True)
 End Sub
 
 Private Sub CreateExtrasPage()
@@ -1323,13 +1343,23 @@ Private Sub PushFormToBackend()
     mdlEnrollmentWorkflow.SetBackendValue "order_date", txtOrderDate.Value
     mdlEnrollmentWorkflow.SetBackendValue "order_number", txtOrderNumber.Value
     mdlEnrollmentWorkflow.SetBackendValue "order_issuer", txtOrderIssuer.Value
-    mdlEnrollmentWorkflow.SetBackendValue "arrival_source", txtArrivalSource.Value
-    mdlEnrollmentWorkflow.SetBackendValue "prescription_number", txtPrescriptionNumber.Value
-    mdlEnrollmentWorkflow.SetBackendValue "prescription_date", txtPrescriptionDate.Value
-    mdlEnrollmentWorkflow.SetBackendValue "report_number", txtReportNumber.Value
-    mdlEnrollmentWorkflow.SetBackendValue "report_date", txtReportDate.Value
-    mdlEnrollmentWorkflow.SetBackendValue "report_info", txtReportInfo.Value
-    mdlEnrollmentWorkflow.SetBackendValue "assignment_info", txtAssignmentInfo.Value
+    mdlEnrollmentWorkflow.SetBackendValue "arrival_details_enabled", CheckValue(chkArrivalDetails.Value)
+    If chkArrivalDetails.Value Then
+        mdlEnrollmentWorkflow.SetBackendValue "arrival_source", txtArrivalSource.Value
+        mdlEnrollmentWorkflow.SetBackendValue "prescription_number", txtPrescriptionNumber.Value
+        mdlEnrollmentWorkflow.SetBackendValue "prescription_date", txtPrescriptionDate.Value
+        mdlEnrollmentWorkflow.SetBackendValue "assignment_info", txtAssignmentInfo.Value
+    Else
+        ClearBackendValues Array("arrival_source", "prescription_number", "prescription_date", "assignment_info")
+    End If
+    mdlEnrollmentWorkflow.SetBackendValue "report_details_enabled", CheckValue(chkReportDetails.Value)
+    If chkReportDetails.Value Then
+        mdlEnrollmentWorkflow.SetBackendValue "report_number", txtReportNumber.Value
+        mdlEnrollmentWorkflow.SetBackendValue "report_date", txtReportDate.Value
+        mdlEnrollmentWorkflow.SetBackendValue "report_info", txtReportInfo.Value
+    Else
+        ClearBackendValues Array("report_number", "report_date", "report_info")
+    End If
     mdlEnrollmentWorkflow.SetBackendValue "accept_date", txtAcceptDate.Value
     mdlEnrollmentWorkflow.SetBackendValue "enroll_date", txtEnrollDate.Value
     mdlEnrollmentWorkflow.SetBackendValue "duty_start_date", txtDutyStartDate.Value
@@ -1392,22 +1422,38 @@ Private Sub PushFormToBackend()
     mdlEnrollmentWorkflow.SetBackendValue "edv_amount", txtEdvAmount.Value
     mdlEnrollmentWorkflow.SetBackendValue "edv_date", txtEdvDate.Value
     mdlEnrollmentWorkflow.SetBackendValue "edv_basis", txtEdvBasis.Value
-    mdlEnrollmentWorkflow.SetBackendValue "birth_date", txtBirthDate.Value
-    mdlEnrollmentWorkflow.SetBackendValue "birth_place", txtBirthPlace.Value
-    mdlEnrollmentWorkflow.SetBackendValue "citizenship", txtCitizenship.Value
     mdlEnrollmentWorkflow.SetBackendValue "personal_details_enabled", CheckValue(chkPersonalDetails.Value)
-    mdlEnrollmentWorkflow.SetBackendValue "inn", txtInn.Value
-    mdlEnrollmentWorkflow.SetBackendValue "snils", txtSnils.Value
-    mdlEnrollmentWorkflow.SetBackendValue "passport_series", txtPassportSeries.Value
-    mdlEnrollmentWorkflow.SetBackendValue "passport_number", txtPassportNumber.Value
-    mdlEnrollmentWorkflow.SetBackendValue "passport_issuer", txtPassportIssuer.Value
-    mdlEnrollmentWorkflow.SetBackendValue "passport_issue_date", txtPassportIssueDate.Value
-    mdlEnrollmentWorkflow.SetBackendValue "passport_code", txtPassportCode.Value
-    mdlEnrollmentWorkflow.SetBackendValue "bank_account", txtBankAccount.Value
-    mdlEnrollmentWorkflow.SetBackendValue "bank_name", txtBankName.Value
-    mdlEnrollmentWorkflow.SetBackendValue "bank_bik", txtBankBik.Value
+    If chkPersonalDetails.Value Then
+        mdlEnrollmentWorkflow.SetBackendValue "birth_date", txtBirthDate.Value
+        mdlEnrollmentWorkflow.SetBackendValue "birth_place", txtBirthPlace.Value
+        mdlEnrollmentWorkflow.SetBackendValue "citizenship", txtCitizenship.Value
+        mdlEnrollmentWorkflow.SetBackendValue "inn", txtInn.Value
+        mdlEnrollmentWorkflow.SetBackendValue "snils", txtSnils.Value
+        mdlEnrollmentWorkflow.SetBackendValue "passport_series", txtPassportSeries.Value
+        mdlEnrollmentWorkflow.SetBackendValue "passport_number", txtPassportNumber.Value
+        mdlEnrollmentWorkflow.SetBackendValue "passport_issuer", txtPassportIssuer.Value
+        mdlEnrollmentWorkflow.SetBackendValue "passport_issue_date", txtPassportIssueDate.Value
+        mdlEnrollmentWorkflow.SetBackendValue "passport_code", txtPassportCode.Value
+    Else
+        ClearBackendValues Array("birth_date", "birth_place", "citizenship", "inn", "snils", "passport_series", "passport_number", "passport_issuer", "passport_issue_date", "passport_code")
+    End If
     mdlEnrollmentWorkflow.SetBackendValue "bank_details_enabled", CheckValue(chkBankDetails.Value)
-    mdlEnrollmentWorkflow.SetBackendValue "requisites_note", txtRequisitesNote.Value
+    If chkBankDetails.Value Then
+        mdlEnrollmentWorkflow.SetBackendValue "bank_account", txtBankAccount.Value
+        mdlEnrollmentWorkflow.SetBackendValue "bank_name", txtBankName.Value
+        mdlEnrollmentWorkflow.SetBackendValue "bank_bik", txtBankBik.Value
+        mdlEnrollmentWorkflow.SetBackendValue "requisites_note", txtRequisitesNote.Value
+    Else
+        ClearBackendValues Array("bank_account", "bank_name", "bank_bik", "requisites_note")
+    End If
+End Sub
+
+Private Sub ClearBackendValues(ByVal fieldKeys As Variant)
+    Dim item As Variant
+
+    For Each item In fieldKeys
+        mdlEnrollmentWorkflow.SetBackendValue CStr(item), ""
+    Next item
 End Sub
 
 Private Function CheckValue(ByVal rawValue As Variant) As String
@@ -1490,9 +1536,11 @@ Public Sub ReloadFromBackend()
     txtOrderDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("order_date"))
     txtOrderNumber.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("order_number"))
     txtOrderIssuer.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("order_issuer"))
+    chkArrivalDetails.Value = BackendYesNo("arrival_details_enabled")
     txtArrivalSource.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("arrival_source"))
     txtPrescriptionNumber.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("prescription_number"))
     txtPrescriptionDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("prescription_date"))
+    chkReportDetails.Value = BackendYesNo("report_details_enabled")
     txtReportNumber.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("report_number"))
     txtReportDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("report_date"))
     txtReportInfo.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("report_info"))
