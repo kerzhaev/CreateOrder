@@ -95,6 +95,10 @@ Public Function ProbeEnrollmentTariffReference() As String
             record("enroll_date") = "15.07.2026"
             record("duty_start_date") = "15.07.2026"
             record("basis_section1") = "Тестовое основание"
+            record("fizo_enabled") = "YES"
+            record("fizo_param") = "SECOND"
+            record("fizo_percent") = "80"
+            record("fizo_basis") = "Тестовое основание ФИЗО"
             record("personal_details_enabled") = "NO"
             record("bank_details_enabled") = "NO"
             record("arrival_details_enabled") = "NO"
@@ -109,6 +113,10 @@ Public Function ProbeEnrollmentTariffReference() As String
             End If
             If InStr(1, evaluation("preview_section1"), "СКРЫТЬ-", vbTextCompare) > 0 Then
                 ProbeEnrollmentTariffReference = "FAILED: disabled arrival or report details leaked into Word preview"
+                Exit Function
+            End If
+            If InStr(1, CStr(evaluation("preview_standard")) & CStr(evaluation("preview_personal")) & CStr(evaluation("preview_section1")), "Тестовое основание ФИЗО", vbTextCompare) = 0 Then
+                ProbeEnrollmentTariffReference = "FAILED: enabled payment basis was not included in Word preview; personal=" & CStr(evaluation("preview_personal"))
                 Exit Function
             End If
             record("personal_details_enabled") = "YES"

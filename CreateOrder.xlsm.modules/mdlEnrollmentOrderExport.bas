@@ -762,6 +762,7 @@ Private Function BuildConfiguredEnrollmentParagraph(ByVal record As Object, ByVa
             If StrComp(SafeText(definition("code")), "per_diem", vbTextCompare) = 0 Then
                 BuildConfiguredEnrollmentParagraph = AppendPerDiemDaysText(BuildConfiguredEnrollmentParagraph, record, templateText)
             End If
+            BuildConfiguredEnrollmentParagraph = AppendConfiguredPaymentBasis(BuildConfiguredEnrollmentParagraph, record, definition)
             Exit Function
         End If
     End If
@@ -819,6 +820,26 @@ Private Function BuildConfiguredEnrollmentParagraph(ByVal record As Object, ByVa
                     ValueOrPlaceholder(record("edv_amount"), "400000") & " " & L("enrollment.word.section2.currency", "рублей.")
             End If
     End Select
+    BuildConfiguredEnrollmentParagraph = AppendConfiguredPaymentBasis(BuildConfiguredEnrollmentParagraph, record, definition)
+End Function
+
+Private Function AppendConfiguredPaymentBasis(ByVal paragraphText As String, ByVal record As Object, ByVal definition As Object) As String
+    Dim bindingKey As String
+    Dim basisText As String
+
+    If Trim$(paragraphText) = "" Then Exit Function
+    bindingKey = SafeText(definition("journal_binding"))
+    If bindingKey = "" Then
+        AppendConfiguredPaymentBasis = paragraphText
+        Exit Function
+    End If
+
+    basisText = Trim$(SafeText(record(bindingKey & "_basis")))
+    If basisText = "" Or InStr(1, paragraphText, basisText, vbTextCompare) > 0 Then
+        AppendConfiguredPaymentBasis = paragraphText
+    Else
+        AppendConfiguredPaymentBasis = RTrim$(paragraphText) & " " & L("enrollment.word.payment_basis", "Основание выплаты:") & " " & basisText & "."
+    End If
 End Function
 
 Private Function HasConfiguredParagraph(ByVal record As Object, ByVal wordBlockTarget As String) As Boolean

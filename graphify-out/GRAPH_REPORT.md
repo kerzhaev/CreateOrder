@@ -1,16 +1,16 @@
 # Graph Report - CreateOrder  (2026-07-16)
 
 ## Corpus Check
-- 66 files · ~95,537 words
+- 66 files · ~96,065 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 733 nodes · 742 edges · 76 communities (61 shown, 15 thin omitted)
+- 734 nodes · 743 edges · 76 communities (61 shown, 15 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0d339f4f`
+- Built from commit: `c44cccb9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -85,7 +85,7 @@
 ## God Nodes (most connected - your core abstractions)
 1. `План реализации: кадровые события и движок надбавок` - 23 edges
 2. `Спецификация: правила назначения надбавок при зачислении` - 17 edges
-3. `Статус проекта CreateOrder` - 16 edges
+3. `Статус проекта CreateOrder` - 17 edges
 4. `Tasks: [FEATURE NAME]` - 13 edges
 5. `11. Этапы реализации` - 12 edges
 6. `Block 1. Payments Without Periods: list-based assignment mode` - 12 edges
@@ -275,8 +275,8 @@ Cohesion: 0.12
 Nodes (16): Автоматические проверки, Где искать код и документацию, Единый вход в кадровые действия, Надбавки и нормативная логика, Ошибки VBA, встреченные при предыдущем импорте, Ошибки и ограничения Excel/интерфейса, Ошибки и принятые решения, Передача проекта — 14.07.2026 (+8 more)
 
 ### Community 55 - "Статус проекта CreateOrder"
-Cohesion: 0.10
-Nodes (20): Аудит готовности на 13.07.2026, Группировка выплат по приказам и немодальная форма — 15.07.2026, Документы и ориентиры, Единый вход в кадровые действия, Зафиксированные решения, Как продолжить работу, Компактные кадровые формы — 15.07.2026, Компактный мастер зачисления и скорость — 15.07.2026 (+12 more)
+Cohesion: 0.09
+Nodes (21): Аудит готовности на 13.07.2026, Группировка выплат по приказам и немодальная форма — 15.07.2026, Документы и ориентиры, Единый вход в кадровые действия, Зафиксированные решения, Исправление обрезания вкладок и оснований выплат — 16.07.2026, Как продолжить работу, Компактные кадровые формы — 15.07.2026 (+13 more)
 
 ### Community 56 - "Разбор источника: приказ МО РФ №430дсп — особые достижения"
 Cohesion: 0.25
@@ -307,7 +307,7 @@ Cohesion: 0.33
 Nodes (5): Компактный мастер зачисления и производительность, Проблема, Проверка, Реализация, Требования
 
 ## Knowledge Gaps
-- **436 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+431 more)
+- **437 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+432 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -321,7 +321,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `Feature Specification: Payments Without Periods and Enrollment Workflow` connect `Block 1. Payments Without Periods: list-based assignment mode` to `Block 2. Enrollment workflow: new tab and rules engine`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **What connects `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)` to the rest of the system?**
-  _436 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _437 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Test-PaymentsEnrollmentAcceptance.ps1` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Block 2. Enrollment workflow: new tab and rules engine` be split into smaller, more focused modules?**
