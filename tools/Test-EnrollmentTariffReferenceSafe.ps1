@@ -40,6 +40,7 @@ Public Function ProbeEnrollmentTariffReference() As String
     Dim rankDisplayValue As String
     Dim record As Object
     Dim evaluation As Object
+    Dim recordKey As Variant
     mdlEnrollmentWorkflow.EnsureEnrollmentReferenceData
     Set ws = ThisWorkbook.Worksheets("EnrollmentReferenceData")
     For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
@@ -89,6 +90,7 @@ Public Function ProbeEnrollmentTariffReference() As String
             record("section") = "Тестовое подразделение"
             record("position_salary") = "12345"
             record("rank_salary") = "5000"
+            record("tariff_rank") = "1"
             record("order_number") = "1"
             record("order_date") = "15.07.2026"
             record("accept_date") = "15.07.2026"
@@ -119,6 +121,23 @@ Public Function ProbeEnrollmentTariffReference() As String
                 ProbeEnrollmentTariffReference = "FAILED: enabled payment basis was not included in Word preview; personal=" & CStr(evaluation("preview_personal"))
                 Exit Function
             End If
+            For Each recordKey In record.Keys
+                mdlEnrollmentWorkflow.SetBackendValue CStr(recordKey), record(recordKey)
+            Next recordKey
+            mdlEnrollmentWorkflow.RefreshEnrollmentForm
+            If CStr(mdlEnrollmentWorkflow.GetBackendValue("std_tariff_enabled")) <> "YES" Then
+                ProbeEnrollmentTariffReference = "FAILED: tariff 1 did not enable the automatic 1-4 allowance"
+                Exit Function
+            End If
+            mdlEnrollmentWorkflow.SetBackendValue "tariff_rank", "5"
+            mdlEnrollmentWorkflow.RefreshEnrollmentForm
+            If CStr(mdlEnrollmentWorkflow.GetBackendValue("std_tariff_enabled")) <> "NO" Then
+                ProbeEnrollmentTariffReference = "FAILED: tariff 5 did not disable the automatic 1-4 allowance"
+                Exit Function
+            End If
+            mdlEnrollmentWorkflow.SetBackendValue "tariff_rank", "1"
+            mdlEnrollmentWorkflow.RefreshEnrollmentForm
+            Set record = mdlEnrollmentWorkflow.GetBackendRecord
             record("personal_details_enabled") = "YES"
             Set evaluation = mdlEnrollmentWorkflow.EvaluateEnrollmentRecord(record)
             If evaluation("word_ready") <> "NO" Then

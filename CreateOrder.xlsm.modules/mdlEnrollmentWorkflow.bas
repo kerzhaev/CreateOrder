@@ -1505,7 +1505,7 @@ Public Sub NormalizeEnrollmentRecord(ByVal record As Object)
 
     If SafeText(record("preferential_enabled")) = "" Then record("preferential_enabled") = YES_VALUE
     If SafeText(record("preferential_coeff")) = "" Then record("preferential_coeff") = DEFAULT_PREFERENTIAL_COEFF
-    If SafeText(record("preferential_basis")) = "" Then record("preferential_basis") = ET("enrollment.default.preferential_basis", "Льготная выслуга 1,5 по зачислению")
+    record("preferential_basis") = ""
 
     premiumWasAutoEnabled = (SafeText(record("premium_enabled")) = "")
     If premiumWasAutoEnabled Then record("premium_enabled") = YES_VALUE
@@ -1529,17 +1529,15 @@ Public Sub NormalizeEnrollmentRecord(ByVal record As Object)
 
     If SafeText(record("std_duty_enabled")) = "" Then record("std_duty_enabled") = YES_VALUE
     If SafeText(record("std_duty_percent")) = "" Then record("std_duty_percent") = DEFAULT_POSITION_ALLOWANCE_PERCENT
-    If SafeText(record("std_duty_basis")) = "" Then record("std_duty_basis") = ET("enrollment.default.std_duty_basis", "Ежемесячная надбавка к денежному довольствию по занимаемой должности")
+    record("std_duty_basis") = ""
 
     If SafeText(record("std_special_enabled")) = "" Then record("std_special_enabled") = YES_VALUE
     If SafeText(record("std_special_percent")) = "" Then record("std_special_percent") = DEFAULT_SPECIAL_CONDITIONS_PERCENT
-    If SafeText(record("std_special_basis")) = "" Then record("std_special_basis") = ET("enrollment.default.std_special_basis", "Надбавка за особые условия военной службы")
+    record("std_special_basis") = ""
 
-    If SafeText(record("std_tariff_enabled")) = "" Then
-        record("std_tariff_enabled") = IIf(IsTariffOneToFour(record("tariff_rank")), YES_VALUE, NO_VALUE)
-    End If
+    record("std_tariff_enabled") = IIf(IsTariffOneToFour(record("tariff_rank")), YES_VALUE, NO_VALUE)
     If SafeText(record("std_tariff_percent")) = "" Then record("std_tariff_percent") = DEFAULT_TARIFF_PERCENT
-    If SafeText(record("std_tariff_basis")) = "" Then record("std_tariff_basis") = ET("enrollment.default.std_tariff_basis", "Надбавка по должностям 1-4 тарифных разрядов")
+    record("std_tariff_basis") = ""
 
     NormalizeOptionalDocumentBlocks record
 
@@ -2905,7 +2903,7 @@ End Function
 
 Private Function IsTariffOneToFour(ByVal tariffText As Variant) As Boolean
     Dim normalized As String
-    normalized = Trim$(CStr(tariffText))
+    normalized = GetEnrollmentReferenceCodeOrDisplay("TARIFF_RANK", Trim$(CStr(tariffText)))
     If Not IsNumeric(normalized) Then Exit Function
     IsTariffOneToFour = CLng(normalized) >= 1 And CLng(normalized) <= 4
 End Function
@@ -3107,9 +3105,9 @@ End Function
 
 Private Sub EnsureEnrollmentPaymentDefinitions(ByVal ws As Worksheet)
     EnsureEnrollmentPaymentDefinition ws, "core", "core", "Section1Core", "core", "", "manual", "blocked", ET("enrollment.word.block.core", "Основное кадровое действие")
-    EnsureEnrollmentPaymentDefinition ws, "std_duty", "standard", "Section1MonthlyStandard", "std_duty", "basis", "standard_start_date", "warning", ET("payments.type.std_duty", "Надбавка по воинской должности")
-    EnsureEnrollmentPaymentDefinition ws, "std_special", "standard", "Section1MonthlyStandard", "std_special", "basis", "standard_start_date", "warning", ET("payments.type.std_special", "Особые условия службы")
-    EnsureEnrollmentPaymentDefinition ws, "std_tariff", "personal", "Section1MonthlyPersonal", "std_tariff", "basis", "standard_start_date", "warning", ET("payments.type.std_tariff", "Надбавка 1-4 тарифных разрядов")
+    EnsureEnrollmentPaymentDefinition ws, "std_duty", "standard", "Section1MonthlyStandard", "std_duty", "", "standard_start_date", "warning", ET("payments.type.std_duty", "Надбавка по воинской должности")
+    EnsureEnrollmentPaymentDefinition ws, "std_special", "standard", "Section1MonthlyStandard", "std_special", "", "standard_start_date", "warning", ET("payments.type.std_special", "Особые условия службы")
+    EnsureEnrollmentPaymentDefinition ws, "std_tariff", "personal", "Section1MonthlyPersonal", "std_tariff", "", "standard_start_date", "warning", ET("payments.type.std_tariff", "Надбавка 1-4 тарифных разрядов")
     EnsureEnrollmentPaymentDefinition ws, "std_contract430", "standard", "Section1MonthlyStandard", "std_contract430", "basis", "standard_start_date", "warning", ET("payments.type.std_contract430", "Надбавка 430 приказ")
     EnsureEnrollmentPaymentDefinition ws, "class", "personal", "Section1MonthlyPersonal", "class", "param,basis", "standard_start_date", "blocked", ET("payments.type.class_qualification", "Классная квалификация")
     EnsureEnrollmentPaymentDefinition ws, "fizo", "personal", "Section1MonthlyPersonal", "fizo", "param,basis", "standard_start_date", "blocked", ET("payments.type.fizo", "ФИЗО")
@@ -3127,6 +3125,9 @@ Private Sub EnsureEnrollmentPaymentDefinitions(ByVal ws As Worksheet)
     UpgradeSettingValueIfEquals ws, "enrollment.def.edv.required_docs", "amount,date,basis_section2", "amount,date,basis_section2,contract_basis"
     UpgradeSettingValueIfEquals ws, "enrollment.def.std_tariff.word_block_target", "Section1MonthlyStandard", "Section1MonthlyPersonal"
     UpgradeSettingValueIfEquals ws, "enrollment.def.secrecy.word_block_target", "Section1MonthlyPersonal", "Section1MonthlyStandard"
+    UpgradeSettingValueIfEquals ws, "enrollment.def.std_duty.required_docs", "basis", ""
+    UpgradeSettingValueIfEquals ws, "enrollment.def.std_special.required_docs", "basis", ""
+    UpgradeSettingValueIfEquals ws, "enrollment.def.std_tariff.required_docs", "basis", ""
 End Sub
 
 Private Sub EnsureEnrollmentPaymentDefinition(ByVal ws As Worksheet, ByVal defCode As String, ByVal paymentKind As String, ByVal wordBlockTarget As String, ByVal journalBinding As String, ByVal requiredDocs As String, ByVal startDateSource As String, ByVal validationSeverity As String, ByVal labelText As String)
