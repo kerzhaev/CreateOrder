@@ -41,7 +41,6 @@ Private txtEmployeeContractBasis As Object
 Private txtEmployeeVus As Object
 Private txtEmployeePosition As Object
 Private txtEmployeeSection As Object
-Private txtEmployeeMilitaryUnit As Object
 Private txtEmployeeTariff As Object
 Private txtEmployeePositionSalary As Object
 Private txtEmployeeRankSalary As Object
@@ -106,6 +105,8 @@ Private txtPerDiemDate As Object
 Private chkEdv As Object
 Private txtEdvAmount As Object
 Private txtEdvDate As Object
+Private chkPersonalDetails As Object
+Private chkBankDetails As Object
 Private txtBirthDate As Object
 Private txtBirthPlace As Object
 Private txtCitizenship As Object
@@ -335,7 +336,6 @@ Public Sub LoadEmployeeFromStaffNumber(ByVal employeeNumber As String)
     txtEmployeeRank.Value = mdlEnrollmentWorkflow.GetEnrollmentReferenceDisplayNameOrCode("RANK", Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colZvanie_Global).Value)))
     txtEmployeePosition.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colDolzhnost_Global).Value))
     txtEmployeeSection.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colVoinskayaChast_Global).Value))
-    txtEmployeeMilitaryUnit.Value = Trim$(CStr(wsStaff.Cells(staffRow, mdlHelper.colVoinskayaChast_Global).Value))
     txtEmployeeServiceCategory.Value = StaffDictValue(staffData, mdlHelper.Ru(1043, 1088, 1091, 1087, 1087, 1072, 32, 1089, 1086, 1090, 1088, 1091, 1076, 1085, 1080, 1082, 1086, 1074))
     txtEmployeeVus.Value = StaffDictValue(staffData, mdlHelper.Ru(1042, 1059, 1057))
     txtEmployeeTariff.Value = StaffDictValue(staffData, mdlHelper.Ru(1058, 1072, 1088, 1080, 1092, 1085, 1099, 1081, 32, 1088, 1072, 1079, 1088, 1103, 1076))
@@ -376,7 +376,7 @@ Public Function GetEmployeeSnapshot() As String
         Trim$(CStr(txtEmployeeFIO.Value)) & "|" & _
         Trim$(CStr(txtEmployeeNumber.Value)) & "|" & _
         Trim$(CStr(txtEmployeePosition.Value)) & "|" & _
-        Trim$(CStr(txtEmployeeMilitaryUnit.Value)) & "|" & _
+        Trim$(CStr(txtEmployeeSection.Value)) & "|" & _
         Trim$(CStr(txtEmployeeTableNumber.Value)) & "|" & _
         Trim$(CStr(txtEmployeeServiceCategory.Value)) & "|" & _
         Trim$(CStr(txtEmployeeVus.Value)) & "|" & _
@@ -868,8 +868,7 @@ Private Sub CreateEmployeePage()
     Set txtEmployeeContractBasis = AddPageTextBox(pgEmployee, "Основание службы / контракта", 160, 96, 372)
     Set txtEmployeeVus = AddPageComboBoxT(pgEmployee, "enrollment.field.vus", "ВУС", 12, 138, 120)
     Set txtEmployeePosition = AddPageComboBoxT(pgEmployee, "enrollment.field.position", "Штатная должность", 150, 138, 382, 34, True)
-    Set txtEmployeeSection = AddPageComboBoxT(pgEmployee, "enrollment.field.section", "Раздел персонала", 12, 192, 250, 34, True)
-    Set txtEmployeeMilitaryUnit = AddPageComboBoxT(pgEmployee, "enrollment.field.military_unit", "Воинская часть", 280, 192, 252, 34, True)
+    Set txtEmployeeSection = AddPageComboBoxT(pgEmployee, "enrollment.field.section", "Раздел персонала", 12, 192, 520, 34, True)
     Set txtEmployeeTariff = AddPageComboBoxT(pgEmployee, "enrollment.field.tariff", "Тарифный разряд", 12, 246, 120)
     Set txtEmployeePositionSalary = AddPageTextBoxT(pgEmployee, "enrollment.field.position_salary", "Оклад по должности (из справочника)", 150, 246, 140, 18, False, True)
     Set txtEmployeeRankSalary = AddPageTextBoxT(pgEmployee, "enrollment.field.rank_salary", "Оклад по званию (из справочника)", 308, 246, 140, 18, False, True)
@@ -953,8 +952,8 @@ Private Sub CreateOneTimePage()
     Set txtEdvAmount = AddPageTextBoxT(pgOneTime, "common.amount", "Сумма", 130, 108, 120)
     Set txtEdvDate = AddPageTextBoxT(pgOneTime, "common.date", "Дата", 270, 108, 120)
 
-    AddPageSectionLabel pgOneTime, "Паспортные данные", 12, 138, 420
-    AddPageSectionLabel pgOneTime, "Банковские реквизиты", 550, 138, 250
+    Set chkPersonalDetails = AddPageCheckBoxT(pgOneTime, "enrollment.field.personal_details_enabled", "Внести персональные данные", 12, 138)
+    Set chkBankDetails = AddPageCheckBoxT(pgOneTime, "enrollment.field.bank_details_enabled", "Внести банковские реквизиты", 550, 138)
     Set txtBirthDate = AddPageTextBoxT(pgOneTime, "enrollment.field.birth_date", "Дата рождения", 12, 162, 120)
     Set txtBirthPlace = AddPageTextBoxT(pgOneTime, "enrollment.field.birth_place", "Место рождения", 150, 162, 320)
     Set txtCitizenship = AddPageTextBoxT(pgOneTime, "enrollment.field.citizenship", "Гражданство", 12, 204, 120)
@@ -1112,10 +1111,6 @@ End Function
 Private Sub PopulateOperatorReferenceLists()
     PopulateComboBox txtEmployeeRank, "RANK"
     PopulateComboBox txtEmployeeServiceCategory, "SERVICE_CATEGORY"
-    PopulateComboBox txtEmployeeVus, "VUS"
-    PopulateComboBox txtEmployeePosition, "POSITION"
-    PopulateComboBox txtEmployeeSection, "SECTION"
-    PopulateComboBox txtEmployeeMilitaryUnit, "MILITARY_UNIT"
     PopulateComboBox txtEmployeeTariff, "TARIFF_RANK"
     PopulateComboBox txtClassParam, "CLASS"
     PopulateComboBox txtSecrecyParam, "SECRECY"
@@ -1319,7 +1314,7 @@ Private Sub PushFormToBackend()
     mdlEnrollmentWorkflow.SetBackendValue "vus", txtEmployeeVus.Value
     mdlEnrollmentWorkflow.SetBackendValue "position", txtEmployeePosition.Value
     mdlEnrollmentWorkflow.SetBackendValue "section", txtEmployeeSection.Value
-    mdlEnrollmentWorkflow.SetBackendValue "military_unit", txtEmployeeMilitaryUnit.Value
+    mdlEnrollmentWorkflow.SetBackendValue "military_unit", txtEmployeeSection.Value
     mdlEnrollmentWorkflow.SetBackendValue "tariff_rank", txtEmployeeTariff.Value
     mdlEnrollmentWorkflow.SetBackendValue "position_salary", txtEmployeePositionSalary.Value
     mdlEnrollmentWorkflow.SetBackendValue "rank_salary", txtEmployeeRankSalary.Value
@@ -1400,6 +1395,7 @@ Private Sub PushFormToBackend()
     mdlEnrollmentWorkflow.SetBackendValue "birth_date", txtBirthDate.Value
     mdlEnrollmentWorkflow.SetBackendValue "birth_place", txtBirthPlace.Value
     mdlEnrollmentWorkflow.SetBackendValue "citizenship", txtCitizenship.Value
+    mdlEnrollmentWorkflow.SetBackendValue "personal_details_enabled", CheckValue(chkPersonalDetails.Value)
     mdlEnrollmentWorkflow.SetBackendValue "inn", txtInn.Value
     mdlEnrollmentWorkflow.SetBackendValue "snils", txtSnils.Value
     mdlEnrollmentWorkflow.SetBackendValue "passport_series", txtPassportSeries.Value
@@ -1410,6 +1406,7 @@ Private Sub PushFormToBackend()
     mdlEnrollmentWorkflow.SetBackendValue "bank_account", txtBankAccount.Value
     mdlEnrollmentWorkflow.SetBackendValue "bank_name", txtBankName.Value
     mdlEnrollmentWorkflow.SetBackendValue "bank_bik", txtBankBik.Value
+    mdlEnrollmentWorkflow.SetBackendValue "bank_details_enabled", CheckValue(chkBankDetails.Value)
     mdlEnrollmentWorkflow.SetBackendValue "requisites_note", txtRequisitesNote.Value
 End Sub
 
@@ -1484,7 +1481,6 @@ Public Sub ReloadFromBackend()
     txtEmployeeVus.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("vus"))
     txtEmployeePosition.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("position"))
     txtEmployeeSection.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("section"))
-    txtEmployeeMilitaryUnit.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("military_unit"))
     txtEmployeeTariff.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("tariff_rank"))
     txtEmployeePositionSalary.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("position_salary"))
     txtEmployeeRankSalary.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("rank_salary"))
@@ -1566,6 +1562,7 @@ Public Sub ReloadFromBackend()
     txtBirthDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("birth_date"))
     txtBirthPlace.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("birth_place"))
     txtCitizenship.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("citizenship"))
+    chkPersonalDetails.Value = BackendYesNo("personal_details_enabled")
     txtInn.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("inn"))
     txtSnils.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("snils"))
     txtPassportSeries.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("passport_series"))
@@ -1576,6 +1573,7 @@ Public Sub ReloadFromBackend()
     txtBankAccount.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_account"))
     txtBankName.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_name"))
     txtBankBik.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_bik"))
+    chkBankDetails.Value = BackendYesNo("bank_details_enabled")
     txtRequisitesNote.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("requisites_note"))
 
     txtPreviewStatus.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("preview_status"))

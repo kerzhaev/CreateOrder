@@ -458,6 +458,7 @@ Public Sub EnsureEnrollmentFormSheetStructure(ByVal ws As Worksheet)
     EnsureBackendField ws, "birth_date", "Дата рождения"
     EnsureBackendField ws, "birth_place", "Место рождения"
     EnsureBackendField ws, "citizenship", "Гражданство"
+    EnsureBackendField ws, "personal_details_enabled", "Персональные данные включены"
     EnsureBackendField ws, "inn", "ИНН"
     EnsureBackendField ws, "snils", "СНИЛС"
     EnsureBackendField ws, "passport_series", "Серия паспорта"
@@ -468,6 +469,7 @@ Public Sub EnsureEnrollmentFormSheetStructure(ByVal ws As Worksheet)
     EnsureBackendField ws, "bank_account", "Лицевой счёт / банк"
     EnsureBackendField ws, "bank_name", "Банк"
     EnsureBackendField ws, "bank_bik", "БИК банка"
+    EnsureBackendField ws, "bank_details_enabled", "Банковские реквизиты включены"
     EnsureBackendField ws, "requisites_note", "Примечание по реквизитам"
     EnsureBackendField ws, "preferential_enabled", "Льготная выслуга вкл"
     EnsureBackendField ws, "preferential_coeff", "Коэффициент льготной выслуги"
@@ -604,7 +606,8 @@ Public Sub EnsureEnrollmentReferenceData()
     EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "MILITARY_VALOR_II", MedalDisplayName("MILITARY_VALOR_II"), "10"
     FormatEnrollmentReferenceSheet ws
     If Not enrollmentReferencesSynced Then
-        SyncEnrollmentReferencesFromStaff ws
+        ' The reference sheet is a calculation register, not a copy of Staff.
+        ' Keep it free from position, VUS, section and military-unit rows.
         DeduplicateEnrollmentReferences ws
         EnsureCompactRankReferenceLabels ws
         enrollmentReferencesSynced = True
@@ -723,41 +726,6 @@ Private Sub EnsureCompactRankReferenceLabels(ByVal ws As Worksheet)
     Next rowNum
 End Sub
 
-Private Sub SyncEnrollmentReferencesFromStaff(ByVal wsReferences As Worksheet)
-    Dim wsStaff As Worksheet
-    Dim rowNum As Long
-    Dim lastRow As Long
-    Dim refRow As Long
-    Dim vusColumn As Long
-    Dim knownValues As Object
-
-    On Error Resume Next
-    mdlHelper.EnsureStaffColumnsInitialized
-    Set wsStaff = mdlHelper.GetStaffWorksheet()
-    On Error GoTo 0
-    If wsStaff Is Nothing Then Exit Sub
-
-    Set knownValues = CreateObject("Scripting.Dictionary")
-    knownValues.CompareMode = vbTextCompare
-    For refRow = 2 To wsReferences.Cells(wsReferences.Rows.Count, 1).End(xlUp).Row
-        If SafeText(wsReferences.Cells(refRow, 1).Value) <> "" Then
-            RegisterKnownReferenceValue knownValues, SafeText(wsReferences.Cells(refRow, 1).Value), SafeText(wsReferences.Cells(refRow, 2).Value)
-            RegisterKnownReferenceValue knownValues, SafeText(wsReferences.Cells(refRow, 1).Value), SafeText(wsReferences.Cells(refRow, 3).Value)
-        End If
-    Next refRow
-
-    vusColumn = FindEnrollmentStaffColumn(wsStaff, mdlHelper.Ru(1042, 1059, 1057))
-    lastRow = wsStaff.Cells(wsStaff.Rows.Count, mdlHelper.colLichniyNomer_Global).End(xlUp).Row
-    For rowNum = 2 To lastRow
-        AddStaffReferenceIfNew wsReferences, knownValues, "RANK", SafeText(wsStaff.Cells(rowNum, mdlHelper.colZvanie_Global).Value)
-        AddStaffReferenceIfNew wsReferences, knownValues, "POSITION", SafeText(wsStaff.Cells(rowNum, mdlHelper.colDolzhnost_Global).Value)
-        AddStaffReferenceIfNew wsReferences, knownValues, "SECTION", SafeText(wsStaff.Cells(rowNum, mdlHelper.colVoinskayaChast_Global).Value)
-        AddStaffReferenceIfNew wsReferences, knownValues, "MILITARY_UNIT", SafeText(wsStaff.Cells(rowNum, mdlHelper.colVoinskayaChast_Global).Value)
-        If vusColumn > 0 Then AddStaffReferenceIfNew wsReferences, knownValues, "VUS", SafeText(wsStaff.Cells(rowNum, vusColumn).Value)
-    Next rowNum
-    FormatEnrollmentReferenceSheet wsReferences
-End Sub
-
 Private Sub EnsureDefaultRankReferences(ByVal ws As Worksheet)
     Dim rankName As Variant
 
@@ -769,7 +737,7 @@ Private Sub EnsureDefaultRankReferences(ByVal ws As Worksheet)
         mdlHelper.Ru(1084, 1083, 1072, 1076, 1096, 1080, 1081, 32, 1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090), mdlHelper.Ru(1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090), _
         mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090), mdlHelper.Ru(1082, 1072, 1087, 1080, 1090, 1072, 1085), _
         mdlHelper.Ru(1084, 1072, 1081, 1086, 1088), mdlHelper.Ru(1087, 1086, 1076, 1087, 1086, 1083, 1082, 1086, 1074, 1085, 1080, 1082), mdlHelper.Ru(1087, 1086, 1083, 1082, 1086, 1074, 1085, 1080, 1082))
-        EnsureEnrollmentReference ws, "RANK", CStr(rankName), ""
+        EnsureEnrollmentReferenceWithCode ws, "RANK", CStr(rankName), RankShortCaption(CStr(rankName)), ""
     Next rankName
 End Sub
 
@@ -782,35 +750,6 @@ Private Sub FormatEnrollmentReferenceSheet(ByVal ws As Worksheet)
     ws.Columns(5).ColumnWidth = 10
     ws.Columns(6).ColumnWidth = 60
     ws.Columns(6).WrapText = True
-End Sub
-Private Function FindEnrollmentStaffColumn(ByVal wsStaff As Worksheet, ByVal headerText As String) As Long
-    Dim columnNum As Long
-    Dim lastColumn As Long
-
-    lastColumn = wsStaff.Cells(1, wsStaff.Columns.Count).End(xlToLeft).Column
-    For columnNum = 1 To lastColumn
-        If StrComp(SafeText(wsStaff.Cells(1, columnNum).Value), headerText, vbTextCompare) = 0 Then
-            FindEnrollmentStaffColumn = columnNum
-            Exit Function
-        End If
-    Next columnNum
-End Function
-
-Private Sub AddStaffReferenceIfNew(ByVal wsReferences As Worksheet, ByVal knownValues As Object, ByVal referenceType As String, ByVal displayName As String)
-    Dim key As String
-
-    If displayName = "" Then Exit Sub
-    key = UCase$(referenceType) & "|" & UCase$(displayName)
-    If knownValues.Exists(key) Then Exit Sub
-    AddEnrollmentReference wsReferences, referenceType, displayName, displayName, "", "YES", "Импортировано из листа Штат; оператор может изменить или отключить строку."
-    RegisterKnownReferenceValue knownValues, referenceType, displayName
-End Sub
-
-Private Sub RegisterKnownReferenceValue(ByVal knownValues As Object, ByVal referenceType As String, ByVal rawValue As String)
-    Dim key As String
-
-    key = UCase$(Trim$(referenceType)) & "|" & UCase$(Trim$(rawValue))
-    If key <> UCase$(Trim$(referenceType)) & "|" Then knownValues(key) = True
 End Sub
 
 Private Sub DeduplicateEnrollmentReferences(ByVal ws As Worksheet)
@@ -838,7 +777,7 @@ Private Sub DeduplicateEnrollmentReferences(ByVal ws As Worksheet)
         referenceType = SafeText(sourceData(rowNum, 1))
         referenceCode = SafeText(sourceData(rowNum, 2))
         displayName = SafeText(sourceData(rowNum, 3))
-        If referenceType <> "" Then
+        If referenceType <> "" And Not IsStaffSnapshotReferenceType(referenceType) Then
             sourceKey = UCase$(referenceType) & "|" & UCase$(IIf(referenceCode <> "", referenceCode, displayName))
             If Not knownValues.Exists(sourceKey) Then
                 uniqueRows.Add Array(sourceData(rowNum, 1), sourceData(rowNum, 2), sourceData(rowNum, 3), sourceData(rowNum, 4), sourceData(rowNum, 5), sourceData(rowNum, 6))
@@ -857,16 +796,13 @@ Private Sub DeduplicateEnrollmentReferences(ByVal ws As Worksheet)
     Next item
 End Sub
 
-Private Sub EnsureEnrollmentReference(ByVal ws As Worksheet, ByVal referenceType As String, ByVal displayName As String, ByVal amountValue As String)
-    Dim rowNum As Long
+Private Function IsStaffSnapshotReferenceType(ByVal referenceType As String) As Boolean
+    Select Case UCase$(Trim$(referenceType))
+        Case "POSITION", "VUS", "SECTION", "MILITARY_UNIT"
+            IsStaffSnapshotReferenceType = True
+    End Select
+End Function
 
-    If displayName = "" Then Exit Sub
-    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
-        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) _
-            And StrComp(SafeText(ws.Cells(rowNum, 3).Value), displayName, vbTextCompare) = 0 Then Exit Sub
-    Next rowNum
-    AddEnrollmentReference ws, referenceType, displayName, displayName, amountValue, "YES", "Импортировано из листа Штат; оператор может изменить или отключить строку."
-End Sub
 Private Function MedalDisplayName(ByVal medalCode As String) As String
     Select Case UCase$(medalCode)
         Case "COMBAT_DISTINCTION"
@@ -1710,8 +1646,6 @@ Public Function EvaluateEnrollmentRecord(ByVal record As Object) As Object
     ValidateDateField record, "lift_date", "Дата подъёмного пособия", issues, severity
     ValidateDateField record, "per_diem_date", "Дата суточных", issues, severity
     ValidateDateField record, "edv_date", "Дата ЕДВ", issues, severity
-    ValidateDateField record, "birth_date", "Дата рождения", issues, severity
-    ValidateDateField record, "passport_issue_date", "Дата выдачи паспорта", issues, severity
     ValidateStaffConsistency record, issues, severity
 
     If IsAllBlank(record("prescription_number"), record("prescription_date"), record("assignment_info")) Then
@@ -1725,19 +1659,25 @@ Public Function EvaluateEnrollmentRecord(ByVal record As Object) As Object
     ValidatePersonalPaymentAmounts record, issues, severity
     ValidateExtraPaymentFields record, issues, severity
 
-    AppendIssueIfBlank issues, severity, record("passport_series"), ET("enrollment.issue.passport_series_missing", "Не заполнена серия паспорта."), STATUS_BLOCKED
-    AppendIssueIfBlank issues, severity, record("passport_number"), ET("enrollment.issue.passport_number_missing", "Не заполнен номер паспорта."), STATUS_BLOCKED
-    AppendIssueIfBlank issues, severity, record("passport_issuer"), ET("enrollment.issue.passport_issuer_missing", "Не заполнено поле 'кем выдан паспорт'."), STATUS_BLOCKED
-    AppendIssueIfBlank issues, severity, record("passport_issue_date"), ET("enrollment.issue.passport_date_missing", "Не заполнена дата выдачи паспорта."), STATUS_BLOCKED
-    AppendIssueIfBlank issues, severity, record("inn"), ET("enrollment.issue.inn_missing", "Не заполнен ИНН."), STATUS_BLOCKED
-    AppendIssueIfBlank issues, severity, record("snils"), ET("enrollment.issue.snils_missing", "Не заполнен СНИЛС."), STATUS_BLOCKED
-    ValidateExactDigits record, "inn", "ИНН", 10, 12, issues, severity
-    ValidateExactDigits record, "snils", "СНИЛС", 11, 11, issues, severity, True
-    ValidateExactDigits record, "passport_series", "Серия паспорта", 4, 4, issues, severity
-    ValidateExactDigits record, "passport_number", "Номер паспорта", 6, 6, issues, severity
-    ValidatePassportCode record, issues, severity
-    AppendIssueIfBlank issues, severity, record("bank_account"), ET("enrollment.issue.bank_account_missing", "Не заполнен лицевой / банковский счёт."), STATUS_BLOCKED
-    AppendIssueIfBlank issues, severity, record("bank_name"), ET("enrollment.issue.bank_name_missing", "Не заполнено наименование банка."), STATUS_BLOCKED
+    If NormalizeYesNo(record("personal_details_enabled")) = YES_VALUE Then
+        AppendIssueIfBlank issues, severity, record("passport_series"), ET("enrollment.issue.passport_series_missing", "Не заполнена серия паспорта."), STATUS_BLOCKED
+        AppendIssueIfBlank issues, severity, record("passport_number"), ET("enrollment.issue.passport_number_missing", "Не заполнен номер паспорта."), STATUS_BLOCKED
+        AppendIssueIfBlank issues, severity, record("passport_issuer"), ET("enrollment.issue.passport_issuer_missing", "Не заполнено поле 'кем выдан паспорт'."), STATUS_BLOCKED
+        AppendIssueIfBlank issues, severity, record("passport_issue_date"), ET("enrollment.issue.passport_date_missing", "Не заполнена дата выдачи паспорта."), STATUS_BLOCKED
+        AppendIssueIfBlank issues, severity, record("inn"), ET("enrollment.issue.inn_missing", "Не заполнен ИНН."), STATUS_BLOCKED
+        AppendIssueIfBlank issues, severity, record("snils"), ET("enrollment.issue.snils_missing", "Не заполнен СНИЛС."), STATUS_BLOCKED
+        ValidateDateField record, "birth_date", "Дата рождения", issues, severity
+        ValidateDateField record, "passport_issue_date", "Дата выдачи паспорта", issues, severity
+        ValidateExactDigits record, "inn", "ИНН", 10, 12, issues, severity
+        ValidateExactDigits record, "snils", "СНИЛС", 11, 11, issues, severity, True
+        ValidateExactDigits record, "passport_series", "Серия паспорта", 4, 4, issues, severity
+        ValidateExactDigits record, "passport_number", "Номер паспорта", 6, 6, issues, severity
+        ValidatePassportCode record, issues, severity
+    End If
+    If NormalizeYesNo(record("bank_details_enabled")) = YES_VALUE Then
+        AppendIssueIfBlank issues, severity, record("bank_account"), ET("enrollment.issue.bank_account_missing", "Не заполнен лицевой / банковский счёт."), STATUS_BLOCKED
+        AppendIssueIfBlank issues, severity, record("bank_name"), ET("enrollment.issue.bank_name_missing", "Не заполнено наименование банка."), STATUS_BLOCKED
+    End If
     AppendIssueIfBlank issues, severity, record("basis_section1"), ET("enrollment.issue.basis_section1_missing", "Не заполнен общий блок оснований для §1."), STATUS_BLOCKED
 
     If SafeText(record("order_draft_id")) = "" Then
@@ -1994,9 +1934,9 @@ Private Function BuildNextPackageRecord(ByVal sourceRecord As Object) As Object
         "service_category", "contract_kind", "contract_basis", "vus", "position", "section", _
         "military_unit", "tariff_rank", "position_salary", "rank_salary", "prescription_number", _
         "prescription_date", "report_number", "report_date", "report_info", "assignment_info", _
-        "birth_date", "birth_place", "citizenship", "inn", "snils", "passport_series", _
+        "birth_date", "birth_place", "citizenship", "personal_details_enabled", "inn", "snils", "passport_series", _
         "passport_number", "passport_issuer", "passport_issue_date", "passport_code", _
-        "bank_account", "bank_name", "bank_bik", "requisites_note", "class_param", "class_enabled", _
+        "bank_account", "bank_name", "bank_bik", "bank_details_enabled", "requisites_note", "class_param", "class_enabled", _
         "class_percent", "class_basis", "fizo_param", "fizo_enabled", "fizo_percent", _
         "fizo_basis", "secrecy_param", "secrecy_enabled", "secrecy_percent", "secrecy_basis", _
         "achievement_param", "achievement_enabled", "achievement_amount", "achievement_basis", "achievement_award_date", "achievement_document_reference", _
@@ -2546,6 +2486,7 @@ Private Sub EnsureRecordKeys(ByVal record As Object)
     EnsureRecordKey record, "birth_date"
     EnsureRecordKey record, "birth_place"
     EnsureRecordKey record, "citizenship"
+    EnsureRecordKey record, "personal_details_enabled"
     EnsureRecordKey record, "inn"
     EnsureRecordKey record, "snils"
     EnsureRecordKey record, "passport_series"
@@ -2556,6 +2497,7 @@ Private Sub EnsureRecordKeys(ByVal record As Object)
     EnsureRecordKey record, "bank_account"
     EnsureRecordKey record, "bank_name"
     EnsureRecordKey record, "bank_bik"
+    EnsureRecordKey record, "bank_details_enabled"
     EnsureRecordKey record, "requisites_note"
     EnsureRecordKey record, "preferential_enabled"
     EnsureRecordKey record, "preferential_coeff"

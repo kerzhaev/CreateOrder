@@ -37,6 +37,8 @@ Public Function ProbeEnrollmentTariffReference() As String
     Dim displayValue As String
     Dim rankCode As String
     Dim rankDisplayValue As String
+    Dim record As Object
+    Dim evaluation As Object
     mdlEnrollmentWorkflow.EnsureEnrollmentReferenceData
     Set ws = ThisWorkbook.Worksheets("EnrollmentReferenceData")
     For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
@@ -78,6 +80,33 @@ Public Function ProbeEnrollmentTariffReference() As String
         ElseIf mdlEnrollmentWorkflow.GetRankReferenceAmount(rankCode) <> "5000" Then
             ProbeEnrollmentTariffReference = "FAILED: full rank code did not resolve the rank salary"
         Else
+            Set record = mdlEnrollmentWorkflow.GetBackendRecord
+            record("fio") = "Тестовый военнослужащий"
+            record("personal_number") = "TEST-001"
+            record("rank") = rankCode
+            record("position") = "Тестовая должность"
+            record("section") = "Тестовое подразделение"
+            record("position_salary") = "12345"
+            record("rank_salary") = "5000"
+            record("order_number") = "1"
+            record("order_date") = "15.07.2026"
+            record("accept_date") = "15.07.2026"
+            record("enroll_date") = "15.07.2026"
+            record("duty_start_date") = "15.07.2026"
+            record("basis_section1") = "Тестовое основание"
+            record("personal_details_enabled") = "NO"
+            record("bank_details_enabled") = "NO"
+            Set evaluation = mdlEnrollmentWorkflow.EvaluateEnrollmentRecord(record)
+            If evaluation("word_ready") <> "YES" Then
+                ProbeEnrollmentTariffReference = "FAILED: optional empty personal or bank fields blocked the order"
+                Exit Function
+            End If
+            record("personal_details_enabled") = "YES"
+            Set evaluation = mdlEnrollmentWorkflow.EvaluateEnrollmentRecord(record)
+            If evaluation("word_ready") <> "NO" Then
+                ProbeEnrollmentTariffReference = "FAILED: enabled personal-data block did not enforce required fields"
+                Exit Function
+            End If
             ProbeEnrollmentTariffReference = "OK"
         End If
     End If

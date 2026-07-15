@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784148281.2529411,
-    "ast_hash": "4c2c417b1fa302e90725e090b9b51544",
+    "mtime": 1784149893.965378,
+    "ast_hash": "7a7990a8f1a5a4c38b0546cd1b267d54",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784148246.1578455,
-    "ast_hash": "d58a78272d377454d145657e82360a17",
+    "mtime": 1784149807.6359923,
+    "ast_hash": "c24996489ef5e47afec21569a0e19536",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -250,13 +250,13 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1783964433.565232,
-    "ast_hash": "288401cd9bcb6ad01acf5024b500c183",
+    "mtime": 1784149807.6344197,
+    "ast_hash": "6276cb26752c26ae07ecbff80acdb4ee",
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784148296.981676,
-    "ast_hash": "71d1010ba20aad63876e46532b846103",
+    "mtime": 1784149893.964332,
+    "ast_hash": "5f489c40986a9989b56f7ca8b43849d2",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -290,8 +290,8 @@
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentTariffReferenceSafe.ps1": {
-    "mtime": 1784147944.805135,
-    "ast_hash": "08a818422634e090202bf633681e950d",
+    "mtime": 1784149622.7127244,
+    "ast_hash": "05ee7e7f3d89caaa12690d8708e97ebc",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-clarity-2026-07-15.md": {
@@ -325,13 +325,13 @@
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentCompactUiSafe.ps1": {
-    "mtime": 1784147193.8938358,
-    "ast_hash": "2622774b75663865a654eebc289ba6ce",
+    "mtime": 1784149709.9128544,
+    "ast_hash": "424285e52f85c804d872ff0edf32fc30",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-compact-performance-2026-07-15.md": {
-    "mtime": 1784148196.9297795,
-    "ast_hash": "9645e2d8845f44d8d1bd844d83c2b0ff",
+    "mtime": 1784149893.9664288,
+    "ast_hash": "bd3e7ff0aeece3ed7e17b1406c51da63",
     "semantic_hash": ""
   },
   "tools/Install-EnrollmentCompactUiSafe.ps1": {
