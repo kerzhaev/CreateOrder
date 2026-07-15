@@ -30,6 +30,7 @@ try {
     try { $excel.AutomationSecurity = 1 } catch {}
     $workbook = $excel.Workbooks.Open($testWorkbookPath, 0, $false)
     Import-CodeModuleText $workbook "mdlEnrollmentWorkflow" (Join-Path $workspace "CreateOrder.xlsm.modules\mdlEnrollmentWorkflow.bas")
+    Import-CodeModuleText $workbook "mdlEnrollmentOrderExport" (Join-Path $workspace "CreateOrder.xlsm.modules\mdlEnrollmentOrderExport.bas")
     try { $workbook.VBProject.VBComponents.Remove($workbook.VBProject.VBComponents.Item("frmEnrollmentWizard")) } catch {}
     $form = $workbook.VBProject.VBComponents.Import((Join-Path $workspace "CreateOrder.xlsm.modules\frmEnrollmentWizard.frm"))
     if ($form.Type -ne 3) { throw "Enrollment form was imported as component type $($form.Type), expected 3." }
@@ -42,6 +43,8 @@ Option Explicit
 Public Function ProbeEnrollmentCompactUi() As String
     Dim pageIndex As Long
     Dim wsReferences As Worksheet
+    Dim frameHost As Object
+    Dim exportResult As String
     Dim referenceRows As Long
     Dim startedAt As Double
     On Error GoTo Failed
@@ -51,8 +54,14 @@ Public Function ProbeEnrollmentCompactUi() As String
     Set wsReferences = ThisWorkbook.Worksheets("EnrollmentReferenceData")
     referenceRows = wsReferences.Cells(wsReferences.Rows.Count, 1).End(xlUp).Row - 1
     If referenceRows > 400 Then Err.Raise 803, , "Enrollment reference data was not deduplicated"
+    exportResult = mdlEnrollmentOrderExport.ExportEnrollmentOrderByDraftId("", 0)
+    If Left`$(exportResult, 6) <> "ERROR:" Then Err.Raise 806, , "Empty export did not return the expected safe error"
     Load frmEnrollmentWizard
     If frmEnrollmentWizard.Controls("mpWizard").Pages.Count <> 7 Then Err.Raise 801, , "Unexpected page count"
+    Set frameHost = frmEnrollmentWizard.Controls("mpWizard").Pages(2).Controls("fraOrder727")
+    If frameHost Is Nothing Then Err.Raise 804, , "Order 727 frame is missing"
+    Set frameHost = frmEnrollmentWizard.Controls("mpWizard").Pages(2).Controls("fraOrder430")
+    If frameHost Is Nothing Then Err.Raise 805, , "Order 430 frame is missing"
     For pageIndex = 0 To frmEnrollmentWizard.Controls("mpWizard").Pages.Count - 1
         If frmEnrollmentWizard.Controls("mpWizard").Pages(pageIndex).ScrollBars <> 0 Then Err.Raise 802, , "Vertical scrolling remains enabled"
     Next pageIndex

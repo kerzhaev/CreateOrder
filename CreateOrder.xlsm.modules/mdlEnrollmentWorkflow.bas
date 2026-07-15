@@ -981,12 +981,12 @@ Public Sub OpenEnrollmentForm()
     ClearEnrollmentForm
     ' Apply configured standard-payment defaults before the operator sees the blank card.
     RefreshEnrollmentForm
-    frmEnrollmentWizard.Show
+    frmEnrollmentWizard.Show vbModeless
 End Sub
 
 Public Sub OpenSelectedEnrollmentRowInForm()
     Call LoadSelectedEnrollmentRowToBackend
-    frmEnrollmentWizard.Show
+    frmEnrollmentWizard.Show vbModeless
 End Sub
 
 Public Function LoadSelectedEnrollmentRowToBackend() As Long

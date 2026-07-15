@@ -29,6 +29,8 @@ Private pgOneTime As Object
 Private pgAdvanced As Object
 Private pgExtras As Object
 Private pgPreview As Object
+Private fraOrder727 As Object
+Private fraOrder430 As Object
 
 Private txtEmployeeFIO As Object
 Private txtEmployeeNumber As Object
@@ -905,39 +907,37 @@ Private Sub CreateDocsPage()
 End Sub
 
 Private Sub CreateMonthlyPage()
-    AddPageSectionLabel pgMonthly, "Приказ МО РФ № 727: стандартные ежемесячные выплаты", 12, 2, 520
-    Set chkPreferential = AddPageCheckBoxT(pgMonthly, "enrollment.field.preferential_enabled", "Льготная выслуга", 12, 28)
-    Set txtPreferentialCoeff = AddPageTextBoxT(pgMonthly, "enrollment.field.preferential_coeff", "Коэффициент", 180, 24, 70)
-    Set chkStdDuty = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_duty", "Надбавка по должности", 12, 70)
-    Set txtStdDutyPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 210, 66, 60)
-    Set chkStdSpecial = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_special", "Особые условия", 290, 70)
-    Set txtStdSpecialPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 480, 66, 50)
-    Set chkStdTariff = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_tariff", "1–4 тариф", 12, 112)
-    Set txtStdTariffPercent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 210, 108, 60)
-    Set chkStdContract430 = AddPageCheckBoxT(pgMonthly, "enrollment.field.std_contract430", "Контракт по приказу № 430дсп", 290, 112)
-    Set txtStdContract430Percent = AddPageTextBoxT(pgMonthly, "common.percent", "%", 480, 108, 50)
-    Set chkPremium = AddPageCheckBoxT(pgMonthly, "enrollment.field.premium", "Премия", 12, 154)
-    Set txtPremiumPercent = AddPageTextBoxT(pgMonthly, "enrollment.field.premium_percent", "Премия %", 80, 150, 60)
-    Set txtPremiumStart = AddPageTextBoxT(pgMonthly, "enrollment.field.premium_start", "Начало премии", 160, 150, 120)
-    Set txtPremiumEnd = AddPageTextBoxT(pgMonthly, "enrollment.field.premium_end", "Окончание премии", 300, 150, 120)
+    Set fraOrder727 = AddPageFrame(pgMonthly, "fraOrder727", "Приказ МО РФ № 727 — стандартные ежемесячные выплаты", 12, 8, 744, 136)
+    Set chkPreferential = AddPageCheckBoxT(fraOrder727, "enrollment.field.preferential_enabled", "Льготная выслуга", 12, 18)
+    Set txtPreferentialCoeff = AddPageTextBoxT(fraOrder727, "enrollment.field.preferential_coeff", "Коэффициент", 180, 14, 70)
+    Set chkStdDuty = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_duty", "Надбавка по должности", 12, 56)
+    Set txtStdDutyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 210, 52, 60)
+    Set chkStdSpecial = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_special", "Особые условия", 290, 56)
+    Set txtStdSpecialPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 480, 52, 50)
+    Set chkStdTariff = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_tariff", "1–4 тариф", 12, 94)
+    Set txtStdTariffPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 210, 90, 60)
+    Set chkPremium = AddPageCheckBoxT(fraOrder727, "enrollment.field.premium", "Премия", 290, 94)
+    Set txtPremiumPercent = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_percent", "Премия %", 360, 90, 60)
+    Set txtPremiumStart = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_start", "Начало", 440, 90, 110)
+    Set txtPremiumEnd = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_end", "Окончание", 570, 90, 120)
 
-    AddPageSectionLabel pgMonthly, "Приказ МО РФ № 430дсп: индивидуальные основания", 12, 196, 520
-    Set txtClassParam = AddPageComboBoxT(pgMonthly, "enrollment.field.class_param", "Классность", 12, 220, 120)
-    Set chkClass = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 150, 238)
-    Set txtClassPercent = AddPageTextBoxT(pgMonthly, "common.percent", "% (из справочника)", 210, 220, 90, 18, False, True)
-    Set txtFizoParam = AddPageComboBoxT(pgMonthly, "enrollment.field.fizo_param", "ФИЗО", 320, 220, 120)
-    Set chkFizo = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 458, 238)
-    Set txtFizoPercent = AddPageTextBoxT(pgMonthly, "common.percent", "% (из справочника)", 548, 220, 50, 18, False, True)
-
-    Set txtSecrecyParam = AddPageComboBoxT(pgMonthly, "enrollment.field.secrecy_param", "Секретность", 12, 274, 180)
-    Set chkSecrecy = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 210, 292)
-    Set txtSecrecyPercent = AddPageTextBoxT(pgMonthly, "common.percent", "% (из справочника)", 260, 274, 90, 18, False, True)
-    Set txtAchievementParam = AddPageComboBoxT(pgMonthly, "enrollment.field.achievement_param", "Achievement / medal", 12, 328, 348)
-    Set chkAchievement = AddPageCheckBoxT(pgMonthly, "common.enabled_short", "Включить", 380, 346)
-    Set txtAchievementAmount = AddPageTextBoxT(pgMonthly, "enrollment.field.achievement_amount", "% / amount (reference)", 430, 328, 100, 18, False, True)
-    Set txtAchievementAwardDate = AddPageTextBoxT(pgMonthly, "common.date", "Award order date", 12, 380, 160)
-    Set txtAchievementDocumentReference = AddPageTextBoxT(pgMonthly, "enrollment.field.order_number", "Award order reference", 190, 380, 340)
-    ConfigureScrollablePage pgMonthly, 440
+    Set fraOrder430 = AddPageFrame(pgMonthly, "fraOrder430", "Приказ МО РФ № 430дсп — индивидуальные основания", 12, 154, 744, 246)
+    Set chkStdContract430 = AddPageCheckBoxT(fraOrder430, "enrollment.field.std_contract430", "Контракт", 12, 18)
+    Set txtStdContract430Percent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 130, 14, 60)
+    Set txtClassParam = AddPageComboBoxT(fraOrder430, "enrollment.field.class_param", "Классность", 12, 56, 120)
+    Set chkClass = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 150, 74)
+    Set txtClassPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 205, 56, 90, 18, False, True)
+    Set txtFizoParam = AddPageComboBoxT(fraOrder430, "enrollment.field.fizo_param", "ФИЗО", 320, 56, 120)
+    Set chkFizo = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 458, 74)
+    Set txtFizoPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 512, 56, 90, 18, False, True)
+    Set txtSecrecyParam = AddPageComboBoxT(fraOrder430, "enrollment.field.secrecy_param", "Секретность", 12, 110, 180)
+    Set chkSecrecy = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 210, 128)
+    Set txtSecrecyPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 260, 110, 90, 18, False, True)
+    Set txtAchievementParam = AddPageComboBoxT(fraOrder430, "enrollment.field.achievement_param", "Особые достижения / медаль", 12, 164, 348)
+    Set chkAchievement = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 380, 182)
+    Set txtAchievementAmount = AddPageTextBoxT(fraOrder430, "enrollment.field.achievement_amount", "% / сумма", 430, 164, 100, 18, False, True)
+    Set txtAchievementAwardDate = AddPageTextBoxT(fraOrder430, "common.date", "Дата приказа", 12, 216, 160)
+    Set txtAchievementDocumentReference = AddPageTextBoxT(fraOrder430, "enrollment.field.order_number", "Реквизиты приказа", 190, 216, 340)
 End Sub
 
 Private Sub CreateOneTimePage()
@@ -997,7 +997,7 @@ Private Sub CreateExtrasPage()
     Const ONE_TIME_STEP As Single = 48
     Const ONE_TIME_START As Single = 248
 
-    AddPageSectionLabel pgExtras, "Иные ежемесячные выплаты (только не вошедшие в приказы № 727 и № 430дсп)", 12, 2, 740
+    AddPageSectionLabel pgExtras, "Иные приказы: укажите нормативный акт / пункт для каждой выплаты", 12, 2, 740
 
     For i = 1 To 4
         topPos = 24 + (i - 1) * MONTHLY_STEP
@@ -1005,7 +1005,7 @@ Private Sub CreateExtrasPage()
         txtExtraMonthlyName(i).Tag = CStr(i)
         Set chkExtraMonthly(i) = AddPageCheckBoxT(pgExtras, "common.enabled_short", "Вкл", 194, topPos + 18)
         chkExtraMonthly(i).Width = 44
-        Set txtExtraMonthlyParam(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_monthly_param", "Параметр", 250, topPos, 105)
+        Set txtExtraMonthlyParam(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_monthly_param", "Приказ / пункт", 250, topPos, 105)
         Set txtExtraMonthlyAmount(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_monthly_amount", "Размер", 370, topPos, 80)
         Set txtExtraMonthlyStart(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_monthly_start", "Дата", 466, topPos, 90)
         Set txtExtraMonthlyBasis(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_monthly_basis", "Основание", 572, topPos, 170)
@@ -1020,10 +1020,27 @@ Private Sub CreateExtrasPage()
         chkExtraOneTime(i).Width = 44
         Set txtExtraOneTimeAmount(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_onetime_amount", "Сумма", 300, topPos, 100)
         Set txtExtraOneTimeDate(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_onetime_date", "Дата", 416, topPos, 100)
-        Set txtExtraOneTimeBasis(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_onetime_basis", "Основание", 532, topPos, 210)
+        Set txtExtraOneTimeBasis(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_onetime_basis", "Приказ / основание", 532, topPos, 210)
     Next i
 
 End Sub
+
+Private Function AddPageFrame(ByVal pageHost As Object, ByVal frameName As String, ByVal captionText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal frameWidth As Single, ByVal frameHeight As Single) As Object
+    Dim frameHost As Object
+
+    Set frameHost = pageHost.Controls.Add("Forms.Frame.1", frameName, True)
+    With frameHost
+        .Caption = captionText
+        .Left = leftPos
+        .Top = topPos
+        .Width = frameWidth
+        .Height = frameHeight
+        .Font.Name = "Times New Roman"
+        .Font.Size = 10
+        .Font.Bold = True
+    End With
+    Set AddPageFrame = frameHost
+End Function
 
 Private Sub CreatePreviewPage()
     AddPageSectionLabel pgPreview, "Проверьте результат перед формированием Word", 12, 2, 520

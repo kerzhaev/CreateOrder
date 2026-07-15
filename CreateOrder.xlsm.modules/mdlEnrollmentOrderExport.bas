@@ -839,6 +839,7 @@ Private Function BuildExtraMonthlyText(ByVal record As Object) As String
     Dim paymentParam As String
     Dim paymentAmount As String
     Dim startDate As String
+    Dim paymentBasis As String
 
     For i = 1 To 4
         If NormalizeYesNo(record("extra_monthly" & CStr(i) & "_enabled")) = "YES" Then
@@ -846,6 +847,8 @@ Private Function BuildExtraMonthlyText(ByVal record As Object) As String
             paymentParam = SafeText(record("extra_monthly" & CStr(i) & "_param"))
             paymentAmount = SafeText(record("extra_monthly" & CStr(i) & "_amount"))
             startDate = SafeText(record("extra_monthly" & CStr(i) & "_start"))
+            paymentBasis = SafeText(record("extra_monthly" & CStr(i) & "_basis"))
+            If paymentBasis <> "" Then paymentParam = Trim$(paymentParam & "; основание: " & paymentBasis)
 
             If paymentName <> "" Then
                 BuildExtraMonthlyText = AppendParagraph(BuildExtraMonthlyText, L("enrollment.word.extra.monthly_prefix", "Установить ежемесячную выплату") & " """ & paymentName & """" & BuildExtraParamSuffix(paymentParam) & " " & L("enrollment.word.personal.amount_prefix", "в размере") & " " & ValueOrPlaceholder(paymentAmount, "0") & BuildExtraStartSuffix(startDate) & ".")
@@ -862,12 +865,15 @@ Private Function BuildExtraOneTimeText(ByVal record As Object) As String
     Dim paymentName As String
     Dim paymentAmount As String
     Dim paymentDate As String
+    Dim paymentBasis As String
 
     For i = 1 To 3
         If NormalizeYesNo(record("extra_one_time" & CStr(i) & "_enabled")) = "YES" Then
             paymentName = SafeText(record("extra_one_time" & CStr(i) & "_name"))
             paymentAmount = SafeText(record("extra_one_time" & CStr(i) & "_amount"))
             paymentDate = SafeText(record("extra_one_time" & CStr(i) & "_date"))
+            paymentBasis = SafeText(record("extra_one_time" & CStr(i) & "_basis"))
+            If paymentBasis <> "" Then paymentName = paymentName & " (" & paymentBasis & ")"
 
             If paymentName <> "" Then
                 BuildExtraOneTimeText = AppendParagraph(BuildExtraOneTimeText, "    " & L("enrollment.word.extra.onetime_prefix", "дополнительную разовую выплату") & " """ & paymentName & """" & " " & L("enrollment.word.personal.amount_prefix", "в размере") & " " & ValueOrPlaceholder(paymentAmount, "0") & BuildExtraStartSuffix(paymentDate) & ".")
