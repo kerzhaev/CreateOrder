@@ -594,6 +594,7 @@ Public Sub EnsureEnrollmentReferenceData()
     EnsureDefaultRankReferences ws
     EnsureCompactTariffRankReferenceLabels ws
     EnsureCompactRankReferenceLabels ws
+    SeedCurrentContractSalaryReferenceData ws
     EnsureEnrollmentReferenceWithCode ws, "FIZO", "SECOND", "2 уровень", "80"
     EnsureEnrollmentReferenceWithCode ws, "FIZO", "FIRST", "1 уровень", "90"
     EnsureEnrollmentReferenceWithCode ws, "FIZO", "HIGH", "Высший уровень", "100"
@@ -602,12 +603,62 @@ Public Sub EnsureEnrollmentReferenceData()
     EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "MILITARY_VALOR_I", MedalDisplayName("MILITARY_VALOR_I"), "20"
     EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "MILITARY_VALOR_II", MedalDisplayName("MILITARY_VALOR_II"), "10"
     FormatEnrollmentReferenceSheet ws
-        If Not enrollmentReferencesSynced Then
+    If Not enrollmentReferencesSynced Then
         SyncEnrollmentReferencesFromStaff ws
+        DeduplicateEnrollmentReferences ws
         EnsureCompactRankReferenceLabels ws
         enrollmentReferencesSynced = True
     End If
     enrollmentReferenceDataReady = True
+End Sub
+
+Public Sub SeedCurrentContractSalaryReferenceData(ByVal ws As Worksheet)
+    Dim tariffSalaries As Variant
+    Dim rankNames As Variant
+    Dim rankSalaries As Variant
+    Dim i As Long
+
+    ' Values as of 01.10.2025. Government Resolution No. 464 (as amended by
+    ' No. 1390) applies the 1.076 coefficient; the base tariff/rank lists are
+    ' Appendices 2 and 3 to MO Order No. 727. Existing operator entries remain intact.
+    tariffSalaries = Array(14330, 15761, 17196, 18629, 21495, 22926, 24359, 25076, 25791, 28655, _
+        29373, 30091, 30805, 31521, 32239, 32954, 33671, 34388, 35103, 35819, _
+        36536, 37252, 37970, 38686, 39400, 40118, 40835, 41549, 42267, 42983, _
+        43698, 44416, 45132, 45849, 46565, 47281, 47998, 48713, 49430, 50146, _
+        50863, 51579, 52295, 53012, 53727, 54444, 57308, 60176, 63039, 64473)
+    rankNames = Array( _
+        mdlHelper.Ru(1088, 1103, 1076, 1086, 1074, 1086, 1081), mdlHelper.Ru(1077, 1092, 1088, 1077, 1081, 1090, 1086, 1088), _
+        mdlHelper.Ru(1084, 1083, 1072, 1076, 1096, 1080, 1081, 32, 1089, 1077, 1088, 1078, 1072, 1085, 1090), mdlHelper.Ru(1089, 1077, 1088, 1078, 1072, 1085, 1090), _
+        mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1089, 1077, 1088, 1078, 1072, 1085, 1090), mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1085, 1072), _
+        mdlHelper.Ru(1087, 1088, 1072, 1087, 1086, 1088, 1097, 1080, 1082), mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1087, 1088, 1072, 1087, 1086, 1088, 1097, 1080, 1082), _
+        mdlHelper.Ru(1084, 1083, 1072, 1076, 1096, 1080, 1081, 32, 1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090), mdlHelper.Ru(1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090), _
+        mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090), mdlHelper.Ru(1082, 1072, 1087, 1080, 1090, 1072, 1085), _
+        mdlHelper.Ru(1084, 1072, 1081, 1086, 1088), mdlHelper.Ru(1087, 1086, 1076, 1087, 1086, 1083, 1082, 1086, 1074, 1085, 1080, 1082), mdlHelper.Ru(1087, 1086, 1083, 1082, 1086, 1074, 1085, 1080, 1082))
+    rankSalaries = Array(7166, 7881, 8601, 9315, 10032, 10750, 11464, 12181, 13614, 14331, 15046, 15761, 16481, 17196, 18629)
+
+    For i = LBound(tariffSalaries) To UBound(tariffSalaries)
+        SetEnrollmentReferenceAmountIfBlank ws, "TARIFF_RANK", CStr(i + 1), CStr(tariffSalaries(i))
+    Next i
+    For i = LBound(rankNames) To UBound(rankNames)
+        SetEnrollmentReferenceAmountIfBlank ws, "RANK", CStr(rankNames(i)), CStr(rankSalaries(i))
+    Next i
+End Sub
+
+Private Sub SetEnrollmentReferenceAmountIfBlank(ByVal ws As Worksheet, ByVal referenceType As String, ByVal codeOrName As String, ByVal amountValue As String)
+    Dim rowNum As Long
+    Dim noteText As String
+
+    noteText = "As of 01.10.2025: Government Resolution No. 464 (as amended by No. 1390); Appendix 2/3 to MO Order No. 727."
+    For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) Then
+            If StrComp(SafeText(ws.Cells(rowNum, 2).Value), codeOrName, vbTextCompare) = 0 _
+                Or StrComp(SafeText(ws.Cells(rowNum, 3).Value), codeOrName, vbTextCompare) = 0 Then
+                If SafeText(ws.Cells(rowNum, 4).Value) = "" Then ws.Cells(rowNum, 4).Value = amountValue
+                If SafeText(ws.Cells(rowNum, 6).Value) = "" Then ws.Cells(rowNum, 6).Value = noteText
+                Exit Sub
+            End If
+        End If
+    Next rowNum
 End Sub
 
 Private Function TariffRankCaption(ByVal tariffRankCode As String) As String

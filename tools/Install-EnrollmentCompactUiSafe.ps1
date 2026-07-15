@@ -37,7 +37,9 @@ try {
     $excel = New-Object -ComObject Excel.Application
     $excel.Visible = $false
     $excel.DisplayAlerts = $false
-    try { $excel.AutomationSecurity = 3 } catch {}
+    # The seeding routine is executed explicitly after the import; macros must be enabled
+    # for this isolated, invisible installation instance.
+    try { $excel.AutomationSecurity = 1 } catch {}
     $workbook = $excel.Workbooks.Open($WorkbookPath, 0, $false)
 
     Import-CodeModuleText $workbook "mdlEnrollmentWorkflow" (Join-Path $workspace "CreateOrder.xlsm.modules\mdlEnrollmentWorkflow.bas")
@@ -45,6 +47,7 @@ try {
     try { $workbook.VBProject.VBComponents.Remove($workbook.VBProject.VBComponents.Item("frmEnrollmentWizard")) } catch {}
     $form = $workbook.VBProject.VBComponents.Import((Join-Path $workspace "CreateOrder.xlsm.modules\frmEnrollmentWizard.frm"))
     if ($form.Type -ne 3) { throw "Enrollment form was imported as component type $($form.Type), expected 3." }
+    $excel.Run("'$($workbook.Name)'!mdlEnrollmentWorkflow.EnsureEnrollmentReferenceData") | Out-Null
 
     $workbook.Save()
     $workbook.Close($true)

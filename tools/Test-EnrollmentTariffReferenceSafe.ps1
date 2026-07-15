@@ -42,6 +42,10 @@ Public Function ProbeEnrollmentTariffReference() As String
     For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
         If CStr(ws.Cells(rowNum, 1).Value) = "TARIFF_RANK" And CStr(ws.Cells(rowNum, 2).Value) = "1" Then
             displayValue = CStr(ws.Cells(rowNum, 3).Value)
+            If CStr(ws.Cells(rowNum, 4).Value) <> "14330" Then
+                ProbeEnrollmentTariffReference = "FAILED: tariff rank 1 salary was not seeded"
+                Exit Function
+            End If
             ws.Cells(rowNum, 4).Value = "12345"
             Exit For
         End If
@@ -57,6 +61,10 @@ Public Function ProbeEnrollmentTariffReference() As String
             If CStr(ws.Cells(rowNum, 1).Value) = "RANK" Then
                 rankCode = CStr(ws.Cells(rowNum, 2).Value)
                 rankDisplayValue = CStr(ws.Cells(rowNum, 3).Value)
+                If CStr(ws.Cells(rowNum, 4).Value) <> "7166" Then
+                    ProbeEnrollmentTariffReference = "FAILED: rank salary was not seeded"
+                    Exit Function
+                End If
                 ws.Cells(rowNum, 4).Value = "5000"
                 Exit For
             End If
