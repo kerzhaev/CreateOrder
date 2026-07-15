@@ -1,16 +1,16 @@
 # Graph Report - CreateOrder  (2026-07-15)
 
 ## Corpus Check
-- 65 files · ~92,678 words
+- 66 files · ~92,934 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 724 nodes · 733 edges · 75 communities (61 shown, 14 thin omitted)
+- 727 nodes · 736 edges · 76 communities (61 shown, 15 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8b4f2b87`
+- Built from commit: `d8cb9a04`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -80,6 +80,7 @@
 - Test-PersonnelActionWizard-old-form.ps1
 - Компактный мастер зачисления и производительность
 - Test-EnrollmentCompactUiSafe.ps1
+- Install-EnrollmentCompactUiSafe.ps1
 
 ## God Nodes (most connected - your core abstractions)
 1. `План реализации: кадровые события и движок надбавок` - 23 edges
@@ -99,7 +100,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (75 total, 14 thin omitted)
+## Communities (76 total, 15 thin omitted)
 
 ### Community 0 - "Test-PaymentsEnrollmentAcceptance.ps1"
 Cohesion: 0.09
@@ -308,7 +309,7 @@ Nodes (5): Компактный мастер зачисления и произ�
 ## Knowledge Gaps
 - **431 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+426 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **14 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_

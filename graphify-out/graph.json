@@ -974,6 +974,36 @@
       "norm_label": "import-userform()"
     },
     {
+      "label": "Install-EnrollmentCompactUiSafe.ps1",
+      "file_type": "code",
+      "source_file": "tools/Install-EnrollmentCompactUiSafe.ps1",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tools_install_enrollmentcompactuisafe",
+      "community": 75,
+      "norm_label": "install-enrollmentcompactuisafe.ps1"
+    },
+    {
+      "label": "Read-VbaText()",
+      "file_type": "code",
+      "source_file": "tools/Install-EnrollmentCompactUiSafe.ps1",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "tools_install_enrollmentcompactuisafe_read_vbatext",
+      "community": 75,
+      "norm_label": "read-vbatext()"
+    },
+    {
+      "label": "Import-CodeModuleText()",
+      "file_type": "code",
+      "source_file": "tools/Install-EnrollmentCompactUiSafe.ps1",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "tools_install_enrollmentcompactuisafe_import_codemoduletext",
+      "community": 75,
+      "norm_label": "import-codemoduletext()"
+    },
+    {
       "label": "Repair-FilterDatabaseNames.ps1",
       "file_type": "code",
       "source_file": "tools/Repair-FilterDatabaseNames.ps1",
@@ -1387,7 +1417,7 @@
       "label": "\u0416\u0443\u0440\u043d\u0430\u043b \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 \u0438\u043d\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0430",
       "file_type": "document",
       "source_file": ".spec/PROJECT_CONTEXT.md",
-      "source_location": "L258",
+      "source_location": "L259",
       "_origin": "ast",
       "id": "spec_project_context_\u0436\u0443\u0440\u043d\u0430\u043b_\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438_\u0438\u043d\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0430",
       "community": 4,
@@ -8678,6 +8708,36 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "tools/Install-EnrollmentCompactUiSafe.ps1",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "tools_install_enrollmentcompactuisafe",
+      "target": "tools_install_enrollmentcompactuisafe_import_codemoduletext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/Install-EnrollmentCompactUiSafe.ps1",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "tools_install_enrollmentcompactuisafe",
+      "target": "tools_install_enrollmentcompactuisafe_read_vbatext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/Install-EnrollmentCompactUiSafe.ps1",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "tools_install_enrollmentcompactuisafe_import_codemoduletext",
+      "target": "tools_install_enrollmentcompactuisafe_read_vbatext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "tools/Test-EnrollmentCompactUiSafe.ps1",
       "source_location": "L14",
       "weight": 1.0,
@@ -9112,7 +9172,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".spec/PROJECT_CONTEXT.md",
-      "source_location": "L258",
+      "source_location": "L259",
       "weight": 1.0,
       "source": "spec_project_context_project_context_knowledge_base",
       "target": "spec_project_context_\u0436\u0443\u0440\u043d\u0430\u043b_\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438_\u0438\u043d\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0430",
@@ -14590,5 +14650,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "8b4f2b875561ee5f2fc2add1caed8332c708eb1c"
+  "built_at_commit": "d8cb9a040cb1fb820906dc7e2fff22ae91140b06"
 }
