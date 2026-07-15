@@ -154,9 +154,9 @@ Public Function ProbeAllowanceRules() As String
     secondLevelState("fizo_level") = "SECOND"
     Set secondLevelResults = mdlPersonnelAllowanceRules.EvaluatePersonnelAllowances(secondLevelState, CreateObject("Scripting.Dictionary"))
     For Each item In secondLevelResults
-        If item("payment_code") = "FIZO_SECOND" Then hasSecondLevelFizo = (item("status") = "ACTIVE" And item("amount_value") = 15)
+        If item("payment_code") = "FIZO_SECOND" Then hasSecondLevelFizo = (item("status") = "ACTIVE" And item("amount_value") = 80)
     Next item
-    If Not hasSecondLevelFizo Then Err.Raise vbObjectError + 27, , "SECOND FIZO level must create a 15-percent assignment"
+    If Not hasSecondLevelFizo Then Err.Raise vbObjectError + 27, , "SECOND FIZO level must create an 80-percent assignment"
 
     Set secondLevelState = CreateObject("Scripting.Dictionary")
     secondLevelState("medal_code") = "COMBAT_DISTINCTION"

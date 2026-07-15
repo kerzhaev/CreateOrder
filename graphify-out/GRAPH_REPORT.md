@@ -1,16 +1,16 @@
 # Graph Report - CreateOrder  (2026-07-15)
 
 ## Corpus Check
-- 59 files · ~62,562 words
+- 60 files · ~63,162 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 691 nodes · 703 edges · 70 communities (59 shown, 11 thin omitted)
+- 699 nodes · 710 edges · 70 communities (59 shown, 11 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4010bd5a`
+- Built from commit: `125d4677`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -173,8 +173,8 @@ Cohesion: 0.09
 Nodes (22): ����������� ����: ������������� ������� ������ � ���������� ��� ��������, 1. ����� ���������, 1.1. ����� ������ VBA, ��� 1: �������� ������� (��� �����������), 1.2. ���������� ������ VBA, 1.3. ����� ����� Excel, 1.4. ���������� ���������������� �����, ��� 2: ���������� ������ �� ������������� (+14 more)
 
 ### Community 22 - "Технический план: Массовое добавление сотрудников на лист "Выплаты_Без_Периодов""
-Cohesion: 0.09
-Nodes (21): 1. Обзор изменений, 2.1. Модули VBA (расширение существующих), 2.2. Новые файлы, 2.3. Обновление Ribbon XML, 2. Затронутые файлы, 4.1. Алгоритм поиска по табельному номеру, 4.2. Алгоритм массового импорта, 4.3. Алгоритм формы выбора сотрудника (+13 more)
+Cohesion: 0.05
+Nodes (38): 1.1. Добавление функции поиска колонки "Лицо", 1.2. Добавление функции поиска по табельному номеру, 1.3. Добавление универсальной функции поиска, 1. Обзор изменений, 2.1. Добавление функции массового импорта, 2.1. Модули VBA (расширение существующих), 2.2. Добавление функции обработки диапазона, 2.2. Новые файлы (+30 more)
 
 ### Community 23 - "2. ��������� ���� ����������"
 Cohesion: 0.11
@@ -189,8 +189,8 @@ Cohesion: 0.11
 Nodes (17): ���������� �� ��������� ������� �������� ��� ��������, 1.1. ���� "�������_���_��������", 1.2. ���� "����������_���_������", 1.3. ���� "����������_����_������", 1. �������� ������ Excel, 2. ���������� ���������������� ����� (XML), 3.1. ������� ��� ����� ������, 3.2. ������ ������������� ������ (+9 more)
 
 ### Community 26 - "3. Детальный план изменений"
-Cohesion: 0.12
-Nodes (17): 1.1. Добавление функции поиска колонки "Лицо", 1.2. Добавление функции поиска по табельному номеру, 1.3. Добавление универсальной функции поиска, 2.1. Добавление функции массового импорта, 2.2. Добавление функции обработки диапазона, 3.1. Структура формы, 3.2. Публичные переменные, 3.3. События формы (+9 more)
+Cohesion: 0.29
+Nodes (6): Ограничение, Подтверждённые требования, Проверка, Реализация, Уточнение операторского интерфейса зачисления, Цель
 
 ### Community 27 - "User Scenarios & Testing *(mandatory)*"
 Cohesion: 0.17
@@ -269,8 +269,8 @@ Cohesion: 0.12
 Nodes (16): Автоматические проверки, Где искать код и документацию, Единый вход в кадровые действия, Надбавки и нормативная логика, Ошибки VBA, встреченные при предыдущем импорте, Ошибки и ограничения Excel/интерфейса, Ошибки и принятые решения, Передача проекта — 14.07.2026 (+8 more)
 
 ### Community 55 - "Статус проекта CreateOrder"
-Cohesion: 0.14
-Nodes (13): Аудит готовности на 13.07.2026, Документы и ориентиры, Единый вход в кадровые действия, Зафиксированные решения, Как продолжить работу, Мастер зачисления: повторная инициализация формы (14.07.2026), Направления работы, Общая картина (+5 more)
+Cohesion: 0.13
+Nodes (14): Аудит готовности на 13.07.2026, Документы и ориентиры, Единый вход в кадровые действия, Зафиксированные решения, Как продолжить работу, Мастер зачисления: повторная инициализация формы (14.07.2026), Направления работы, Обновление интерфейса зачисления — 15.07.2026 (+6 more)
 
 ### Community 56 - "Разбор источника: приказ МО РФ №430дсп — особые достижения"
 Cohesion: 0.25
@@ -293,7 +293,7 @@ Cohesion: 0.50
 Nodes (3): Матрица приёмки замечаний по мастеру зачисления, Неподтверждённые величины, Обязательный финальный сценарий
 
 ## Knowledge Gaps
-- **415 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+410 more)
+- **421 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+416 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -307,7 +307,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `Feature Specification: Payments Without Periods and Enrollment Workflow` connect `Block 1. Payments Without Periods: list-based assignment mode` to `Block 2. Enrollment workflow: new tab and rules engine`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **What connects `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)` to the rest of the system?**
-  _415 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _421 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Test-PaymentsEnrollmentAcceptance.ps1` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Block 2. Enrollment workflow: new tab and rules engine` be split into smaller, more focused modules?**

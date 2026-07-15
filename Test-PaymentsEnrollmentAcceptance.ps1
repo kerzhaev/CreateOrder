@@ -1483,7 +1483,7 @@ try {
     Assert-True (([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 18)) -like "*$paymentStdDuty*") "Enrollment V2 preview did not include the standard duty allowance."
     Assert-True (([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 18)) -like "*$previewStdSpecial*") "Enrollment V2 preview did not include the special-conditions marker."
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 83)).Trim() "20" "Enrollment V2 did not derive class qualification percent."
-    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 86)).Trim() "50" "Enrollment V2 did not derive FIZO percent."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 86)).Trim() "90" "Enrollment V2 did not derive FIZO percent."
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 89)).Trim() "20" "Enrollment V2 did not derive secrecy percent."
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 92)).Trim() "60" "Enrollment V2 did not derive achievement amount."
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 115)).Trim() "YES" "Enrollment V2 did not keep extra monthly payment enabled."
@@ -1538,7 +1538,7 @@ try {
     }
 
     $createdRowsV2 = $excel.Run("'$($workbook.Name)'!mdlEnrollmentWorkflow.GeneratePaymentsFromEnrollmentRowDirect", 2)
-    Assert-True ($createdRowsV2 -ge 10) "Enrollment V2 row did not generate the expected built-in and reserve payment rows."
+    Assert-True ($createdRowsV2 -ge 10) "Enrollment V2 row did not generate the expected built-in and reserve payment rows. Actual: $createdRowsV2; issues: $([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 25))"
 
     $paymentsLastRow = Get-LastUsedRow -Worksheet $wsPayments -ColumnNumber 4
     $generatedTypes = @()

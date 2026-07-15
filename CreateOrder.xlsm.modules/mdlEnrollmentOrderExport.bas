@@ -929,7 +929,9 @@ Private Function BuildDefaultRequisitesText(ByVal record As Object) As String
     If SafeText(record("passport_code")) <> "" Then resultText = resultText & ", " & L("enrollment.word.requisites.passport_code", "код подразделения") & " " & SafeText(record("passport_code"))
     resultText = resultText & "." & vbCrLf
     resultText = resultText & L("enrollment.word.requisites.inn", "ИНН") & " - " & SafeText(record("inn")) & ", " & L("enrollment.word.requisites.snils", "СНИЛС") & " - " & SafeText(record("snils")) & "." & vbCrLf
-    resultText = resultText & L("enrollment.word.requisites.bank", "Лицевой счёт / банк:") & " " & SafeText(record("bank_name")) & " - " & SafeText(record("bank_account")) & "." & vbCrLf
+    resultText = resultText & L("enrollment.word.requisites.bank", "Лицевой счёт / банк:") & " " & SafeText(record("bank_name")) & " - " & SafeText(record("bank_account"))
+    If SafeText(record("bank_bik")) <> "" Then resultText = resultText & "; БИК " & SafeText(record("bank_bik"))
+    resultText = resultText & "." & vbCrLf
     If SafeText(record("requisites_note")) <> "" Then
         resultText = resultText & SafeText(record("requisites_note")) & "." & vbCrLf
     End If
@@ -988,7 +990,7 @@ Private Function ReplaceRecordFieldTokens(ByVal templateText As String, ByVal re
                             "personal_number", "table_number", "service_category", "contract_kind", _
                             "tariff_rank", "position_salary", "rank_salary", "passport_series", _
                             "passport_number", "passport_issuer", "passport_issue_date", "passport_code", _
-                            "inn", "snils", "bank_account", "bank_name", "basis_section1", "basis_section2", _
+                            "inn", "snils", "bank_account", "bank_name", "bank_bik", "basis_section1", "basis_section2", _
                             "enroll_date", "accept_date", "duty_start_date", "standard_start_date", _
                             "preferential_start_date", "requisites_note", "birth_date", "birth_place", _
                             "citizenship")
@@ -1017,7 +1019,7 @@ Private Function ResolveDefinitionFieldKey(ByVal definition As Object, ByVal tok
              "personal_number", "table_number", "service_category", "contract_kind", _
              "tariff_rank", "position_salary", "rank_salary", "passport_series", _
              "passport_number", "passport_issuer", "passport_issue_date", "passport_code", _
-             "inn", "snils", "bank_account", "bank_name", "basis_section1", "basis_section2", _
+             "inn", "snils", "bank_account", "bank_name", "bank_bik", "basis_section1", "basis_section2", _
              "enroll_date", "accept_date", "duty_start_date", "standard_start_date", _
              "preferential_start_date", "requisites_note", "birth_date", "birth_place", _
              "citizenship"

@@ -39,19 +39,12 @@ Private Sub AddFizoResult(ByVal results As Collection, ByVal stateData As Object
     levelCode = UCase$(TextValue(stateData, "fizo_level"))
     sportCode = UCase$(TextValue(stateData, "sport_status"))
     Select Case levelCode
-        Case "SECOND": amountValue = 15
-        Case "FIRST": amountValue = 30
-        Case "HIGH": amountValue = 70
+        Case "SECOND": amountValue = 80
+        Case "FIRST": amountValue = 90
+        Case "HIGH": amountValue = 100
         Case Else: Exit Sub
     End Select
 
-    If levelCode = "HIGH" Then
-        Select Case sportCode
-            Case "CLASS_1": amountValue = 80
-            Case "CMS": amountValue = 90
-            Case "MASTER", "MASTER_INTERNATIONAL": amountValue = 100
-        End Select
-    End If
     statusValue = ALLOWANCE_STATUS_ACTIVE
     explanation = "FIZO rule resolved from qualification level and sport status."
     results.Add NewAllowance("FIZO", "FIZO_" & levelCode, "PERCENT", amountValue, "SPECIAL_ACHIEVEMENTS_P2", statusValue, explanation, ruleData)

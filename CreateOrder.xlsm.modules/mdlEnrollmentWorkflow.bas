@@ -177,6 +177,7 @@ Public Const COL_ENROLLMENT_EXTRA_ONE_TIME3_BASIS As Long = 147
 Public Const COL_ENROLLMENT_EXTRA_ONE_TIME3_ENABLED As Long = 148
 Public Const COL_ENROLLMENT_ACHIEVEMENT_AWARD_DATE As Long = 149
 Public Const COL_ENROLLMENT_ACHIEVEMENT_DOCUMENT_REFERENCE As Long = 150
+Public Const COL_ENROLLMENT_BANK_BIK As Long = 151
 
 Public Const ENROLLMENT_REFERENCE_SHEET As String = "EnrollmentReferenceData"
 
@@ -197,6 +198,20 @@ Public Sub EnsureEnrollmentInfrastructure()
     wsBackend.Visible = xlSheetVeryHidden
     On Error GoTo 0
     HideLegacyEnrollmentFormSheets
+    HideTechnicalOperatorSheets
+End Sub
+
+Private Sub HideTechnicalOperatorSheets()
+    Dim sheetName As Variant
+    Dim ws As Worksheet
+
+    For Each sheetName In Array("PositionClassificationInput", "PaymentRuleInput", "LegalActInput", "StaffLinkReview", "PersonnelHistory", "PersonnelEventInput")
+        Set ws = Nothing
+        On Error Resume Next
+        Set ws = ThisWorkbook.Worksheets(CStr(sheetName))
+        If Not ws Is Nothing Then ws.Visible = xlSheetHidden
+        On Error GoTo 0
+    Next sheetName
 End Sub
 
 Private Sub HideLegacyEnrollmentFormSheets()
@@ -272,6 +287,7 @@ Public Sub EnsureEnrollmentSheetStructure(ByVal ws As Worksheet)
     SetEnrollmentHeader ws, COL_ENROLLMENT_PASSPORT_CODE, "enrollment.header.passport_code", "Код подразделения", 16
     SetEnrollmentHeader ws, COL_ENROLLMENT_BANK_ACCOUNT, "enrollment.header.bank_account", "Лицевой / банковский счёт", 24
     SetEnrollmentHeader ws, COL_ENROLLMENT_BANK_NAME, "enrollment.header.bank_name", "Банк", 24
+    SetEnrollmentHeader ws, COL_ENROLLMENT_BANK_BIK, "enrollment.header.bank_bik", "БИК банка", 16
     SetEnrollmentHeader ws, COL_ENROLLMENT_REQUISITES_NOTE, "enrollment.header.requisites_note", "Примечание по реквизитам", 26
     SetEnrollmentHeader ws, COL_ENROLLMENT_PREFERENTIAL_ENABLED, "enrollment.header.preferential_enabled", "Льготная выслуга вкл", 14
     SetEnrollmentHeader ws, COL_ENROLLMENT_PREFERENTIAL_COEFF, "enrollment.header.preferential_coeff", "Коэффициент льготы", 14
@@ -446,6 +462,7 @@ Public Sub EnsureEnrollmentFormSheetStructure(ByVal ws As Worksheet)
     EnsureBackendField ws, "passport_code", "Код подразделения"
     EnsureBackendField ws, "bank_account", "Лицевой счёт / банк"
     EnsureBackendField ws, "bank_name", "Банк"
+    EnsureBackendField ws, "bank_bik", "БИК банка"
     EnsureBackendField ws, "requisites_note", "Примечание по реквизитам"
     EnsureBackendField ws, "preferential_enabled", "Льготная выслуга вкл"
     EnsureBackendField ws, "preferential_coeff", "Коэффициент льготной выслуги"
@@ -566,8 +583,12 @@ Public Sub EnsureEnrollmentReferenceData()
         ws.Rows(1).Font.Bold = True
         FormatEnrollmentReferenceSheet ws
     End If
+    EnsureDefaultRankReferences ws
     EnsureCompactTariffRankReferenceLabels ws
-    EnsureEnrollmentReference ws, "FIZO", "2 уровень", "15"
+    EnsureCompactRankReferenceLabels ws
+    EnsureEnrollmentReferenceWithCode ws, "FIZO", "SECOND", "2 уровень", "80"
+    EnsureEnrollmentReferenceWithCode ws, "FIZO", "FIRST", "1 уровень", "90"
+    EnsureEnrollmentReferenceWithCode ws, "FIZO", "HIGH", "Высший уровень", "100"
     EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "COMBAT_DISTINCTION", MedalDisplayName("COMBAT_DISTINCTION"), "30"
     EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "DEMINING", MedalDisplayName("DEMINING"), "20"
     EnsureEnrollmentReferenceWithCode ws, "ACHIEVEMENT", "MILITARY_VALOR_I", MedalDisplayName("MILITARY_VALOR_I"), "20"
@@ -607,6 +628,34 @@ Private Function RankShortCaption(ByVal rankCode As String) As String
             RankShortCaption = mdlHelper.Ru(1077, 1092, 1088, 46)
         Case LCase$(mdlHelper.Ru(1089, 1077, 1088, 1078, 1072, 1085, 1090))
             RankShortCaption = mdlHelper.Ru(1089, 1077, 1088, 1078, 46)
+        Case "младший сержант": RankShortCaption = "мл. с-т"
+        Case "старший сержант": RankShortCaption = "ст. с-т"
+        Case "старшина": RankShortCaption = "ст-на"
+        Case "прапорщик": RankShortCaption = "пр-к"
+        Case "старший прапорщик": RankShortCaption = "ст. пр-к"
+        Case "младший лейтенант": RankShortCaption = "мл. л-т"
+        Case "лейтенант": RankShortCaption = "л-т"
+        Case "старший лейтенант": RankShortCaption = "ст. л-т"
+        Case "капитан": RankShortCaption = "к-н"
+        Case "майор": RankShortCaption = "м-р"
+        Case "подполковник": RankShortCaption = "п/п-к"
+        Case "полковник": RankShortCaption = "п-к"
+        Case "генерал-майор": RankShortCaption = "г-м"
+        Case "генерал-лейтенант": RankShortCaption = "г-л"
+        Case "генерал-полковник": RankShortCaption = "г-п"
+        Case "генерал армии": RankShortCaption = "ген. армии"
+        Case "маршал российской федерации": RankShortCaption = "Маршал РФ"
+        Case "старший матрос": RankShortCaption = "ст. матрос"
+        Case "старшина 2 статьи": RankShortCaption = "ст-на 2 ст."
+        Case "старшина 1 статьи": RankShortCaption = "ст-на 1 ст."
+        Case "главный корабельный старшина": RankShortCaption = "гл. кораб. ст-на"
+        Case "старший мичман": RankShortCaption = "ст. мичман"
+        Case "капитан-лейтенант": RankShortCaption = "кап.-л-т"
+        Case "капитан 3 ранга": RankShortCaption = "кап. 3 р."
+        Case "капитан 2 ранга": RankShortCaption = "кап. 2 р."
+        Case "капитан 1 ранга": RankShortCaption = "кап. 1 р."
+        Case "контр-адмирал": RankShortCaption = "контр-адм."
+        Case "вице-адмирал": RankShortCaption = "вице-адм."
         Case Else
             RankShortCaption = rankCode
     End Select
@@ -660,6 +709,22 @@ Private Sub SyncEnrollmentReferencesFromStaff(ByVal wsReferences As Worksheet)
         If vusColumn > 0 Then AddStaffReferenceIfNew wsReferences, knownValues, "VUS", SafeText(wsStaff.Cells(rowNum, vusColumn).Value)
     Next rowNum
     FormatEnrollmentReferenceSheet wsReferences
+End Sub
+
+Private Sub EnsureDefaultRankReferences(ByVal ws As Worksheet)
+    Dim rankName As Variant
+
+    For Each rankName In Array( _
+        "рядовой", "ефрейтор", "младший сержант", "сержант", "старший сержант", "старшина", _
+        "прапорщик", "старший прапорщик", "младший лейтенант", "лейтенант", "старший лейтенант", "капитан", _
+        "майор", "подполковник", "полковник", "генерал-майор", "генерал-лейтенант", "генерал-полковник", _
+        "генерал армии", "Маршал Российской Федерации", _
+        "матрос", "старший матрос", "старшина 2 статьи", "старшина 1 статьи", "главный старшина", _
+        "главный корабельный старшина", "мичман", "старший мичман", "капитан-лейтенант", _
+        "капитан 3 ранга", "капитан 2 ранга", "капитан 1 ранга", "контр-адмирал", "вице-адмирал", _
+        "адмирал", "адмирал флота")
+        EnsureEnrollmentReference ws, "RANK", CStr(rankName), ""
+    Next rankName
 End Sub
 
 Private Sub FormatEnrollmentReferenceSheet(ByVal ws As Worksheet)
@@ -723,7 +788,14 @@ Private Sub EnsureEnrollmentReferenceWithCode(ByVal ws As Worksheet, ByVal refer
 
     For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
         If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) _
-            And UCase$(SafeText(ws.Cells(rowNum, 2).Value)) = UCase$(code) Then Exit Sub
+            And (UCase$(SafeText(ws.Cells(rowNum, 2).Value)) = UCase$(code) _
+                Or StrComp(SafeText(ws.Cells(rowNum, 3).Value), displayName, vbTextCompare) = 0) Then
+            ws.Cells(rowNum, 2).Value = code
+            ws.Cells(rowNum, 3).Value = displayName
+            ws.Cells(rowNum, 4).Value = amountValue
+            ws.Cells(rowNum, 5).Value = "YES"
+            Exit Sub
+        End If
     Next rowNum
     AddEnrollmentReference ws, referenceType, code, displayName, amountValue, "YES", "Reference value; operator may amend it after confirming the supporting document."
 End Sub
@@ -845,6 +917,7 @@ Public Sub ApplyEnrollmentReferenceValues(ByVal record As Object)
     If amountValue <> "" Then record("secrecy_percent") = amountValue
     amountValue = GetEnrollmentReferenceAmount("ACHIEVEMENT", SafeText(record("achievement_param")))
     If amountValue <> "" Then record("achievement_amount") = amountValue
+    If SafeText(record("bank_name")) <> "" Then record("bank_bik") = GetEnrollmentReferenceAmount("BANK", SafeText(record("bank_name")))
 End Sub
 Public Sub OpenEnrollmentForm()
     EnsureEnrollmentInfrastructure
@@ -1198,6 +1271,7 @@ Public Function GetEnrollmentRecordFromWorksheet(ByVal ws As Worksheet, ByVal ro
     record("passport_code") = ws.Cells(rowNum, COL_ENROLLMENT_PASSPORT_CODE).Value
     record("bank_account") = ws.Cells(rowNum, COL_ENROLLMENT_BANK_ACCOUNT).Value
     record("bank_name") = ws.Cells(rowNum, COL_ENROLLMENT_BANK_NAME).Value
+    record("bank_bik") = ws.Cells(rowNum, COL_ENROLLMENT_BANK_BIK).Value
     record("requisites_note") = ws.Cells(rowNum, COL_ENROLLMENT_REQUISITES_NOTE).Value
     record("preferential_enabled") = ws.Cells(rowNum, COL_ENROLLMENT_PREFERENTIAL_ENABLED).Value
     record("preferential_coeff") = ws.Cells(rowNum, COL_ENROLLMENT_PREFERENTIAL_COEFF).Value
@@ -1654,6 +1728,7 @@ Private Sub WriteRecordToSheet(ByVal ws As Worksheet, ByVal rowNum As Long, ByVa
     WriteTextCell ws, rowNum, COL_ENROLLMENT_PASSPORT_CODE, record("passport_code")
     WriteTextCell ws, rowNum, COL_ENROLLMENT_BANK_ACCOUNT, record("bank_account")
     ws.Cells(rowNum, COL_ENROLLMENT_BANK_NAME).Value = record("bank_name")
+    WriteTextCell ws, rowNum, COL_ENROLLMENT_BANK_BIK, record("bank_bik")
     ws.Cells(rowNum, COL_ENROLLMENT_REQUISITES_NOTE).Value = record("requisites_note")
     ws.Cells(rowNum, COL_ENROLLMENT_PREFERENTIAL_ENABLED).Value = record("preferential_enabled")
     ws.Cells(rowNum, COL_ENROLLMENT_PREFERENTIAL_COEFF).Value = record("preferential_coeff")
@@ -1814,7 +1889,7 @@ Private Function BuildNextPackageRecord(ByVal sourceRecord As Object) As Object
         "prescription_date", "report_number", "report_date", "report_info", "assignment_info", _
         "birth_date", "birth_place", "citizenship", "inn", "snils", "passport_series", _
         "passport_number", "passport_issuer", "passport_issue_date", "passport_code", _
-        "bank_account", "bank_name", "requisites_note", "class_param", "class_enabled", _
+        "bank_account", "bank_name", "bank_bik", "requisites_note", "class_param", "class_enabled", _
         "class_percent", "class_basis", "fizo_param", "fizo_enabled", "fizo_percent", _
         "fizo_basis", "secrecy_param", "secrecy_enabled", "secrecy_percent", "secrecy_basis", _
         "achievement_param", "achievement_enabled", "achievement_amount", "achievement_basis", "achievement_award_date", "achievement_document_reference", _
@@ -2373,6 +2448,7 @@ Private Sub EnsureRecordKeys(ByVal record As Object)
     EnsureRecordKey record, "passport_code"
     EnsureRecordKey record, "bank_account"
     EnsureRecordKey record, "bank_name"
+    EnsureRecordKey record, "bank_bik"
     EnsureRecordKey record, "requisites_note"
     EnsureRecordKey record, "preferential_enabled"
     EnsureRecordKey record, "preferential_coeff"
@@ -2796,13 +2872,11 @@ Private Function ResolveFizoPercent(ByVal paramText As String) As Long
     normalized = UCase$(Trim$(paramText))
 
     If InStr(normalized, "ВЫС") > 0 Then
-        ResolveFizoPercent = 70
+        ResolveFizoPercent = 100
     ElseIf InStr(normalized, "1") > 0 Or InStr(normalized, "I") > 0 Then
-        ResolveFizoPercent = 50
+        ResolveFizoPercent = 90
     ElseIf InStr(normalized, "2") > 0 Or InStr(normalized, "II") > 0 Then
-        ResolveFizoPercent = 30
-    ElseIf InStr(normalized, "3") > 0 Or InStr(normalized, "III") > 0 Then
-        ResolveFizoPercent = 15
+        ResolveFizoPercent = 80
     End If
 End Function
 

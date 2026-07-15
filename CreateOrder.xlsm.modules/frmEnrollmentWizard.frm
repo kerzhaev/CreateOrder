@@ -115,6 +115,7 @@ Private txtPassportIssueDate As Object
 Private txtPassportCode As Object
 Private txtBankAccount As Object
 Private txtBankName As Object
+Private txtBankBik As Object
 Private txtRequisitesNote As Object
 
 Private txtPreferentialBasis As Object
@@ -164,6 +165,7 @@ Private WithEvents cboClassDynamic As MSForms.ComboBox
 Private WithEvents cboSecrecyDynamic As MSForms.ComboBox
 Private WithEvents cboFizoDynamic As MSForms.ComboBox
 Private WithEvents cboAchievementDynamic As MSForms.ComboBox
+Private WithEvents cboBankDynamic As MSForms.ComboBox
 
 Private currentSourceMode As String
 Private Const PREVIEW_PAGE_INDEX As Long = 6
@@ -736,19 +738,20 @@ Private Sub ConfigureButtons()
 
     btnSelect.Caption = t("enrollment.form.button.pick_from_staff", "Выбрать сотрудника из штата")
     btnAddPeriod.Caption = t("enrollment.form.button.check", "Проверить и показать")
-    btnEditPeriod.Caption = t("enrollment.form.button.save", "Сохранить карточку")
-    btnDeletePeriod.Caption = t("enrollment.form.button.export", "Сохранить и экспортировать пакет")
+    btnEditPeriod.Caption = t("enrollment.form.button.save", "Сохранить")
+    btnDeletePeriod.Caption = t("enrollment.form.button.export", "Экспортировать Word")
     btnCheckDynamic.Caption = btnAddPeriod.Caption
     btnSaveCardDynamic.Caption = btnEditPeriod.Caption
     btnExportPackageDynamic.Caption = btnDeletePeriod.Caption
     btnSaveGenerateDynamic.Caption = t("enrollment.form.button.save_generate", "Сохранить и подготовить выплаты")
-    btnSaveContinueDynamic.Caption = t("enrollment.form.button.save_continue_package", "Сохранить и следующий в пакете")
+    btnSaveContinueDynamic.Caption = t("enrollment.form.button.save_continue_package", "Следующий в пакете")
     btnClose.Caption = t("common.close", "Закрыть")
 
     On Error Resume Next
     btnAddPeriod.Visible = False
     btnEditPeriod.Visible = False
     btnDeletePeriod.Visible = False
+    btnSaveGenerateDynamic.Visible = False
     On Error GoTo 0
 
     btnSelect.Left = 650
@@ -762,25 +765,20 @@ Private Sub ConfigureButtons()
 
     btnSaveCardDynamic.Left = 158
     btnSaveCardDynamic.Top = 620
-    btnSaveCardDynamic.Width = 135
+    btnSaveCardDynamic.Width = 130
     btnSaveCardDynamic.Height = 28
-
-    btnSaveGenerateDynamic.Left = 303
-    btnSaveGenerateDynamic.Top = 620
-    btnSaveGenerateDynamic.Width = 185
-    btnSaveGenerateDynamic.Height = 28
-
-    btnSaveContinueDynamic.Left = 498
-    btnSaveContinueDynamic.Top = 620
-    btnSaveContinueDynamic.Width = 200
-    btnSaveContinueDynamic.Height = 28
 
     btnExportPackageDynamic.Left = 18
     btnExportPackageDynamic.Top = 654
-    btnExportPackageDynamic.Width = 220
+    btnExportPackageDynamic.Width = 160
     btnExportPackageDynamic.Height = 28
 
-    btnClose.Left = 254
+    btnSaveContinueDynamic.Left = 188
+    btnSaveContinueDynamic.Top = 654
+    btnSaveContinueDynamic.Width = 150
+    btnSaveContinueDynamic.Height = 28
+
+    btnClose.Left = 350
     btnClose.Top = 654
     btnClose.Width = 64
 End Sub
@@ -838,12 +836,12 @@ Private Sub CreateWizardUi()
     Set pgOneTime = mpWizard.Pages.Add
     pgOneTime.Caption = t("enrollment.page.onetime", "Разовые выплаты и реквизиты")
     Set pgAdvanced = mpWizard.Pages.Add
-    pgAdvanced.Caption = t("enrollment.page.advanced", "Основания и пакет")
+    pgAdvanced.Caption = t("enrollment.page.advanced", "Основания выплат")
     Set pgExtras = mpWizard.Pages.Add
-    pgExtras.Caption = t("enrollment.page.extras", "Дополнительные выплаты")
+    pgExtras.Caption = t("enrollment.page.extras", "Иные выплаты")
     ConfigureScrollablePage pgExtras, 720
     Set pgPreview = mpWizard.Pages.Add
-    pgPreview.Caption = t("enrollment.page.preview", "Проверка и Word")
+    pgPreview.Caption = t("enrollment.page.preview", "Проверка и текст приказа")
     ConfigureScrollablePage pgPreview, 540
 
     CreateEmployeePage
@@ -942,7 +940,8 @@ Private Sub CreateOneTimePage()
     Set txtEdvAmount = AddPageTextBoxT(pgOneTime, "common.amount", "Сумма", 130, 108, 120)
     Set txtEdvDate = AddPageTextBoxT(pgOneTime, "common.date", "Дата", 270, 108, 120)
 
-    AddPageSectionLabel pgOneTime, "Персональные данные и банковские реквизиты", 12, 138, 500
+    AddPageSectionLabel pgOneTime, "Паспортные данные", 12, 138, 420
+    AddPageSectionLabel pgOneTime, "Банковские реквизиты", 550, 138, 250
     Set txtBirthDate = AddPageTextBoxT(pgOneTime, "enrollment.field.birth_date", "Дата рождения", 12, 162, 120)
     Set txtBirthPlace = AddPageTextBoxT(pgOneTime, "enrollment.field.birth_place", "Место рождения", 150, 162, 320)
     Set txtCitizenship = AddPageTextBoxT(pgOneTime, "enrollment.field.citizenship", "Гражданство", 12, 204, 120)
@@ -952,10 +951,11 @@ Private Sub CreateOneTimePage()
     Set txtPassportNumber = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_number", "Номер паспорта", 150, 246, 120)
     Set txtPassportIssueDate = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_issue_date", "Дата выдачи", 290, 246, 120)
     Set txtPassportCode = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_code", "Код подразделения", 430, 246, 102)
-    Set txtPassportIssuer = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_issuer", "Кем выдан", 550, 162, 250, 50, True)
-    Set txtBankAccount = AddPageTextBoxT(pgOneTime, "enrollment.field.bank_account", "Лицевой / банковский счёт", 550, 234, 250)
-    Set txtBankName = AddPageTextBoxT(pgOneTime, "enrollment.field.bank_name", "Банк", 550, 276, 250)
-    Set txtRequisitesNote = AddPageTextBoxT(pgOneTime, "enrollment.field.requisites_note", "Примечание по реквизитам", 550, 318, 250, 48, True)
+    Set txtPassportIssuer = AddPageTextBoxT(pgOneTime, "enrollment.field.passport_issuer", "Кем выдан", 12, 288, 520, 42, True)
+    Set txtBankName = AddPageComboBoxT(pgOneTime, "enrollment.field.bank_name", "Банк (из справочника)", 550, 162, 250)
+    Set txtBankBik = AddPageTextBox(pgOneTime, "БИК (из справочника)", 550, 204, 250, 18, False, True)
+    Set txtBankAccount = AddPageTextBoxT(pgOneTime, "enrollment.field.bank_account", "Лицевой / банковский счёт", 550, 246, 250)
+    Set txtRequisitesNote = AddPageTextBoxT(pgOneTime, "enrollment.field.requisites_note", "Примечание по реквизитам", 550, 288, 250, 42, True)
     ConfigureScrollablePage pgOneTime, 430
 End Sub
 
@@ -984,11 +984,12 @@ Private Sub CreateExtrasPage()
     Const ONE_TIME_STEP As Single = 120
     Const ONE_TIME_START As Single = 560
 
-    AddPageSectionLabel pgExtras, "Дополнительные ежемесячные выплаты", 12, 2, 420
-    AddPageSectionLabel pgExtras, "Дополнительные разовые выплаты", 12, 532, 420
+    AddPageSectionLabel pgExtras, "Иные ежемесячные выплаты — заполняйте, только если выплаты нет на вкладках выше", 12, 2, 720
+    AddPageSectionLabel pgExtras, "Вид — что выплачивается; параметр — условие/основание; размер — сумма в рублях или процент; дата — начало выплаты.", 12, 18, 720
+    AddPageSectionLabel pgExtras, "Иные разовые выплаты — укажите сумму, дату и основание", 12, 552, 620
 
     For i = 1 To 4
-        topPos = 34 + (i - 1) * MONTHLY_STEP
+        topPos = 54 + (i - 1) * MONTHLY_STEP
         Set txtExtraMonthlyName(i) = AddPageComboBoxT(pgExtras, "enrollment.field.extra_monthly_name_short", "Вид ежемесячной выплаты", 12, topPos, 300)
         txtExtraMonthlyName(i).Tag = CStr(i)
         Set chkExtraMonthly(i) = AddPageCheckBoxT(pgExtras, "common.enabled_short", "Вкл", 324, topPos + 18)
@@ -1010,7 +1011,7 @@ Private Sub CreateExtrasPage()
         Set txtExtraOneTimeBasis(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_onetime_basis", "Основание", 12, topPos + 52, 724, 42, True)
     Next i
 
-    ConfigureScrollablePage pgExtras, 950
+    ConfigureScrollablePage pgExtras, 970
 End Sub
 
 Private Sub CreatePreviewPage()
@@ -1094,12 +1095,14 @@ Private Sub PopulateOperatorReferenceLists()
     PopulateComboBox txtSecrecyParam, "SECRECY"
     PopulateComboBox txtFizoParam, "FIZO"
     PopulateComboBox txtAchievementParam, "ACHIEVEMENT"
+    PopulateComboBox txtBankName, "BANK"
     Set cboEmployeeRankDynamic = txtEmployeeRank
     Set cboEmployeeTariffDynamic = txtEmployeeTariff
     Set cboClassDynamic = txtClassParam
     Set cboSecrecyDynamic = txtSecrecyParam
     Set cboFizoDynamic = txtFizoParam
     Set cboAchievementDynamic = txtAchievementParam
+    Set cboBankDynamic = txtBankName
     PopulateExtraPaymentTypeLists
 End Sub
 
@@ -1144,6 +1147,7 @@ Private Sub UpdateReferenceSalaryPreview()
     If amountValue <> "" Then txtFizoPercent.Value = amountValue
     amountValue = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("ACHIEVEMENT", SafeText(txtAchievementParam.Value))
     If amountValue <> "" Then txtAchievementAmount.Value = amountValue
+    txtBankBik.Value = mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("BANK", SafeText(txtBankName.Value))
 End Sub
 
 Private Sub cboEmployeeRankDynamic_Change()
@@ -1159,6 +1163,10 @@ Private Sub cboClassDynamic_Change()
 End Sub
 
 Private Sub cboFizoDynamic_Change()
+    UpdateReferenceSalaryPreview
+End Sub
+
+Private Sub cboBankDynamic_Change()
     UpdateReferenceSalaryPreview
 End Sub
 
@@ -1341,6 +1349,7 @@ Private Sub PushFormToBackend()
     mdlEnrollmentWorkflow.SetBackendValue "passport_code", txtPassportCode.Value
     mdlEnrollmentWorkflow.SetBackendValue "bank_account", txtBankAccount.Value
     mdlEnrollmentWorkflow.SetBackendValue "bank_name", txtBankName.Value
+    mdlEnrollmentWorkflow.SetBackendValue "bank_bik", txtBankBik.Value
     mdlEnrollmentWorkflow.SetBackendValue "requisites_note", txtRequisitesNote.Value
 End Sub
 
@@ -1506,6 +1515,7 @@ Public Sub ReloadFromBackend()
     txtPassportCode.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("passport_code"))
     txtBankAccount.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_account"))
     txtBankName.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_name"))
+    txtBankBik.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_bik"))
     txtRequisitesNote.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("requisites_note"))
 
     txtPreviewStatus.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("preview_status"))
