@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784061823.202173,
-    "ast_hash": "05062dae048d37b5a0899dd7f7a0e984",
+    "mtime": 1784134965.543372,
+    "ast_hash": "5dd0b4c17bde93f704d5a9520ea29fab",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784061823.1980536,
-    "ast_hash": "77a0728834eca877474a1492a4d60035",
+    "mtime": 1784134965.5413697,
+    "ast_hash": "7899d17fc7c5a5cc995f98eb53d85e4a",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -285,8 +285,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/acceptance-matrix.md": {
-    "mtime": 1784061807.5661266,
-    "ast_hash": "913d9e17774ce5a08b1222fbfcf14f7c",
+    "mtime": 1784134965.5423708,
+    "ast_hash": "e175d7bc84482431c822218f68521e61",
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentTariffReferenceSafe.ps1": {
