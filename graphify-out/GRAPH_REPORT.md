@@ -1,16 +1,16 @@
 # Graph Report - CreateOrder  (2026-07-15)
 
 ## Corpus Check
-- 60 files · ~63,162 words
+- 63 files · ~91,481 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 699 nodes · 710 edges · 70 communities (59 shown, 11 thin omitted)
+- 714 nodes · 724 edges · 73 communities (60 shown, 13 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `125d4677`
+- Built from commit: `23c2a75d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -75,6 +75,9 @@
 - Спецификация: операторский интерфейс мастера зачисления
 - plan.md
 - Матрица приёмки замечаний по мастеру зачисления
+- Компактные формы перемещения и исключения
+- Test-PersonnelActionWizard-no-loc.ps1
+- Test-PersonnelActionWizard-old-form.ps1
 
 ## God Nodes (most connected - your core abstractions)
 1. `План реализации: кадровые события и движок надбавок` - 23 edges
@@ -83,10 +86,10 @@
 4. `11. Этапы реализации` - 12 edges
 5. `Block 1. Payments Without Periods: list-based assignment mode` - 12 edges
 6. `Block 2. Enrollment workflow: new tab and rules engine` - 12 edges
-7. `Технический план: Массовое добавление сотрудников на лист "Выплаты_Без_Периодов"` - 10 edges
-8. `Спецификация: Массовое добавление сотрудников на лист "Выплаты_Без_Периодов"` - 10 edges
-9. `������������: ������������� ������� ������ � ���������� ��� ��������` - 10 edges
-10. `План: приказы о перемещении и исключении из списков` - 10 edges
+7. `Статус проекта CreateOrder` - 11 edges
+8. `Технический план: Массовое добавление сотрудников на лист "Выплаты_Без_Периодов"` - 10 edges
+9. `Спецификация: Массовое добавление сотрудников на лист "Выплаты_Без_Периодов"` - 10 edges
+10. `������������: ������������� ������� ������ � ���������� ��� ��������` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
@@ -94,7 +97,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (70 total, 11 thin omitted)
+## Communities (73 total, 13 thin omitted)
 
 ### Community 0 - "Test-PaymentsEnrollmentAcceptance.ps1"
 Cohesion: 0.09
@@ -269,8 +272,8 @@ Cohesion: 0.12
 Nodes (16): Автоматические проверки, Где искать код и документацию, Единый вход в кадровые действия, Надбавки и нормативная логика, Ошибки VBA, встреченные при предыдущем импорте, Ошибки и ограничения Excel/интерфейса, Ошибки и принятые решения, Передача проекта — 14.07.2026 (+8 more)
 
 ### Community 55 - "Статус проекта CreateOrder"
-Cohesion: 0.13
-Nodes (14): Аудит готовности на 13.07.2026, Документы и ориентиры, Единый вход в кадровые действия, Зафиксированные решения, Как продолжить работу, Мастер зачисления: повторная инициализация формы (14.07.2026), Направления работы, Обновление интерфейса зачисления — 15.07.2026 (+6 more)
+Cohesion: 0.12
+Nodes (15): Аудит готовности на 13.07.2026, Документы и ориентиры, Единый вход в кадровые действия, Зафиксированные решения, Как продолжить работу, Компактные кадровые формы — 15.07.2026, Мастер зачисления: повторная инициализация формы (14.07.2026), Направления работы (+7 more)
 
 ### Community 56 - "Разбор источника: приказ МО РФ №430дсп — особые достижения"
 Cohesion: 0.25
@@ -292,22 +295,26 @@ Nodes (5): Не утверждённые нормативные размеры, 
 Cohesion: 0.50
 Nodes (3): Матрица приёмки замечаний по мастеру зачисления, Неподтверждённые величины, Обязательный финальный сценарий
 
+### Community 70 - "Компактные формы перемещения и исключения"
+Cohesion: 0.33
+Nodes (5): Компактные формы перемещения и исключения, Проверка, Состояние на 15.07.2026, Требования, Цель
+
 ## Knowledge Gaps
-- **421 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+416 more)
+- **426 isolated node(s):** `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)`, `3. Архитектурные решения (ADR)`, `3.1. AI Factory / Pipeline Notes` (+421 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `План реализации: кадровые события и движок надбавок` connect `План реализации: кадровые события и движок надбавок` to `3. Целевая модель данных`, `6. Единый движок оценки выплат`, `12. Тестовая стратегия`, `5. Сервис связывания со Штат`, `9. Интерфейс`, `11. Этапы реализации`, `4. Справочники правил`, `7. Пользовательские сценарии`, `8. Word-архитектура`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Why does `Block 2. Enrollment workflow: new tab and rules engine` connect `Block 2. Enrollment workflow: new tab and rules engine` to `Block 1. Payments Without Periods: list-based assignment mode`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **Why does `Feature Specification: Payments Without Periods and Enrollment Workflow` connect `Block 1. Payments Without Periods: list-based assignment mode` to `Block 2. Enrollment workflow: new tab and rules engine`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **What connects `0. System Instructions (Agent Rules)`, `1. Глобальная цель`, `2. Текущее состояние (Active State)` to the rest of the system?**
-  _421 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _426 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Test-PaymentsEnrollmentAcceptance.ps1` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
 - **Should `Block 2. Enrollment workflow: new tab and rules engine` be split into smaller, more focused modules?**

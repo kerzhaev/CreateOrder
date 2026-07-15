@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784140170.6074915,
-    "ast_hash": "3262f6e333c81295b0a8e338ac056362",
+    "mtime": 1784142894.3983777,
+    "ast_hash": "414290741a6e107a206f85d74dd13381",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784140152.7763977,
-    "ast_hash": "9308f95eb896b1e2885ba7c690f30619",
+    "mtime": 1784142816.8247774,
+    "ast_hash": "ab83d40483e3c41a966ed8dcd0cd1b61",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -220,8 +220,8 @@
     "semantic_hash": ""
   },
   "tools/Test-PersonnelActionWizardSafe.ps1": {
-    "mtime": 1784059520.7845027,
-    "ast_hash": "3eecee1da4f924e622968765448d41f1",
+    "mtime": 1784142639.5577488,
+    "ast_hash": "3017576f5e0b587faadaefd6c91dddd8",
     "semantic_hash": ""
   },
   "tools/Test-PersonnelRibbonSafe.ps1": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784140170.6074915,
-    "ast_hash": "7568a966974880738e0e9ad59468fab3",
+    "mtime": 1784142894.3963091,
+    "ast_hash": "7095cdb91bf21cb0210a11598478c98d",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -297,6 +297,31 @@
   ".spec/tasks/enrollment-operator-clarity-2026-07-15.md": {
     "mtime": 1784140152.7769275,
     "ast_hash": "032c20a3b51821400fe9b7cb258ed9ce",
+    "semantic_hash": ""
+  },
+  "tmp/Test-PersonnelActionWizard-no-loc.ps1": {
+    "mtime": 1784141131.492636,
+    "ast_hash": "33f34042e3b5c9d8d03d459c46b1fe0d",
+    "semantic_hash": ""
+  },
+  "tmp/Test-PersonnelActionWizard-old-form.ps1": {
+    "mtime": 1784141389.1065514,
+    "ast_hash": "89494b3e2c21822112116a3b739dd3be",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/personnel-action-wizard-usability-2026-07-15.md": {
+    "mtime": 1784142714.7158082,
+    "ast_hash": "f1d422e914e745b71c3590afdb8dc2d9",
+    "semantic_hash": ""
+  },
+  "tmp/loc-utf8.txt": {
+    "mtime": 1784142156.736024,
+    "ast_hash": "cabd3307ef59c72f4279972739f6617b",
+    "semantic_hash": ""
+  },
+  "tmp/wizard-utf8.txt": {
+    "mtime": 1784142067.5949802,
+    "ast_hash": "4a219bcca4c3d6957ade9c317a42e608",
     "semantic_hash": ""
   }
 }

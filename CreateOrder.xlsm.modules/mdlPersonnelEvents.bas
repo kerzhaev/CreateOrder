@@ -15,6 +15,7 @@ Private Const SHEET_LEGAL_ACTS As String = "LegalActs"
 Private Const SHEET_EVENT_INPUT As String = "PersonnelEventInput"
 
 Private mPersonnelActionMenuPending As Boolean
+Private mPersonnelInfrastructureReady As Boolean
 
 Public Const EVENT_TYPE_ENROLLMENT As String = "ENROLLMENT"
 Public Const EVENT_TYPE_TRANSFER As String = "TRANSFER"
@@ -31,6 +32,8 @@ Public Const LEGAL_ACT_UP_788 As String = "UP-788-20221102"
 Public Const LEGAL_ACT_MO_780 As String = "MO-780-20221219"
 
 Public Sub EnsurePersonnelEventInfrastructure()
+    If mPersonnelInfrastructureReady Then Exit Sub
+
     EnsureServiceSheet SHEET_EMPLOYEES, Array("EmployeeID", "FIO", "PersonalNumber", "TableNumber", "SourceMode", "StaffLinkStatus", "StaffReference", "CreatedAt", "UpdatedAt", "IsActive")
     EnsureServiceSheet SHEET_CURRENT_STATE, Array("EmployeeID", "Rank", "RankEffectiveDate", "Position", "Section", "MilitaryUnit", "VUS", "TariffRank", "PositionSalary", "RankSalary", "ServiceCategory", "ContractKind", "ContractBasis", "StateDate", "SourceEventID", "LastEventID", "FizoLevel", "SportStatus", "MedalCode", "DriverCDCE", "Contract430Eligible", "MedalAwardDate", "MedalAwardDocumentReference")
     EnsureServiceSheet SHEET_EVENTS, Array("EventID", "EmployeeID", "EventType", "EventDate", "EffectiveDate", "Status", "BeforeSnapshotID", "AfterSnapshotID", "OrderReference", "BasisText", "OperatorName", "CreatedAt", "UpdatedAt", "CorrectsEventID", "Comment", "HandoverDate", "AcceptanceDate", "DutyStartDate", "DestinationUnit", "DestinationLocation", "MaterialAssistanceStatus", "MainLeaveStatus", "AdditionalLeaveStatus")
@@ -44,6 +47,7 @@ Public Sub EnsurePersonnelEventInfrastructure()
     EnsureConfirmedPoint2Cap
     EnsureConfirmedPersonnelLegalActs
     EnsurePersonnelEventInputSheet
+    mPersonnelInfrastructureReady = True
 End Sub
 
 Public Sub EnsureConfirmedPersonnelLegalActs()
@@ -135,14 +139,50 @@ Public Sub OpenPersonnelActionWizard(ByVal eventType As String)
 End Sub
 
 Public Function GetPersonnelWizardValue(ByVal fieldKey As String) As Variant
-    EnsurePersonnelEventInfrastructure
     GetPersonnelWizardValue = GetInputValue(ThisWorkbook.Worksheets(SHEET_EVENT_INPUT), fieldKey)
 End Function
 
 Public Sub SetPersonnelWizardValue(ByVal fieldKey As String, ByVal fieldValue As Variant)
-    EnsurePersonnelEventInfrastructure
     SetInputValue ThisWorkbook.Worksheets(SHEET_EVENT_INPUT), fieldKey, fieldValue
 End Sub
+
+Public Function SearchPersonnelEmployees(ByVal query As String) As Collection
+    Dim employees As Worksheet
+    Dim results As New Collection
+    Dim rowNum As Long
+    Dim employeeID As String
+    Dim fio As String
+    Dim personalNumber As String
+    Dim tableNumber As String
+    Dim normalizedQuery As String
+    Dim employeeData As Object
+
+    EnsurePersonnelEventInfrastructure
+    normalizedQuery = LCase$(Trim$(query))
+    Set employees = ThisWorkbook.Worksheets(SHEET_EMPLOYEES)
+    If normalizedQuery = "" Then
+        Set SearchPersonnelEmployees = results
+        Exit Function
+    End If
+    For rowNum = 2 To LastDataRow(employees)
+        employeeID = SafeText(employees.Cells(rowNum, 1).Value)
+        fio = SafeText(employees.Cells(rowNum, 2).Value)
+        personalNumber = SafeText(employees.Cells(rowNum, 3).Value)
+        tableNumber = SafeText(employees.Cells(rowNum, 4).Value)
+        If InStr(1, LCase$(employeeID), normalizedQuery, vbTextCompare) > 0 _
+            Or InStr(1, LCase$(fio), normalizedQuery, vbTextCompare) > 0 _
+            Or InStr(1, LCase$(personalNumber), normalizedQuery, vbTextCompare) > 0 _
+            Or InStr(1, LCase$(tableNumber), normalizedQuery, vbTextCompare) > 0 Then
+            Set employeeData = CreateObject("Scripting.Dictionary")
+            employeeData("employee_id") = employeeID
+            employeeData("fio") = fio
+            employeeData("personal_number") = personalNumber
+            employeeData("table_number") = tableNumber
+            results.Add employeeData
+        End If
+    Next rowNum
+    Set SearchPersonnelEmployees = results
+End Function
 
 Public Function LoadPersonnelWizardCurrentState() As Boolean
     Dim ws As Worksheet

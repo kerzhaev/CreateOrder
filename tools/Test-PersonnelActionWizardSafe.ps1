@@ -48,7 +48,7 @@ try {
     $probe.CodeModule.AddFromString(@"
 Option Explicit
 Public Function ProbePersonnelActionWizard() As String
-    Dim enrollmentID As String, transferID As String, exclusionID As String, outputPath As String, employeeID As String, currentState As Object, employeeRow As Long
+    Dim enrollmentID As String, transferID As String, exclusionID As String, outputPath As String, employeeID As String, currentState As Object, employeeRow As Long, searchMatches As Collection
     On Error GoTo Failed
     mdlPersonnelEvents.PreparePersonnelActionMenu
     Load frmPersonnelActionWizard
@@ -69,9 +69,16 @@ Public Function ProbePersonnelActionWizard() As String
     enrollmentID = mdlPersonnelEvents.SavePersonnelEventInput(False)
     employeeID = CStr(mdlPersonnelEvents.GetPersonnelWizardValue("employee_id"))
     If employeeID = "" Then Err.Raise 699, , "Enrollment did not create EmployeeID"
+    Set searchMatches = mdlPersonnelEvents.SearchPersonnelEmployees("Wizard Test")
+    If searchMatches.Count <> 1 Then Err.Raise 699, , "Search by FIO did not return the employee"
+    Set searchMatches = mdlPersonnelEvents.SearchPersonnelEmployees("WIZ-001")
+    If searchMatches.Count <> 1 Then Err.Raise 699, , "Search by personal number did not return the employee"
     mdlPersonnelEvents.PrepareNewPersonnelAction "TRANSFER"
     Load frmPersonnelActionWizard
     If frmPersonnelActionWizard.Controls("txt_employee_id") Is Nothing Then Err.Raise 700, , "Employee field missing"
+    If frmPersonnelActionWizard.Controls("txt_search") Is Nothing Then Err.Raise 700, , "Search field missing"
+    frmPersonnelActionWizard.Controls("txt_search").Value = "Wizard Test"
+    If InStr(1, CStr(frmPersonnelActionWizard.Controls("txt_search_results").Value), "Wizard Test", vbTextCompare) = 0 Then Err.Raise 700, , "Search preview did not show the employee"
     If frmPersonnelActionWizard.Controls("txt_destination_location") Is Nothing Then Err.Raise 701, , "Destination field missing"
     If frmPersonnelActionWizard.Controls("txt_status") Is Nothing Then Err.Raise 702, , "Status field missing"
     If frmPersonnelActionWizard.btnImportResponse.Caption = "" Then Err.Raise 703, , "Save button caption missing"
