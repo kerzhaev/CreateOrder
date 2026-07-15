@@ -6,7 +6,8 @@ param(
     [string]$RibbonHandlersPath = ".\CreateOrder.xlsm.modules\mdlRibbonHandlers.bas",
     [string]$SourceTemplatePath = "",
     [string]$RunTemplatePath = ".\ZP12_TEST_RUN.xlsx",
-    [string]$Pass1SnapshotPath = ".\ZP12_TEST_RUN_PASS1.xlsx"
+    [string]$Pass1SnapshotPath = ".\ZP12_TEST_RUN_PASS1.xlsx",
+    [string]$TestDirectoryPath = ".\_tmp_zp12_validation_test"
 )
 
 $ErrorActionPreference = "Stop"
@@ -102,7 +103,7 @@ function Invoke-ZP12MacroRun {
         $null = $vbProject.VBComponents.Import($RibbonHandlersFullPath)
         $macroWb.Save()
 
-        $excel.Run("CreateOrder.xlsm!mdlZP12Validation.ValidateZP12Template", $TemplateFullPath, $true)
+        $excel.Run("'$($macroWb.Name)'!mdlZP12Validation.ValidateZP12Template", $TemplateFullPath, $true)
 
         $templateWb = $null
         foreach ($wb in $excel.Workbooks) {
@@ -277,12 +278,17 @@ $ribbonHandlersFullPath = Resolve-ProjectPath $RibbonHandlersPath
 $sourceTemplateFullPath = if ([string]::IsNullOrWhiteSpace($SourceTemplatePath)) { Get-DefaultSourceTemplate } else { Resolve-ProjectPath $SourceTemplatePath }
 $runTemplateFullPath = Resolve-ProjectPath $RunTemplatePath
 $pass1SnapshotFullPath = Resolve-ProjectPath $Pass1SnapshotPath
+$testDirectoryFullPath = Resolve-ProjectPath $TestDirectoryPath
+$testMacroWorkbookFullPath = Join-Path $testDirectoryFullPath "CreateOrder_zp12_validation_test.xlsm"
 
 if (-not (Test-Path $workbookFullPath)) { throw "Не найден workbook: $workbookFullPath" }
 if (-not (Test-Path $moduleFullPath)) { throw "Не найден модуль: $moduleFullPath" }
 if (-not (Test-Path $helperFullPath)) { throw "Не найден helper-модуль: $helperFullPath" }
 if (-not (Test-Path $ribbonHandlersFullPath)) { throw "Не найден ribbon-модуль: $ribbonHandlersFullPath" }
 if (-not (Test-Path $sourceTemplateFullPath)) { throw "Не найден шаблон: $sourceTemplateFullPath" }
+
+New-Item -ItemType Directory -Path $testDirectoryFullPath -Force | Out-Null
+Copy-Item -LiteralPath $workbookFullPath -Destination $testMacroWorkbookFullPath -Force
 
 Write-Host "=== D89 regression ===" -ForegroundColor Cyan
 Write-Host "Workbook: $workbookFullPath"
@@ -297,7 +303,7 @@ if (Test-Path $pass1SnapshotFullPath) {
 }
 
 Write-Host "[1/5] First validation run..." -ForegroundColor Yellow
-Invoke-ZP12MacroRun -WorkbookFullPath $workbookFullPath -ModuleFullPath $moduleFullPath -HelperFullPath $helperFullPath -RibbonHandlersFullPath $ribbonHandlersFullPath -TemplateFullPath $runTemplateFullPath
+Invoke-ZP12MacroRun -WorkbookFullPath $testMacroWorkbookFullPath -ModuleFullPath $moduleFullPath -HelperFullPath $helperFullPath -RibbonHandlersFullPath $ribbonHandlersFullPath -TemplateFullPath $runTemplateFullPath
 $pass1State = Get-ZP12State -WorkbookFullPath $runTemplateFullPath
 Copy-Item -Path $runTemplateFullPath -Destination $pass1SnapshotFullPath -Force
 
@@ -305,7 +311,7 @@ Write-Host "[2/5] Apply controlled fixes..." -ForegroundColor Yellow
 Apply-RegressionFixes -WorkbookFullPath $runTemplateFullPath
 
 Write-Host "[3/5] Second validation run..." -ForegroundColor Yellow
-Invoke-ZP12MacroRun -WorkbookFullPath $workbookFullPath -ModuleFullPath $moduleFullPath -HelperFullPath $helperFullPath -RibbonHandlersFullPath $ribbonHandlersFullPath -TemplateFullPath $runTemplateFullPath
+Invoke-ZP12MacroRun -WorkbookFullPath $testMacroWorkbookFullPath -ModuleFullPath $moduleFullPath -HelperFullPath $helperFullPath -RibbonHandlersFullPath $ribbonHandlersFullPath -TemplateFullPath $runTemplateFullPath
 $pass2State = Get-ZP12State -WorkbookFullPath $runTemplateFullPath
 
 Write-Host "[4/5] Assert expected status transitions..." -ForegroundColor Yellow

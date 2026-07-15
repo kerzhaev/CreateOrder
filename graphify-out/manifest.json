@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   "Test-ZP12Validation.ps1": {
-    "mtime": 1783890820.830293,
-    "ast_hash": "0048ba16d0dd190be9f4eb45204ed2ca",
+    "mtime": 1784135791.0115216,
+    "ast_hash": "af96e78ac3069e3dc06c641e9ee54a0e",
     "semantic_hash": ""
   },
   "tools/ensure_localization_sheet.py": {
@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784134965.543372,
-    "ast_hash": "5dd0b4c17bde93f704d5a9520ea29fab",
+    "mtime": 1784136280.7847645,
+    "ast_hash": "8bd23c879da38805d0cc0f4e94bd3eb6",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -150,8 +150,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/zp12-validation.md": {
-    "mtime": 1773353583.4554453,
-    "ast_hash": "b671109aee4ff59447e73dbe8560c4fc",
+    "mtime": 1784136280.7821476,
+    "ast_hash": "da2b7b53c6bed2d5598b7249bf65736f",
     "semantic_hash": ""
   },
   ".spec/templates/.specify/templates/agent-file-template.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784061807.5681276,
-    "ast_hash": "574053112dd5eff340df77726d6e1958",
+    "mtime": 1784136280.7837162,
+    "ast_hash": "607cfb5ee8c4563c1a1bb53656b2f97d",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784134965.5413697,
-    "ast_hash": "7899d17fc7c5a5cc995f98eb53d85e4a",
+    "mtime": 1784136319.5765133,
+    "ast_hash": "e6299a19d260df8b3d6c29fc1ad13dfb",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {

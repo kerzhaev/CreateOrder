@@ -1,7 +1,7 @@
 Attribute VB_Name = "mdlZP12Validation"
 Option Explicit
 
-Private Const STAFF_SHEET_INDEX As Long = 4
+Private Const STAFF_SHEET_NAME As String = "Штат"
 Private Const HISTORY_SHEET_NAME As String = "D89_History"
 Private Const HISTORY_HEADER_ROW As Long = 1
 Private Const TEMPLATE_HEADER_ROW As Long = 1
@@ -172,7 +172,7 @@ Private Function BuildStaffContext() As Object
     Dim colEffectiveStart As Long
     Dim context As Object
 
-    Set wsStaff = ThisWorkbook.Worksheets(STAFF_SHEET_INDEX)
+    Set wsStaff = GetStaffWorksheet()
     colTable = 1
     colPersonal = 2
     colRank = 3
@@ -198,6 +198,17 @@ Private Function BuildStaffContext() As Object
     context.Add "PersonalIndex", BuildStaffIndex(wsStaff, colPersonal, False)
 
     Set BuildStaffContext = context
+End Function
+
+Private Function GetStaffWorksheet() As Worksheet
+    On Error Resume Next
+    Set GetStaffWorksheet = ThisWorkbook.Worksheets(STAFF_SHEET_NAME)
+    On Error GoTo 0
+
+    If GetStaffWorksheet Is Nothing Then
+        Err.Raise vbObjectError + 703, "mdlZP12Validation", _
+            "Required staff sheet was not found: '" & STAFF_SHEET_NAME & "'."
+    End If
 End Function
 
 Private Function FindRequiredHeaderColumn(ByVal ws As Worksheet, ByVal headerName As String) As Long
