@@ -18,6 +18,8 @@ Private Const DEFAULT_EDV_AMOUNT As String = "400000"
 Private Const DEFAULT_PER_DIEM_DAYS As String = "1"
 
 Private enrollmentReferencesSynced As Boolean
+Private enrollmentInfrastructureReady As Boolean
+Private enrollmentReferenceDataReady As Boolean
 
 Private Const BACKEND_COL_KEY As Long = 1
 Private Const BACKEND_COL_LABEL As Long = 2
@@ -185,6 +187,8 @@ Public Sub EnsureEnrollmentInfrastructure()
     Dim wsJournal As Worksheet
     Dim wsBackend As Worksheet
 
+    If enrollmentInfrastructureReady Then Exit Sub
+
     Set wsJournal = EnsureWorksheet(mdlReferenceData.SHEET_ENROLLMENT)
     Set wsBackend = EnsureWorksheet(mdlReferenceData.SHEET_ENROLLMENT_FORM)
 
@@ -199,6 +203,7 @@ Public Sub EnsureEnrollmentInfrastructure()
     On Error GoTo 0
     HideLegacyEnrollmentFormSheets
     HideTechnicalOperatorSheets
+    enrollmentInfrastructureReady = True
 End Sub
 
 Private Sub HideTechnicalOperatorSheets()
@@ -551,6 +556,8 @@ Public Sub EnsureEnrollmentReferenceData()
     Dim ws As Worksheet
     Dim i As Long
 
+    If enrollmentReferenceDataReady Then Exit Sub
+
     On Error Resume Next
     Set ws = ThisWorkbook.Worksheets(ENROLLMENT_REFERENCE_SHEET)
     On Error GoTo 0
@@ -583,6 +590,7 @@ Public Sub EnsureEnrollmentReferenceData()
         ws.Rows(1).Font.Bold = True
         FormatEnrollmentReferenceSheet ws
     End If
+    DeduplicateEnrollmentReferences ws
     EnsureDefaultRankReferences ws
     EnsureCompactTariffRankReferenceLabels ws
     EnsureCompactRankReferenceLabels ws
@@ -599,6 +607,7 @@ Public Sub EnsureEnrollmentReferenceData()
         EnsureCompactRankReferenceLabels ws
         enrollmentReferencesSynced = True
     End If
+    enrollmentReferenceDataReady = True
 End Sub
 
 Private Function TariffRankCaption(ByVal tariffRankCode As String) As String
@@ -680,8 +689,9 @@ Private Sub SyncEnrollmentReferencesFromStaff(ByVal wsReferences As Worksheet)
     Set knownValues = CreateObject("Scripting.Dictionary")
     knownValues.CompareMode = vbTextCompare
     For refRow = 2 To wsReferences.Cells(wsReferences.Rows.Count, 1).End(xlUp).Row
-        If SafeText(wsReferences.Cells(refRow, 1).Value) <> "" And SafeText(wsReferences.Cells(refRow, 3).Value) <> "" Then
-            knownValues(UCase$(SafeText(wsReferences.Cells(refRow, 1).Value)) & "|" & UCase$(SafeText(wsReferences.Cells(refRow, 3).Value))) = True
+        If SafeText(wsReferences.Cells(refRow, 1).Value) <> "" Then
+            RegisterKnownReferenceValue knownValues, SafeText(wsReferences.Cells(refRow, 1).Value), SafeText(wsReferences.Cells(refRow, 2).Value)
+            RegisterKnownReferenceValue knownValues, SafeText(wsReferences.Cells(refRow, 1).Value), SafeText(wsReferences.Cells(refRow, 3).Value)
         End If
     Next refRow
 
@@ -742,7 +752,58 @@ Private Sub AddStaffReferenceIfNew(ByVal wsReferences As Worksheet, ByVal knownV
     key = UCase$(referenceType) & "|" & UCase$(displayName)
     If knownValues.Exists(key) Then Exit Sub
     AddEnrollmentReference wsReferences, referenceType, displayName, displayName, "", "YES", "Импортировано из листа Штат; оператор может изменить или отключить строку."
-    knownValues(key) = True
+    RegisterKnownReferenceValue knownValues, referenceType, displayName
+End Sub
+
+Private Sub RegisterKnownReferenceValue(ByVal knownValues As Object, ByVal referenceType As String, ByVal rawValue As String)
+    Dim key As String
+
+    key = UCase$(Trim$(referenceType)) & "|" & UCase$(Trim$(rawValue))
+    If key <> UCase$(Trim$(referenceType)) & "|" Then knownValues(key) = True
+End Sub
+
+Private Sub DeduplicateEnrollmentReferences(ByVal ws As Worksheet)
+    Dim sourceData As Variant
+    Dim uniqueRows As Collection
+    Dim knownValues As Object
+    Dim rowNum As Long
+    Dim sourceKey As String
+    Dim referenceType As String
+    Dim referenceCode As String
+    Dim displayName As String
+    Dim item As Variant
+    Dim outputRow As Long
+    Dim lastRow As Long
+
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    If lastRow < 3 Then Exit Sub
+
+    sourceData = ws.Range(ws.Cells(2, 1), ws.Cells(lastRow, 6)).Value2
+    Set knownValues = CreateObject("Scripting.Dictionary")
+    knownValues.CompareMode = vbTextCompare
+    Set uniqueRows = New Collection
+
+    For rowNum = 1 To UBound(sourceData, 1)
+        referenceType = SafeText(sourceData(rowNum, 1))
+        referenceCode = SafeText(sourceData(rowNum, 2))
+        displayName = SafeText(sourceData(rowNum, 3))
+        If referenceType <> "" Then
+            sourceKey = UCase$(referenceType) & "|" & UCase$(IIf(referenceCode <> "", referenceCode, displayName))
+            If Not knownValues.Exists(sourceKey) Then
+                uniqueRows.Add Array(sourceData(rowNum, 1), sourceData(rowNum, 2), sourceData(rowNum, 3), sourceData(rowNum, 4), sourceData(rowNum, 5), sourceData(rowNum, 6))
+                knownValues(sourceKey) = True
+            End If
+        End If
+    Next rowNum
+
+    If uniqueRows.Count = lastRow - 1 Then Exit Sub
+
+    ws.Range(ws.Cells(2, 1), ws.Cells(lastRow, 6)).ClearContents
+    outputRow = 2
+    For Each item In uniqueRows
+        ws.Cells(outputRow, 1).Resize(1, 6).Value = item
+        outputRow = outputRow + 1
+    Next item
 End Sub
 
 Private Sub EnsureEnrollmentReference(ByVal ws As Worksheet, ByVal referenceType As String, ByVal displayName As String, ByVal amountValue As String)

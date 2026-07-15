@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784142894.3983777,
-    "ast_hash": "414290741a6e107a206f85d74dd13381",
+    "mtime": 1784144602.7907028,
+    "ast_hash": "6361eb6b0f43bf0a6fe8ec40519db121",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784142816.8247774,
-    "ast_hash": "ab83d40483e3c41a966ed8dcd0cd1b61",
+    "mtime": 1784144602.791703,
+    "ast_hash": "0878614ecbe4a826c8341d3d6cd624e7",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784142894.3963091,
-    "ast_hash": "7095cdb91bf21cb0210a11598478c98d",
+    "mtime": 1784144602.7891731,
+    "ast_hash": "8dda019cc31c110ce82b1fb478ff10a3",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -322,6 +322,16 @@
   "tmp/wizard-utf8.txt": {
     "mtime": 1784142067.5949802,
     "ast_hash": "4a219bcca4c3d6957ade9c317a42e608",
+    "semantic_hash": ""
+  },
+  "tools/Test-EnrollmentCompactUiSafe.ps1": {
+    "mtime": 1784144679.3270936,
+    "ast_hash": "b8be380b4d1947a6e5890dc51caeb0ca",
+    "semantic_hash": ""
+  },
+  ".spec/tasks/enrollment-compact-performance-2026-07-15.md": {
+    "mtime": 1784144616.5920525,
+    "ast_hash": "59674df7c21349d1923e0c63c79ec5e7",
     "semantic_hash": ""
   }
 }
