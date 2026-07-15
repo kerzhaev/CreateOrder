@@ -596,6 +596,7 @@ Public Sub EnsureEnrollmentReferenceData()
     FormatEnrollmentReferenceSheet ws
         If Not enrollmentReferencesSynced Then
         SyncEnrollmentReferencesFromStaff ws
+        EnsureCompactRankReferenceLabels ws
         enrollmentReferencesSynced = True
     End If
 End Sub
@@ -628,34 +629,18 @@ Private Function RankShortCaption(ByVal rankCode As String) As String
             RankShortCaption = mdlHelper.Ru(1077, 1092, 1088, 46)
         Case LCase$(mdlHelper.Ru(1089, 1077, 1088, 1078, 1072, 1085, 1090))
             RankShortCaption = mdlHelper.Ru(1089, 1077, 1088, 1078, 46)
-        Case "младший сержант": RankShortCaption = "мл. с-т"
-        Case "старший сержант": RankShortCaption = "ст. с-т"
-        Case "старшина": RankShortCaption = "ст-на"
-        Case "прапорщик": RankShortCaption = "пр-к"
-        Case "старший прапорщик": RankShortCaption = "ст. пр-к"
-        Case "младший лейтенант": RankShortCaption = "мл. л-т"
-        Case "лейтенант": RankShortCaption = "л-т"
-        Case "старший лейтенант": RankShortCaption = "ст. л-т"
-        Case "капитан": RankShortCaption = "к-н"
-        Case "майор": RankShortCaption = "м-р"
-        Case "подполковник": RankShortCaption = "п/п-к"
-        Case "полковник": RankShortCaption = "п-к"
-        Case "генерал-майор": RankShortCaption = "г-м"
-        Case "генерал-лейтенант": RankShortCaption = "г-л"
-        Case "генерал-полковник": RankShortCaption = "г-п"
-        Case "генерал армии": RankShortCaption = "ген. армии"
-        Case "маршал российской федерации": RankShortCaption = "Маршал РФ"
-        Case "старший матрос": RankShortCaption = "ст. матрос"
-        Case "старшина 2 статьи": RankShortCaption = "ст-на 2 ст."
-        Case "старшина 1 статьи": RankShortCaption = "ст-на 1 ст."
-        Case "главный корабельный старшина": RankShortCaption = "гл. кораб. ст-на"
-        Case "старший мичман": RankShortCaption = "ст. мичман"
-        Case "капитан-лейтенант": RankShortCaption = "кап.-л-т"
-        Case "капитан 3 ранга": RankShortCaption = "кап. 3 р."
-        Case "капитан 2 ранга": RankShortCaption = "кап. 2 р."
-        Case "капитан 1 ранга": RankShortCaption = "кап. 1 р."
-        Case "контр-адмирал": RankShortCaption = "контр-адм."
-        Case "вице-адмирал": RankShortCaption = "вице-адм."
+        Case LCase$(mdlHelper.Ru(1084, 1083, 1072, 1076, 1096, 1080, 1081, 32, 1089, 1077, 1088, 1078, 1072, 1085, 1090)): RankShortCaption = mdlHelper.Ru(1084, 1083, 46, 32, 1089, 45, 1090)
+        Case LCase$(mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1089, 1077, 1088, 1078, 1072, 1085, 1090)): RankShortCaption = mdlHelper.Ru(1089, 1090, 46, 32, 1089, 45, 1090)
+        Case LCase$(mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1085, 1072)): RankShortCaption = mdlHelper.Ru(1089, 1090, 45, 1085, 1072)
+        Case LCase$(mdlHelper.Ru(1087, 1088, 1072, 1087, 1086, 1088, 1097, 1080, 1082)): RankShortCaption = mdlHelper.Ru(1087, 1088, 45, 1082)
+        Case LCase$(mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1087, 1088, 1072, 1087, 1086, 1088, 1097, 1080, 1082)): RankShortCaption = mdlHelper.Ru(1089, 1090, 46, 32, 1087, 1088, 45, 1082)
+        Case LCase$(mdlHelper.Ru(1084, 1083, 1072, 1076, 1096, 1080, 1081, 32, 1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090)): RankShortCaption = mdlHelper.Ru(1084, 1083, 46, 32, 1083, 45, 1090)
+        Case LCase$(mdlHelper.Ru(1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090)): RankShortCaption = mdlHelper.Ru(1083, 45, 1090)
+        Case LCase$(mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090)): RankShortCaption = mdlHelper.Ru(1089, 1090, 46, 32, 1083, 45, 1090)
+        Case LCase$(mdlHelper.Ru(1082, 1072, 1087, 1080, 1090, 1072, 1085)): RankShortCaption = mdlHelper.Ru(1082, 45, 1085)
+        Case LCase$(mdlHelper.Ru(1084, 1072, 1081, 1086, 1088)): RankShortCaption = mdlHelper.Ru(1084, 45, 1088)
+        Case LCase$(mdlHelper.Ru(1087, 1086, 1076, 1087, 1086, 1083, 1082, 1086, 1074, 1085, 1080, 1082)): RankShortCaption = mdlHelper.Ru(1087, 47, 1087, 45, 1082)
+        Case LCase$(mdlHelper.Ru(1087, 1086, 1083, 1082, 1086, 1074, 1085, 1080, 1082)): RankShortCaption = mdlHelper.Ru(1087, 45, 1082)
         Case Else
             RankShortCaption = rankCode
     End Select
@@ -664,15 +649,16 @@ End Function
 Private Sub EnsureCompactRankReferenceLabels(ByVal ws As Worksheet)
     Dim rowNum As Long
     Dim rankCode As String
+    Dim displayName As String
     Dim shortCaption As String
 
     For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
         If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = "RANK" Then
             rankCode = SafeText(ws.Cells(rowNum, 2).Value)
-            shortCaption = RankShortCaption(rankCode)
-            If shortCaption <> rankCode And StrComp(SafeText(ws.Cells(rowNum, 3).Value), rankCode, vbTextCompare) = 0 Then
-                ws.Cells(rowNum, 3).Value = shortCaption
-            End If
+            displayName = SafeText(ws.Cells(rowNum, 3).Value)
+            shortCaption = RankShortCaption(displayName)
+            If StrComp(shortCaption, displayName, vbTextCompare) = 0 Then shortCaption = RankShortCaption(rankCode)
+            If StrComp(shortCaption, displayName, vbTextCompare) <> 0 Then ws.Cells(rowNum, 3).Value = shortCaption
         End If
     Next rowNum
 End Sub
@@ -715,14 +701,13 @@ Private Sub EnsureDefaultRankReferences(ByVal ws As Worksheet)
     Dim rankName As Variant
 
     For Each rankName In Array( _
-        "рядовой", "ефрейтор", "младший сержант", "сержант", "старший сержант", "старшина", _
-        "прапорщик", "старший прапорщик", "младший лейтенант", "лейтенант", "старший лейтенант", "капитан", _
-        "майор", "подполковник", "полковник", "генерал-майор", "генерал-лейтенант", "генерал-полковник", _
-        "генерал армии", "Маршал Российской Федерации", _
-        "матрос", "старший матрос", "старшина 2 статьи", "старшина 1 статьи", "главный старшина", _
-        "главный корабельный старшина", "мичман", "старший мичман", "капитан-лейтенант", _
-        "капитан 3 ранга", "капитан 2 ранга", "капитан 1 ранга", "контр-адмирал", "вице-адмирал", _
-        "адмирал", "адмирал флота")
+        mdlHelper.Ru(1088, 1103, 1076, 1086, 1074, 1086, 1081), mdlHelper.Ru(1077, 1092, 1088, 1077, 1081, 1090, 1086, 1088), _
+        mdlHelper.Ru(1084, 1083, 1072, 1076, 1096, 1080, 1081, 32, 1089, 1077, 1088, 1078, 1072, 1085, 1090), mdlHelper.Ru(1089, 1077, 1088, 1078, 1072, 1085, 1090), _
+        mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1089, 1077, 1088, 1078, 1072, 1085, 1090), mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1085, 1072), _
+        mdlHelper.Ru(1087, 1088, 1072, 1087, 1086, 1088, 1097, 1080, 1082), mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1087, 1088, 1072, 1087, 1086, 1088, 1097, 1080, 1082), _
+        mdlHelper.Ru(1084, 1083, 1072, 1076, 1096, 1080, 1081, 32, 1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090), mdlHelper.Ru(1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090), _
+        mdlHelper.Ru(1089, 1090, 1072, 1088, 1096, 1080, 1081, 32, 1083, 1077, 1081, 1090, 1077, 1085, 1072, 1085, 1090), mdlHelper.Ru(1082, 1072, 1087, 1080, 1090, 1072, 1085), _
+        mdlHelper.Ru(1084, 1072, 1081, 1086, 1088), mdlHelper.Ru(1087, 1086, 1076, 1087, 1086, 1083, 1082, 1086, 1074, 1085, 1080, 1082), mdlHelper.Ru(1087, 1086, 1083, 1082, 1086, 1074, 1085, 1080, 1082))
         EnsureEnrollmentReference ws, "RANK", CStr(rankName), ""
     Next rankName
 End Sub
@@ -815,12 +800,22 @@ Public Function GetEnrollmentReferenceValues(ByVal referenceType As String) As C
     Dim ws As Worksheet
     Dim rowNum As Long
     Dim values As New Collection
+    Dim knownValues As Object
+    Dim displayName As String
 
     EnsureEnrollmentReferenceData
     Set ws = ThisWorkbook.Worksheets(ENROLLMENT_REFERENCE_SHEET)
+    Set knownValues = CreateObject("Scripting.Dictionary")
+    knownValues.CompareMode = vbTextCompare
     For rowNum = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
         If UCase$(SafeText(ws.Cells(rowNum, 1).Value)) = UCase$(referenceType) Then
-            If UCase$(SafeText(ws.Cells(rowNum, 5).Value)) <> "NO" Then values.Add SafeText(ws.Cells(rowNum, 3).Value)
+            displayName = SafeText(ws.Cells(rowNum, 3).Value)
+            If UCase$(SafeText(ws.Cells(rowNum, 5).Value)) <> "NO" And displayName <> "" Then
+                If Not knownValues.Exists(displayName) Then
+                    values.Add displayName
+                    knownValues(displayName) = True
+                End If
+            End If
         End If
     Next rowNum
     Set GetEnrollmentReferenceValues = values
