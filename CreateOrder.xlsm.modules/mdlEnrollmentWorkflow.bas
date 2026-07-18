@@ -347,25 +347,25 @@ Public Sub EnsureEnrollmentSheetStructure(ByVal ws As Worksheet)
     SetEnrollmentHeader ws, COL_ENROLLMENT_STD_CONTRACT430_BASIS, "enrollment.header.std_contract430_basis", "Основание 430 приказа", 24
 
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY1_NAME, "enrollment.header.extra_monthly1_name", "Доп. ежемесячная 1: наименование", 18
-    SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY1_PARAM, "enrollment.header.extra_monthly1_param", "Доп. ежемесячная 1: параметр", 18
+    SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY1_PARAM, "enrollment.header.extra_monthly1_param", "Доп. ежемесячная 1: НПА / пункт", 26
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY1_AMOUNT, "enrollment.header.extra_monthly1_amount", "Доп. ежемесячная 1: размер", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY1_START, "enrollment.header.extra_monthly1_start", "Доп. ежемесячная 1: дата начала", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY1_BASIS, "enrollment.header.extra_monthly1_basis", "Доп. ежемесячная 1: основание", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY1_ENABLED, "enrollment.header.extra_monthly1_enabled", "Доп. ежемесячная 1: вкл", 16
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY2_NAME, "enrollment.header.extra_monthly2_name", "Доп. ежемесячная 2: наименование", 18
-    SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY2_PARAM, "enrollment.header.extra_monthly2_param", "Доп. ежемесячная 2: параметр", 18
+    SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY2_PARAM, "enrollment.header.extra_monthly2_param", "Доп. ежемесячная 2: НПА / пункт", 26
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY2_AMOUNT, "enrollment.header.extra_monthly2_amount", "Доп. ежемесячная 2: размер", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY2_START, "enrollment.header.extra_monthly2_start", "Доп. ежемесячная 2: дата начала", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY2_BASIS, "enrollment.header.extra_monthly2_basis", "Доп. ежемесячная 2: основание", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY2_ENABLED, "enrollment.header.extra_monthly2_enabled", "Доп. ежемесячная 2: вкл", 16
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY3_NAME, "enrollment.header.extra_monthly3_name", "Доп. ежемесячная 3: наименование", 18
-    SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY3_PARAM, "enrollment.header.extra_monthly3_param", "Доп. ежемесячная 3: параметр", 18
+    SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY3_PARAM, "enrollment.header.extra_monthly3_param", "Доп. ежемесячная 3: НПА / пункт", 26
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY3_AMOUNT, "enrollment.header.extra_monthly3_amount", "Доп. ежемесячная 3: размер", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY3_START, "enrollment.header.extra_monthly3_start", "Доп. ежемесячная 3: дата начала", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY3_BASIS, "enrollment.header.extra_monthly3_basis", "Доп. ежемесячная 3: основание", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY3_ENABLED, "enrollment.header.extra_monthly3_enabled", "Доп. ежемесячная 3: вкл", 16
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY4_NAME, "enrollment.header.extra_monthly4_name", "Доп. ежемесячная 4: наименование", 18
-    SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY4_PARAM, "enrollment.header.extra_monthly4_param", "Доп. ежемесячная 4: параметр", 18
+    SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY4_PARAM, "enrollment.header.extra_monthly4_param", "Доп. ежемесячная 4: НПА / пункт", 26
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY4_AMOUNT, "enrollment.header.extra_monthly4_amount", "Доп. ежемесячная 4: размер", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY4_START, "enrollment.header.extra_monthly4_start", "Доп. ежемесячная 4: дата начала", 18
     SetEnrollmentHeader ws, COL_ENROLLMENT_EXTRA_MONTHLY4_BASIS, "enrollment.header.extra_monthly4_basis", "Доп. ежемесячная 4: основание", 18
@@ -2289,6 +2289,7 @@ Private Sub ValidateExtraPaymentFields(ByVal record As Object, ByRef issues As S
     For i = 1 To 4
         If NormalizeYesNo(record(ExtraMonthlyKey(i, "enabled"))) = YES_VALUE Then
             AppendIssueIfBlank issues, severity, record(ExtraMonthlyKey(i, "name")), tf("enrollment.issue.extra_monthly_name_missing", "Включена дополнительная ежемесячная выплата #{index}, но не заполнено наименование.", "{index}", i), STATUS_BLOCKED
+            AppendIssueIfBlank issues, severity, record(ExtraMonthlyKey(i, "param")), tf("enrollment.issue.extra_monthly_act_missing", "Для дополнительной ежемесячной выплаты #{index} не заполнен НПА / пункт.", "{index}", i), STATUS_BLOCKED
             AppendIssueIfBlank issues, severity, record(ExtraMonthlyKey(i, "amount")), tf("enrollment.issue.extra_monthly_amount_missing", "Включена дополнительная ежемесячная выплата #{index}, но не заполнен размер.", "{index}", i), STATUS_BLOCKED
             AppendIssueIfBlank issues, severity, record(ExtraMonthlyKey(i, "start")), tf("enrollment.issue.extra_monthly_start_missing", "Для дополнительной ежемесячной выплаты #{index} не заполнена дата начала.", "{index}", i), STATUS_WARNING
             AppendIssueIfBlank issues, severity, record(ExtraMonthlyKey(i, "basis")), tf("enrollment.issue.extra_monthly_basis_missing", "Для дополнительной ежемесячной выплаты #{index} не заполнено основание.", "{index}", i), STATUS_WARNING
@@ -3120,6 +3121,7 @@ Private Sub EnsureEnrollmentPaymentDefinitions(ByVal ws As Worksheet)
     EnsureEnrollmentPaymentDefinition ws, "requisites", "requisites", "Section1Requisites", "requisites", "", "manual", "blocked", ET("enrollment.word.block.requisites", "Реквизиты и основания")
     EnsureEnrollmentPaymentDefinition ws, "extra_monthly", "personal", "Section1MonthlyPersonal", "extra_monthly", "name,amount,start,basis", "manual", "blocked", ET("enrollment.page.extras", "Дополнительные выплаты")
     EnsureEnrollmentPaymentDefinition ws, "extra_onetime", "onetime", "Section1OneTime", "extra_one_time", "name,amount,date,basis", "manual", "blocked", ET("enrollment.page.extras", "Дополнительные выплаты")
+    EnsureEnrollmentPaymentLegalMetadata ws
     UpgradeSettingValueIfEquals ws, "enrollment.def.core.text_template", ET("enrollment.word.block.core", "Основное кадровое действие"), "{core_text}"
     UpgradeSettingValueIfEquals ws, "enrollment.def.requisites.text_template", ET("enrollment.word.block.requisites", "Реквизиты и основания"), "{requisites_text}"
     UpgradeSettingValueIfEquals ws, "enrollment.def.edv.required_docs", "amount,date,basis_section2", "amount,date,basis_section2,contract_basis"
@@ -3128,6 +3130,24 @@ Private Sub EnsureEnrollmentPaymentDefinitions(ByVal ws As Worksheet)
     UpgradeSettingValueIfEquals ws, "enrollment.def.std_duty.required_docs", "basis", ""
     UpgradeSettingValueIfEquals ws, "enrollment.def.std_special.required_docs", "basis", ""
     UpgradeSettingValueIfEquals ws, "enrollment.def.std_tariff.required_docs", "basis", ""
+End Sub
+
+Private Sub EnsureEnrollmentPaymentLegalMetadata(ByVal ws As Worksheet)
+    ' These settings are shared wording rules. Per-person evidence remains in the enrollment row.
+    EnsureSetting ws, "enrollment.def.std_duty.word_legal_group", "MO_727", "Word legal-act group"
+    EnsureSetting ws, "enrollment.def.std_special.word_legal_group", "MO_727", "Word legal-act group"
+    EnsureSetting ws, "enrollment.def.secrecy.word_legal_group", "MO_727", "Word legal-act group"
+    EnsureSetting ws, "enrollment.def.std_tariff.word_legal_group", "MO_430", "Word legal-act group"
+    EnsureSetting ws, "enrollment.def.std_contract430.word_legal_group", "MO_430", "Word legal-act group"
+    EnsureSetting ws, "enrollment.def.class.word_legal_group", "MO_430", "Word legal-act group"
+    EnsureSetting ws, "enrollment.def.fizo.word_legal_group", "MO_430", "Word legal-act group"
+    EnsureSetting ws, "enrollment.def.achievement.word_legal_group", "MO_430", "Word legal-act group"
+
+    EnsureSetting ws, "enrollment.def.std_tariff.word_legal_clause", "в соответствии с пунктом 3 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
+    EnsureSetting ws, "enrollment.def.std_contract430.word_legal_clause", "в соответствии с пунктом 3.4 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
+    EnsureSetting ws, "enrollment.def.class.word_legal_clause", "в соответствии с пунктом 2 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
+    EnsureSetting ws, "enrollment.def.fizo.word_legal_clause", "в соответствии с пунктом 2 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
+    EnsureSetting ws, "enrollment.def.achievement.word_legal_clause", "в соответствии с пунктом 2 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
 End Sub
 
 Private Sub EnsureEnrollmentPaymentDefinition(ByVal ws As Worksheet, ByVal defCode As String, ByVal paymentKind As String, ByVal wordBlockTarget As String, ByVal journalBinding As String, ByVal requiredDocs As String, ByVal startDateSource As String, ByVal validationSeverity As String, ByVal labelText As String)
@@ -3155,6 +3175,8 @@ Public Function GetEnrollmentPaymentDefinition(ByVal defCode As String) As Objec
     definition("validation_severity") = GetEnrollmentSetting("enrollment.def." & defCode & ".validation_severity", "")
     definition("label") = GetEnrollmentSetting("enrollment.def." & defCode & ".label", defCode)
     definition("text_template") = GetEnrollmentSetting("enrollment.def." & defCode & ".text_template", DefaultEnrollmentDefinitionTextTemplate(defCode))
+    definition("word_legal_group") = GetEnrollmentSetting("enrollment.def." & defCode & ".word_legal_group", "")
+    definition("word_legal_clause") = GetEnrollmentSetting("enrollment.def." & defCode & ".word_legal_clause", "")
 
     Set GetEnrollmentPaymentDefinition = definition
 End Function
@@ -3168,6 +3190,19 @@ Public Function GetEnrollmentPaymentDefinitionsByBlock(ByVal wordBlockTarget As 
         Set definition = GetEnrollmentPaymentDefinition(CStr(code))
         If StrComp(SafeText(definition("word_block_target")), wordBlockTarget, vbTextCompare) = 0 Then
             GetEnrollmentPaymentDefinitionsByBlock.Add definition
+        End If
+    Next code
+End Function
+
+Public Function GetEnrollmentPaymentDefinitionsByLegalGroup(ByVal legalGroup As String) As Collection
+    Dim code As Variant
+    Dim definition As Object
+
+    Set GetEnrollmentPaymentDefinitionsByLegalGroup = New Collection
+    For Each code In EnrollmentDefinitionCodes()
+        Set definition = GetEnrollmentPaymentDefinition(CStr(code))
+        If StrComp(SafeText(definition("word_legal_group")), legalGroup, vbTextCompare) = 0 Then
+            GetEnrollmentPaymentDefinitionsByLegalGroup.Add definition
         End If
     Next code
 End Function

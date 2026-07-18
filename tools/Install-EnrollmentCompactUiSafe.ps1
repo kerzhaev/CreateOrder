@@ -5,6 +5,14 @@ param(
 $ErrorActionPreference = "Stop"
 $workspace = Split-Path -Parent $PSScriptRoot
 
+function Invoke-EnrollmentPreflight([string]$SourceWorkbookPath) {
+    # The working book is not opened until both checks pass in disposable copies.
+    & (Join-Path $PSScriptRoot "Test-EnrollmentTariffReferenceSafe.ps1") -WorkbookPath $SourceWorkbookPath
+    if (-not $?) { throw "Enrollment tariff preflight failed." }
+    & (Join-Path $PSScriptRoot "Test-EnrollmentCompactUiSafe.ps1") -WorkbookPath $SourceWorkbookPath
+    if (-not $?) { throw "Enrollment compact UI preflight failed." }
+}
+
 function Read-VbaText([string]$Path) {
     [IO.File]::ReadAllText($Path, [Text.Encoding]::GetEncoding(1251))
 }
@@ -24,6 +32,8 @@ if ($openExcel.Count -gt 0) {
 if (-not (Test-Path -LiteralPath $WorkbookPath)) {
     throw "Workbook not found: $WorkbookPath"
 }
+
+Invoke-EnrollmentPreflight $WorkbookPath
 
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $backupDirectory = Join-Path $workspace ("CreateOrderBackups\enrollment-compact-ui-installed-" + $stamp)

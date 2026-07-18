@@ -622,7 +622,6 @@ End Function
 Private Function BuildSection1ForRecord(ByVal record As Object, Optional ByVal itemNumber As Long = 1) As String
     Dim resultText As String
     Dim monthlyText As String
-    Dim personalText As String
     Dim premiumText As String
 
     resultText = CStr(itemNumber) & ". " & BuildCoreEnrollmentSentence(record) & vbCrLf
@@ -632,11 +631,8 @@ Private Function BuildSection1ForRecord(ByVal record As Object, Optional ByVal i
         resultText = resultText & BuildPreferentialParagraph(record) & vbCrLf
     End If
 
-    monthlyText = BuildStandardMonthlyText(record)
+    monthlyText = BuildMonthlyLegalActSections(record)
     If monthlyText <> "" Then resultText = resultText & monthlyText & vbCrLf
-
-    personalText = BuildPersonalMonthlyText(record)
-    If personalText <> "" Then resultText = resultText & personalText & vbCrLf
 
     resultText = resultText & BuildOneTimeText(record)
 
@@ -645,6 +641,60 @@ Private Function BuildSection1ForRecord(ByVal record As Object, Optional ByVal i
 
     resultText = resultText & vbCrLf & BuildRequisitesText(record)
     BuildSection1ForRecord = resultText
+End Function
+
+Private Function BuildMonthlyLegalActSections(ByVal record As Object) As String
+    Dim resultText As String
+
+    resultText = AppendParagraph(resultText, BuildLegalActMonthlySection(record, "MO_727"))
+    resultText = AppendParagraph(resultText, BuildLegalActMonthlySection(record, "MO_430"))
+    resultText = AppendParagraph(resultText, BuildOtherLegalActMonthlyText(record))
+
+    BuildMonthlyLegalActSections = resultText
+End Function
+
+Private Function BuildLegalActMonthlySection(ByVal record As Object, ByVal legalGroup As String) As String
+    Dim definition As Object
+    Dim allowanceText As String
+    Dim listText As String
+    Dim itemIndex As Long
+    Dim clauseText As String
+
+    For Each definition In mdlEnrollmentWorkflow.GetEnrollmentPaymentDefinitionsByLegalGroup(legalGroup)
+        allowanceText = BuildConfiguredEnrollmentParagraph(record, definition)
+        If allowanceText <> "" Then
+            itemIndex = itemIndex + 1
+            clauseText = SafeText(definition("word_legal_clause"))
+            If clauseText <> "" Then allowanceText = EnsureSentencePrefix(clauseText, allowanceText)
+            listText = AppendParagraph(listText, "    " & CStr(itemIndex) & ". " & allowanceText)
+        End If
+    Next definition
+
+    If listText <> "" Then
+        BuildLegalActMonthlySection = LegalActMonthlyPreamble(legalGroup) & vbCrLf & listText
+    End If
+End Function
+
+Private Function LegalActMonthlyPreamble(ByVal legalGroup As String) As String
+    Select Case UCase$(Trim$(legalGroup))
+        Case "MO_727"
+            LegalActMonthlyPreamble = L("enrollment.word.legal_act.727.preamble", "В соответствии с Порядком обеспечения денежным довольствием военнослужащих Вооруженных Сил Российской Федерации и предоставления им и членам их семей отдельных выплат, утверждённым приказом Министра обороны Российской Федерации от 06.12.2019 г. № 727, установить:")
+        Case "MO_430"
+            LegalActMonthlyPreamble = L("enrollment.word.legal_act.430.preamble", "В соответствии с Правилами выплаты ежемесячной надбавки за особые достижения в службе военнослужащим Вооруженных Сил Российской Федерации, проходящим военную службу по контракту, утверждёнными приказом Министра обороны Российской Федерации от 31 июля 2019 г. № 430дсп, установить:")
+    End Select
+End Function
+
+Private Function EnsureSentencePrefix(ByVal clauseText As String, ByVal allowanceText As String) As String
+    Dim normalizedClause As String
+
+    normalizedClause = Trim$(clauseText)
+    If normalizedClause = "" Then
+        EnsureSentencePrefix = allowanceText
+    ElseIf Right$(normalizedClause, 1) = "," Or Right$(normalizedClause, 1) = ";" Then
+        EnsureSentencePrefix = normalizedClause & " " & LCase$(Left$(allowanceText, 1)) & Mid$(allowanceText, 2)
+    Else
+        EnsureSentencePrefix = normalizedClause & ", " & LCase$(Left$(allowanceText, 1)) & Mid$(allowanceText, 2)
+    End If
 End Function
 
 Private Function BuildCoreEnrollmentSentence(ByVal record As Object) As String
@@ -729,8 +779,6 @@ Private Function BuildPersonalMonthlyText(ByVal record As Object) As String
             resultText = AppendParagraph(resultText, BuildConfiguredEnrollmentParagraph(record, definition))
         End If
     Next definition
-
-    resultText = AppendParagraph(resultText, BuildExtraMonthlyText(record))
 
     BuildPersonalMonthlyText = resultText
 End Function
@@ -879,6 +927,70 @@ Private Function BuildExtraMonthlyText(ByVal record As Object) As String
 
     resultText = BuildExtraMonthlyText
     BuildExtraMonthlyText = resultText
+End Function
+
+Private Function BuildOtherLegalActMonthlyText(ByVal record As Object) As String
+    Dim groups As Object
+    Dim itemIndexes As Collection
+    Dim i As Long
+    Dim legalActText As String
+    Dim groupKey As Variant
+    Dim itemIndex As Variant
+    Dim itemText As String
+    Dim listText As String
+    Dim numberInGroup As Long
+
+    Set groups = CreateObject("Scripting.Dictionary")
+    groups.CompareMode = vbTextCompare
+    For i = 1 To 4
+        If NormalizeYesNo(record("extra_monthly" & CStr(i) & "_enabled")) = "YES" Then
+            legalActText = SafeText(record("extra_monthly" & CStr(i) & "_param"))
+            If legalActText <> "" Then
+                If Not groups.Exists(legalActText) Then
+                    Set itemIndexes = New Collection
+                    groups.Add legalActText, itemIndexes
+                End If
+                Set itemIndexes = groups(legalActText)
+                itemIndexes.Add i
+            End If
+        End If
+    Next i
+
+    For Each groupKey In groups.Keys
+        listText = ""
+        numberInGroup = 0
+        Set itemIndexes = groups(groupKey)
+        For Each itemIndex In itemIndexes
+            itemText = BuildExtraMonthlyItem(record, CLng(itemIndex))
+            If itemText <> "" Then
+                numberInGroup = numberInGroup + 1
+                listText = AppendParagraph(listText, "    " & CStr(numberInGroup) & ". " & itemText)
+            End If
+        Next itemIndex
+        If listText <> "" Then
+            BuildOtherLegalActMonthlyText = AppendParagraph(BuildOtherLegalActMonthlyText, _
+                "В соответствии с " & CStr(groupKey) & ", установить:" & vbCrLf & listText)
+        End If
+    Next groupKey
+End Function
+
+Private Function BuildExtraMonthlyItem(ByVal record As Object, ByVal index As Long) As String
+    Dim paymentName As String
+    Dim paymentAmount As String
+    Dim startDate As String
+    Dim paymentBasis As String
+
+    paymentName = SafeText(record("extra_monthly" & CStr(index) & "_name"))
+    paymentAmount = SafeText(record("extra_monthly" & CStr(index) & "_amount"))
+    startDate = SafeText(record("extra_monthly" & CStr(index) & "_start"))
+    paymentBasis = SafeText(record("extra_monthly" & CStr(index) & "_basis"))
+    If paymentName = "" Then Exit Function
+
+    BuildExtraMonthlyItem = L("enrollment.word.extra.monthly_prefix", "Установить ежемесячную выплату") & " """ & paymentName & """ " & _
+                            L("enrollment.word.personal.amount_prefix", "в размере") & " " & ValueOrPlaceholder(paymentAmount, "0") & BuildExtraStartSuffix(startDate) & "."
+    If paymentBasis <> "" Then
+        BuildExtraMonthlyItem = RTrim$(BuildExtraMonthlyItem) & " " & L("enrollment.word.payment_basis", "Основание выплаты:") & " " & paymentBasis & "."
+    End If
 End Function
 
 Private Function BuildExtraOneTimeText(ByVal record As Object) As String
@@ -1324,6 +1436,9 @@ Private Function L(ByVal key As String, ByVal fallback As String) As String
     Dim resolvedText As String
     Dim safeFallback As String
 
+    ' Export must not depend on an initialized localization cache. This is especially
+    ' important for a newly added legal-act setting that has no localized entry yet.
+    On Error GoTo UseFallback
     resolvedText = t(key, fallback)
     If StrComp(resolvedText, key, vbTextCompare) = 0 Then
         safeFallback = EnrollmentWordSafeFallback(key)
@@ -1332,7 +1447,13 @@ Private Function L(ByVal key As String, ByVal fallback As String) As String
         End If
     End If
 
+    If Trim$(resolvedText) = "" Then resolvedText = fallback
     L = resolvedText
+    Exit Function
+
+UseFallback:
+    Err.Clear
+    L = fallback
 End Function
 
 Private Function EnrollmentWordSafeFallback(ByVal key As String) As String
