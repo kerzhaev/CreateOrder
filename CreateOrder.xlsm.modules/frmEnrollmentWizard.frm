@@ -916,40 +916,54 @@ End Sub
 
 Private Sub CreateMonthlyPage()
     Set chkPreferential = AddPageCheckBoxT(pgMonthly, "enrollment.field.preferential_enabled", "Льготная выслуга", 24, 18)
-    Set txtPreferentialCoeff = AddPageTextBoxT(pgMonthly, "enrollment.field.preferential_coeff", "Коэффициент", 190, 14, 70)
-    AddPageSectionLabel pgMonthly, "Льготная выслуга применяется отдельно и включена по умолчанию", 282, 18, 420
+    chkPreferential.Width = 140
+    Set txtPreferentialCoeff = AddPageTextBoxT(pgMonthly, "enrollment.field.preferential_coeff", "Коэффициент", 176, 14, 56)
+    AddPageSectionLabel pgMonthly, "Льготная выслуга применяется отдельно и включена по умолчанию", 250, 18, 420
 
-    Set fraOrder727 = AddPageFrame(pgMonthly, "fraOrder727", "Приказ МО РФ № 727 — ежемесячные выплаты", 12, 52, 744, 154)
+    Set fraOrder727 = AddPageFrame(pgMonthly, "fraOrder727", "Приказ МО РФ № 727 — ежемесячные выплаты", 12, 52, 744, 184)
     Set chkStdDuty = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_duty", "Надбавка по должности", 18, 18)
-    Set txtStdDutyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 220, 14, 60)
-    Set chkStdSpecial = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_special", "Особые условия", 388, 18)
-    Set txtStdSpecialPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 610, 14, 60)
-    Set txtSecrecyParam = AddPageComboBoxT(fraOrder727, "enrollment.field.secrecy_param", "Секретность", 18, 68, 180)
-    Set chkSecrecy = AddPageCheckBoxT(fraOrder727, "common.enabled_short", "Вкл", 218, 86)
-    Set txtSecrecyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "% (из справочника)", 268, 68, 100, 18, False, True)
-    Set chkPremium = AddPageCheckBoxT(fraOrder727, "enrollment.field.premium", "Премия", 388, 70)
-    Set txtPremiumPercent = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_percent", "Премия %", 468, 66, 60)
-    Set txtPremiumStart = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_start", "Начало", 546, 66, 80)
-    Set txtPremiumEnd = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_end", "Окончание", 644, 66, 76)
+    chkStdDuty.Width = 150
+    Set txtStdDutyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 178, 14, 52)
+    Set chkStdSpecial = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_special", "Особые условия", 386, 18)
+    chkStdSpecial.Width = 120
+    Set txtStdSpecialPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 514, 14, 52)
 
-    Set fraOrder430 = AddPageFrame(pgMonthly, "fraOrder430", "Приказ МО РФ № 430дсп — индивидуальные основания", 12, 218, 744, 190)
+    Set txtSecrecyParam = AddPageComboBoxT(fraOrder727, "enrollment.field.secrecy_param", "Секретность", 18, 62, 136)
+    Set chkSecrecy = AddPageCheckBoxT(fraOrder727, "common.enabled_short", "Вкл", 162, 80)
+    chkSecrecy.Width = 40
+    Set txtSecrecyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 210, 62, 52, 18, False, True)
+    Set txtClassParam = AddPageComboBoxT(fraOrder727, "enrollment.field.class_param", "Классность", 386, 62, 136)
+    Set chkClass = AddPageCheckBoxT(fraOrder727, "common.enabled_short", "Вкл", 530, 80)
+    chkClass.Width = 40
+    Set txtClassPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 578, 62, 52, 18, False, True)
+
+    Set chkPremium = AddPageCheckBoxT(fraOrder727, "enrollment.field.premium", "Премия", 18, 114)
+    chkPremium.Width = 82
+    Set txtPremiumPercent = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_percent", "%", 108, 110, 52)
+    Set txtPremiumStart = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_start", "Начало", 178, 110, 82)
+    Set txtPremiumEnd = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_end", "Окончание", 278, 110, 82)
+
+    Set fraOrder430 = AddPageFrame(pgMonthly, "fraOrder430", "Приказ МО РФ № 430дсп — индивидуальные основания", 12, 248, 744, 152)
     Set chkStdContract430 = AddPageCheckBoxT(fraOrder430, "enrollment.field.std_contract430", "Контракт / 430дсп", 18, 18)
-    Set txtStdContract430Percent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 210, 14, 60)
+    chkStdContract430.Width = 142
+    Set txtStdContract430Percent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 168, 14, 52)
     Set chkStdTariff = AddPageCheckBoxT(fraOrder430, "enrollment.field.std_tariff", "", 12, 54)
     chkStdTariff.Visible = False
-    Set lblTariffAllowanceState = AddLabelToPage(fraOrder430, "1–4 тариф: определяется по выбранному разряду", 18, 54, 300)
-    Set txtStdTariffPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (автоматически)", 320, 50, 100, 18, False, True)
-    Set txtClassParam = AddPageComboBoxT(fraOrder430, "enrollment.field.class_param", "Классность", 18, 94, 150)
-    Set chkClass = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 188, 112)
-    Set txtClassPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 238, 94, 100, 18, False, True)
-    Set txtFizoParam = AddPageComboBoxT(fraOrder430, "enrollment.field.fizo_param", "ФИЗО", 390, 94, 150)
-    Set chkFizo = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 560, 112)
-    Set txtFizoPercent = AddPageTextBoxT(fraOrder430, "common.percent", "% (из справочника)", 610, 94, 100, 18, False, True)
-    Set txtAchievementParam = AddPageComboBoxT(fraOrder430, "enrollment.field.achievement_param", "Особые достижения / медаль", 18, 142, 300)
-    Set chkAchievement = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 338, 160)
-    Set txtAchievementAmount = AddPageTextBoxT(fraOrder430, "enrollment.field.achievement_amount", "% / сумма", 390, 142, 90, 18, False, True)
-    Set txtAchievementAwardDate = AddPageTextBoxT(fraOrder430, "common.date", "Дата приказа", 500, 142, 100)
-    Set txtAchievementDocumentReference = AddPageTextBoxT(fraOrder430, "enrollment.field.order_number", "Номер приказа", 618, 142, 100)
+    Set lblTariffAllowanceState = AddLabelToPage(fraOrder430, "1–4 тариф: определяется по выбранному разряду", 18, 54, 246)
+    Set txtStdTariffPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 274, 50, 52, 18, False, True)
+
+    Set txtFizoParam = AddPageComboBoxT(fraOrder430, "enrollment.field.fizo_param", "ФИЗО", 18, 92, 136)
+    Set chkFizo = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 162, 110)
+    chkFizo.Width = 40
+    Set txtFizoPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 210, 92, 52, 18, False, True)
+    Set txtAchievementParam = AddPageComboBoxT(fraOrder430, "enrollment.field.achievement_param", "Особые достижения / медаль", 386, 92, 174)
+    Set chkAchievement = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 568, 110)
+    chkAchievement.Width = 40
+    Set txtAchievementAmount = AddPageTextBoxT(fraOrder430, "enrollment.field.achievement_amount", "% / сумма", 616, 92, 70, 18, False, True)
+    Set txtAchievementAwardDate = AddPageTextBoxT(fraOrder430, "common.date", "Дата", 18, 132, 76)
+    Set txtAchievementDocumentReference = AddPageTextBoxT(fraOrder430, "enrollment.field.order_number", "Номер приказа", 112, 132, 160)
+
+    ConfigureScrollablePage pgMonthly, 0, True
 End Sub
 
 Private Sub CreateOneTimePage()
@@ -990,17 +1004,17 @@ Private Sub CreateAdvancedPage()
     Dim fraBasisOneTime As Object
 
     AddPageSectionLabel pgAdvanced, "Заполняйте только реквизиты подтверждающих документов для индивидуальных выплат", 12, 2, 700
-    Set fraBasis727 = AddPageFrame(pgAdvanced, "fraBasis727", "Приказ МО РФ № 727 — только индивидуальные документы", 12, 24, 360, 100)
+    Set fraBasis727 = AddPageFrame(pgAdvanced, "fraBasis727", "Приказ МО РФ № 727 — только индивидуальные документы", 12, 24, 360, 134)
     Set txtSecrecyBasis = AddPageTextBoxT(fraBasis727, "enrollment.field.secrecy_basis", "Секретность", 12, 16, 324, 26, True)
-    Set txtPremiumBasis = AddPageTextBoxT(fraBasis727, "enrollment.field.premium_basis", "Премия", 12, 54, 324, 26, True)
+    Set txtClassBasis = AddPageTextBoxT(fraBasis727, "enrollment.field.class_basis", "Классность", 12, 50, 324, 26, True)
+    Set txtPremiumBasis = AddPageTextBoxT(fraBasis727, "enrollment.field.premium_basis", "Премия", 12, 84, 324, 26, True)
 
-    Set fraBasis430 = AddPageFrame(pgAdvanced, "fraBasis430", "Приказ МО РФ № 430дсп — индивидуальные документы", 384, 24, 372, 156)
+    Set fraBasis430 = AddPageFrame(pgAdvanced, "fraBasis430", "Приказ МО РФ № 430дсп — индивидуальные документы", 384, 24, 372, 122)
     Set txtStdContract430Basis = AddPageTextBoxT(fraBasis430, "enrollment.field.std_contract430_basis", "Контракт / 430дсп", 12, 16, 336, 22, True)
-    Set txtClassBasis = AddPageTextBoxT(fraBasis430, "enrollment.field.class_basis", "Классность", 12, 50, 336, 22, True)
-    Set txtFizoBasis = AddPageTextBoxT(fraBasis430, "enrollment.field.fizo_basis", "ФИЗО", 12, 84, 336, 22, True)
-    Set txtAchievementBasis = AddPageTextBoxT(fraBasis430, "enrollment.field.achievement_basis", "Особые достижения / медаль", 12, 118, 336, 22, True)
+    Set txtFizoBasis = AddPageTextBoxT(fraBasis430, "enrollment.field.fizo_basis", "ФИЗО", 12, 50, 336, 22, True)
+    Set txtAchievementBasis = AddPageTextBoxT(fraBasis430, "enrollment.field.achievement_basis", "Особые достижения / медаль", 12, 84, 336, 22, True)
 
-    Set fraBasisOneTime = AddPageFrame(pgAdvanced, "fraBasisOneTime", "Разовые выплаты", 12, 192, 744, 82)
+    Set fraBasisOneTime = AddPageFrame(pgAdvanced, "fraBasisOneTime", "Разовые выплаты", 12, 170, 744, 82)
     Set txtLiftBasis = AddPageTextBoxT(fraBasisOneTime, "enrollment.field.lift_basis", "Подъёмное пособие", 12, 16, 220, 30, True)
     Set txtPerDiemBasis = AddPageTextBoxT(fraBasisOneTime, "enrollment.field.per_diem_basis", "Суточные", 250, 16, 220, 30, True)
     Set txtEdvBasis = AddPageTextBoxT(fraBasisOneTime, "enrollment.field.edv_basis", "ЕДВ", 488, 16, 220, 30, True)
@@ -1076,9 +1090,24 @@ Private Sub RemoveDefaultWizardPages()
     Loop
 End Sub
 
-Private Sub ConfigureScrollablePage(ByVal pageHost As Object, ByVal pageScrollHeight As Long)
-    pageHost.ScrollBars = fmScrollBarsNone
-    pageHost.ScrollHeight = pageHost.InsideHeight
+Private Sub ConfigureScrollablePage(ByVal pageHost As Object, ByVal minimumScrollHeight As Long, Optional ByVal enableVerticalScroll As Boolean = False)
+    Dim controlItem As Object
+    Dim contentBottom As Long
+
+    contentBottom = minimumScrollHeight
+    For Each controlItem In pageHost.Controls
+        If CLng(controlItem.Top + controlItem.Height) > contentBottom Then
+            contentBottom = CLng(controlItem.Top + controlItem.Height)
+        End If
+    Next controlItem
+
+    If enableVerticalScroll Then
+        pageHost.ScrollBars = fmScrollBarsVertical
+        pageHost.ScrollHeight = Application.Max(pageHost.InsideHeight, contentBottom + 14)
+    Else
+        pageHost.ScrollBars = fmScrollBarsNone
+        pageHost.ScrollHeight = pageHost.InsideHeight
+    End If
 End Sub
 
 Private Sub AddPageSectionLabel(ByVal pageHost As Object, ByVal captionText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal labelWidth As Single)

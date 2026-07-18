@@ -3110,7 +3110,7 @@ Private Sub EnsureEnrollmentPaymentDefinitions(ByVal ws As Worksheet)
     EnsureEnrollmentPaymentDefinition ws, "std_special", "standard", "Section1MonthlyStandard", "std_special", "", "standard_start_date", "warning", ET("payments.type.std_special", "Особые условия службы")
     EnsureEnrollmentPaymentDefinition ws, "std_tariff", "personal", "Section1MonthlyPersonal", "std_tariff", "", "standard_start_date", "warning", ET("payments.type.std_tariff", "Надбавка 1-4 тарифных разрядов")
     EnsureEnrollmentPaymentDefinition ws, "std_contract430", "standard", "Section1MonthlyStandard", "std_contract430", "basis", "standard_start_date", "warning", ET("payments.type.std_contract430", "Надбавка 430 приказ")
-    EnsureEnrollmentPaymentDefinition ws, "class", "personal", "Section1MonthlyPersonal", "class", "param,basis", "standard_start_date", "blocked", ET("payments.type.class_qualification", "Классная квалификация")
+    EnsureEnrollmentPaymentDefinition ws, "class", "standard", "Section1MonthlyStandard", "class", "param,basis", "standard_start_date", "blocked", ET("payments.type.class_qualification", "Классная квалификация")
     EnsureEnrollmentPaymentDefinition ws, "fizo", "personal", "Section1MonthlyPersonal", "fizo", "param,basis", "standard_start_date", "blocked", ET("payments.type.fizo", "ФИЗО")
     EnsureEnrollmentPaymentDefinition ws, "secrecy", "standard", "Section1MonthlyStandard", "secrecy", "param,basis", "standard_start_date", "blocked", ET("payments.type.secrecy", "Секретность")
     EnsureEnrollmentPaymentDefinition ws, "achievement", "personal", "Section1MonthlyPersonal", "achievement", "param,basis", "standard_start_date", "blocked", ET("payments.type.achievement", "Особые достижения")
@@ -3127,6 +3127,8 @@ Private Sub EnsureEnrollmentPaymentDefinitions(ByVal ws As Worksheet)
     UpgradeSettingValueIfEquals ws, "enrollment.def.edv.required_docs", "amount,date,basis_section2", "amount,date,basis_section2,contract_basis"
     UpgradeSettingValueIfEquals ws, "enrollment.def.std_tariff.word_block_target", "Section1MonthlyStandard", "Section1MonthlyPersonal"
     UpgradeSettingValueIfEquals ws, "enrollment.def.secrecy.word_block_target", "Section1MonthlyPersonal", "Section1MonthlyStandard"
+    UpgradeSettingValueIfEquals ws, "enrollment.def.class.payment_kind", "personal", "standard"
+    UpgradeSettingValueIfEquals ws, "enrollment.def.class.word_block_target", "Section1MonthlyPersonal", "Section1MonthlyStandard"
     UpgradeSettingValueIfEquals ws, "enrollment.def.std_duty.required_docs", "basis", ""
     UpgradeSettingValueIfEquals ws, "enrollment.def.std_special.required_docs", "basis", ""
     UpgradeSettingValueIfEquals ws, "enrollment.def.std_tariff.required_docs", "basis", ""
@@ -3139,15 +3141,18 @@ Private Sub EnsureEnrollmentPaymentLegalMetadata(ByVal ws As Worksheet)
     EnsureSetting ws, "enrollment.def.secrecy.word_legal_group", "MO_727", "Word legal-act group"
     EnsureSetting ws, "enrollment.def.std_tariff.word_legal_group", "MO_430", "Word legal-act group"
     EnsureSetting ws, "enrollment.def.std_contract430.word_legal_group", "MO_430", "Word legal-act group"
-    EnsureSetting ws, "enrollment.def.class.word_legal_group", "MO_430", "Word legal-act group"
+    EnsureSetting ws, "enrollment.def.class.word_legal_group", "MO_727", "Word legal-act group"
     EnsureSetting ws, "enrollment.def.fizo.word_legal_group", "MO_430", "Word legal-act group"
     EnsureSetting ws, "enrollment.def.achievement.word_legal_group", "MO_430", "Word legal-act group"
 
     EnsureSetting ws, "enrollment.def.std_tariff.word_legal_clause", "в соответствии с пунктом 3 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
     EnsureSetting ws, "enrollment.def.std_contract430.word_legal_clause", "в соответствии с пунктом 3.4 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
-    EnsureSetting ws, "enrollment.def.class.word_legal_clause", "в соответствии с пунктом 2 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
+    EnsureSetting ws, "enrollment.def.class.word_legal_clause", "", "Word legal clause; operator may amend"
     EnsureSetting ws, "enrollment.def.fizo.word_legal_clause", "в соответствии с пунктом 2 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
     EnsureSetting ws, "enrollment.def.achievement.word_legal_clause", "в соответствии с пунктом 2 Правил выплаты ежемесячной надбавки за особые достижения в службе", "Word legal clause; operator may amend"
+
+    UpgradeSettingValueIfEquals ws, "enrollment.def.class.word_legal_group", "MO_430", "MO_727"
+    UpgradeSettingValueIfEquals ws, "enrollment.def.class.word_legal_clause", "в соответствии с пунктом 2 Правил выплаты ежемесячной надбавки за особые достижения в службе", ""
 End Sub
 
 Private Sub EnsureEnrollmentPaymentDefinition(ByVal ws As Worksheet, ByVal defCode As String, ByVal paymentKind As String, ByVal wordBlockTarget As String, ByVal journalBinding As String, ByVal requiredDocs As String, ByVal startDateSource As String, ByVal validationSeverity As String, ByVal labelText As String)
