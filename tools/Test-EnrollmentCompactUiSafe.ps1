@@ -50,6 +50,7 @@ Public Function ProbeEnrollmentCompactUi() As String
     Dim rowNum As Long
     Dim referenceType As String
     Dim controlItem As Object
+    Dim nestedControl As Object
     Dim hasPersonalToggle As Boolean
     Dim hasBankToggle As Boolean
     Dim tariffDefinition As Object
@@ -81,10 +82,16 @@ Public Function ProbeEnrollmentCompactUi() As String
     If frmEnrollmentWizard.Controls("mpWizard").Pages.Count <> 7 Then Err.Raise 801, , "Unexpected page count"
     Set frameHost = frmEnrollmentWizard.Controls("mpWizard").Pages(2).Controls("fraOrder727")
     If frameHost Is Nothing Then Err.Raise 804, , "Order 727 frame is missing"
-    If frameHost.Height <> 184 Then Err.Raise 816, , "Order 727 frame is not compactly laid out"
+    If frameHost.Height <> 168 Then Err.Raise 816, , "Order 727 frame is not compactly laid out"
+    For Each nestedControl In frameHost.Controls
+        If nestedControl.Top + nestedControl.Height + 6 > frameHost.Height Then Err.Raise 821, , "Order 727 contains clipped controls"
+    Next nestedControl
     Set frameHost = frmEnrollmentWizard.Controls("mpWizard").Pages(2).Controls("fraOrder430")
     If frameHost Is Nothing Then Err.Raise 805, , "Order 430 frame is missing"
-    If frameHost.Top <> 248 Or frameHost.Height <> 152 Then Err.Raise 817, , "Order 430 frame is not compactly laid out"
+    If frameHost.Top <> 232 Or frameHost.Height <> 174 Then Err.Raise 817, , "Order 430 frame is not compactly laid out"
+    For Each nestedControl In frameHost.Controls
+        If nestedControl.Top + nestedControl.Height + 6 > frameHost.Height Then Err.Raise 822, , "Order 430 contains clipped controls"
+    Next nestedControl
     Set monthlyPage = frmEnrollmentWizard.Controls("mpWizard").Pages(2)
     If monthlyPage.ScrollBars <> 2 Then Err.Raise 818, , "Monthly page does not have native vertical scrolling"
     Set frameHost = frmEnrollmentWizard.Controls("mpWizard").Pages(1).Controls("fraDocsArrival")

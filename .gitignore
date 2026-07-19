@@ -24,6 +24,7 @@ CreateOrderBackups/
 # Локальный карантин и диагностические артефакты
 Trash/
 _tmp*/
+tmp/
 *.log
 Копия CreateOrder.xlsm
 

@@ -920,7 +920,7 @@ Private Sub CreateMonthlyPage()
     Set txtPreferentialCoeff = AddPageTextBoxT(pgMonthly, "enrollment.field.preferential_coeff", "Коэффициент", 176, 14, 56)
     AddPageSectionLabel pgMonthly, "Льготная выслуга применяется отдельно и включена по умолчанию", 250, 18, 420
 
-    Set fraOrder727 = AddPageFrame(pgMonthly, "fraOrder727", "Приказ МО РФ № 727 — ежемесячные выплаты", 12, 52, 744, 184)
+    Set fraOrder727 = AddPageFrame(pgMonthly, "fraOrder727", "Приказ МО РФ № 727 — ежемесячные выплаты", 12, 52, 744, 168)
     Set chkStdDuty = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_duty", "Надбавка по должности", 18, 18)
     chkStdDuty.Width = 150
     Set txtStdDutyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 178, 14, 52)
@@ -943,7 +943,7 @@ Private Sub CreateMonthlyPage()
     Set txtPremiumStart = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_start", "Начало", 178, 110, 82)
     Set txtPremiumEnd = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_end", "Окончание", 278, 110, 82)
 
-    Set fraOrder430 = AddPageFrame(pgMonthly, "fraOrder430", "Приказ МО РФ № 430дсп — индивидуальные основания", 12, 248, 744, 152)
+    Set fraOrder430 = AddPageFrame(pgMonthly, "fraOrder430", "Приказ МО РФ № 430дсп — индивидуальные основания", 12, 232, 744, 174)
     Set chkStdContract430 = AddPageCheckBoxT(fraOrder430, "enrollment.field.std_contract430", "Контракт / 430дсп", 18, 18)
     chkStdContract430.Width = 142
     Set txtStdContract430Percent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 168, 14, 52)
@@ -952,16 +952,16 @@ Private Sub CreateMonthlyPage()
     Set lblTariffAllowanceState = AddLabelToPage(fraOrder430, "1–4 тариф: определяется по выбранному разряду", 18, 54, 246)
     Set txtStdTariffPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 274, 50, 52, 18, False, True)
 
-    Set txtFizoParam = AddPageComboBoxT(fraOrder430, "enrollment.field.fizo_param", "ФИЗО", 18, 92, 136)
-    Set chkFizo = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 162, 110)
+    Set txtFizoParam = AddPageComboBoxT(fraOrder430, "enrollment.field.fizo_param", "ФИЗО", 18, 84, 136)
+    Set chkFizo = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 162, 102)
     chkFizo.Width = 40
-    Set txtFizoPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 210, 92, 52, 18, False, True)
-    Set txtAchievementParam = AddPageComboBoxT(fraOrder430, "enrollment.field.achievement_param", "Особые достижения / медаль", 386, 92, 174)
-    Set chkAchievement = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 568, 110)
+    Set txtFizoPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 210, 84, 52, 18, False, True)
+    Set txtAchievementParam = AddPageComboBoxT(fraOrder430, "enrollment.field.achievement_param", "Особые достижения / медаль", 386, 84, 174)
+    Set chkAchievement = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 568, 102)
     chkAchievement.Width = 40
-    Set txtAchievementAmount = AddPageTextBoxT(fraOrder430, "enrollment.field.achievement_amount", "% / сумма", 616, 92, 70, 18, False, True)
-    Set txtAchievementAwardDate = AddPageTextBoxT(fraOrder430, "common.date", "Дата", 18, 132, 76)
-    Set txtAchievementDocumentReference = AddPageTextBoxT(fraOrder430, "enrollment.field.order_number", "Номер приказа", 112, 132, 160)
+    Set txtAchievementAmount = AddPageTextBoxT(fraOrder430, "enrollment.field.achievement_amount", "% / сумма", 616, 84, 70, 18, False, True)
+    Set txtAchievementAwardDate = AddPageTextBoxT(fraOrder430, "common.date", "Дата приказа", 386, 126, 92)
+    Set txtAchievementDocumentReference = AddPageTextBoxT(fraOrder430, "enrollment.field.order_number", "Номер приказа", 494, 126, 192)
 
     ConfigureScrollablePage pgMonthly, 0, True
 End Sub
