@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784473081.7971866,
-    "ast_hash": "467a7045824d507f58dab7960322352c",
+    "mtime": 1784486836.4109898,
+    "ast_hash": "3ee1ebfda442cd62dee2e5747ffe2c5c",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -255,8 +255,8 @@
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784473081.849276,
-    "ast_hash": "02d3793d312ebb29036623c80e6ae3c7",
+    "mtime": 1784486721.5492003,
+    "ast_hash": "5a403f6eeb291df0cc843aec314c9e6f",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
@@ -352,6 +352,16 @@
   ".spec/tasks/enrollment-monthly-grid-2026-07-18.md": {
     "mtime": 1784473081.8023682,
     "ast_hash": "66c4b0f1d337bb1ae7d37d32d31a553f",
+    "semantic_hash": ""
+  },
+  "tools/apply_layout_constants.py": {
+    "mtime": 1784486639.988218,
+    "ast_hash": "4f633a87a0969bc104ed25322aac9cca",
+    "semantic_hash": ""
+  },
+  "tools/verify_geometry.py": {
+    "mtime": 1784486497.4345274,
+    "ast_hash": "a94d0029225dba9b8fb5a136637fcd33",
     "semantic_hash": ""
   }
 }

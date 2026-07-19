@@ -70,6 +70,8 @@
   "68": "Матрица приёмки замечаний по мастеру зачисления",
   "69": "Test-EnrollmentTariffReferenceSafe.ps1",
   "70": "Компактные формы перемещения и исключения",
+  "71": "verify_geometry.py",
+  "72": "apply_layout_constants.py",
   "73": "Компактный мастер зачисления и производительность",
   "74": "Test-EnrollmentCompactUiSafe.ps1",
   "75": "Install-EnrollmentCompactUiSafe.ps1",
