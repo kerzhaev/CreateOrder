@@ -34,11 +34,11 @@ Private Const FRA430_WIDTH As Single = 744
 Private Const FRA430_HEIGHT As Single = 174
 
 ' Standard control sizes used across the monthly page.
-Private Const CTRL_PERCENT_WIDTH As Single = 52
-Private Const CTRL_PARAM_WIDTH As Single = 136
-Private Const CTRL_PARAM_ACHIEVEMENT_WIDTH As Single = 174
+Private Const CTRL_PERCENT_WIDTH As Single = 28
+Private Const CTRL_PARAM_WIDTH As Single = 96
+Private Const CTRL_PARAM_ACHIEVEMENT_WIDTH As Single = 120
 Private Const CTRL_DATE_WIDTH As Single = 92
-Private Const CTRL_DOC_WIDTH As Single = 192
+Private Const CTRL_DOC_WIDTH As Single = 160
 Private Const CTRL_PREMIUM_WIDTH As Single = 82
 Private Const CTRL_PREMIUM_START_WIDTH As Single = 82
 Private Const CTRL_PREMIUM_END_WIDTH As Single = 82
@@ -52,7 +52,7 @@ Private Const FRA727_ROW1_CHK_TOP As Single = 18       ' std_duty / std_special 
 Private Const FRA727_ROW1_TXT_TOP As Single = 14       ' std_duty% / std_special% textboxes
 Private Const FRA727_ROW2_CHK_TOP As Single = 80       ' secrecy / class checkboxes ("Вкл")
 Private Const FRA727_ROW2_TXT_TOP As Single = 62       ' secrecy/class param combo and % textbox
-Private Const FRA727_ROW3_CHK_TOP As Single = 114      ' premium checkbox (rendered slightly lower than textboxes)
+Private Const FRA727_ROW3_CHK_TOP As Single = 126      ' premium checkbox (rendered slightly lower than textboxes)
 Private Const FRA727_ROW3_TXT_TOP As Single = 110      ' premium% / premium dates
 Private Const FRA727_COL_LEFT As Single = 18
 Private Const FRA727_COL_LEFT_PERCENT As Single = 178
@@ -76,7 +76,7 @@ Private Const FRA430_COL_LEFT_FIZO_PERCENT As Single = 210
 Private Const FRA430_COL_RIGHT As Single = 386
 Private Const FRA430_COL_RIGHT_CHK As Single = 568
 Private Const FRA430_COL_RIGHT_AMOUNT As Single = 616
-Private Const FRA430_COL_RIGHT_AMOUNT_WIDTH As Single = 70
+Private Const FRA430_COL_RIGHT_AMOUNT_WIDTH As Single = 36
 Private Const FRA430_COL_DATE As Single = 386
 Private Const FRA430_COL_DOC As Single = 494
 
