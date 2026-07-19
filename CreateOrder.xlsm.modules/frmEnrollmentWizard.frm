@@ -21,6 +21,65 @@ Private Const RESULT_COL_RANK As Long = 2
 Private Const RESULT_COL_POSITION As Long = 3
 Private Const RESULT_COL_SECTION As Long = 4
 
+' ----- Layout constants for the monthly payments page (CreateMonthlyPage) -----
+' Geometry is collected here so the layout can be tuned without reading the body of CreateMonthlyPage.
+Private Const FRA727_LEFT As Single = 12
+Private Const FRA727_TOP As Single = 52
+Private Const FRA727_WIDTH As Single = 744
+Private Const FRA727_HEIGHT As Single = 168
+
+Private Const FRA430_LEFT As Single = 12
+Private Const FRA430_TOP As Single = 232
+Private Const FRA430_WIDTH As Single = 744
+Private Const FRA430_HEIGHT As Single = 174
+
+' Standard control sizes used across the monthly page.
+Private Const CTRL_PERCENT_WIDTH As Single = 52
+Private Const CTRL_PARAM_WIDTH As Single = 136
+Private Const CTRL_PARAM_ACHIEVEMENT_WIDTH As Single = 174
+Private Const CTRL_DATE_WIDTH As Single = 92
+Private Const CTRL_DOC_WIDTH As Single = 192
+Private Const CTRL_PREMIUM_WIDTH As Single = 82
+Private Const CTRL_PREMIUM_START_WIDTH As Single = 82
+Private Const CTRL_PREMIUM_END_WIDTH As Single = 82
+Private Const CTRL_HEIGHT_DEFAULT As Single = 18
+Private Const CTRL_LBL_TARIFF_WIDTH As Single = 246
+
+' Row baselines inside fraOrder727.
+' Each row carries a checkbox (top1) and adjacent percent textbox (top2). The
+' textbox is placed 4 points above the checkbox so their visible centres align.
+Private Const FRA727_ROW1_CHK_TOP As Single = 18       ' std_duty / std_special checkboxes
+Private Const FRA727_ROW1_TXT_TOP As Single = 14       ' std_duty% / std_special% textboxes
+Private Const FRA727_ROW2_CHK_TOP As Single = 80       ' secrecy / class checkboxes ("Вкл")
+Private Const FRA727_ROW2_TXT_TOP As Single = 62       ' secrecy/class param combo and % textbox
+Private Const FRA727_ROW3_CHK_TOP As Single = 114      ' premium checkbox (rendered slightly lower than textboxes)
+Private Const FRA727_ROW3_TXT_TOP As Single = 110      ' premium% / premium dates
+Private Const FRA727_COL_LEFT As Single = 18
+Private Const FRA727_COL_LEFT_PERCENT As Single = 178
+Private Const FRA727_COL_RIGHT As Single = 386
+Private Const FRA727_COL_RIGHT_PERCENT As Single = 514
+Private Const FRA727_COL_RIGHT_CHK As Single = 530
+Private Const FRA727_COL_RIGHT_CLASS_PERCENT As Single = 578
+
+' Row baselines inside fraOrder430.
+Private Const FRA430_ROW1_CHK_TOP As Single = 18       ' contract430 checkbox / contract430% textbox
+Private Const FRA430_ROW1_TXT_TOP As Single = 14       ' contract430% textbox (rendered above the checkbox)
+Private Const FRA430_ROW2_LBL_TOP As Single = 54       ' 1-4 tariff label / tariff% textbox
+Private Const FRA430_ROW2_TXT_TOP As Single = 50       ' tariff% textbox
+Private Const FRA430_ROW3_CHK_TOP As Single = 102      ' fizo / achievement checkboxes ("Вкл")
+Private Const FRA430_ROW3_TXT_TOP As Single = 84       ' fizo/achievement param combo and % textbox
+Private Const FRA430_ROW4_TOP As Single = 126          ' medal award date / order row
+Private Const FRA430_COL_LEFT As Single = 18
+Private Const FRA430_COL_LEFT_PERCENT As Single = 168
+Private Const FRA430_COL_LEFT_TARIFF_PERCENT As Single = 274
+Private Const FRA430_COL_LEFT_FIZO_PERCENT As Single = 210
+Private Const FRA430_COL_RIGHT As Single = 386
+Private Const FRA430_COL_RIGHT_CHK As Single = 568
+Private Const FRA430_COL_RIGHT_AMOUNT As Single = 616
+Private Const FRA430_COL_RIGHT_AMOUNT_WIDTH As Single = 70
+Private Const FRA430_COL_DATE As Single = 386
+Private Const FRA430_COL_DOC As Single = 494
+
 Private mpWizard As Object
 Private pgEmployee As Object
 Private pgDocs As Object
@@ -915,53 +974,54 @@ Private Sub CreateDocsPage()
 End Sub
 
 Private Sub CreateMonthlyPage()
+    ' Geometry lives in the layout constants at the top of this module.
     Set chkPreferential = AddPageCheckBoxT(pgMonthly, "enrollment.field.preferential_enabled", "Льготная выслуга", 24, 18)
     chkPreferential.Width = 140
     Set txtPreferentialCoeff = AddPageTextBoxT(pgMonthly, "enrollment.field.preferential_coeff", "Коэффициент", 176, 14, 56)
     AddPageSectionLabel pgMonthly, "Льготная выслуга применяется отдельно и включена по умолчанию", 250, 18, 420
 
-    Set fraOrder727 = AddPageFrame(pgMonthly, "fraOrder727", "Приказ МО РФ № 727 — ежемесячные выплаты", 12, 52, 744, 168)
-    Set chkStdDuty = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_duty", "Надбавка по должности", 18, 18)
+    Set fraOrder727 = AddPageFrame(pgMonthly, "fraOrder727", "Приказ МО РФ № 727 — ежемесячные выплаты", FRA727_LEFT, FRA727_TOP, FRA727_WIDTH, FRA727_HEIGHT)
+    Set chkStdDuty = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_duty", "Надбавка по должности", FRA727_COL_LEFT, FRA727_ROW1_CHK_TOP)
     chkStdDuty.Width = 150
-    Set txtStdDutyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 178, 14, 52)
-    Set chkStdSpecial = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_special", "Особые условия", 386, 18)
+    Set txtStdDutyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", FRA727_COL_LEFT_PERCENT, FRA727_ROW1_TXT_TOP, CTRL_PERCENT_WIDTH)
+    Set chkStdSpecial = AddPageCheckBoxT(fraOrder727, "enrollment.field.std_special", "Особые условия", FRA727_COL_RIGHT, FRA727_ROW1_CHK_TOP)
     chkStdSpecial.Width = 120
-    Set txtStdSpecialPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 514, 14, 52)
+    Set txtStdSpecialPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", FRA727_COL_RIGHT_PERCENT, FRA727_ROW1_TXT_TOP, CTRL_PERCENT_WIDTH)
 
-    Set txtSecrecyParam = AddPageComboBoxT(fraOrder727, "enrollment.field.secrecy_param", "Секретность", 18, 62, 136)
-    Set chkSecrecy = AddPageCheckBoxT(fraOrder727, "common.enabled_short", "Вкл", 162, 80)
+    Set txtSecrecyParam = AddPageComboBoxT(fraOrder727, "enrollment.field.secrecy_param", "Секретность", FRA727_COL_LEFT, FRA727_ROW2_TXT_TOP, CTRL_PARAM_WIDTH)
+    Set chkSecrecy = AddPageCheckBoxT(fraOrder727, "common.enabled_short", "Вкл", 162, FRA727_ROW2_CHK_TOP)
     chkSecrecy.Width = 40
-    Set txtSecrecyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 210, 62, 52, 18, False, True)
-    Set txtClassParam = AddPageComboBoxT(fraOrder727, "enrollment.field.class_param", "Классность", 386, 62, 136)
-    Set chkClass = AddPageCheckBoxT(fraOrder727, "common.enabled_short", "Вкл", 530, 80)
+    Set txtSecrecyPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 210, FRA727_ROW2_TXT_TOP, CTRL_PERCENT_WIDTH, CTRL_HEIGHT_DEFAULT, False, True)
+    Set txtClassParam = AddPageComboBoxT(fraOrder727, "enrollment.field.class_param", "Классность", FRA727_COL_RIGHT, FRA727_ROW2_TXT_TOP, CTRL_PARAM_WIDTH)
+    Set chkClass = AddPageCheckBoxT(fraOrder727, "common.enabled_short", "Вкл", FRA727_COL_RIGHT_CHK, FRA727_ROW2_CHK_TOP)
     chkClass.Width = 40
-    Set txtClassPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", 578, 62, 52, 18, False, True)
+    Set txtClassPercent = AddPageTextBoxT(fraOrder727, "common.percent", "%", FRA727_COL_RIGHT_CLASS_PERCENT, FRA727_ROW2_TXT_TOP, CTRL_PERCENT_WIDTH, CTRL_HEIGHT_DEFAULT, False, True)
 
-    Set chkPremium = AddPageCheckBoxT(fraOrder727, "enrollment.field.premium", "Премия", 18, 114)
-    chkPremium.Width = 82
-    Set txtPremiumPercent = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_percent", "%", 108, 110, 52)
-    Set txtPremiumStart = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_start", "Начало", 178, 110, 82)
-    Set txtPremiumEnd = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_end", "Окончание", 278, 110, 82)
+    Set chkPremium = AddPageCheckBoxT(fraOrder727, "enrollment.field.premium", "Премия", FRA727_COL_LEFT, FRA727_ROW3_CHK_TOP)
+    chkPremium.Width = CTRL_PREMIUM_WIDTH
+    Set txtPremiumPercent = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_percent", "%", 108, FRA727_ROW3_TXT_TOP, CTRL_PERCENT_WIDTH)
+    Set txtPremiumStart = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_start", "Начало", 178, FRA727_ROW3_TXT_TOP, CTRL_PREMIUM_START_WIDTH)
+    Set txtPremiumEnd = AddPageTextBoxT(fraOrder727, "enrollment.field.premium_end", "Окончание", 278, FRA727_ROW3_TXT_TOP, CTRL_PREMIUM_END_WIDTH)
 
-    Set fraOrder430 = AddPageFrame(pgMonthly, "fraOrder430", "Приказ МО РФ № 430дсп — индивидуальные основания", 12, 232, 744, 174)
-    Set chkStdContract430 = AddPageCheckBoxT(fraOrder430, "enrollment.field.std_contract430", "Контракт / 430дсп", 18, 18)
+    Set fraOrder430 = AddPageFrame(pgMonthly, "fraOrder430", "Приказ МО РФ № 430дсп — индивидуальные основания", FRA430_LEFT, FRA430_TOP, FRA430_WIDTH, FRA430_HEIGHT)
+    Set chkStdContract430 = AddPageCheckBoxT(fraOrder430, "enrollment.field.std_contract430", "Контракт / 430дсп", FRA430_COL_LEFT, FRA430_ROW1_CHK_TOP)
     chkStdContract430.Width = 142
-    Set txtStdContract430Percent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 168, 14, 52)
+    Set txtStdContract430Percent = AddPageTextBoxT(fraOrder430, "common.percent", "%", FRA430_COL_LEFT_PERCENT, FRA430_ROW1_TXT_TOP, CTRL_PERCENT_WIDTH)
     Set chkStdTariff = AddPageCheckBoxT(fraOrder430, "enrollment.field.std_tariff", "", 12, 54)
     chkStdTariff.Visible = False
-    Set lblTariffAllowanceState = AddLabelToPage(fraOrder430, "1–4 тариф: определяется по выбранному разряду", 18, 54, 246)
-    Set txtStdTariffPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 274, 50, 52, 18, False, True)
+    Set lblTariffAllowanceState = AddLabelToPage(fraOrder430, "1–4 тариф: определяется по выбранному разряду", FRA430_COL_LEFT, FRA430_ROW2_LBL_TOP, CTRL_LBL_TARIFF_WIDTH)
+    Set txtStdTariffPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", FRA430_COL_LEFT_TARIFF_PERCENT, FRA430_ROW2_TXT_TOP, CTRL_PERCENT_WIDTH, CTRL_HEIGHT_DEFAULT, False, True)
 
-    Set txtFizoParam = AddPageComboBoxT(fraOrder430, "enrollment.field.fizo_param", "ФИЗО", 18, 84, 136)
-    Set chkFizo = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 162, 102)
+    Set txtFizoParam = AddPageComboBoxT(fraOrder430, "enrollment.field.fizo_param", "ФИЗО", FRA430_COL_LEFT, FRA430_ROW3_TXT_TOP, CTRL_PARAM_WIDTH)
+    Set chkFizo = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 162, FRA430_ROW3_CHK_TOP)
     chkFizo.Width = 40
-    Set txtFizoPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", 210, 84, 52, 18, False, True)
-    Set txtAchievementParam = AddPageComboBoxT(fraOrder430, "enrollment.field.achievement_param", "Особые достижения / медаль", 386, 84, 174)
-    Set chkAchievement = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", 568, 102)
+    Set txtFizoPercent = AddPageTextBoxT(fraOrder430, "common.percent", "%", FRA430_COL_LEFT_FIZO_PERCENT, FRA430_ROW3_TXT_TOP, CTRL_PERCENT_WIDTH, CTRL_HEIGHT_DEFAULT, False, True)
+    Set txtAchievementParam = AddPageComboBoxT(fraOrder430, "enrollment.field.achievement_param", "Особые достижения / медаль", FRA430_COL_RIGHT, FRA430_ROW3_TXT_TOP, CTRL_PARAM_ACHIEVEMENT_WIDTH)
+    Set chkAchievement = AddPageCheckBoxT(fraOrder430, "common.enabled_short", "Вкл", FRA430_COL_RIGHT_CHK, FRA430_ROW3_CHK_TOP)
     chkAchievement.Width = 40
-    Set txtAchievementAmount = AddPageTextBoxT(fraOrder430, "enrollment.field.achievement_amount", "% / сумма", 616, 84, 70, 18, False, True)
-    Set txtAchievementAwardDate = AddPageTextBoxT(fraOrder430, "common.date", "Дата приказа", 386, 126, 92)
-    Set txtAchievementDocumentReference = AddPageTextBoxT(fraOrder430, "enrollment.field.order_number", "Номер приказа", 494, 126, 192)
+    Set txtAchievementAmount = AddPageTextBoxT(fraOrder430, "enrollment.field.achievement_amount", "% / сумма", FRA430_COL_RIGHT_AMOUNT, FRA430_ROW3_TXT_TOP, FRA430_COL_RIGHT_AMOUNT_WIDTH, CTRL_HEIGHT_DEFAULT, False, True)
+    Set txtAchievementAwardDate = AddPageTextBoxT(fraOrder430, "common.date", "Дата приказа", FRA430_COL_DATE, FRA430_ROW4_TOP, CTRL_DATE_WIDTH)
+    Set txtAchievementDocumentReference = AddPageTextBoxT(fraOrder430, "enrollment.field.order_number", "Номер приказа", FRA430_COL_DOC, FRA430_ROW4_TOP, CTRL_DOC_WIDTH)
 
     ConfigureScrollablePage pgMonthly, 0, True
 End Sub

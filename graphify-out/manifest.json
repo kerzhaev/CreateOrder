@@ -35,23 +35,23 @@
     "semantic_hash": ""
   },
   "Build-Ribbon.ps1": {
-    "mtime": 1784059365.1327858,
-    "ast_hash": "0134c8c2dfa786989346aad934b4e95c",
+    "mtime": 1784473081.812071,
+    "ast_hash": "9937685c481606b8b6e6162f90dbcf7d",
     "semantic_hash": ""
   },
   "Test-FIODeclension.ps1": {
-    "mtime": 1783980936.931378,
-    "ast_hash": "06de54ffb1ddbdc96893432d905f22ce",
+    "mtime": 1784473081.8446977,
+    "ast_hash": "c638b5358ab3ad4e4a9f0db59a84118c",
     "semantic_hash": ""
   },
   "Test-PaymentsEnrollmentAcceptance.ps1": {
-    "mtime": 1784138613.7708347,
-    "ast_hash": "0e7edf33c6ff027ba65997c81ef0d268",
+    "mtime": 1784473081.8458593,
+    "ast_hash": "e69e8c9435ae5cf171a410fb48f17dd4",
     "semantic_hash": ""
   },
   "Test-ZP12Validation.ps1": {
-    "mtime": 1784135791.0115216,
-    "ast_hash": "af96e78ac3069e3dc06c641e9ee54a0e",
+    "mtime": 1784473081.8478606,
+    "ast_hash": "9e4288bd9a71e3391cfd18ce175e772d",
     "semantic_hash": ""
   },
   "tools/ensure_localization_sheet.py": {
@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   ".spec/PROJECT_CONTEXT.md": {
-    "mtime": 1784472620.2207766,
-    "ast_hash": "a5d0eee61dbb3516bca38a426226af05",
+    "mtime": 1784473081.7971866,
+    "ast_hash": "467a7045824d507f58dab7960322352c",
     "semantic_hash": ""
   },
   ".spec/archive/implementation-instructions.md": {
@@ -150,8 +150,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/zp12-validation.md": {
-    "mtime": 1784136280.7821476,
-    "ast_hash": "da2b7b53c6bed2d5598b7249bf65736f",
+    "mtime": 1784473081.8100722,
+    "ast_hash": "b051f6478f8f8d85384873312a38de25",
     "semantic_hash": ""
   },
   ".spec/templates/.specify/templates/agent-file-template.md": {
@@ -185,8 +185,8 @@
     "semantic_hash": ""
   },
   "docs/FeatureSpec_PaymentsAndEnrollment.md": {
-    "mtime": 1783892642.129615,
-    "ast_hash": "14345a05fc0494562973f08e423bcff7",
+    "mtime": 1784473081.8478606,
+    "ast_hash": "313f193946de070feba1254f09bf2e81",
     "semantic_hash": ""
   },
   "docs/TechnicalNotes.md": {
@@ -195,108 +195,108 @@
     "semantic_hash": ""
   },
   "docs/UserGuide.md": {
-    "mtime": 1784472632.4329906,
+    "mtime": 1784473081.8502784,
     "ast_hash": "50aa97659d6826e8091b29970d08611a",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/plan.md": {
-    "mtime": 1783976566.1675456,
-    "ast_hash": "f0aaa3767459c87456a6b2502ec5caa9",
+    "mtime": 1784473081.7981865,
+    "ast_hash": "114960508e616c5b6766527d65fcb893",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/spec.md": {
-    "mtime": 1783976566.1663556,
-    "ast_hash": "9174040f3e67d4ed4bdff0c5046aa1af",
+    "mtime": 1784473081.7993717,
+    "ast_hash": "9df7fdf5580c051dc46cda31b8195964",
     "semantic_hash": ""
   },
   "Test-PersonnelEvents.ps1": {
-    "mtime": 1784138807.3810365,
-    "ast_hash": "34ce4a3dea7cab3bf856f48df8e1afc8",
+    "mtime": 1784473081.8468602,
+    "ast_hash": "261c4013bcdefdd2f7ac37315740bbfc",
     "semantic_hash": ""
   },
   "tools/Repair-FilterDatabaseNames.ps1": {
-    "mtime": 1783969041.7837565,
-    "ast_hash": "2d9013cb7ea10dad31290257535c6b15",
+    "mtime": 1784473081.8597877,
+    "ast_hash": "c4893b313bde6564bc60a4f172457958",
     "semantic_hash": ""
   },
   "tools/Test-PersonnelActionWizardSafe.ps1": {
-    "mtime": 1784142639.5577488,
-    "ast_hash": "3017576f5e0b587faadaefd6c91dddd8",
+    "mtime": 1784473081.862788,
+    "ast_hash": "6cc902b3b6fdc30ce73fcb885025a4e2",
     "semantic_hash": ""
   },
   "tools/Test-PersonnelRibbonSafe.ps1": {
-    "mtime": 1784059132.6110346,
-    "ast_hash": "36be5360a280d204deff144f7abc18f4",
+    "mtime": 1784473081.862788,
+    "ast_hash": "3fda3af2e43eac69054d328559b10c08",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/order-forms-move-exclusion.md": {
-    "mtime": 1783974275.616154,
-    "ast_hash": "5ddfb75f2722d70a6749d9235f95ec2d",
+    "mtime": 1784473081.7981865,
+    "ast_hash": "4fe2ed8ed0c917717f284771cce6b393",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-allowance-rules/source-analysis-430.md": {
-    "mtime": 1783976672.3551755,
-    "ast_hash": "67195f4300046ceef426c0b54e771fa0",
+    "mtime": 1784473081.7993717,
+    "ast_hash": "016b6c6e65bf4ffcceb427c7fd778e2c",
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/plan.md": {
-    "mtime": 1784059586.9677641,
-    "ast_hash": "749f974da8ed322100ed1a6cb1f0f4ca",
+    "mtime": 1784473081.8090715,
+    "ast_hash": "1923cbe786603b05ca47a7f70b507733",
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-unified-wizard/spec.md": {
-    "mtime": 1784058842.679905,
-    "ast_hash": "ac315386ef915bebd3f05c31d10562d9",
+    "mtime": 1784473081.8100722,
+    "ast_hash": "ef242cb49460740c5addb63ad41f7464",
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1784149807.6344197,
-    "ast_hash": "6276cb26752c26ae07ecbff80acdb4ee",
+    "mtime": 1784473081.8110712,
+    "ast_hash": "2ff708c4d18ec6e985e28dc439effc62",
     "semantic_hash": ""
   },
   "docs/PROJECT_STATUS.md": {
-    "mtime": 1784472594.7067926,
-    "ast_hash": "b312c679ae52dfcc6d1fad5e9dbdc389",
+    "mtime": 1784473081.849276,
+    "ast_hash": "02d3793d312ebb29036623c80e6ae3c7",
     "semantic_hash": ""
   },
   "docs/SESSION_HANDOFF_2026-07-14.md": {
-    "mtime": 1784048739.162851,
-    "ast_hash": "5f114dd8929e95d85fd65573a050a141",
+    "mtime": 1784473081.8502784,
+    "ast_hash": "f39d74913694ef2b023657533124930f",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/plan.md": {
-    "mtime": 1784061807.5671299,
-    "ast_hash": "b444ce3276a8b3c940c9feb00824fc2c",
+    "mtime": 1784473081.8065622,
+    "ast_hash": "c43348358dbefe53632993223d2d6e88",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/spec.md": {
-    "mtime": 1784061481.153905,
-    "ast_hash": "01097548f1311096bb5552506f781cb4",
+    "mtime": 1784473081.8080657,
+    "ast_hash": "0993477e7201b4edfae2ae96a9fa54ed",
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentFizoReferenceSafe.ps1": {
-    "mtime": 1784059861.879006,
-    "ast_hash": "9cec0d50910920184332d021933abd1f",
+    "mtime": 1784473081.860788,
+    "ast_hash": "dc6f71e16125cdb84191baca550cde37",
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentMedalReferenceSafe.ps1": {
-    "mtime": 1784061130.5634837,
-    "ast_hash": "28177ddbc92b10f933c7b5828f120dff",
+    "mtime": 1784473081.860788,
+    "ast_hash": "11e9b64216847df18c5ca8557619359e",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-ui/acceptance-matrix.md": {
-    "mtime": 1784134965.5423708,
-    "ast_hash": "e175d7bc84482431c822218f68521e61",
+    "mtime": 1784473081.8055599,
+    "ast_hash": "b9479e006cff7dd8a14973aa55871ec0",
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentTariffReferenceSafe.ps1": {
-    "mtime": 1784365776.336648,
-    "ast_hash": "956d3918949dd8c06a07cdfd407100af",
+    "mtime": 1784473081.861788,
+    "ast_hash": "c37fec1471940558d6c2d1dcb3f474d4",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-operator-clarity-2026-07-15.md": {
-    "mtime": 1784140152.7769275,
-    "ast_hash": "032c20a3b51821400fe9b7cb258ed9ce",
+    "mtime": 1784473081.8033705,
+    "ast_hash": "ca1a54adb3e4eb9a3e719862e7210a43",
     "semantic_hash": ""
   },
   "tmp/Test-PersonnelActionWizard-no-loc.ps1": {
@@ -310,8 +310,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/personnel-action-wizard-usability-2026-07-15.md": {
-    "mtime": 1784142714.7158082,
-    "ast_hash": "f1d422e914e745b71c3590afdb8dc2d9",
+    "mtime": 1784473081.8080657,
+    "ast_hash": "d2a808ecf6f2693d3ab424fa8aac7a85",
     "semantic_hash": ""
   },
   "tmp/loc-utf8.txt": {
@@ -325,23 +325,23 @@
     "semantic_hash": ""
   },
   "tools/Test-EnrollmentCompactUiSafe.ps1": {
-    "mtime": 1784369334.6299167,
-    "ast_hash": "0bb286a89e9b28f810c6376b2a044a09",
+    "mtime": 1784473081.8597877,
+    "ast_hash": "49a1c61e5f3c47bb450ec92ef3d54722",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-compact-performance-2026-07-15.md": {
-    "mtime": 1784153738.9610088,
-    "ast_hash": "98171677d0b1be4497d3a9c87ad39fa3",
+    "mtime": 1784473081.800368,
+    "ast_hash": "566a695cdb260fd3cf36fd5ea01cdab5",
     "semantic_hash": ""
   },
   "tools/Install-EnrollmentCompactUiSafe.ps1": {
-    "mtime": 1784366012.880442,
-    "ast_hash": "04bc7d848fb47f5dfe2d69cd1476175d",
+    "mtime": 1784473081.858788,
+    "ast_hash": "39ea09310d0b7346a7726cf929ab2321",
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-legal-act-word-sections-2026-07-18.md": {
-    "mtime": 1784365953.8474588,
-    "ast_hash": "edbc5ca7c0a3e7e664f0897ef108f1a7",
+    "mtime": 1784473081.8023682,
+    "ast_hash": "c5e9ac071374b31e01dc12ef8e8c9dd1",
     "semantic_hash": ""
   },
   "tmp/pdfs/order-sample-page-1.png": {
@@ -350,8 +350,8 @@
     "semantic_hash": ""
   },
   ".spec/tasks/enrollment-monthly-grid-2026-07-18.md": {
-    "mtime": 1784369281.6437757,
-    "ast_hash": "fcdcbddb7fb209d001bc8651f1cb3587",
+    "mtime": 1784473081.8023682,
+    "ast_hash": "66c4b0f1d337bb1ae7d37d32d31a553f",
     "semantic_hash": ""
   }
 }
