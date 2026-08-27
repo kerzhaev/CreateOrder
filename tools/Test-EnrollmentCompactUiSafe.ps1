@@ -110,7 +110,9 @@ Public Function ProbeEnrollmentCompactUi() As String
     Next controlItem
     If Not hasPersonalToggle Or Not hasBankToggle Then Err.Raise 808, , "Optional personal or bank data toggles are missing"
     For pageIndex = 0 To frmEnrollmentWizard.Controls("mpWizard").Pages.Count - 1
-        If pageIndex <> 2 Then
+        ' The monthly and extras pages deliberately scroll: their dynamic fields
+        ' extend beyond the compact form viewport.
+        If pageIndex <> 2 And pageIndex <> 5 Then
             If frmEnrollmentWizard.Controls("mpWizard").Pages(pageIndex).ScrollBars <> 0 Then Err.Raise 802, , "Unexpected vertical scrolling remains enabled"
         End If
     Next pageIndex

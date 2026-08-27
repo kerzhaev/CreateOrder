@@ -35,16 +35,29 @@ try {
 Option Explicit
 Public Function ProbeEnrollmentFizoReference() As String
     Dim values As Collection
+    Dim expectedCodes As Variant
+    Dim expectedAmounts As Variant
+    Dim i As Long
+    Dim displayName As String
     mdlEnrollmentWorkflow.EnsureEnrollmentReferenceData
     Set values = mdlEnrollmentWorkflow.GetEnrollmentReferenceValues("FIZO")
-    If values.Count <> 1 Then
-        ProbeEnrollmentFizoReference = "FAILED: FIZO reference must contain the configured level"
+    If values.Count <> 3 Then
+        ProbeEnrollmentFizoReference = "FAILED: FIZO reference must contain three configured levels"
         Exit Function
     End If
-    If mdlEnrollmentWorkflow.GetEnrollmentReferenceAmount("FIZO", CStr(values(1))) <> "15" Then
-        ProbeEnrollmentFizoReference = "FAILED: FIZO level 2 must resolve to 15%"
-        Exit Function
-    End If
+    expectedCodes = Array("SECOND", "FIRST", "HIGH")
+    expectedAmounts = Array("80", "90", "100")
+    For i = LBound(expectedCodes) To UBound(expectedCodes)
+        displayName = mdlEnrollmentWorkflow.GetEnrollmentReferenceDisplayName("FIZO", CStr(expectedCodes(i)))
+        If displayName = "" Then
+            ProbeEnrollmentFizoReference = "FAILED: FIZO code is missing: " & CStr(expectedCodes(i))
+            Exit Function
+        End If
+        If mdlEnrollmentWorkflow.GetEnrollmentReferenceAmountByCode("FIZO", CStr(expectedCodes(i))) <> CStr(expectedAmounts(i)) Then
+            ProbeEnrollmentFizoReference = "FAILED: FIZO amount mismatch for " & CStr(expectedCodes(i))
+            Exit Function
+        End If
+    Next i
     ProbeEnrollmentFizoReference = "OK"
 End Function
 "@)

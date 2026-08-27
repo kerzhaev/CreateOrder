@@ -187,7 +187,16 @@ Public Sub EnsureEnrollmentInfrastructure()
     Dim wsJournal As Worksheet
     Dim wsBackend As Worksheet
 
-    If enrollmentInfrastructureReady Then Exit Sub
+    If enrollmentInfrastructureReady Then
+        On Error Resume Next
+        Set wsJournal = ThisWorkbook.Worksheets(mdlReferenceData.SHEET_ENROLLMENT)
+        Set wsBackend = ThisWorkbook.Worksheets(mdlReferenceData.SHEET_ENROLLMENT_FORM)
+        On Error GoTo 0
+        If Not wsJournal Is Nothing And Not wsBackend Is Nothing Then Exit Sub
+
+        Debug.Print "[FIX] Rebuilding enrollment infrastructure after a required sheet was removed."
+        enrollmentInfrastructureReady = False
+    End If
 
     Set wsJournal = EnsureWorksheet(mdlReferenceData.SHEET_ENROLLMENT)
     Set wsBackend = EnsureWorksheet(mdlReferenceData.SHEET_ENROLLMENT_FORM)

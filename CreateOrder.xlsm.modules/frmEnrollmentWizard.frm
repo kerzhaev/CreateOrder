@@ -1113,6 +1113,7 @@ Private Sub CreateExtrasPage()
         Set txtExtraOneTimeBasis(i) = AddPageTextBoxT(pgExtras, "enrollment.field.extra_onetime_basis", "Приказ / основание", 532, topPos, 210)
     Next i
 
+    ConfigureScrollablePage pgExtras, 392, True
 End Sub
 
 Private Function AddPageFrame(ByVal pageHost As Object, ByVal frameName As String, ByVal captionText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal frameWidth As Single, ByVal frameHeight As Single) As Object
@@ -1716,7 +1717,8 @@ Public Sub ReloadFromBackend()
     txtBankAccount.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_account"))
     txtBankName.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_name"))
     txtBankBik.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_bik"))
-    chkBankDetails.Value = BackendYesNo("bank_details_enabled")
+    chkBankDetails.Value = BackendYesNo("bank_details_enabled") Or SafeText(txtBankAccount.Value) <> "" Or _
+        SafeText(txtBankName.Value) <> "" Or SafeText(txtBankBik.Value) <> ""
     txtRequisitesNote.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("requisites_note"))
 
     txtPreviewStatus.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("preview_status"))
