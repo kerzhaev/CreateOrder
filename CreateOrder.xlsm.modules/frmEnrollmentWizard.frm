@@ -1645,6 +1645,10 @@ Public Sub ReloadFromBackend()
     txtReportDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("report_date"))
     txtReportInfo.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("report_info"))
     txtAssignmentInfo.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("assignment_info"))
+    chkArrivalDetails.Value = BackendYesNo("arrival_details_enabled") Or SafeText(txtArrivalSource.Value) <> "" Or _
+        SafeText(txtPrescriptionNumber.Value) <> "" Or SafeText(txtPrescriptionDate.Value) <> "" Or SafeText(txtAssignmentInfo.Value) <> ""
+    chkReportDetails.Value = BackendYesNo("report_details_enabled") Or SafeText(txtReportNumber.Value) <> "" Or _
+        SafeText(txtReportDate.Value) <> "" Or SafeText(txtReportInfo.Value) <> ""
     txtAcceptDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("accept_date"))
     txtEnrollDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("enroll_date"))
     txtDutyStartDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("duty_start_date"))
@@ -1706,7 +1710,6 @@ Public Sub ReloadFromBackend()
     txtBirthDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("birth_date"))
     txtBirthPlace.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("birth_place"))
     txtCitizenship.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("citizenship"))
-    chkPersonalDetails.Value = BackendYesNo("personal_details_enabled")
     txtInn.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("inn"))
     txtSnils.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("snils"))
     txtPassportSeries.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("passport_series"))
@@ -1714,6 +1717,10 @@ Public Sub ReloadFromBackend()
     txtPassportIssuer.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("passport_issuer"))
     txtPassportIssueDate.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("passport_issue_date"))
     txtPassportCode.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("passport_code"))
+    chkPersonalDetails.Value = BackendYesNo("personal_details_enabled") Or SafeText(txtBirthDate.Value) <> "" Or _
+        SafeText(txtBirthPlace.Value) <> "" Or SafeText(txtCitizenship.Value) <> "" Or SafeText(txtInn.Value) <> "" Or _
+        SafeText(txtSnils.Value) <> "" Or SafeText(txtPassportSeries.Value) <> "" Or SafeText(txtPassportNumber.Value) <> "" Or _
+        SafeText(txtPassportIssuer.Value) <> "" Or SafeText(txtPassportIssueDate.Value) <> "" Or SafeText(txtPassportCode.Value) <> ""
     txtBankAccount.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_account"))
     txtBankName.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_name"))
     txtBankBik.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("bank_bik"))

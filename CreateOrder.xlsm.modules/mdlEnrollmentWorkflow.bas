@@ -1620,6 +1620,13 @@ FallbackValue:
 End Function
 
 Private Sub NormalizeOptionalDocumentBlocks(ByVal record As Object)
+    If SafeText(record("personal_details_enabled")) = "" Then
+        record("personal_details_enabled") = IIf(Not IsAllBlank(record("birth_date"), record("birth_place"), record("citizenship"), record("inn"), record("snils"), record("passport_series"), record("passport_number"), record("passport_issuer"), record("passport_issue_date"), record("passport_code")), YES_VALUE, NO_VALUE)
+    End If
+    If SafeText(record("bank_details_enabled")) = "" Then
+        record("bank_details_enabled") = IIf(Not IsAllBlank(record("bank_account"), record("bank_name"), record("bank_bik"), record("requisites_note")), YES_VALUE, NO_VALUE)
+    End If
+
     If SafeText(record("arrival_details_enabled")) = "" Then
         record("arrival_details_enabled") = IIf(Not IsAllBlank(record("arrival_source"), record("prescription_number"), record("prescription_date"), record("assignment_info")), YES_VALUE, NO_VALUE)
     End If

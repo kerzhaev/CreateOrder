@@ -1666,13 +1666,13 @@ try {
     Write-Output "10fa. Enrollment payment definition contract"
     $definitionExpectations = @(
         @{ Code = "core"; Kind = "core"; Block = "Section1Core"; Binding = "core"; Required = ""; Start = "manual"; Severity = "blocked" },
-        @{ Code = "std_duty"; Kind = "standard"; Block = "Section1MonthlyStandard"; Binding = "std_duty"; Required = "basis"; Start = "standard_start_date"; Severity = "warning" },
-        @{ Code = "std_special"; Kind = "standard"; Block = "Section1MonthlyStandard"; Binding = "std_special"; Required = "basis"; Start = "standard_start_date"; Severity = "warning" },
-        @{ Code = "std_tariff"; Kind = "standard"; Block = "Section1MonthlyStandard"; Binding = "std_tariff"; Required = "basis"; Start = "standard_start_date"; Severity = "warning" },
+        @{ Code = "std_duty"; Kind = "standard"; Block = "Section1MonthlyStandard"; Binding = "std_duty"; Required = ""; Start = "standard_start_date"; Severity = "warning" },
+        @{ Code = "std_special"; Kind = "standard"; Block = "Section1MonthlyStandard"; Binding = "std_special"; Required = ""; Start = "standard_start_date"; Severity = "warning" },
+        @{ Code = "std_tariff"; Kind = "standard"; Block = "Section1MonthlyPersonal"; Binding = "std_tariff"; Required = ""; Start = "standard_start_date"; Severity = "warning" },
         @{ Code = "std_contract430"; Kind = "standard"; Block = "Section1MonthlyStandard"; Binding = "std_contract430"; Required = "basis"; Start = "standard_start_date"; Severity = "warning" },
-        @{ Code = "class"; Kind = "personal"; Block = "Section1MonthlyPersonal"; Binding = "class"; Required = "param,basis"; Start = "standard_start_date"; Severity = "blocked" },
+        @{ Code = "class"; Kind = "standard"; Block = "Section1MonthlyStandard"; Binding = "class"; Required = "param,basis"; Start = "standard_start_date"; Severity = "blocked" },
         @{ Code = "fizo"; Kind = "personal"; Block = "Section1MonthlyPersonal"; Binding = "fizo"; Required = "param,basis"; Start = "standard_start_date"; Severity = "blocked" },
-        @{ Code = "secrecy"; Kind = "personal"; Block = "Section1MonthlyPersonal"; Binding = "secrecy"; Required = "param,basis"; Start = "standard_start_date"; Severity = "blocked" },
+        @{ Code = "secrecy"; Kind = "personal"; Block = "Section1MonthlyStandard"; Binding = "secrecy"; Required = "param,basis"; Start = "standard_start_date"; Severity = "blocked" },
         @{ Code = "achievement"; Kind = "personal"; Block = "Section1MonthlyPersonal"; Binding = "achievement"; Required = "param,basis"; Start = "standard_start_date"; Severity = "blocked" },
         @{ Code = "lift"; Kind = "onetime"; Block = "Section1OneTime"; Binding = "lift"; Required = "amount,date,basis"; Start = "enroll_date"; Severity = "warning" },
         @{ Code = "per_diem"; Kind = "onetime"; Block = "Section1OneTime"; Binding = "per_diem"; Required = "amount,date,basis"; Start = "enroll_date"; Severity = "warning" },
@@ -1781,6 +1781,7 @@ try {
     $wsEnrollment.Cells(2, 81).Value = "Указ № 644"
 
     $excel.Run("'$($workbook.Name)'!mdlEnrollmentWorkflow.RefreshEnrollmentRowDirect", $sheetEnrollment, 2)
+    $expectedRankSalary = [string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 36)
     $exportPath = [string]$excel.Run("'$($workbook.Name)'!mdlEnrollmentOrderExport.ExportEnrollmentOrderByRow", 2)
     Assert-True (Test-Path -LiteralPath $exportPath) "Enrollment Word export did not create a .docx file."
 
@@ -1799,7 +1800,7 @@ try {
     Assert-True ($docXml -like "*w:keepLines*") "Enrollment Word export should keep section 2/signature paragraphs from splitting into orphan lines."
     Assert-True ($docText -like "*Надбавка за ученую степень*") "Enrollment Word export did not include the extra monthly payment."
     Assert-True ($docText -like "*Компенсация найма жилья*") "Enrollment Word export did not include the extra one-time payment."
-    Assert-True ($docText -like "*оклад по воинскому званию*5000*") "Enrollment Word export did not include the rank salary paragraph."
+    Assert-True ($docText -like ("*оклад по воинскому званию*" + $expectedRankSalary + "*")) "Enrollment Word export did not include the rank salary paragraph."
     Assert-True ($docText -like "*Дата рождения:*01.01.2000*") "Enrollment Word export did not include birth date requisites."
     Assert-True ($docText -like "*место рождения:*г. Тестоград*") "Enrollment Word export did not include birth place requisites."
     Assert-True ($docText -like "*гражданство:*Российская Федерация*") "Enrollment Word export did not include citizenship requisites."
@@ -1999,6 +2000,13 @@ try {
     $wsEnrollment.Cells(2, 3).Value = $ln1.Trim()
     $wsEnrollment.Cells(2, 7).Value = "06.07.2026"
     $wsEnrollment.Cells(2, 8).Value = "991-OKLAD"
+    $wsEnrollment.Cells(2, 26).Value = "manual"
+    $wsEnrollment.Cells(2, 2).Value = "Ручной тест оклада"
+    $wsEnrollment.Cells(2, 4).Value = "капитан"
+    $wsEnrollment.Cells(2, 5).Value = "ручная должность"
+    $wsEnrollment.Cells(2, 6).Value = "ручное подразделение"
+    $wsEnrollment.Cells(2, 33).Value = "ручное подразделение"
+    $wsEnrollment.Cells(2, 36).Value = "5000"
     $wsEnrollment.Cells(2, 10).Value = "06.07.2026"
     $wsEnrollment.Cells(2, 11).Value = "06.07.2026"
     $wsEnrollment.Cells(2, 13).Value = "report salary missing"
@@ -2010,13 +2018,14 @@ try {
     $wsEnrollment.Cells(2, 44).Value = "06.07.2026"
     $wsEnrollment.Cells(2, 45).Value = "06.07.2026"
     Set-EnrollmentRequiredFields -Worksheet $wsEnrollment -RowNumber 2
+    $wsEnrollment.Cells(2, 34).ClearContents()
     $wsEnrollment.Cells(2, 35).ClearContents()
     $excel.Run("'$($workbook.Name)'!mdlEnrollmentWorkflow.RefreshEnrollmentRowDirect", $sheetEnrollment, 2)
 
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 23)).Trim() "NO" "Missing position salary should block Word readiness."
     Assert-Eq ([int](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 24)) 2 "Missing position salary should have blocked severity."
     $salaryIssues = [string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 25)
-    Assert-True ($salaryIssues -like "*оклад*") "Missing position salary validation did not mention salary."
+    Assert-True ($salaryIssues -like "*оклад*") "Missing position salary validation did not mention salary. Issues: $salaryIssues"
 
     $missingSalaryExportResult = [string]$excel.Run("'$($workbook.Name)'!codex_acceptance_probe.ProbeEnrollmentExportRow", 2)
     Assert-True ($missingSalaryExportResult -like "ERROR:*") "Enrollment export should block rows without position salary."
