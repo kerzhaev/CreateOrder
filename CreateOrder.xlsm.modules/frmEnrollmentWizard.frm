@@ -588,8 +588,21 @@ Public Function ProbeLayoutSnapshot() As String
         CStr(CLng(txtExtraMonthlyBasis(1).Top)) & "|" & _
         CStr(CLng(txtExtraOneTimeName(1).Top + txtExtraOneTimeName(1).Height)) & "|" & _
         CStr(CLng(txtExtraOneTimeBasis(1).Top)) & "|" & _
-        tf("enrollment.field.extra_monthly_name_short", "Ежемес. #{index}: вид", "{index}", 1) & "|" & _
-        tf("enrollment.field.extra_onetime_name_short", "Разовая #{index}: вид", "{index}", 1)
+        FindPageLabelCaption(pgExtras, 12, 24) & "|" & _
+        FindPageLabelCaption(pgExtras, 12, 248)
+End Function
+
+Private Function FindPageLabelCaption(ByVal pageHost As Object, ByVal leftPos As Single, ByVal topPos As Single) As String
+    Dim controlItem As Object
+
+    For Each controlItem In pageHost.Controls
+        If TypeName(controlItem) = "Label" Then
+            If CLng(controlItem.Left) = CLng(leftPos) And CLng(controlItem.Top) = CLng(topPos) Then
+                FindPageLabelCaption = CStr(controlItem.Caption)
+                Exit Function
+            End If
+        End If
+    Next controlItem
 End Function
 
 Public Function ProbeFullCardSnapshot() As String
@@ -1091,7 +1104,7 @@ Private Sub CreateExtrasPage()
 
     For i = 1 To 4
         topPos = 24 + (i - 1) * MONTHLY_STEP
-        Set txtExtraMonthlyName(i) = AddPageComboBoxT(pgExtras, "enrollment.field.extra_monthly_name_short", "Вид", 12, topPos, 170)
+        Set txtExtraMonthlyName(i) = AddPageComboBoxT(pgExtras, "enrollment.field.extra_monthly_name_short", "Вид", 12, topPos, 170, 18, False, i)
         txtExtraMonthlyName(i).Tag = CStr(i)
         Set chkExtraMonthly(i) = AddPageCheckBoxT(pgExtras, "common.enabled_short", "Вкл", 194, topPos + 18)
         chkExtraMonthly(i).Width = 44
@@ -1104,7 +1117,7 @@ Private Sub CreateExtrasPage()
     AddPageSectionLabel pgExtras, "Иные разовые выплаты", 12, 224, 740
     For i = 1 To 3
         topPos = ONE_TIME_START + (i - 1) * ONE_TIME_STEP
-        Set txtExtraOneTimeName(i) = AddPageComboBoxT(pgExtras, "enrollment.field.extra_onetime_name_short", "Вид", 12, topPos, 220)
+        Set txtExtraOneTimeName(i) = AddPageComboBoxT(pgExtras, "enrollment.field.extra_onetime_name_short", "Вид", 12, topPos, 220, 18, False, i)
         txtExtraOneTimeName(i).Tag = CStr(i)
         Set chkExtraOneTime(i) = AddPageCheckBoxT(pgExtras, "common.enabled_short", "Вкл", 244, topPos + 18)
         chkExtraOneTime(i).Width = 44
@@ -1186,12 +1199,17 @@ Private Sub AddPageSectionLabel(ByVal pageHost As Object, ByVal captionText As S
         .Font.Bold = True
     End With
 End Sub
-Private Function AddPageComboBoxT(ByVal pageHost As Object, ByVal localizationKey As String, ByVal fallbackText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal controlWidth As Single, Optional ByVal controlHeight As Single = 18, Optional ByVal ignoredMultiline As Boolean = False) As Object
+Private Function AddPageComboBoxT(ByVal pageHost As Object, ByVal localizationKey As String, ByVal fallbackText As String, ByVal leftPos As Single, ByVal topPos As Single, ByVal controlWidth As Single, Optional ByVal controlHeight As Single = 18, Optional ByVal ignoredMultiline As Boolean = False, Optional ByVal captionIndex As Long = 0) As Object
     Dim lbl As Object
     Dim cbo As Object
+    Dim resolvedCaption As String
+
+    resolvedCaption = t(localizationKey, fallbackText)
+    If captionIndex > 0 Then resolvedCaption = Replace$(resolvedCaption, "{index}", CStr(captionIndex))
+
     Set lbl = pageHost.Controls.Add("Forms.Label.1", "lbl_cbo_" & CStr(pageHost.Controls.Count + 1), True)
     With lbl
-        .Caption = t(localizationKey, fallbackText)
+        .Caption = resolvedCaption
         .Left = leftPos
         .Top = topPos
         .Width = controlWidth
