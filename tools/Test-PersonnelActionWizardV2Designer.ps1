@@ -2,7 +2,8 @@
 param(
     [string]$WorkbookPath,
     [string]$SourceDirectory,
-    [string]$TargetComponentName = 'frmPersonnelActionWizardV2'
+    [string]$TargetComponentName = 'frmPersonnelActionWizardV2',
+    [ValidateSet('V1', 'V2')][string]$ExpectedActiveVersion = 'V1'
 )
 
 if ([string]::IsNullOrWhiteSpace($WorkbookPath)) { $WorkbookPath = Join-Path $PSScriptRoot '..\CreateOrder.xlsm' }
@@ -139,8 +140,13 @@ try {
     $eventsComponent = $book.VBProject.VBComponents.Item('mdlPersonnelEvents')
     try {
         $eventsCode = $eventsComponent.CodeModule.Lines(1, $eventsComponent.CodeModule.CountOfLines)
-        Assert-Condition ($eventsCode.Contains('frmPersonnelActionWizard.Show')) 'The current V1 route is missing before owner acceptance.'
-        Assert-Condition (-not $eventsCode.Contains(($TargetComponentName + '.Show'))) 'V2 must not become active before owner layout acceptance.'
+        if ($ExpectedActiveVersion -eq 'V2') {
+            Assert-Condition ($eventsCode.Contains(($TargetComponentName + '.Show'))) 'The active personnel route does not open V2.'
+            Assert-Condition (-not $eventsCode.Contains('frmPersonnelActionWizard.Show')) 'The active personnel route still opens V1.'
+        } else {
+            Assert-Condition ($eventsCode.Contains('frmPersonnelActionWizard.Show')) 'The current V1 route is missing before owner acceptance.'
+            Assert-Condition (-not $eventsCode.Contains(($TargetComponentName + '.Show'))) 'V2 must not become active before owner layout acceptance.'
+        }
     } finally {
         Release-ComObject $eventsComponent
     }
@@ -210,4 +216,4 @@ End Function
 }
 
 Assert-Condition (-not (Get-Process EXCEL -ErrorAction SilentlyContinue)) 'Excel remained running after personnel V2 designer verification.'
-Write-Host ("Personnel Action Wizard V2 designer verification passed: {0} manifest rows, 2 pages, V1 retained and active." -f $manifest.Count)
+Write-Host ("Personnel Action Wizard V2 designer verification passed: {0} manifest rows, 2 pages, V1 retained, {1} active." -f $manifest.Count, $ExpectedActiveVersion)

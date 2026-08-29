@@ -107,7 +107,7 @@ End Sub
 Public Sub OpenPersonnelActionMenu()
     EnsurePersonnelEventInfrastructure
     PreparePersonnelActionMenu
-    frmPersonnelActionWizard.Show
+    frmPersonnelActionWizardV2.Show
 End Sub
 
 Public Sub PreparePersonnelActionMenu()
@@ -135,7 +135,7 @@ Public Sub OpenPersonnelActionWizard(ByVal eventType As String)
         Err.Raise vbObjectError + 660, "mdlPersonnelEvents", "Personnel action wizard supports TRANSFER and EXCLUSION only."
     End If
     PrepareNewPersonnelAction normalizedType
-    frmPersonnelActionWizard.Show
+    frmPersonnelActionWizardV2.Show
 End Sub
 
 Public Function GetPersonnelWizardValue(ByVal fieldKey As String) As Variant
