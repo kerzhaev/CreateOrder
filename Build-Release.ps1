@@ -127,7 +127,21 @@ Write-Host "  -> [Patch]: ghosted modules=$ghostedCount" -ForegroundColor Green
 # 4. �������� ���������
 Write-Host "[3/4] ��������� ��������� ������..." -ForegroundColor Yellow
 Remove-Item $tempZip -Force
-[System.IO.Compression.ZipFile]::CreateFromDirectory($extractDir, $tempZip)
+$releaseArchive = [System.IO.Compression.ZipFile]::Open($tempZip, [System.IO.Compression.ZipArchiveMode]::Create)
+try {
+    Get-ChildItem -LiteralPath $extractDir -File -Recurse | ForEach-Object {
+        $relativePath = $_.FullName.Substring($extractDir.Length).TrimStart([char]'\', [char]'/').Replace('\', '/')
+        [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+            $releaseArchive,
+            $_.FullName,
+            $relativePath,
+            [System.IO.Compression.CompressionLevel]::Optimal
+        ) | Out-Null
+    }
+}
+finally {
+    $releaseArchive.Dispose()
+}
 
 # 5. ������� ����������
 Write-Host "[4/4] �����������..." -ForegroundColor Yellow

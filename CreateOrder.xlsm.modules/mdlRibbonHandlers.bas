@@ -461,7 +461,7 @@ Public Sub OnEnrollmentOpenSelectedClick(control As IRibbonControl)
     On Error GoTo ErrorHandler
     Dim rowNum As Long
     rowNum = mdlEnrollmentWorkflow.LoadSelectedEnrollmentRowToBackend()
-    frmEnrollmentWizard.Show
+    frmEnrollmentWizardV2.Show
     MsgBox tf("enrollment.ribbon.selected_loaded", "Строка {row} загружена в мастер зачисления.", "{row}", rowNum), vbInformation, t("enrollment.caption.main", "Зачисление")
     Exit Sub
 ErrorHandler:
@@ -473,7 +473,7 @@ Public Sub OnEnrollmentSaveAndContinuePackageClick(control As IRibbonControl)
     Dim orderDraftId As String
 
     orderDraftId = mdlEnrollmentWorkflow.SaveEnrollmentFormAndContinuePackage()
-    frmEnrollmentWizard.Show
+    frmEnrollmentWizardV2.Show
     MsgBox tf("enrollment.form.message.package_next", "Следующий военнослужащий пакета подготовлен. OrderDraftId: {draftId}", "{draftId}", orderDraftId), vbInformation, t("enrollment.caption.main", "Зачисление")
     Exit Sub
 ErrorHandler:
@@ -487,7 +487,7 @@ Public Sub OnEnrollmentContinuePackageClick(control As IRibbonControl)
 
     rowNum = mdlEnrollmentWorkflow.ResolveActiveEnrollmentRow()
     orderDraftId = mdlEnrollmentWorkflow.PrepareNextEnrollmentInPackage(rowNum)
-    frmEnrollmentWizard.Show
+    frmEnrollmentWizardV2.Show
     MsgBox tf("enrollment.ribbon.package_next", "Следующий военнослужащий пакета подготовлен. OrderDraftId: {draftId}", "{draftId}", orderDraftId), vbInformation, t("enrollment.caption.main", "Зачисление")
     Exit Sub
 ErrorHandler:

@@ -971,7 +971,15 @@ Public Sub ApplyEnrollmentReferenceValues(ByVal record As Object)
     If amountValue <> "" Then record("secrecy_percent") = amountValue
     amountValue = GetEnrollmentReferenceAmount("ACHIEVEMENT", SafeText(record("achievement_param")))
     If amountValue <> "" Then record("achievement_amount") = amountValue
-    If SafeText(record("bank_name")) <> "" Then record("bank_bik") = GetEnrollmentReferenceAmount("BANK", SafeText(record("bank_name")))
+    If SafeText(record("bank_name")) <> "" Then
+        amountValue = GetEnrollmentReferenceAmount("BANK", SafeText(record("bank_name")))
+        If amountValue <> "" Then
+            record("bank_bik") = amountValue
+            Debug.Print "[FIX:legacy-bank-bik] Applied reference BIK for bank=" & SafeText(record("bank_name"))
+        ElseIf SafeText(record("bank_bik")) <> "" Then
+            Debug.Print "[FIX:legacy-bank-bik] Preserved existing BIK because BANK lookup was empty; bank=" & SafeText(record("bank_name"))
+        End If
+    End If
 End Sub
 Public Sub OpenEnrollmentForm()
     EnsureEnrollmentInfrastructure
@@ -979,12 +987,12 @@ Public Sub OpenEnrollmentForm()
     ClearEnrollmentForm
     ' Apply configured standard-payment defaults before the operator sees the blank card.
     RefreshEnrollmentForm
-    frmEnrollmentWizard.Show vbModeless
+    frmEnrollmentWizardV2.Show vbModeless
 End Sub
 
 Public Sub OpenSelectedEnrollmentRowInForm()
     Call LoadSelectedEnrollmentRowToBackend
-    frmEnrollmentWizard.Show vbModeless
+    frmEnrollmentWizardV2.Show vbModeless
 End Sub
 
 Public Function LoadSelectedEnrollmentRowToBackend() As Long
@@ -1106,7 +1114,7 @@ Public Sub CloseEnrollmentWizardIfOpen()
     Dim frm As Object
 
     For Each frm In VBA.UserForms
-        If TypeName(frm) = "frmEnrollmentWizard" Then
+        If TypeName(frm) = "frmEnrollmentWizardV2" Then
             Unload frm
             Exit For
         End If
@@ -2108,8 +2116,8 @@ End Sub
 Private Sub SyncEnrollmentWizardIfOpen()
     Dim frm As Object
     For Each frm In VBA.UserForms
-        If TypeName(frm) = "frmEnrollmentWizard" Then
-            frmEnrollmentWizard.ReloadFromBackend
+        If TypeName(frm) = "frmEnrollmentWizardV2" Then
+            frmEnrollmentWizardV2.ReloadFromBackend
             Exit For
         End If
     Next frm

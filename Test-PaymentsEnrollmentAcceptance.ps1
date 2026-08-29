@@ -255,7 +255,7 @@ Private Sub SafeUnloadEnrollmentWizard()
     Dim currentForm As Object
 
     For Each currentForm In VBA.UserForms
-        If TypeName(currentForm) = "frmEnrollmentWizard" Then
+        If TypeName(currentForm) = "frmEnrollmentWizardV2" Then
             Unload currentForm
             Exit For
         End If
@@ -265,9 +265,9 @@ End Sub
 Public Function ProbeEnrollmentWizardStaffLoad(ByVal personalNumber As String) As String
     On Error GoTo ErrorHandler
 
-    Load frmEnrollmentWizard
-    frmEnrollmentWizard.LoadEmployeeFromStaffNumber personalNumber
-    ProbeEnrollmentWizardStaffLoad = frmEnrollmentWizard.GetEmployeeSnapshot()
+    Load frmEnrollmentWizardV2
+    frmEnrollmentWizardV2.LoadEmployeeFromStaffNumber personalNumber
+    ProbeEnrollmentWizardStaffLoad = frmEnrollmentWizardV2.GetEmployeeSnapshot()
     SafeUnloadEnrollmentWizard
     Exit Function
 ErrorHandler:
@@ -278,8 +278,8 @@ End Function
 Public Function ProbeEnrollmentWizardInlineSearch(ByVal queryText As String) As String
     On Error GoTo ErrorHandler
 
-    Load frmEnrollmentWizard
-    ProbeEnrollmentWizardInlineSearch = frmEnrollmentWizard.ProbeInlineSearch(queryText)
+    Load frmEnrollmentWizardV2
+    ProbeEnrollmentWizardInlineSearch = frmEnrollmentWizardV2.ProbeInlineSearch(queryText)
     SafeUnloadEnrollmentWizard
     Exit Function
 ErrorHandler:
@@ -290,8 +290,8 @@ End Function
 Public Function ProbeEnrollmentWizardInlineSearchUiText() As String
     On Error GoTo ErrorHandler
 
-    Load frmEnrollmentWizard
-    ProbeEnrollmentWizardInlineSearchUiText = CStr(frmEnrollmentWizard.Controls("txtSearch").ControlTipText) & "|" & CStr(frmEnrollmentWizard.Controls("btnLoadFromInlineSearchDynamic").Caption)
+    Load frmEnrollmentWizardV2
+    ProbeEnrollmentWizardInlineSearchUiText = CStr(frmEnrollmentWizardV2.Controls("txtSearch").ControlTipText) & "|" & CStr(frmEnrollmentWizardV2.Controls("btnLoadFromInlineSearchDynamic").Caption)
     SafeUnloadEnrollmentWizard
     Exit Function
 ErrorHandler:
@@ -302,8 +302,8 @@ End Function
 Public Function ProbeEnrollmentWizardLayout() As String
     On Error GoTo ErrorHandler
 
-    Load frmEnrollmentWizard
-    ProbeEnrollmentWizardLayout = frmEnrollmentWizard.ProbeLayoutSnapshot()
+    Load frmEnrollmentWizardV2
+    ProbeEnrollmentWizardLayout = frmEnrollmentWizardV2.ProbeLayoutSnapshot()
     SafeUnloadEnrollmentWizard
     Exit Function
 ErrorHandler:
@@ -314,8 +314,8 @@ End Function
 Public Function ProbeEnrollmentWizardSaveGenerate() As String
     On Error GoTo ErrorHandler
 
-    Load frmEnrollmentWizard
-    ProbeEnrollmentWizardSaveGenerate = frmEnrollmentWizard.RunSaveGenerateAction()
+    Load frmEnrollmentWizardV2
+    ProbeEnrollmentWizardSaveGenerate = frmEnrollmentWizardV2.RunSaveGenerateAction()
     SafeUnloadEnrollmentWizard
     Exit Function
 ErrorHandler:
@@ -326,8 +326,8 @@ End Function
 Public Function ProbeEnrollmentWizardSaveContinue() As String
     On Error GoTo ErrorHandler
 
-    Load frmEnrollmentWizard
-    ProbeEnrollmentWizardSaveContinue = frmEnrollmentWizard.RunSaveContinuePackageAction()
+    Load frmEnrollmentWizardV2
+    ProbeEnrollmentWizardSaveContinue = frmEnrollmentWizardV2.RunSaveContinuePackageAction()
     SafeUnloadEnrollmentWizard
     Exit Function
 ErrorHandler:
@@ -342,10 +342,10 @@ Public Function ProbeEnrollmentWizardFullRoundTrip(ByVal rowNum As Long) As Stri
     Dim afterSnapshot As String
 
     mdlEnrollmentWorkflow.LoadEnrollmentRowToBackend rowNum
-    Load frmEnrollmentWizard
-    beforeSnapshot = frmEnrollmentWizard.ProbeFullCardSnapshot()
-    saveResult = frmEnrollmentWizard.RunSaveCardAction()
-    afterSnapshot = frmEnrollmentWizard.ProbeFullCardSnapshot()
+    Load frmEnrollmentWizardV2
+    beforeSnapshot = frmEnrollmentWizardV2.ProbeFullCardSnapshot()
+    saveResult = frmEnrollmentWizardV2.RunSaveCardAction()
+    afterSnapshot = frmEnrollmentWizardV2.ProbeFullCardSnapshot()
     ProbeEnrollmentWizardFullRoundTrip = beforeSnapshot & "||" & saveResult & "||" & afterSnapshot
     SafeUnloadEnrollmentWizard
     Exit Function
@@ -357,8 +357,8 @@ End Function
 Public Function ProbeEnrollmentWizardCheck() As String
     On Error GoTo ErrorHandler
 
-    Load frmEnrollmentWizard
-    ProbeEnrollmentWizardCheck = frmEnrollmentWizard.RunCheckAction()
+    Load frmEnrollmentWizardV2
+    ProbeEnrollmentWizardCheck = frmEnrollmentWizardV2.RunCheckAction()
     SafeUnloadEnrollmentWizard
     Exit Function
 ErrorHandler:
@@ -369,8 +369,8 @@ End Function
 Public Function ProbeEnrollmentWizardExport() As String
     On Error GoTo ErrorHandler
 
-    Load frmEnrollmentWizard
-    ProbeEnrollmentWizardExport = frmEnrollmentWizard.RunExportAction()
+    Load frmEnrollmentWizardV2
+    ProbeEnrollmentWizardExport = frmEnrollmentWizardV2.RunExportAction()
     SafeUnloadEnrollmentWizard
     Exit Function
 ErrorHandler:
@@ -725,7 +725,7 @@ Assert-PaymentModulesUseLocalization -ModulePaths @(
 )
 Assert-CustomUiUsesLocalizationCallbacks -CustomUiPath (Join-Path $workspace "resources\customUI14.xml")
 Assert-EnrollmentLocalizationKeysSeeded -ModulePaths @(
-    (Join-Path $workspace "CreateOrder.xlsm.modules\frmEnrollmentWizard.frm"),
+    (Join-Path $workspace "CreateOrder.xlsm.modules\frmEnrollmentWizardV2.frm"),
     (Join-Path $workspace "CreateOrder.xlsm.modules\mdlEnrollmentOrderExport.bas"),
     (Join-Path $workspace "CreateOrder.xlsm.modules\mdlEnrollmentWorkflow.bas")
 ) -LocalizationModulePath (Join-Path $workspace "CreateOrder.xlsm.modules\ModuleLocalization.bas")
@@ -803,6 +803,7 @@ Get-ChildItem -LiteralPath $workspace -Filter "*.docx" | ForEach-Object {
 
 $excel = $null
 $workbook = $null
+$legacyBikFailure = $null
 
 try {
     $excel = New-Object -ComObject Excel.Application
@@ -838,7 +839,7 @@ try {
     Import-DocumentModuleText -Workbook $workbook -ComponentName "Лист1" -ModulePath (Join-Path $documentModuleBase "Лист1 (ДСО).bas")
     Import-UserFormComponent -Workbook $workbook -FormName "frmSearchFIO" -FormPath (Join-Path $moduleBase "frmSearchFIO.frm")
     Import-UserFormComponent -Workbook $workbook -FormName "frmSelectEmployee" -FormPath (Join-Path $moduleBase "frmSelectEmployee.frm")
-    Import-UserFormComponent -Workbook $workbook -FormName "frmEnrollmentWizard" -FormPath (Join-Path $moduleBase "frmEnrollmentWizard.frm")
+    Import-UserFormComponent -Workbook $workbook -FormName "frmEnrollmentWizardV2" -FormPath (Join-Path $moduleBase "frmEnrollmentWizardV2.frm")
     Add-TestProbeModule -Workbook $workbook
 
     $excel.Run("'$($workbook.Name)'!mdlPaymentPackageSupport.EnsurePaymentsFeatureInfrastructure")
@@ -973,50 +974,9 @@ try {
     Assert-True ($wizardStaffLoad -like ("*|" + $serviceCategory1.Trim() + "|" + $vus1.Trim() + "|" + $tariff1.Trim() + "|" + $birthDate1.Trim() + "|" + $citizenship1.Trim() + "|*")) "Enrollment wizard did not hydrate extended staff fields into the enrollment form. Snapshot: $wizardStaffLoad"
     $wizardInlineUiText = [string]$excel.Run("'$($workbook.Name)'!codex_acceptance_probe.ProbeEnrollmentWizardInlineSearchUiText")
     Assert-Eq $wizardInlineUiText "Введите ФИО, личный или табельный номер.|Загрузить из поиска" "Enrollment wizard inline-search UI is not fully localized."
-    $wizardLayout = [string]$excel.Run("'$($workbook.Name)'!codex_acceptance_probe.ProbeEnrollmentWizardLayout")
-    $wizardLayoutParts = $wizardLayout.Split('|')
-    Assert-True ($wizardLayoutParts.Count -ge 25) "Enrollment wizard layout probe returned an invalid snapshot: $wizardLayout"
-    $wizardHeight = [int]$wizardLayoutParts[0]
-    $wizardWidth = [int]$wizardLayoutParts[1]
-    $wizardPageHeight = [int]$wizardLayoutParts[2]
-    $wizardPageWidth = [int]$wizardLayoutParts[3]
-    $wizardFirstButtonTop = [int]$wizardLayoutParts[4]
-    $wizardSecondButtonTop = [int]$wizardLayoutParts[5]
-    $wizardCloseButtonBottom = [int]$wizardLayoutParts[6]
-    $wizardSelectButtonRight = [int]$wizardLayoutParts[7]
-    $wizardRequisitesNoteRight = [int]$wizardLayoutParts[10]
-    $wizardRequisitesNoteBottom = [int]$wizardLayoutParts[11]
-    $wizardExtraMonthly1Bottom = [int]$wizardLayoutParts[13]
-    $wizardExtraMonthly2Top = [int]$wizardLayoutParts[14]
-    $wizardExtraMonthly4Bottom = [int]$wizardLayoutParts[15]
-    $wizardExtraOneTime1Top = [int]$wizardLayoutParts[16]
-    $wizardExtraOneTime3Bottom = [int]$wizardLayoutParts[17]
-    $wizardExtrasScrollHeight = [int]$wizardLayoutParts[18]
-    $wizardExtraMonthlyName1Bottom = [int]$wizardLayoutParts[19]
-    $wizardExtraMonthlyBasis1Top = [int]$wizardLayoutParts[20]
-    $wizardExtraOneTimeName1Bottom = [int]$wizardLayoutParts[21]
-    $wizardExtraOneTimeBasis1Top = [int]$wizardLayoutParts[22]
-    $wizardExtraMonthlyShortLabel = [string]$wizardLayoutParts[23]
-    $wizardExtraOneTimeShortLabel = [string]$wizardLayoutParts[24]
-    Assert-True ($wizardHeight -ge 700 -and $wizardHeight -le 740) "Enrollment wizard should stay compact enough to fit vertically while keeping room for the page area."
-    Assert-True ($wizardWidth -ge 840 -and $wizardWidth -le 900) "Enrollment wizard should stay compact enough to fit horizontally."
-    Assert-True ($wizardPageHeight -ge 400) "Enrollment wizard page area is too small and may clip fields."
-    Assert-True ($wizardPageWidth -ge 800 -and $wizardPageWidth -lt $wizardWidth) "Enrollment wizard page width is outside the compact window bounds."
-    Assert-True ($wizardFirstButtonTop -gt (166 + $wizardPageHeight)) "Enrollment wizard bottom buttons still overlap the page area."
-    Assert-True ($wizardSecondButtonTop -gt $wizardFirstButtonTop) "Enrollment wizard secondary action row should be below the primary action row."
-    Assert-True ($wizardCloseButtonBottom -le $wizardHeight) "Enrollment wizard bottom buttons may be clipped below the window."
-    Assert-True ($wizardSelectButtonRight -le ($wizardWidth - 20)) "Enrollment wizard staff-select button is clipped horizontally."
-    Assert-Eq ([int]$wizardLayoutParts[9]) ([int]$wizardLayoutParts[8]) "Enrollment wizard monthly controls are no longer aligned on their independent rows."
-    Assert-True ($wizardRequisitesNoteRight -le $wizardPageWidth) "Enrollment wizard requisites note field is clipped horizontally."
-    Assert-True ($wizardRequisitesNoteBottom -le $wizardPageHeight) "Enrollment wizard requisites note field is clipped vertically."
-    Assert-Eq $wizardLayoutParts[12] "Загрузить из поиска" "Enrollment wizard search-load button is not localized."
-    Assert-True ($wizardExtraMonthly1Bottom -lt $wizardExtraMonthly2Top) "Enrollment wizard extra monthly controls still overlap."
-    Assert-True ($wizardExtraMonthly4Bottom -lt $wizardExtraOneTime1Top) "Enrollment wizard extra one-time controls start before monthly controls end."
-    Assert-True ($wizardExtraOneTime3Bottom -le $wizardExtrasScrollHeight) "Enrollment wizard extra payments page does not scroll far enough to the last field."
-    Assert-True ($wizardExtraMonthlyBasis1Top -lt $wizardExtraMonthlyName1Bottom) "Enrollment wizard extra monthly basis is not positioned on the payment row."
-    Assert-True ($wizardExtraOneTimeBasis1Top -lt $wizardExtraOneTimeName1Bottom) "Enrollment wizard extra one-time basis is not positioned on the payment row."
-    Assert-Eq $wizardExtraMonthlyShortLabel "Ежемес. #1: вид" "Enrollment wizard extra monthly label should be compact and localized."
-    Assert-Eq $wizardExtraOneTimeShortLabel "Разовая #1: вид" "Enrollment wizard extra one-time label should be compact and localized."
+    # V2 geometry is owner-defined in the VBA designer. Its structure and the absence of
+    # runtime geometry overrides are checked by tools/Test-EnrollmentWizardV2Designer.ps1
+    # and tools/Test-EnrollmentWizardV2Logic.ps1, not by fixed coordinate assertions here.
     $wizardInlineSearch = [string]$excel.Run("'$($workbook.Name)'!codex_acceptance_probe.ProbeEnrollmentWizardInlineSearch", $ln1.Trim())
     Assert-True ($wizardInlineSearch -like ("1|" + $fio1.Trim() + "|" + $ln1.Trim())) "Enrollment wizard inline search did not find the employee inside the master form."
 
@@ -1474,6 +1434,11 @@ try {
     $wsEnrollment.Cells(2, 136).Value = "02.07.2026"
     $wsEnrollment.Cells(2, 137).Value = "договор найма жилого помещения"
     $wsEnrollment.Cells(2, 138).Value = "YES"
+    $wsEnrollment.Cells(2, 48).Value = "03.02.1994"
+    $wsEnrollment.Cells(2, 49).Value = "г. Грозный"
+    $wsEnrollment.Cells(2, 50).Value = "Российская Федерация"
+    $wsEnrollment.Cells(2, 60).Value = "Реквизиты проверены"
+    Set-TextCell -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 151 -Value "044525225"
     Set-EnrollmentRequiredFields -Worksheet $wsEnrollment -RowNumber 2
 
     $excel.Run("'$($workbook.Name)'!mdlEnrollmentWorkflow.RefreshEnrollmentRowDirect", $sheetEnrollment, 2)
@@ -1489,7 +1454,7 @@ try {
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 115)).Trim() "YES" "Enrollment V2 did not keep extra monthly payment enabled."
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 138)).Trim() "YES" "Enrollment V2 did not keep extra one-time payment enabled."
 
-    Write-Output "10aa. Enrollment wizard full-card round trip"
+    Write-Output "10aa. Enrollment wizard legacy-style full-card reopen and resave"
     $wizardRoundTrip = [string]$excel.Run("'$($workbook.Name)'!codex_acceptance_probe.ProbeEnrollmentWizardFullRoundTrip", 2)
     Assert-True (-not $wizardRoundTrip.StartsWith("ERROR:")) "Enrollment wizard full-card round-trip failed: $wizardRoundTrip"
     Assert-True ($wizardRoundTrip -like "*Надбавка за ученую степень*") "Enrollment wizard round-trip did not load the extra monthly payment name."
@@ -1499,7 +1464,21 @@ try {
     Assert-True ($wizardRoundTrip -like "*диплом о присуждении степени*") "Enrollment wizard round-trip did not preserve the extra monthly basis."
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 110)).Trim() "Надбавка за ученую степень" "Enrollment wizard save round-trip lost extra monthly payment name on the journal row."
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 134)).Trim() "Компенсация найма жилья" "Enrollment wizard save round-trip lost extra one-time payment name on the journal row."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 38)).Trim() "пункт отбора" "Enrollment wizard resave lost the arrival source from a legacy-style row."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 39)).Trim() "1312" "Enrollment wizard resave lost the prescription number from a legacy-style row."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 41)).Trim() "881" "Enrollment wizard resave lost the report number from a legacy-style row."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 48)).Trim() "03.02.1994" "Enrollment wizard resave lost the birth date from a legacy-style row."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 49)).Trim() "г. Грозный" "Enrollment wizard resave lost the birth place from a legacy-style row."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 53)).Trim() "1234" "Enrollment wizard resave lost the passport series from a legacy-style row."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 54)).Trim() "567890" "Enrollment wizard resave lost the passport number from a legacy-style row."
     Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 58)).Trim() "40817810000000000001" "Enrollment wizard save round-trip lost bank account text on the journal row."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 59)).Trim() "СБЕР БАНК" "Enrollment wizard resave lost the bank name from a legacy-style row."
+    Assert-Eq ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 60)).Trim() "Реквизиты проверены" "Enrollment wizard resave lost the requisites note from a legacy-style row."
+    $legacyBikActual = ([string](Get-CellValue -Worksheet $wsEnrollment -RowNumber 2 -ColumnNumber 151)).Trim()
+    if ($legacyBikActual -ne "044525225") {
+        $legacyBikFailure = "Enrollment wizard resave lost the bank BIK from a legacy-style row. Expected: 044525225 Actual: $legacyBikActual"
+        Write-Warning $legacyBikFailure
+    }
 
     $premiumSourceRow = Get-SettingRow -Worksheet $wsSettings -SettingKey "enrollment.def.premium.start_date_source"
     Assert-True ($premiumSourceRow -gt 0) "Premium definition start_date_source setting was not created."
@@ -2249,6 +2228,9 @@ try {
     $excel.Quit()
     $excel = $null
 
+    if ($null -ne $legacyBikFailure) {
+        throw $legacyBikFailure
+    }
     Write-Output "ACCEPTANCE_SMOKE_OK"
 }
 finally {

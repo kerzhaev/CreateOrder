@@ -17,7 +17,10 @@ Public Function ExportPersonnelEventOrder(ByVal eventID As String) As String
     Dim wordApp As Object
     Dim wordDoc As Object
     Dim outputPath As String
+    Dim failureNumber As Long
+    Dim failureDescription As String
 
+    On Error GoTo Failed
     Set eventData = GetEvent(eventID)
     If eventData.Count = 0 Then Err.Raise vbObjectError + 710, "mdlPersonnelEventOrderExport", "Personnel event was not found: " & eventID
     Set beforeState = GetSnapshot(eventData("before_snapshot_id"))
@@ -27,7 +30,8 @@ Public Function ExportPersonnelEventOrder(ByVal eventID As String) As String
     wordApp.Visible = False
     Set wordDoc = wordApp.Documents.Add
 
-    WriteHeader wordDoc
+    Debug.Print "[FIX:personnel-order-layout] Exporting event=" & eventID & "; type=" & SafeText(eventData("event_type"))
+    WriteHeader wordDoc, eventData
     If eventData("event_type") = "TRANSFER" Then
         WriteTransferOrder wordDoc, eventData, beforeState, afterState
     ElseIf eventData("event_type") = "EXCLUSION" Then
@@ -35,6 +39,8 @@ Public Function ExportPersonnelEventOrder(ByVal eventID As String) As String
     Else
         Err.Raise vbObjectError + 711, "mdlPersonnelEventOrderExport", "Word export is supported only for TRANSFER and EXCLUSION."
     End If
+    WriteSignatureBlock wordDoc
+    ApplyDocumentFormatting wordDoc
 
     outputPath = BuildOutputPath(eventID)
     wordDoc.SaveAs2 outputPath, 16
@@ -42,13 +48,21 @@ Public Function ExportPersonnelEventOrder(ByVal eventID As String) As String
     mdlPersonnelEvents.SetPersonnelEventStatus eventID, mdlPersonnelEvents.EVENT_STATUS_EXPORTED
     ExportPersonnelEventOrder = outputPath
 
-SafeExit:
+CleanExit:
     On Error Resume Next
     If Not wordDoc Is Nothing Then wordDoc.Close False
     If Not wordApp Is Nothing Then wordApp.Quit
     Set wordDoc = Nothing
     Set wordApp = Nothing
-    If Err.Number <> 0 Then Err.Raise Err.Number, "mdlPersonnelEventOrderExport", Err.Description
+    On Error GoTo 0
+    If failureNumber <> 0 Then Err.Raise failureNumber, "mdlPersonnelEventOrderExport", failureDescription
+    Exit Function
+
+Failed:
+    failureNumber = Err.Number
+    failureDescription = Err.Description
+    Debug.Print "[FIX:personnel-order-layout] Export failed for event=" & eventID & "; error=" & CStr(failureNumber)
+    Resume CleanExit
 End Function
 
 Public Sub ExportPersonnelEventOrderPrompt()
@@ -65,26 +79,41 @@ ErrorHandler:
     MsgBox Txt("personnel.word.error.export", "Personnel order export failed:") & vbCrLf & Err.Description, vbCritical
 End Sub
 
-Private Sub WriteHeader(ByVal wordDoc As Object)
-    AppendCenteredParagraph wordDoc, "ПРОЕКТ ПРИКАЗА", True
-    AppendCenteredParagraph wordDoc, "КОМАНДИРА ВОЙСКОВОЙ ЧАСТИ", True
-    AppendCenteredParagraph wordDoc, "(по строевой части)", False
-    AppendCenteredParagraph wordDoc, "«___» __________ 20__ г. № ____", False
+Private Sub WriteHeader(ByVal wordDoc As Object, ByVal eventData As Object)
+    Dim headerText As String
+    Dim headerLines As Variant
+    Dim lineItem As Variant
+    Dim unitNumber As String
+    Dim cityName As String
+
+    unitNumber = mdlEnrollmentWorkflow.GetEnrollmentSetting("enrollment.unit_number", "81510")
+    cityName = mdlEnrollmentWorkflow.GetEnrollmentSetting("enrollment.city", "Грозный")
+    headerText = mdlEnrollmentWorkflow.GetEnrollmentSetting("enrollment.header_text", "ПРОЕКТ ПРИКАЗА|КОМАНДИРА ВОЙСКОВОЙ ЧАСТИ {unit}|(по строевой части)")
+    headerLines = Split(Replace$(headerText, "{unit}", unitNumber), "|")
+    For Each lineItem In headerLines
+        If Trim$(CStr(lineItem)) <> "" Then AppendCenteredParagraph wordDoc, Trim$(CStr(lineItem)), True
+    Next lineItem
+    AppendCenteredParagraph wordDoc, "«___» " & FormatEventDate(eventData("event_date")) & " г. № " & SafeText(eventData("order_reference")), False
+    If cityName <> "" Then AppendCenteredParagraph wordDoc, "г. " & cityName, False
     AppendParagraph wordDoc, "", False
 End Sub
 
 Private Sub WriteTransferOrder(ByVal wordDoc As Object, ByVal eventData As Object, ByVal beforeState As Object, ByVal afterState As Object)
     Dim fio As String
     Dim coreText As String
+    Dim personalNumber As String
 
     fio = GetEmployeeFio(eventData("employee_id"))
+    personalNumber = GetEmployeePersonalNumber(eventData("employee_id"))
     AppendParagraph wordDoc, "§ 1", True
-    coreText = SnapshotText(afterState, "rank") & " " & fio & ", " & SnapshotText(beforeState, "position") & _
-        ", назначенного " & eventData("order_reference") & " на воинскую должность " & SnapshotText(afterState, "position") & _
-        ", ВУС-" & SnapshotText(afterState, "vus") & ", полагать с " & FormatEventDate(EventDateOrFallback(eventData, "handover_date", "event_date")) & _
-        " сдавшим дела и должность по предыдущей воинской должности, с " & FormatEventDate(EventDateOrFallback(eventData, "acceptance_date", "effective_date")) & _
-        " принявшим дела и должность по новой воинской должности и с " & FormatEventDate(EventDateOrFallback(eventData, "duty_start_date", "effective_date")) & " вступившим в исполнение служебных обязанностей."
+    coreText = SnapshotText(afterState, "rank") & " " & fio & EmployeeNumberSuffix(personalNumber) & _
+        ", ранее замещавшего " & SnapshotAppointmentText(beforeState) & VusSuffix(beforeState) & _
+        ", назначенного приказом " & SafeText(eventData("order_reference")) & " на " & SnapshotAppointmentText(afterState) & VusSuffix(afterState) & "."
     AppendParagraph wordDoc, coreText, False
+    AppendParagraph wordDoc, "С " & FormatEventDate(EventDateOrFallback(eventData, "handover_date", "event_date")) & " дела и должность по прежней воинской должности сдал.", False
+    AppendParagraph wordDoc, "С " & FormatEventDate(EventDateOrFallback(eventData, "acceptance_date", "effective_date")) & " дела и должность по новой воинской должности принял.", False
+    AppendParagraph wordDoc, "К исполнению обязанностей по новой воинской должности приступил с " & FormatEventDate(EventDateOrFallback(eventData, "duty_start_date", "effective_date")) & ".", False
+    AppendSalaryDetails wordDoc, eventData, afterState
     AppendAllowances wordDoc, eventData("event_id"), False
     AppendBasis wordDoc, eventData("order_reference"), eventData("basis_text")
 End Sub
@@ -92,17 +121,63 @@ End Sub
 Private Sub WriteExclusionOrder(ByVal wordDoc As Object, ByVal eventData As Object, ByVal beforeState As Object, ByVal afterState As Object)
     Dim fio As String
     Dim coreText As String
+    Dim personalNumber As String
 
     fio = GetEmployeeFio(eventData("employee_id"))
+    personalNumber = GetEmployeePersonalNumber(eventData("employee_id"))
     AppendParagraph wordDoc, "§ 1", True
-    coreText = SnapshotText(beforeState, "rank") & " " & fio & ", " & SnapshotText(beforeState, "position") & _
-        ", с " & FormatEventDate(EventDateOrFallback(eventData, "handover_date", "event_date")) & " сдавшим дела и должность и с " & _
-        FormatEventDate(eventData("effective_date")) & " исключить из списков личного состава воинской части, всех видов обеспечения" & DestinationText(eventData) & "."
+    coreText = SnapshotText(beforeState, "rank") & " " & fio & EmployeeNumberSuffix(personalNumber) & _
+        ", замещавшего " & SnapshotAppointmentText(beforeState) & VusSuffix(beforeState) & _
+        ", с " & FormatEventDate(EventDateOrFallback(eventData, "handover_date", "event_date")) & " дела и должность сдал; с " & _
+        FormatEventDate(eventData("effective_date")) & " исключить из списков личного состава воинской части и всех видов обеспечения" & DestinationText(eventData) & "."
     AppendParagraph wordDoc, coreText, False
     AppendParagraph wordDoc, "Прекратить с даты исключения выплату ранее установленных надбавок и повышающих коэффициентов.", False
     AppendTerminatedAllowances wordDoc, eventData("event_id")
     AppendExclusionServiceDetails wordDoc, eventData
     AppendBasis wordDoc, eventData("order_reference"), eventData("basis_text")
+End Sub
+
+Private Sub AppendSalaryDetails(ByVal wordDoc As Object, ByVal eventData As Object, ByVal afterState As Object)
+    Dim salaryText As String
+    Dim salaryDate As String
+
+    salaryDate = FormatEventDate(EventDateOrFallback(eventData, "duty_start_date", "effective_date"))
+    If SnapshotText(afterState, "position_salary") <> "" Then
+        salaryText = "С " & salaryDate & " установить оклад по воинской должности в размере " & SnapshotText(afterState, "position_salary") & " руб. в месяц"
+        If SnapshotText(afterState, "tariff_rank") <> "" Then salaryText = salaryText & " (" & SnapshotText(afterState, "tariff_rank") & " тарифный разряд)"
+        AppendParagraph wordDoc, salaryText & ".", False
+    ElseIf SnapshotText(afterState, "tariff_rank") <> "" Then
+        AppendParagraph wordDoc, "С " & salaryDate & " установить оклад по " & SnapshotText(afterState, "tariff_rank") & " тарифному разряду.", False
+    End If
+    If SnapshotText(afterState, "rank_salary") <> "" Then
+        AppendParagraph wordDoc, "С " & salaryDate & " установить оклад по воинскому званию в размере " & SnapshotText(afterState, "rank_salary") & " руб. в месяц.", False
+    End If
+End Sub
+
+Private Sub WriteSignatureBlock(ByVal wordDoc As Object)
+    Dim unitNumber As String
+    Dim signatoryPosition As String
+    Dim signatoryRank As String
+    Dim signatoryName As String
+
+    unitNumber = mdlEnrollmentWorkflow.GetEnrollmentSetting("enrollment.unit_number", "81510")
+    signatoryPosition = mdlEnrollmentWorkflow.GetEnrollmentSetting("enrollment.signatory_position", "ВРИО КОМАНДИРА ВОЙСКОВОЙ ЧАСТИ " & unitNumber)
+    signatoryRank = mdlEnrollmentWorkflow.GetEnrollmentSetting("enrollment.signatory_rank", "майор")
+    signatoryName = mdlEnrollmentWorkflow.GetEnrollmentSetting("enrollment.signatory_name", "Е.Коропец")
+    signatoryPosition = Replace$(signatoryPosition, "{unit}", unitNumber)
+
+    AppendParagraph wordDoc, "", False
+    AppendParagraph wordDoc, signatoryPosition, True
+    AppendParagraph wordDoc, Trim$(signatoryRank & " " & signatoryName), False
+End Sub
+
+Private Sub ApplyDocumentFormatting(ByVal wordDoc As Object)
+    With wordDoc.Content.Font
+        .Name = "Times New Roman"
+        .Size = 12
+    End With
+    wordDoc.Content.ParagraphFormat.SpaceAfter = 0
+    wordDoc.Content.ParagraphFormat.LineSpacingRule = 0
 End Sub
 
 Private Sub AppendAllowances(ByVal wordDoc As Object, ByVal eventID As String, ByVal includeTerminated As Boolean)
@@ -269,6 +344,20 @@ Private Function DestinationText(ByVal eventData As Object) As String
     If SafeText(eventData("destination_location")) <> "" Then DestinationText = DestinationText & ", " & SafeText(eventData("destination_location"))
 End Function
 
+Private Function SnapshotAppointmentText(ByVal stateData As Object) As String
+    SnapshotAppointmentText = "воинскую должность: " & SnapshotText(stateData, "position")
+    If SnapshotText(stateData, "section") <> "" Then SnapshotAppointmentText = SnapshotAppointmentText & "; подразделение: " & SnapshotText(stateData, "section")
+    If SnapshotText(stateData, "military_unit") <> "" Then SnapshotAppointmentText = SnapshotAppointmentText & "; воинская часть: " & SnapshotText(stateData, "military_unit")
+End Function
+
+Private Function VusSuffix(ByVal stateData As Object) As String
+    If SnapshotText(stateData, "vus") <> "" Then VusSuffix = "; ВУС-" & SnapshotText(stateData, "vus")
+End Function
+
+Private Function EmployeeNumberSuffix(ByVal personalNumber As String) As String
+    If SafeText(personalNumber) <> "" Then EmployeeNumberSuffix = ", личный номер " & SafeText(personalNumber)
+End Function
+
 Private Sub AppendExclusionServiceDetails(ByVal wordDoc As Object, ByVal eventData As Object)
     If SafeText(eventData("material_assistance_status")) <> "" Then AppendParagraph wordDoc, "Материальная помощь за текущий год: " & SafeText(eventData("material_assistance_status")) & ".", False
     If SafeText(eventData("main_leave_status")) <> "" Then AppendParagraph wordDoc, "Основной отпуск за текущий год: " & SafeText(eventData("main_leave_status")) & ".", False
@@ -292,6 +381,8 @@ Private Function GetSnapshot(ByVal snapshotID As String) As Object
             result("military_unit") = ws.Cells(rowNum, 8).Value
             result("vus") = ws.Cells(rowNum, 9).Value
             result("tariff_rank") = ws.Cells(rowNum, 10).Value
+            result("position_salary") = ws.Cells(rowNum, 11).Value
+            result("rank_salary") = ws.Cells(rowNum, 12).Value
             Exit For
         End If
     Next rowNum
@@ -307,6 +398,20 @@ Private Function GetEmployeeFio(ByVal employeeID As String) As String
     For rowNum = 2 To lastRow
         If SafeText(ws.Cells(rowNum, 1).Value) = employeeID Then
             GetEmployeeFio = SafeText(ws.Cells(rowNum, 2).Value)
+            Exit Function
+        End If
+    Next rowNum
+End Function
+
+Private Function GetEmployeePersonalNumber(ByVal employeeID As String) As String
+    Dim ws As Worksheet
+    Dim rowNum As Long
+    Dim lastRow As Long
+    Set ws = ThisWorkbook.Worksheets(EMPLOYEES_SHEET)
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    For rowNum = 2 To lastRow
+        If SafeText(ws.Cells(rowNum, 1).Value) = employeeID Then
+            GetEmployeePersonalNumber = SafeText(ws.Cells(rowNum, 3).Value)
             Exit Function
         End If
     Next rowNum

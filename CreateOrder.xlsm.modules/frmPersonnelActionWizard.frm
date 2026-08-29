@@ -56,7 +56,7 @@ Private Sub ConfigureWizard()
     End If
     Me.ScrollBars = fmScrollBarsNone
     Me.Width = 790
-    Me.Height = IIf(actionType = "EXCLUSION", 470, 560)
+    Me.Height = 560
 
     ConfigureActionButtons
     AddSearchBlock
@@ -134,7 +134,10 @@ Private Sub AddExclusionBlock()
     AddField "handover_date", t("personnel.wizard.handover_date", "Дата сдачи дел"), 18, 268, 95, 110, False
     AddField "destination_unit", t("personnel.wizard.destination_unit", "Куда убывает"), 250, 268, 100, 280, False
     AddField "destination_location", t("personnel.wizard.destination_location", "Населённый пункт"), 18, 296, 105, 250, False
-    AddStatusField 330
+    AddField "material_assistance_status", t("personnel.wizard.material_assistance_status", "Материальная помощь за год"), 18, 330, 165, 540, False
+    AddField "main_leave_status", t("personnel.wizard.main_leave_status", "Основной отпуск за год"), 18, 358, 165, 540, False
+    AddField "additional_leave_status", t("personnel.wizard.additional_leave_status", "Дополнительный отпуск за год"), 18, 386, 165, 540, False
+    AddStatusField 420
 End Sub
 
 Private Sub AddStatusField(ByVal topValue As Single)
@@ -279,7 +282,7 @@ End Sub
 
 Private Function VisibleFieldKeys() As Variant
     If UCase$(CStr(mdlPersonnelEvents.GetPersonnelWizardValue("event_type"))) = "EXCLUSION" Then
-        VisibleFieldKeys = Array("employee_id", "event_date", "effective_date", "order_reference", "basis_text", "comment", "handover_date", "destination_unit", "destination_location", "status")
+        VisibleFieldKeys = Array("employee_id", "event_date", "effective_date", "order_reference", "basis_text", "comment", "handover_date", "destination_unit", "destination_location", "material_assistance_status", "main_leave_status", "additional_leave_status", "status")
     Else
         VisibleFieldKeys = Array("employee_id", "event_date", "effective_date", "order_reference", "basis_text", "comment", "new_rank", "new_position", "new_section", "new_military_unit", "new_vus", "handover_date", "acceptance_date", "duty_start_date", "destination_unit", "destination_location", "status")
     End If
