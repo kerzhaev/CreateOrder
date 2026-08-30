@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmPersonnelActionWizardV2 
    Caption         =   "Кадровое действие V2"
-   ClientHeight    =   10620
+   ClientHeight    =   12180
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   15555
@@ -13,7 +13,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 Option Explicit
 
 Private Const DEBUG_LOGGING As Boolean = True
@@ -22,6 +21,10 @@ Private mSavedEventID As String
 Private mSelectionMode As Boolean
 Private mLoadedSignature As String
 Private mSearchMatches As Collection
+Private mPreviewDraft As Object
+Private mPreviewResult As Object
+Private mPreviewSignature As String
+Private mPreviewState As String
 Private WithEvents mSearchText As MSForms.TextBox
 Attribute mSearchText.VB_VarHelpID = -1
 Private WithEvents mMenuEnrollment As MSForms.CommandButton
@@ -34,6 +37,10 @@ Private WithEvents mMenuHistory As MSForms.CommandButton
 Attribute mMenuHistory.VB_VarHelpID = -1
 Private WithEvents mMenuClose As MSForms.CommandButton
 Attribute mMenuClose.VB_VarHelpID = -1
+Private WithEvents mPreviewConfirm As MSForms.CommandButton
+Attribute mPreviewConfirm.VB_VarHelpID = -1
+Private WithEvents mPreviewCancel As MSForms.CommandButton
+Attribute mPreviewCancel.VB_VarHelpID = -1
 
 Private Sub UserForm_Initialize()
     Dim failureNumber As Long
@@ -44,6 +51,7 @@ Private Sub UserForm_Initialize()
     LogDebug "initialize", "selection_mode=" & CStr(mSelectionMode)
     BindDesignerControls
     ConfigureWizard
+    mPreviewState = "EDITING"
     If Not mSelectionMode Then
         LoadValues
         mLoadedSignature = CurrentSignature
@@ -69,6 +77,8 @@ Private Sub BindDesignerControls()
     Set mMenuExclusion = FindDesignerControl("menuExclusion")
     Set mMenuHistory = FindDesignerControl("menuHistory")
     Set mMenuClose = FindDesignerControl("menuClose")
+    Set mPreviewConfirm = FindDesignerControl("btnPreviewConfirm")
+    Set mPreviewCancel = FindDesignerControl("btnPreviewCancel")
     ApplyDesignerLocalization
 End Sub
 
@@ -102,6 +112,11 @@ Private Sub ConfigureActionButtons()
     FindDesignerControl("btnImportResponse").Caption = t("personnel.wizard.save", "Сохранить")
     FindDesignerControl("btnLicenseStatus").Caption = t("personnel.wizard.export", "Экспортировать Word")
     FindDesignerControl("btnClose").Caption = t("personnel.wizard.close", "Закрыть")
+    FindDesignerControl("btnImportResponse").Enabled = True
+    FindDesignerControl("btnExportRequest").Enabled = True
+    FindDesignerControl("btnLicenseStatus").Enabled = (mSavedEventID <> "")
+    FindDesignerControl("btnPreviewConfirm").Enabled = False
+    FindDesignerControl("btnPreviewCancel").Enabled = False
 End Sub
 
 Private Sub ConfigureActionMenu()
@@ -148,6 +163,14 @@ Private Sub ApplyDesignerLocalization()
     SetDesignerCaption "lbl_additional_leave_status", "personnel.wizard.additional_leave_status", "Дополнительный отпуск за год"
     SetDesignerCaption "pgTransfer", "ribbon.ui.openPersonnelTransferAction.label", "Перемещение"
     SetDesignerCaption "pgExclusion", "ribbon.ui.openPersonnelExclusionAction.label", "Исключение"
+    SetDesignerCaption "pgPreview", "personnel.preview.page", "Проверка"
+    SetDesignerCaption "lbl_preview_title", "personnel.preview.title", "5. Проверка перед сохранением"
+    SetDesignerCaption "lbl_preview_before", "personnel.preview.before", "До"
+    SetDesignerCaption "lbl_preview_after", "personnel.preview.after", "После"
+    SetDesignerCaption "lbl_preview_payments", "personnel.preview.payments", "Выплаты"
+    SetDesignerCaption "lbl_preview_warnings", "personnel.preview.warnings", "Предупреждения"
+    SetDesignerCaption "btnPreviewConfirm", "personnel.preview.confirm", "Подтвердить"
+    SetDesignerCaption "btnPreviewCancel", "personnel.preview.cancel", "Отмена"
 End Sub
 
 Private Sub SetDesignerCaption(ByVal controlName As String, ByVal localizationKey As String, ByVal fallbackText As String)
@@ -275,7 +298,12 @@ Private Sub LoadValues()
     Next fieldKey
     mSavedEventID = PV("saved_event_id")
     FindDesignerControl("btnLicenseStatus").Enabled = (mSavedEventID <> "")
-    If mSavedEventID <> "" Then SetText "status", t("personnel.wizard.saved_prefix", "Сохранено:") & " " & mSavedEventID
+    If mSavedEventID <> "" Then
+        mPreviewState = "SAVED"
+        SetText "status", t("personnel.wizard.saved_prefix", "Сохранено:") & " " & mSavedEventID
+    Else
+        mPreviewState = "EDITING"
+    End If
 End Sub
 
 Private Function VisibleFieldKeys() As Variant
@@ -317,6 +345,15 @@ Private Function CurrentSignature() As String
 End Function
 
 Public Function SaveAction() As String
+    If mPreviewState <> "CONFIRMED" Then
+        If mPreviewState = "PREVIEW_READY" Then
+            SetText "status", t("personnel.preview.confirm_required", "Подтвердите просмотр перед сохранением действия.")
+        Else
+            Call PrepareConfirmationPreview
+            SetText "status", t("personnel.preview.confirm_required", "Подтвердите просмотр перед сохранением действия.")
+        End If
+        Exit Function
+    End If
     On Error GoTo Failed
     LogDebug "save-start", "event_type=" & CurrentActionType()
     WriteValues
@@ -325,10 +362,21 @@ Public Function SaveAction() As String
     FindDesignerControl("btnLicenseStatus").Enabled = True
     SetText "status", t("personnel.wizard.saved_prefix", "Сохранено:") & " " & mSavedEventID
     mLoadedSignature = CurrentSignature
+    mPreviewState = "SAVED"
+    FindDesignerControl("btnImportResponse").Enabled = False
+    FindDesignerControl("btnExportRequest").Enabled = False
+    FindDesignerControl("btnLicenseStatus").Enabled = True
+    FindDesignerControl("btnPreviewConfirm").Enabled = False
+    FindDesignerControl("btnPreviewCancel").Enabled = False
     SaveAction = mSavedEventID
     LogDebug "save-complete", "event_id=" & mSavedEventID
     Exit Function
 Failed:
+    mPreviewState = "PREVIEW_READY"
+    FindDesignerControl("btnImportResponse").Enabled = False
+    FindDesignerControl("btnExportRequest").Enabled = False
+    FindDesignerControl("btnPreviewConfirm").Enabled = CBool(mPreviewResult("can_confirm"))
+    FindDesignerControl("btnPreviewCancel").Enabled = True
     LogDebug "save-error", "number=" & CStr(Err.number) & "; description=" & Err.description
     SetText "status", Err.description
     Application.StatusBar = Err.description
@@ -336,7 +384,7 @@ End Function
 
 Public Function ExportAction() As String
     On Error GoTo Failed
-    If mSavedEventID = "" Then
+    If mSavedEventID = "" Or mPreviewState <> "SAVED" Then
         SetText "status", t("personnel.wizard.export_after_save", "Сначала сохраните кадровое действие.")
         Exit Function
     End If
@@ -352,6 +400,7 @@ Failed:
 End Function
 
 Private Sub btnExportRequest_Click()
+    If mPreviewState <> "EDITING" And mPreviewState <> "SAVED" Then CancelPreviewInternal False
     If Trim$(TextOf("search")) <> "" Then
         Call FindAndLoadEmployee
     Else
@@ -367,7 +416,7 @@ Private Sub btnExportRequest_Click()
 End Sub
 
 Private Sub btnImportResponse_Click()
-    Call SaveAction
+    Call PrepareConfirmationPreview
 End Sub
 
 Private Sub btnLicenseStatus_Click()
@@ -408,6 +457,209 @@ End Sub
 Private Sub mMenuClose_Click()
     Unload Me
 End Sub
+
+Private Sub mPreviewConfirm_Click()
+    Call ConfirmPreviewInternal
+End Sub
+
+Private Sub mPreviewCancel_Click()
+    CancelPreviewInternal True
+End Sub
+
+Public Function PrepareConfirmationPreview() As Boolean
+    Dim draft As Object
+    Dim preview As Object
+
+    On Error GoTo Failed
+    If mSelectionMode Then Exit Function
+    Set draft = CollectCurrentDraft()
+    Set preview = mdlPersonnelActionPreview.BuildPersonnelActionPreview(draft)
+    Set mPreviewDraft = draft
+    Set mPreviewResult = preview
+    mPreviewSignature = CurrentSignature
+    RenderPreview preview
+    FindDesignerControl("mpAction").value = 2
+    mPreviewState = "PREVIEW_READY"
+    FindDesignerControl("btnImportResponse").Enabled = False
+    FindDesignerControl("btnExportRequest").Enabled = False
+    FindDesignerControl("btnLicenseStatus").Enabled = False
+    FindDesignerControl("btnPreviewConfirm").Enabled = CBool(preview("can_confirm"))
+    FindDesignerControl("btnPreviewCancel").Enabled = True
+    If CBool(preview("can_confirm")) Then
+        SetText "status", t("personnel.preview.ready", "Проверка готова. Проверьте данные и подтвердите.")
+    Else
+        SetText "status", t("personnel.preview.invalid", "Предпросмотр содержит ошибки. Сохранение недоступно.")
+    End If
+    LogDebug "confirmation-opened", "page=preview"
+    PrepareConfirmationPreview = CBool(preview("can_confirm"))
+    Exit Function
+Failed:
+    SetText "status", Err.description
+    Application.StatusBar = Err.description
+    LogDebug "confirmation-open-error", "number=" & CStr(Err.number)
+End Function
+
+Public Sub OpenConfirmationPreview()
+    Call PrepareConfirmationPreview
+End Sub
+
+Public Function ConfirmConfirmationPreview() As String
+    ConfirmConfirmationPreview = ConfirmPreviewInternal()
+End Function
+
+Public Sub CancelConfirmationPreview()
+    CancelPreviewInternal True
+End Sub
+
+Private Function ConfirmPreviewInternal() As String
+    If mPreviewState = "SAVED" Then
+        LogDebug "confirmation-confirmed-ignored", "state=saved"
+        ConfirmPreviewInternal = mSavedEventID
+        Exit Function
+    End If
+    If mPreviewState <> "PREVIEW_READY" Then
+        SetText "status", t("personnel.preview.confirm_required", "Подтвердите просмотр перед сохранением действия.")
+        Exit Function
+    End If
+    If mPreviewResult Is Nothing Then
+        SetText "status", t("personnel.preview.confirm_required", "Подтвердите просмотр перед сохранением действия.")
+        Exit Function
+    End If
+    If CurrentSignature <> mPreviewSignature Then
+        CancelPreviewInternal False
+        SetText "status", t("personnel.preview.changed", "Черновик изменился. Предпросмотр сброшен; проверьте его снова.")
+        Exit Function
+    End If
+    If Not CBool(mPreviewResult("can_confirm")) Then
+        SetText "status", t("personnel.preview.invalid", "Предпросмотр содержит ошибки. Сохранение недоступно.")
+        Exit Function
+    End If
+    mPreviewState = "CONFIRMED"
+    LogDebug "confirmation-confirmed", "page=preview"
+    ConfirmPreviewInternal = SaveAction()
+End Function
+
+Private Sub CancelPreviewInternal(ByVal showStatus As Boolean)
+    Set mPreviewDraft = Nothing
+    Set mPreviewResult = Nothing
+    mPreviewSignature = ""
+    If Not mSelectionMode Then
+        FindDesignerControl("mpAction").value = IIf(CurrentActionType() = "EXCLUSION", 1, 0)
+        mPreviewState = "EDITING"
+        FindDesignerControl("btnImportResponse").Enabled = True
+        FindDesignerControl("btnExportRequest").Enabled = True
+        FindDesignerControl("btnLicenseStatus").Enabled = (mSavedEventID <> "")
+        FindDesignerControl("btnPreviewConfirm").Enabled = False
+        FindDesignerControl("btnPreviewCancel").Enabled = False
+    End If
+    ClearPreviewControls
+    If showStatus Then SetText "status", t("personnel.preview.cancelled", "Предпросмотр отменён. Черновик не сохранён.")
+    LogDebug "confirmation-cancelled", "page=preview"
+End Sub
+
+Private Function CollectCurrentDraft() As Object
+    Dim draft As Object
+    Dim fieldKey As Variant
+
+    Set draft = CreateObject("Scripting.Dictionary")
+    draft.CompareMode = vbTextCompare
+    draft.Add "event_type", CurrentActionType()
+    For Each fieldKey In VisibleFieldKeys
+        If CStr(fieldKey) <> "status" Then draft(CStr(fieldKey)) = TextOf(CStr(fieldKey))
+    Next fieldKey
+    Set CollectCurrentDraft = draft
+End Function
+
+Private Sub RenderPreview(ByVal preview As Object)
+    FindDesignerControl("txt_preview_before").value = RenderChangedLines(preview("changed_fields"), "before")
+    FindDesignerControl("txt_preview_after").value = RenderChangedLines(preview("changed_fields"), "after")
+    FindDesignerControl("txt_preview_payments").value = RenderPaymentLines(preview("payment_changes"))
+    FindDesignerControl("txt_preview_warnings").value = RenderWarningLines(preview("warnings"))
+End Sub
+
+Private Sub ClearPreviewControls()
+    FindDesignerControl("txt_preview_before").value = ""
+    FindDesignerControl("txt_preview_after").value = ""
+    FindDesignerControl("txt_preview_payments").value = ""
+    FindDesignerControl("txt_preview_warnings").value = ""
+End Sub
+
+Private Function RenderChangedLines(ByVal changedFields As Collection, ByVal valueKey As String) As String
+    Dim item As Object
+    Dim lineText As String
+    Dim valueText As String
+
+    For Each item In changedFields
+        If UCase$(PreviewValue(item("change_kind"))) <> "UNCHANGED" Then
+            valueText = PreviewValue(item(valueKey))
+            lineText = PreviewFieldLabel(CStr(item("key"))) & ": " & valueText
+            If RenderChangedLines <> "" Then RenderChangedLines = RenderChangedLines & vbCrLf
+            RenderChangedLines = RenderChangedLines & lineText
+        End If
+    Next item
+    If RenderChangedLines = "" Then RenderChangedLines = t("personnel.preview.no_changes", "Изменений нет.")
+End Function
+
+Private Function RenderPaymentLines(ByVal paymentChanges As Collection) As String
+    Dim item As Object
+    Dim lineText As String
+    Dim amountText As String
+
+    For Each item In paymentChanges
+        lineText = UCase$(PreviewValue(item("change_kind"))) & ": " & PreviewValue(item("payment_code"))
+        amountText = PreviewValue(item("amount_value"), "")
+        If amountText <> "" Then lineText = lineText & " (" & amountText & ")"
+        If RenderPaymentLines <> "" Then RenderPaymentLines = RenderPaymentLines & vbCrLf
+        RenderPaymentLines = RenderPaymentLines & lineText
+    Next item
+    If RenderPaymentLines = "" Then RenderPaymentLines = t("personnel.preview.no_payments", "Изменений выплат нет.")
+End Function
+
+Private Function RenderWarningLines(ByVal warnings As Collection) As String
+    Dim item As Object
+    Dim lineText As String
+
+    For Each item In warnings
+        lineText = UCase$(PreviewValue(item("severity"))) & " " & PreviewValue(item("code")) & ": " & PreviewValue(item("detail"))
+        If RenderWarningLines <> "" Then RenderWarningLines = RenderWarningLines & vbCrLf
+        RenderWarningLines = RenderWarningLines & lineText
+    Next item
+    If RenderWarningLines = "" Then RenderWarningLines = t("personnel.preview.no_warnings", "Предупреждений нет.")
+End Function
+
+Private Function PreviewFieldLabel(ByVal fieldKey As String) As String
+    Select Case fieldKey
+        Case "new_rank": PreviewFieldLabel = CStr(FindDesignerControl("lbl_new_rank").Caption)
+        Case "new_position": PreviewFieldLabel = CStr(FindDesignerControl("lbl_new_position").Caption)
+        Case "new_section": PreviewFieldLabel = CStr(FindDesignerControl("lbl_new_section").Caption)
+        Case "new_military_unit": PreviewFieldLabel = CStr(FindDesignerControl("lbl_new_military_unit").Caption)
+        Case "new_vus": PreviewFieldLabel = CStr(FindDesignerControl("lbl_new_vus").Caption)
+        Case "event_date": PreviewFieldLabel = CStr(FindDesignerControl("lbl_event_date").Caption)
+        Case "effective_date": PreviewFieldLabel = CStr(FindDesignerControl("lbl_effective_date").Caption)
+        Case "order_reference": PreviewFieldLabel = CStr(FindDesignerControl("lbl_order_reference").Caption)
+        Case "basis_text": PreviewFieldLabel = CStr(FindDesignerControl("lbl_basis_text").Caption)
+        Case "comment": PreviewFieldLabel = CStr(FindDesignerControl("lbl_comment").Caption)
+        Case "handover_date": PreviewFieldLabel = CStr(FindDesignerControl(IIf(CurrentActionType() = "EXCLUSION", "lbl_exclusion_handover_date", "lbl_transfer_handover_date")).Caption)
+        Case "acceptance_date": PreviewFieldLabel = CStr(FindDesignerControl("lbl_acceptance_date").Caption)
+        Case "duty_start_date": PreviewFieldLabel = CStr(FindDesignerControl("lbl_duty_start_date").Caption)
+        Case "destination_unit": PreviewFieldLabel = CStr(FindDesignerControl(IIf(CurrentActionType() = "EXCLUSION", "lbl_exclusion_destination_unit", "lbl_transfer_destination_unit")).Caption)
+        Case "destination_location": PreviewFieldLabel = CStr(FindDesignerControl(IIf(CurrentActionType() = "EXCLUSION", "lbl_exclusion_destination_location", "lbl_transfer_destination_location")).Caption)
+        Case "material_assistance_status": PreviewFieldLabel = CStr(FindDesignerControl("lbl_material_assistance_status").Caption)
+        Case "main_leave_status": PreviewFieldLabel = CStr(FindDesignerControl("lbl_main_leave_status").Caption)
+        Case "additional_leave_status": PreviewFieldLabel = CStr(FindDesignerControl("lbl_additional_leave_status").Caption)
+        Case Else: PreviewFieldLabel = fieldKey
+    End Select
+End Function
+
+Private Function PreviewValue(ByVal rawValue As Variant, Optional ByVal emptyText As String = "-") As String
+    If IsError(rawValue) Or IsNull(rawValue) Or IsEmpty(rawValue) Then Exit Function
+    If IsDate(rawValue) Then
+        PreviewValue = Format$(CDate(rawValue), "dd.mm.yyyy")
+    Else
+        PreviewValue = Trim$(CStr(rawValue))
+    End If
+    If PreviewValue = "" Then PreviewValue = emptyText
+End Function
 
 Private Sub LogDebug(ByVal actionName As String, ByVal detailText As String)
     If DEBUG_LOGGING Then Debug.Print "[PERSONNEL-ACTION-V2] action=" & actionName & "; " & detailText

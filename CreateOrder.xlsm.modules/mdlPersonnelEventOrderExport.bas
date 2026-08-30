@@ -25,6 +25,8 @@ Public Function ExportPersonnelEventOrder(ByVal eventID As String) As String
     If eventData.Count = 0 Then Err.Raise vbObjectError + 710, "mdlPersonnelEventOrderExport", "Personnel event was not found: " & eventID
     Set beforeState = GetSnapshot(eventData("before_snapshot_id"))
     Set afterState = GetSnapshot(eventData("after_snapshot_id"))
+    beforeState("fio") = GetEmployeeFio(eventData("employee_id"))
+    beforeState("personal_number") = GetEmployeePersonalNumber(eventData("employee_id"))
 
     Set wordApp = CreateObject("Word.Application")
     wordApp.Visible = False
@@ -33,9 +35,9 @@ Public Function ExportPersonnelEventOrder(ByVal eventID As String) As String
     Debug.Print "[FIX:personnel-order-layout] Exporting event=" & eventID & "; type=" & SafeText(eventData("event_type"))
     WriteHeader wordDoc, eventData
     If eventData("event_type") = "TRANSFER" Then
-        WriteTransferOrder wordDoc, eventData, beforeState, afterState
+        WriteTransferOrderFromModel wordDoc, eventData, beforeState, afterState
     ElseIf eventData("event_type") = "EXCLUSION" Then
-        WriteExclusionOrder wordDoc, eventData, beforeState, afterState
+        WriteExclusionOrderFromModel wordDoc, eventData, beforeState, afterState
     Else
         Err.Raise vbObjectError + 711, "mdlPersonnelEventOrderExport", "Word export is supported only for TRANSFER and EXCLUSION."
     End If
@@ -462,6 +464,38 @@ Private Function Txt(ByVal key As String, ByVal fallback As String) As String
 Fallback:
     Txt = fallback
 End Function
+
+Private Sub WriteTransferOrderFromModel(ByVal wordDoc As Object, ByVal eventData As Object, ByVal beforeState As Object, ByVal afterState As Object)
+    Dim orderModel As Object
+    Dim lineItem As Variant
+
+    Set orderModel = mdlPersonnelOrderText.BuildPersonnelOrderTextModel(eventData, beforeState, afterState)
+    AppendParagraph wordDoc, orderModel("section_heading"), True
+    AppendParagraph wordDoc, orderModel("transfer_core_text"), False
+    For Each lineItem In orderModel("transfer_lines")
+        AppendParagraph wordDoc, CStr(lineItem), False
+    Next lineItem
+    For Each lineItem In orderModel("salary_lines")
+        AppendParagraph wordDoc, CStr(lineItem), False
+    Next lineItem
+    AppendAllowances wordDoc, eventData("event_id"), False
+    AppendParagraph wordDoc, orderModel("basis_line"), True
+End Sub
+
+Private Sub WriteExclusionOrderFromModel(ByVal wordDoc As Object, ByVal eventData As Object, ByVal beforeState As Object, ByVal afterState As Object)
+    Dim orderModel As Object
+    Dim lineItem As Variant
+
+    Set orderModel = mdlPersonnelOrderText.BuildPersonnelOrderTextModel(eventData, beforeState, afterState)
+    AppendParagraph wordDoc, orderModel("section_heading"), True
+    AppendParagraph wordDoc, orderModel("exclusion_core_text"), False
+    AppendParagraph wordDoc, orderModel("exclusion_stop_text"), False
+    AppendTerminatedAllowances wordDoc, eventData("event_id")
+    For Each lineItem In orderModel("exclusion_service_lines")
+        AppendParagraph wordDoc, CStr(lineItem), False
+    Next lineItem
+    AppendParagraph wordDoc, orderModel("basis_line"), True
+End Sub
 
 Private Function SafeText(ByVal rawValue As Variant) As String
     If IsError(rawValue) Or IsNull(rawValue) Or IsEmpty(rawValue) Then Exit Function

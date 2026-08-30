@@ -2,7 +2,8 @@
 param(
     [string]$WorkbookPath,
     [string]$SourceDirectory,
-    [string]$TargetComponentName = 'frmPersonnelActionWizardV2'
+    [string]$TargetComponentName = 'frmPersonnelActionWizardV2',
+    [ValidateSet('V1', 'V2')][string]$ExpectedActiveVersion = 'V1'
 )
 
 if ([string]::IsNullOrWhiteSpace($WorkbookPath)) { $WorkbookPath = Join-Path $PSScriptRoot '..\CreateOrder.xlsm' }
@@ -19,3 +20,9 @@ Write-Verbose ('Exporting owner-edited personnel action designer form: {0}' -f $
     -OperationName 'Export-PersonnelActionWizardV2Designer' `
     -BackupPrefix 'personnel-action-v2-owner-layout' `
     -Verbose:($VerbosePreference -eq 'Continue')
+
+& (Join-Path $PSScriptRoot 'Test-PersonnelActionWizardV2Designer.ps1') `
+    -WorkbookPath $WorkbookPath `
+    -SourceDirectory $SourceDirectory `
+    -TargetComponentName $TargetComponentName `
+    -ExpectedActiveVersion $ExpectedActiveVersion

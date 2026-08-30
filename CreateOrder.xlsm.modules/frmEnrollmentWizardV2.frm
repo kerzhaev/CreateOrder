@@ -237,6 +237,7 @@ Private Sub UserForm_Initialize()
     PopulateOperatorReferenceLists
     currentSourceMode = "manual"
     ReloadFromBackend
+    UpdatePaymentBasisHighlights
     lblStatus.Caption = t("enrollment.form.status.ready_to_pick", "Выберите сотрудника из листа 'Штат' или заполните карточку вручную. После выбора проверьте страницы мастера.")
     Exit Sub
 
@@ -1225,10 +1226,12 @@ End Sub
 
 Private Sub cboClassDynamic_Change()
     UpdateReferenceSalaryPreview
+    UpdatePaymentBasisHighlights
 End Sub
 
 Private Sub cboFizoDynamic_Change()
     UpdateReferenceSalaryPreview
+    UpdatePaymentBasisHighlights
 End Sub
 
 Private Sub cboBankDynamic_Change()
@@ -1237,6 +1240,143 @@ End Sub
 
 Private Sub cboSecrecyDynamic_Change()
     UpdateReferenceSalaryPreview
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub txt__________________6_Change()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub txt______________________4_Change()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub txt________________4_Change()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub txt_______________________2_Change()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub txt_____________________________6_Change()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub txt___________430_____2_Change()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub txt______________________________2_Change()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub txt____________________4_Change()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub adv_txt_______________6_Change()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_17_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_14_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_10_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_9_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_15_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub mon_chk_1_3_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_2_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_7_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub one_chk_14_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub ext_chk_4_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub ext_chk_15_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_26_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_37_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_49_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_58_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub chk_67_Click()
+    UpdatePaymentBasisHighlights
+End Sub
+
+Private Sub UpdatePaymentBasisHighlights()
+    ApplyPaymentBasisHighlight chkPremium, txtPremiumBasis
+    ApplyPaymentBasisHighlight chkClass, txtClassBasis
+    ApplyPaymentBasisHighlight chkFizo, txtFizoBasis
+    ApplyPaymentBasisHighlight chkSecrecy, txtSecrecyBasis
+    ApplyPaymentBasisHighlight chkAchievement, txtAchievementBasis
+    ApplyPaymentBasisHighlight chkStdContract430, txtStdContract430Basis
+    ApplyPaymentBasisHighlight chkLift, txtLiftBasis
+    ApplyPaymentBasisHighlight chkPerDiem, txtPerDiemBasis
+    ApplyPaymentBasisHighlight chkEdv, txtEdvBasis
+    UpdateExtraPaymentBasisHighlights
+End Sub
+
+Private Sub UpdateExtraPaymentBasisHighlights()
+    Dim i As Long
+    For i = 1 To 4
+        ApplyPaymentBasisHighlight chkExtraMonthly(i), txtExtraMonthlyBasis(i)
+    Next i
+    For i = 1 To 3
+        ApplyPaymentBasisHighlight chkExtraOneTime(i), txtExtraOneTimeBasis(i)
+    Next i
+End Sub
+
+Private Sub ApplyPaymentBasisHighlight(ByVal checkBox As Object, ByVal basisTextBox As Object)
+    Dim missing As Boolean
+    If checkBox Is Nothing Or basisTextBox Is Nothing Then Exit Sub
+    missing = CBool(checkBox.Value) And Len(Trim$(CStr(basisTextBox.Value))) = 0
+    If missing Then
+        basisTextBox.BackColor = RGB(255, 230, 230)
+        basisTextBox.ControlTipText = t("enrollment.issue.payment_field_missing", "Заполните обязательное основание выплаты.")
+    Else
+        basisTextBox.BackColor = RGB(255, 255, 255)
+        basisTextBox.ControlTipText = vbNullString
+    End If
 End Sub
 Private Sub AddSearchResult(ByVal wsStaff As Worksheet, ByVal rowNum As Long, ByVal listRow As Long)
     lstResults.AddItem Trim$(CStr(wsStaff.Cells(rowNum, mdlHelper.colLichniyNomer_Global).Value))
@@ -1557,6 +1697,7 @@ Public Sub ReloadFromBackend()
     txtPreviewPersonal.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("preview_personal"))
     txtPreviewSection1.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("preview_section1"))
     txtPreviewSection2.Value = SafeText(mdlEnrollmentWorkflow.GetBackendValue("preview_section2"))
+    UpdatePaymentBasisHighlights
 End Sub
 
 Private Function BackendYesNo(ByVal fieldKey As String) As Boolean

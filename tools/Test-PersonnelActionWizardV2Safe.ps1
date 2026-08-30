@@ -2,7 +2,8 @@
 param(
     [string]$WorkbookPath,
     [string]$SourceDirectory,
-    [string]$TargetComponentName = 'frmPersonnelActionWizardV2'
+    [string]$TargetComponentName = 'frmPersonnelActionWizardV2',
+    [switch]$SkipFormImport
 )
 
 if ([string]::IsNullOrWhiteSpace($WorkbookPath)) { $WorkbookPath = Join-Path $PSScriptRoot '..\CreateOrder.xlsm' }
@@ -24,7 +25,12 @@ function Import-CodeModuleText {
     )
     $code = Read-VbaText -Path $ModulePath
     $code = [regex]::Replace($code, '^Attribute VB_Name\s*=\s*"[^"]+"\r?\n', '', 1)
-    $component = $Workbook.VBProject.VBComponents.Item($ModuleName)
+    $component = $null
+    try { $component = $Workbook.VBProject.VBComponents.Item($ModuleName) } catch {}
+    if ($null -eq $component) {
+        $component = $Workbook.VBProject.VBComponents.Add(1)
+        $component.Name = $ModuleName
+    }
     $module = $component.CodeModule
     if ($module.CountOfLines -gt 0) { $module.DeleteLines(1, $module.CountOfLines) }
     $module.AddFromString($code)
@@ -94,9 +100,13 @@ try {
     $workbook = $excel.Workbooks.Open($testWorkbookPath, 0, $false)
 
     Import-CodeModuleText -Workbook $workbook -ModuleName 'ModuleLocalization' -ModulePath (Join-Path $resolvedSource 'ModuleLocalization.bas')
+    Import-CodeModuleText -Workbook $workbook -ModuleName 'mdlPersonnelOrderText' -ModulePath (Join-Path $resolvedSource 'mdlPersonnelOrderText.bas')
+    Import-CodeModuleText -Workbook $workbook -ModuleName 'mdlPersonnelActionPreview' -ModulePath (Join-Path $resolvedSource 'mdlPersonnelActionPreview.bas')
     Import-CodeModuleText -Workbook $workbook -ModuleName 'mdlPersonnelEvents' -ModulePath (Join-Path $resolvedSource 'mdlPersonnelEvents.bas')
     Import-CodeModuleText -Workbook $workbook -ModuleName 'mdlPersonnelEventOrderExport' -ModulePath (Join-Path $resolvedSource 'mdlPersonnelEventOrderExport.bas')
-    Import-UserForm -Workbook $workbook -FormName $TargetComponentName -FormPath $formPath
+    if (-not $SkipFormImport) {
+        Import-UserForm -Workbook $workbook -FormName $TargetComponentName -FormPath $formPath
+    }
 
     try { $workbook.VBProject.VBComponents.Remove($workbook.VBProject.VBComponents.Item('personnel_v2_e2e_probe')) } catch {}
     $probe = $workbook.VBProject.VBComponents.Add(1)
@@ -143,6 +153,42 @@ Private Sub SetProbeValue(ByVal formObject As Object, ByVal controlName As Strin
     targetControl.Value = valueText
 End Sub
 
+Private Function DataRowCount(ByVal sheetName As String) As Long
+    Dim ws As Worksheet
+    Dim lastRow As Long
+
+    Set ws = ThisWorkbook.Worksheets(sheetName)
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    If lastRow < 2 Then
+        DataRowCount = 0
+    Else
+        DataRowCount = lastRow - 1
+    End If
+End Function
+
+Private Function CreateTransferDraft(ByVal employeeID As String) As Object
+    Dim draft As Object
+
+    Set draft = CreateObject("Scripting.Dictionary")
+    draft.Add "event_type", "TRANSFER"
+    draft.Add "employee_id", employeeID
+    draft.Add "event_date", DateSerial(2026, 8, 2)
+    draft.Add "effective_date", DateSerial(2026, 8, 3)
+    draft.Add "order_reference", "V2-TRANSFER-001"
+    draft.Add "basis_text", "Personnel V2 E2E transfer"
+    draft.Add "new_rank", "Private"
+    draft.Add "new_position", "Transferred V2 position"
+    draft.Add "new_section", "Transferred V2 section"
+    draft.Add "new_military_unit", "V2 unit 2"
+    draft.Add "new_vus", "200200"
+    draft.Add "handover_date", DateSerial(2026, 8, 2)
+    draft.Add "acceptance_date", DateSerial(2026, 8, 3)
+    draft.Add "duty_start_date", DateSerial(2026, 8, 4)
+    draft.Add "destination_unit", "V2 destination unit"
+    draft.Add "destination_location", "V2 destination city"
+    Set CreateTransferDraft = draft
+End Function
+
 Public Function RunPersonnelActionV2E2E() As String
     Dim formObject As Object
     Dim enrollmentID As String
@@ -151,8 +197,21 @@ Public Function RunPersonnelActionV2E2E() As String
     Dim employeeID As String
     Dim transferPath As String
     Dim exclusionPath As String
+    Dim previewDraft As Object
+    Dim transferPreview As Object
+    Dim transferPreviewCore As String
+    Dim previewProjection As Object
+    Dim previewTextModel As Object
+    Dim stageName As String
     Dim currentState As Object
     Dim employeeRow As Long
+    Dim eventsBeforeCancel As Long
+    Dim snapshotsBeforeCancel As Long
+    Dim assignmentsBeforeCancel As Long
+    Dim documentsBeforeCancel As Long
+    Dim eventsAfterConfirm As Long
+    Dim snapshotsAfterConfirm As Long
+    Dim duplicateConfirmID As String
 
     On Error GoTo Failed
     mdlPersonnelEvents.ResetPersonnelEventInput
@@ -196,8 +255,41 @@ Public Function RunPersonnelActionV2E2E() As String
     SetProbeValue formObject, "txt_duty_start_date", "04.08.2026"
     SetProbeValue formObject, "txt_transfer_destination_unit", "V2 destination unit"
     SetProbeValue formObject, "txt_transfer_destination_location", "V2 destination city"
-    transferID = formObject.SaveAction()
+    eventsBeforeCancel = DataRowCount("PersonnelEvents")
+    snapshotsBeforeCancel = DataRowCount("PersonnelStateSnapshots")
+    assignmentsBeforeCancel = DataRowCount("PaymentAssignments")
+    documentsBeforeCancel = DataRowCount("DocumentRegistry")
+    stageName = "preview-build"
+    If Not formObject.PrepareConfirmationPreview() Then Err.Raise 933, , "V2 preview rejected the valid TRANSFER fixture"
+    Set transferPreview = mdlPersonnelActionPreview.BuildPersonnelActionPreview(CreateTransferDraft(employeeID))
+    stageName = "preview-text-model"
+    If Not transferPreview.Exists("order_projection") Then Err.Raise 940, , "Preview omitted order_projection"
+    Set previewProjection = transferPreview("order_projection")
+    If previewProjection Is Nothing Then Err.Raise 941, , "Preview order_projection is empty"
+    If Not previewProjection.Exists("text_model") Then Err.Raise 942, , "Preview omitted text_model"
+    Set previewTextModel = previewProjection("text_model")
+    If previewTextModel Is Nothing Then Err.Raise 943, , "Preview text_model is empty"
+    transferPreviewCore = CStr(previewTextModel("transfer_core_text"))
+    If InStr(1, CStr(FindProbeControl(formObject, "txt_preview_after").Value), "Transferred V2 position", vbTextCompare) = 0 Then Err.Raise 944, , "Preview UI omitted the new position"
+    stageName = "preview-cancel"
+    formObject.CancelConfirmationPreview
+    If DataRowCount("PersonnelEvents") <> eventsBeforeCancel Then Err.Raise 945, , "Cancel changed PersonnelEvents"
+    If DataRowCount("PersonnelStateSnapshots") <> snapshotsBeforeCancel Then Err.Raise 946, , "Cancel changed PersonnelStateSnapshots"
+    If DataRowCount("PaymentAssignments") <> assignmentsBeforeCancel Then Err.Raise 947, , "Cancel changed PaymentAssignments"
+    If DataRowCount("DocumentRegistry") <> documentsBeforeCancel Then Err.Raise 948, , "Cancel changed DocumentRegistry"
+    stageName = "preview-rebuild"
+    If Not formObject.PrepareConfirmationPreview() Then Err.Raise 949, , "V2 preview could not be rebuilt after cancel"
+    stageName = "preview-confirm"
+    transferID = formObject.ConfirmConfirmationPreview()
     If transferID = "" Then Err.Raise 934, , "V2 transfer did not return EventID"
+    eventsAfterConfirm = DataRowCount("PersonnelEvents")
+    snapshotsAfterConfirm = DataRowCount("PersonnelStateSnapshots")
+    If eventsAfterConfirm <> eventsBeforeCancel + 1 Then Err.Raise 950, , "Confirm did not create exactly one event"
+    If snapshotsAfterConfirm <> snapshotsBeforeCancel + 2 Then Err.Raise 951, , "Confirm did not create exactly two snapshots"
+    stageName = "duplicate-confirm"
+    duplicateConfirmID = formObject.ConfirmConfirmationPreview()
+    If duplicateConfirmID <> transferID Then Err.Raise 952, , "Duplicate confirm returned a different EventID"
+    If DataRowCount("PersonnelEvents") <> eventsAfterConfirm Then Err.Raise 953, , "Duplicate confirm created a second event"
     Set currentState = mdlPersonnelEvents.GetCurrentPersonnelState(employeeID)
     If CStr(currentState("position")) <> "Transferred V2 position" Then Err.Raise 935, , "V2 transfer did not update current state"
     transferPath = formObject.ExportAction()
@@ -218,7 +310,8 @@ Public Function RunPersonnelActionV2E2E() As String
     SetProbeValue formObject, "txt_material_assistance_status", "оказана"
     SetProbeValue formObject, "txt_main_leave_status", "использован"
     SetProbeValue formObject, "txt_additional_leave_status", "не использован"
-    exclusionID = formObject.SaveAction()
+    If Not formObject.PrepareConfirmationPreview() Then Err.Raise 954, , "V2 exclusion preview rejected the valid fixture"
+    exclusionID = formObject.ConfirmConfirmationPreview()
     If exclusionID = "" Then Err.Raise 937, , "V2 exclusion did not return EventID"
     For employeeRow = 2 To ThisWorkbook.Worksheets("Employees").Cells(ThisWorkbook.Worksheets("Employees").Rows.Count, 1).End(xlUp).Row
         If CStr(ThisWorkbook.Worksheets("Employees").Cells(employeeRow, 1).Value) = employeeID Then Exit For
@@ -228,25 +321,28 @@ Public Function RunPersonnelActionV2E2E() As String
     If exclusionPath = "" Then Err.Raise 939, , "V2 exclusion did not export Word"
     Unload formObject
 
-    RunPersonnelActionV2E2E = "PERSONNEL_ACTION_V2_E2E_OK|" & transferPath & "|" & exclusionPath
+    RunPersonnelActionV2E2E = "PERSONNEL_ACTION_V2_E2E_OK|" & transferPath & "|" & exclusionPath & "|" & transferPreviewCore
     Exit Function
 Failed:
-    RunPersonnelActionV2E2E = "FAILED: " & Err.Description
+    RunPersonnelActionV2E2E = "FAILED: " & CStr(Err.Number) & ":" & Err.Source & ":" & Err.Description & ":stage=" & stageName
 End Function
 '@.Replace('__TARGET__', $TargetComponentName)
     $probe.CodeModule.AddFromString($probeCode)
 
     $result = [string]$excel.Run("'$($workbook.Name)'!personnel_v2_e2e_probe.RunPersonnelActionV2E2E")
     if ($result -notlike 'PERSONNEL_ACTION_V2_E2E_OK|*') { throw $result }
-    $parts = $result -split '\|', 3
-    if ($parts.Count -ne 3) { throw "Unexpected V2 E2E result: $result" }
+    $parts = $result -split '\|', 4
+    if ($parts.Count -ne 4) { throw "Unexpected V2 E2E result: $result" }
     $transferPath = $parts[1]
     $exclusionPath = $parts[2]
+    $transferPreviewCore = $parts[3]
+    if ([string]::IsNullOrWhiteSpace($transferPreviewCore)) { throw 'Preview text model returned an empty transfer core text.' }
     if (-not (Test-Path -LiteralPath $transferPath)) { throw "V2 transfer DOCX missing: $transferPath" }
     if (-not (Test-Path -LiteralPath $exclusionPath)) { throw "V2 exclusion DOCX missing: $exclusionPath" }
 
     $transferText = Get-DocxText -Path $transferPath
     $exclusionText = Get-DocxText -Path $exclusionPath
+    Assert-Contains $transferText $transferPreviewCore 'Transfer DOCX core text differs from the preview text model.'
     Assert-Contains $transferText '02.08.2026 г. № V2-TRANSFER-001' 'V2 transfer DOCX omitted the actual order date/number.'
     Assert-Contains $transferText 'Transferred V2 position' 'V2 transfer DOCX omitted the new position.'
     Assert-Contains $transferText 'ВУС-200200' 'V2 transfer DOCX omitted the new VUS.'

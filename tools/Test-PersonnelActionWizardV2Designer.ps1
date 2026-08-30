@@ -61,19 +61,30 @@ $resolvedSource = [IO.Path]::GetFullPath($SourceDirectory)
 $frmPath = Join-Path $resolvedSource ($TargetComponentName + '.frm')
 $frxPath = Join-Path $resolvedSource ($TargetComponentName + '.frx')
 $manifestPath = Join-Path $resolvedSource ($TargetComponentName + '.layout.csv')
+$localizationSourcePath = Join-Path $resolvedSource 'ModuleLocalization.bas'
 
-foreach ($path in @($frmPath, $frxPath, $manifestPath)) {
+foreach ($path in @($frmPath, $frxPath, $manifestPath, $localizationSourcePath)) {
     Assert-Condition (Test-Path -LiteralPath $path) "Missing personnel V2 artifact: $path"
 }
 Assert-Condition (-not (Get-Process EXCEL -ErrorAction SilentlyContinue)) 'Excel is running. Close Excel before the personnel V2 designer test.'
 
 $bytes = [IO.File]::ReadAllBytes($frmPath)
 $formText = [Text.Encoding]::GetEncoding(1251).GetString($bytes)
+$localizationSourceText = [Text.Encoding]::GetEncoding(1251).GetString([IO.File]::ReadAllBytes($localizationSourcePath))
 Assert-Condition ($formText.Contains(('Attribute VB_Name = "{0}"' -f $TargetComponentName))) 'The exported .frm has an unexpected VB_Name.'
 Assert-Condition ($formText.Contains('Private Sub BindDesignerControls()')) 'The V2 form is missing design-time control binding.'
 Assert-Condition ($formText.Contains('Private Sub ApplyDesignerLocalization()')) 'The V2 form is missing designer localization.'
+Assert-Condition ($formText.Contains('Public Function PrepareConfirmationPreview()')) 'The V2 form is missing transient preview preparation.'
+Assert-Condition ($formText.Contains('Public Function ConfirmConfirmationPreview()')) 'The V2 form is missing confirmation entry point.'
+Assert-Condition ($formText.Contains('Public Sub CancelConfirmationPreview()')) 'The V2 form is missing cancellation entry point.'
+foreach ($localizationKey in @('personnel.preview.ready', 'personnel.preview.invalid', 'personnel.preview.changed', 'personnel.preview.cancelled', 'personnel.preview.no_changes', 'personnel.preview.no_payments', 'personnel.preview.no_warnings', 'personnel.preview.confirm_required')) {
+    Assert-Condition ($localizationSourceText.Contains(('AddSafe "{0}"' -f $localizationKey))) "Localization source is missing preview status key: $localizationKey"
+}
 Assert-Condition (-not $formText.Contains('Controls.Add(')) 'The V2 form code must not create runtime controls.'
 Assert-Condition (-not [regex]::IsMatch($formText, '\.(Left|Top|Width|Height)\s*=')) 'The V2 form code must not override owner geometry.'
+foreach ($logMarker in @('confirmation-opened', 'confirmation-cancelled', 'confirmation-confirmed')) {
+    Assert-Condition ($formText.Contains($logMarker)) "The V2 form is missing confirmation log marker: $logMarker"
+}
 Assert-Condition (-not [regex]::IsMatch($formText, '(?<!\r)\n')) 'The V2 .frm must use CRLF line endings.'
 
 $manifest = @(Import-Csv -LiteralPath $manifestPath)
@@ -81,11 +92,11 @@ $pages = @($manifest | Where-Object control_type -eq 'Page')
 $designerNames = @($manifest | ForEach-Object designer_name)
 $uniqueDesignerNames = @($designerNames | Sort-Object -Unique)
 Assert-Condition ($manifest.Count -ge 50) "Layout manifest is unexpectedly small: $($manifest.Count) rows."
-Assert-Condition ($pages.Count -eq 2) "Expected two action pages in the manifest; found $($pages.Count)."
+Assert-Condition ($pages.Count -eq 3) "Expected three action pages in the manifest; found $($pages.Count)."
 Assert-Condition ($designerNames.Count -eq $uniqueDesignerNames.Count) 'Designer control names must be globally unique.'
 
 $requiredNames = @(
-    'fraWizard', 'fraActionMenu', 'mpAction', 'pgTransfer', 'pgExclusion',
+    'fraWizard', 'fraActionMenu', 'mpAction', 'pgTransfer', 'pgExclusion', 'pgPreview',
     'txt_search', 'txt_search_results', 'txt_employee_id', 'txt_event_date',
     'txt_effective_date', 'txt_order_reference', 'txt_basis_text', 'txt_comment',
     'txt_new_rank', 'txt_new_position', 'txt_new_section', 'txt_new_military_unit',
@@ -95,7 +106,11 @@ $requiredNames = @(
     'txt_exclusion_destination_unit', 'txt_exclusion_destination_location',
     'txt_material_assistance_status', 'txt_main_leave_status',
     'txt_additional_leave_status', 'txt_status', 'btnExportRequest',
-    'btnImportResponse', 'btnLicenseStatus', 'btnClose', 'menuEnrollment',
+    'btnImportResponse', 'btnLicenseStatus', 'btnClose', 'lbl_preview_title',
+    'lbl_preview_before', 'lbl_preview_after', 'lbl_preview_payments',
+    'lbl_preview_warnings', 'txt_preview_before', 'txt_preview_after',
+    'txt_preview_payments', 'txt_preview_warnings', 'btnPreviewConfirm',
+    'btnPreviewCancel', 'menuEnrollment',
     'menuTransfer', 'menuExclusion', 'menuHistory', 'menuClose'
 )
 foreach ($requiredName in $requiredNames) {
@@ -110,6 +125,8 @@ $v2 = $null
 $designer = $null
 $wizardFrame = $null
 $multiPage = $null
+$previewPage = $null
+$localizationSheet = $null
 $probeComponent = $null
 try {
     $excel = New-Object -ComObject Excel.Application
@@ -118,6 +135,26 @@ try {
     $excel.DisplayAlerts = $false
     $excel.AutomationSecurity = 1
     $book = $excel.Workbooks.Open($resolvedWorkbook, 0, $false)
+
+    $localizationSheet = $book.Worksheets.Item('Localization')
+    $localizationLastRow = [int]$localizationSheet.Cells($localizationSheet.Rows.Count, 1).End(-4162).Row
+    foreach ($localizationKey in @(
+        'personnel.preview.page', 'personnel.preview.title', 'personnel.preview.before',
+        'personnel.preview.after', 'personnel.preview.payments', 'personnel.preview.warnings',
+        'personnel.preview.confirm', 'personnel.preview.cancel'
+    )) {
+        $localizationFound = $false
+        for ($row = 2; $row -le $localizationLastRow; $row++) {
+            $keyValue = [string]$localizationSheet.Cells($row, 1).Value2
+            $textValue = [string]$localizationSheet.Cells($row, 2).Value2
+            if ([string]::Equals($keyValue.Trim(), $localizationKey, [StringComparison]::OrdinalIgnoreCase)) {
+                Assert-Condition (-not [string]::IsNullOrWhiteSpace($textValue)) "Localization value is blank: $localizationKey"
+                $localizationFound = $true
+                break
+            }
+        }
+        Assert-Condition $localizationFound "Missing preview localization key: $localizationKey"
+    }
 
     $v1 = $book.VBProject.VBComponents.Item('frmPersonnelActionWizard')
     $v2 = $book.VBProject.VBComponents.Item($TargetComponentName)
@@ -129,9 +166,16 @@ try {
 
     $wizardFrame = $designer.Controls.Item('fraWizard')
     $multiPage = $wizardFrame.Controls.Item('mpAction')
-    Assert-Condition ($multiPage.Pages.Count -eq 2) "Installed V2 must contain two pages; found $($multiPage.Pages.Count)."
+    Assert-Condition ($multiPage.Pages.Count -eq 3) "Installed V2 must contain three pages; found $($multiPage.Pages.Count)."
     Assert-Condition ($multiPage.Pages.Item(0).Name -eq 'pgTransfer') 'The first V2 page must be pgTransfer.'
     Assert-Condition ($multiPage.Pages.Item(1).Name -eq 'pgExclusion') 'The second V2 page must be pgExclusion.'
+    Assert-Condition ($multiPage.Pages.Item(2).Name -eq 'pgPreview') 'The third V2 page must be pgPreview.'
+    $previewPage = $multiPage.Pages.Item(2)
+    Assert-Condition ([bool]$previewPage.Controls.Item('txt_preview_before').Locked) 'Preview before control must be read-only.'
+    Assert-Condition ([bool]$previewPage.Controls.Item('txt_preview_after').Locked) 'Preview after control must be read-only.'
+    Assert-Condition ([bool]$previewPage.Controls.Item('txt_preview_payments').Locked) 'Preview payments control must be read-only.'
+    Assert-Condition ([bool]$previewPage.Controls.Item('txt_preview_warnings').Locked) 'Preview warnings control must be read-only.'
+    Assert-Condition ([bool]$previewPage.Controls.Item('txt_preview_before').MultiLine) 'Preview before control must be multiline.'
 
     $v2Code = $v2.CodeModule.Lines(1, $v2.CodeModule.CountOfLines)
     Assert-Condition ($v2Code.Contains('Private Sub BindDesignerControls()')) 'Installed V2 is not connected to design-time controls.'
@@ -159,6 +203,7 @@ Public Function RunPersonnelActionV2DesignerProbe() As String
     Dim wizardFrame As Object
     Dim menuFrame As Object
     Dim multiPage As Object
+    Dim previewPage As Object
 
     mdlPersonnelEvents.EnsurePersonnelEventInfrastructure
 
@@ -176,6 +221,12 @@ Public Function RunPersonnelActionV2DesignerProbe() As String
     If formObject.IsActionMenu Then Err.Raise 903, , "TRANSFER unexpectedly entered menu mode"
     Set wizardFrame = formObject.Controls.Item("fraWizard")
     Set multiPage = wizardFrame.Controls.Item("mpAction")
+    Set previewPage = multiPage.Pages.Item(2)
+    If previewPage.Name <> "pgPreview" Then Err.Raise 907, , "Preview page was not exported"
+    If Not previewPage.Controls.Item("txt_preview_before").Locked Then Err.Raise 908, , "Preview before is editable"
+    If Not previewPage.Controls.Item("txt_preview_after").Locked Then Err.Raise 909, , "Preview after is editable"
+    If Not previewPage.Controls.Item("txt_preview_payments").Locked Then Err.Raise 910, , "Preview payments is editable"
+    If Not previewPage.Controls.Item("txt_preview_warnings").Locked Then Err.Raise 911, , "Preview warnings is editable"
     If multiPage.Value <> 0 Then Err.Raise 904, , "TRANSFER page was not selected"
     If wizardFrame.Controls.Item("btnLicenseStatus").Enabled Then Err.Raise 905, , "Export must stay disabled before save"
     Unload formObject
@@ -201,6 +252,8 @@ End Function
     if ($book) { $book.Close($false) }
     if ($excel) { $excel.Quit() }
     Release-ComObject $probeComponent
+    Release-ComObject $previewPage
+    Release-ComObject $localizationSheet
     Release-ComObject $multiPage
     Release-ComObject $wizardFrame
     Release-ComObject $designer
@@ -216,4 +269,4 @@ End Function
 }
 
 Assert-Condition (-not (Get-Process EXCEL -ErrorAction SilentlyContinue)) 'Excel remained running after personnel V2 designer verification.'
-Write-Host ("Personnel Action Wizard V2 designer verification passed: {0} manifest rows, 2 pages, V1 retained, {1} active." -f $manifest.Count, $ExpectedActiveVersion)
+Write-Host ("Personnel Action Wizard V2 designer verification passed: {0} manifest rows, 3 pages, V1 retained, {1} active." -f $manifest.Count, $ExpectedActiveVersion)

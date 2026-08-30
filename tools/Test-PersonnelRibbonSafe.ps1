@@ -11,6 +11,11 @@ function Read-VbaText([string]$Path) {
     [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::GetEncoding(1251))
 }
 
+$ribbonXml = [System.IO.File]::ReadAllText((Join-Path $workspace "resources\customUI14.xml"), [System.Text.Encoding]::UTF8)
+if ($ribbonXml -notmatch 'openPersonnelHistoryCenter' -or $ribbonXml -notmatch 'OnOpenPersonnelHistoryCenterClick') { throw 'Personnel history center Ribbon button is missing.' }
+$ribbonHandlers = Read-VbaText -Path (Join-Path $workspace "CreateOrder.xlsm.modules\mdlRibbonHandlers.bas")
+if ($ribbonHandlers -notmatch 'OnOpenPersonnelHistoryCenterClick') { throw 'Personnel history center Ribbon handler is missing.' }
+
 function Import-CodeModuleText($Workbook, [string]$ModuleName, [string]$ModulePath) {
     $code = Read-VbaText -Path $ModulePath
     $code = [regex]::Replace($code, '^Attribute VB_Name\s*=\s*"[^"]+"\r?\n', '', 1)

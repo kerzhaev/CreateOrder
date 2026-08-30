@@ -18,7 +18,7 @@ Attribute VB_Exposed = False
 
 'version 5#
 'Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmSelectEmployee
-'   Caption = "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
+'   Caption = "Select employee"
 '   ClientHeight = 6000
 '   ClientLeft = 120
 '   ClientTop = 465
@@ -33,8 +33,8 @@ Attribute VB_Exposed = False
 'Attribute VB_Exposed = False
 
 ' =====================================================================
-' пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ_пїЅпїЅпїЅ_пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
-' пїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ "95 пїЅпїЅпїЅ" пїЅпїЅ пїЅпїЅ
+' Select employee form for choosing a personnel record
+' Note: keep the 95-character compatibility boundary
 ' =====================================================================
 
 Option Explicit
@@ -73,18 +73,18 @@ Private Sub UserForm_Initialize()
         .Clear
     End With
 
-    Me.Caption = t("form.select_employee.title", "Р’С‹Р±РѕСЂ СЃРѕС‚СЂСѓРґРЅРёРєР°")
-    btnSelect.Caption = t("form.select_employee.button.select", "Р’С‹Р±СЂР°С‚СЊ")
-    btnCancel.Caption = t("form.select_employee.button.cancel", "РћС‚РјРµРЅР°")
-    txtSearch.ControlTipText = t("form.select_employee.search_hint", "Enter FIO, personal number, or table number")
-    lblStatus.Caption = t("form.select_employee.status.start", "Р’РІРµРґРёС‚Рµ РЅРµ РјРµРЅРµРµ 2 СЃРёРјРІРѕР»РѕРІ РґР»СЏ РїРѕРёСЃРєР°.")
+    Me.Caption = t("form.select_employee.title", "Выбор сотрудника")
+    btnSelect.Caption = t("form.select_employee.button.select", "Выбрать")
+    btnCancel.Caption = t("form.select_employee.button.cancel", "Отмена")
+    txtSearch.ControlTipText = t("form.select_employee.search_hint", "Введите ФИО, личный или табельный номер")
+    lblStatus.Caption = t("form.select_employee.status.start", "Введите не менее 2 символов для поиска.")
     ClearSelectedDetails
     Exit Sub
 
 ErrorHandler:
     MsgBox tf("form.select_employee.message.init_error", _
-              "РћС€РёР±РєР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё С„РѕСЂРјС‹: {error}", _
-              "{error}", Err.Description), vbCritical, t("common.error", "РћС€РёР±РєР°")
+              "Ошибка инициализации формы: {error}", _
+              "{error}", Err.Description), vbCritical, t("common.error", "Ошибка")
 End Sub
 
 Private Sub txtSearch_Change()
@@ -109,13 +109,13 @@ Private Sub txtSearch_Change()
     ClearSelectedDetails
 
     If Len(query) < 2 Then
-        lblStatus.Caption = t("common.status_enter_min_chars", "Р’РІРµРґРёС‚Рµ РЅРµ РјРµРЅРµРµ 2 СЃРёРјРІРѕР»РѕРІ.")
+        lblStatus.Caption = t("common.status_enter_min_chars", "Введите не менее 2 символов.")
         Exit Sub
     End If
 
     If mdlHelper.colFIO_Global <= 0 Or mdlHelper.colLichniyNomer_Global <= 0 Then
         MsgBox t("form.select_employee.message.staff_columns_error", _
-                 "РќРµ СѓРґР°Р»РѕСЃСЊ РѕРїСЂРµРґРµР»РёС‚СЊ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рµ СЃС‚РѕР»Р±С†С‹ Р»РёСЃС‚Р° 'РЁС‚Р°С‚'."), vbCritical, t("common.error", "РћС€РёР±РєР°")
+                 "Не удалось определить обязательные столбцы листа 'Штат'."), vbCritical, t("common.error", "Ошибка")
         Exit Sub
     End If
 
@@ -137,11 +137,11 @@ Private Sub txtSearch_Change()
     Next rowNum
 
     If foundCount = 0 Then
-        lblStatus.Caption = t("common.status_none", "РЎРѕРІРїР°РґРµРЅРёР№ РЅРµ РЅР°Р№РґРµРЅРѕ.")
+        lblStatus.Caption = t("common.status_none", "Совпадений не найдено.")
         Exit Sub
     End If
 
-    lblStatus.Caption = tf("common.status_found", "РќР°Р№РґРµРЅРѕ: {count}", "{count}", foundCount)
+    lblStatus.Caption = tf("common.status_found", "Найдено: {count}", "{count}", foundCount)
     If foundCount = 1 Then
         lstResults.ListIndex = 0
         lstResults_Click
@@ -152,7 +152,7 @@ ErrorHandler:
     lstResults.Clear
     ClearSelectedDetails
     lblStatus.Caption = tf("form.select_employee.message.search_error", _
-                           "РћС€РёР±РєР° РїРѕРёСЃРєР°: {error}", _
+                           "Ошибка поиска: {error}", _
                            "{error}", Err.Description)
 End Sub
 
@@ -161,12 +161,12 @@ Private Sub lstResults_Click()
 
     If lstResults.ListCount = 0 Or lstResults.ListIndex < 0 Then Exit Sub
 
-    lblFIO.Caption = t("form.select_employee.label.fio_prefix", "FIO:") & " " & CStr(lstResults.List(lstResults.ListIndex, RESULT_COL_FIO))
-    lblZvanie.Caption = t("form.select_employee.label.rank_prefix", "Р—РІР°РЅРёРµ:") & " " & CStr(lstResults.List(lstResults.ListIndex, RESULT_COL_RANK))
-    lblDolzhnost.Caption = t("form.select_employee.label.position_prefix", "Р”РѕР»Р¶РЅРѕСЃС‚СЊ:") & " " & CStr(lstResults.List(lstResults.ListIndex, RESULT_COL_POSITION))
-    lblSectionDynamic.Caption = t("form.select_employee.label.section_prefix", "Р Р°Р·РґРµР» РїРµСЂСЃРѕРЅР°Р»Р°:") & " " & CStr(lstResults.List(lstResults.ListIndex, RESULT_COL_SECTION))
+    lblFIO.Caption = t("form.select_employee.label.fio_prefix", "ФИО:") & " " & CStr(lstResults.List(lstResults.ListIndex, RESULT_COL_FIO))
+    lblZvanie.Caption = t("form.select_employee.label.rank_prefix", "Звание:") & " " & CStr(lstResults.List(lstResults.ListIndex, RESULT_COL_RANK))
+    lblDolzhnost.Caption = t("form.select_employee.label.position_prefix", "Должность:") & " " & CStr(lstResults.List(lstResults.ListIndex, RESULT_COL_POSITION))
+    lblSectionDynamic.Caption = t("form.select_employee.label.section_prefix", "Раздел персонала:") & " " & CStr(lstResults.List(lstResults.ListIndex, RESULT_COL_SECTION))
     lblStatus.Caption = tf("form.select_employee.status.selected", _
-                           "Р’С‹Р±СЂР°РЅ: {fio}", _
+                           "Выбран: {fio}", _
                            "{fio}", CStr(lstResults.List(lstResults.ListIndex, RESULT_COL_FIO)))
     Exit Sub
 
@@ -208,8 +208,8 @@ Private Sub btnSelect_Click()
     On Error GoTo ErrorHandler
 
     If lstResults.ListCount = 0 Or lstResults.ListIndex < 0 Then
-        MsgBox t("form.select_employee.message.choose_from_list", "Р’С‹Р±РµСЂРёС‚Рµ СЃРѕС‚СЂСѓРґРЅРёРєР° РёР· СЃРїРёСЃРєР°."), _
-               vbExclamation, t("common.attention", "Р’РЅРёРјР°РЅРёРµ")
+        MsgBox t("form.select_employee.message.choose_from_list", "Выберите сотрудника из списка."), _
+               vbExclamation, t("common.attention", "Внимание")
         Exit Sub
     End If
 
@@ -221,8 +221,8 @@ Private Sub btnSelect_Click()
 
 ErrorHandler:
     MsgBox tf("form.select_employee.message.select_error", _
-              "РћС€РёР±РєР° РІС‹Р±РѕСЂР° СЃРѕС‚СЂСѓРґРЅРёРєР°: {error}", _
-              "{error}", Err.Description), vbCritical, t("common.error", "РћС€РёР±РєР°")
+              "Ошибка выбора сотрудника: {error}", _
+              "{error}", Err.Description), vbCritical, t("common.error", "Ошибка")
 End Sub
 
 Private Sub btnCancel_Click()
@@ -312,11 +312,11 @@ Private Sub AddEmployeeRow(ByVal wsStaff As Worksheet, ByVal rowNum As Long, ByV
 End Sub
 
 Private Sub ClearSelectedDetails()
-    lblFIO.Caption = t("form.select_employee.label.fio_prefix", "FIO:")
-    lblZvanie.Caption = t("form.select_employee.label.rank_prefix", "Р—РІР°РЅРёРµ:")
-    lblDolzhnost.Caption = t("form.select_employee.label.position_prefix", "Р”РѕР»Р¶РЅРѕСЃС‚СЊ:")
+    lblFIO.Caption = t("form.select_employee.label.fio_prefix", "ФИО:")
+    lblZvanie.Caption = t("form.select_employee.label.rank_prefix", "Звание:")
+    lblDolzhnost.Caption = t("form.select_employee.label.position_prefix", "Должность:")
     If Not lblSectionDynamic Is Nothing Then
-        lblSectionDynamic.Caption = t("form.select_employee.label.section_prefix", "Р Р°Р·РґРµР» РїРµСЂСЃРѕРЅР°Р»Р°:")
+        lblSectionDynamic.Caption = t("form.select_employee.label.section_prefix", "Раздел персонала:")
     End If
 End Sub
 

@@ -56,6 +56,9 @@
 
         <group id="personnelActionsGroup" getLabel="GetRibbonLabel">
           <button id="openPersonnelActionsMenu" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelActionsMenuClick" imageMso="ContactInsertFromOutlook" size="large"/>
+          <button id="openDataIntegrityCenter" getLabel="GetRibbonLabel" onAction="OnOpenDataIntegrityCenterClick" imageMso="Spelling" size="large"/>
+          <button id="openPersonnelHistoryCenter" getLabel="GetRibbonLabel" onAction="OnOpenPersonnelHistoryCenterClick" imageMso="History" size="large"/>
+          <button id="openGroupedPersonnelOrder" getLabel="GetRibbonLabel" onAction="OnOpenGroupedPersonnelOrderClick" imageMso="FileSaveAsWordDocx" size="large"/>
         </group>
 
         <group id="dataGroup" getLabel="GetRibbonLabel">

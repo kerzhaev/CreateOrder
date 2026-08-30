@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     ������� �������� ������ ������� CreateOrder.
 .DESCRIPTION
@@ -7,15 +7,31 @@
 #>
 
 param(
-    [string]$SourceFile = "CreateOrder.xlsm"
+    [string]$SourceFile = "CreateOrder.xlsm",
+    [string]$OutputDirectory,
+    [switch]$SkipGate
 )
 
 # ����������� ��������� ������� �� UTF-8 ��� ����������� ������ ������� ����
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
+if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
+    $OutputDirectory = Join-Path (Get-Location) "CreateOrderReleases"
+}
+
+if (-not $SkipGate) {
+    $gateScript = Join-Path $PSScriptRoot "tools\Invoke-CreateOrderReleaseGate.ps1"
+    if (-not (Test-Path -LiteralPath $gateScript -PathType Leaf)) {
+        Write-Host "[X] ������: release-gate �� ������!" -ForegroundColor Red
+        exit 10
+    }
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $gateScript -Mode Release -WorkbookPath $SourceFile -OutputDirectory $OutputDirectory -SkipManual
+    exit $LASTEXITCODE
+}
+
 # ���������� ������������ ��� ��������� ����� � ����� � ��������
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$releaseDir = Join-Path (Get-Location) "CreateOrderReleases"
+$releaseDir = [IO.Path]::GetFullPath($OutputDirectory)
 $OutputFile = Join-Path $releaseDir "CreateOrder_Release_$timestamp.xlsm"
 
 Write-Host "=== ������ ������ ����������� ������ ===" -ForegroundColor Cyan

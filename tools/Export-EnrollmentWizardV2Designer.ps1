@@ -12,6 +12,7 @@ if ([string]::IsNullOrWhiteSpace($SourceDirectory)) { $SourceDirectory = Join-Pa
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName Microsoft.VisualBasic
 
 function Write-ExportLog {
     param(
@@ -117,6 +118,15 @@ function Get-ControlTypeName {
         IMdcFrame = 'Frame'
         IMdcMultiPage = 'MultiPage'
         IMdcPage = 'Page'
+        PageClass = 'Page'
+        FrameClass = 'Frame'
+        MultiPageClass = 'MultiPage'
+        TextBoxClass = 'TextBox'
+        LabelClass = 'Label'
+        CommandButtonClass = 'CommandButton'
+        ComboBoxClass = 'ComboBox'
+        CheckBoxClass = 'CheckBox'
+        ListBoxClass = 'ListBox'
     }
     if ($typeMap.ContainsKey($typeName)) { return $typeMap[$typeName] }
     return $typeName

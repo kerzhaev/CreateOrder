@@ -357,6 +357,29 @@ ErrorHandler:
     MsgBox Err.Description, vbCritical, t("common.error", "Error")
 End Sub
 
+Public Sub OnOpenDataIntegrityCenterClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    frmDataIntegrityCenter.Show
+    Exit Sub
+ErrorHandler:
+    MsgBox tf("integrity.form.scan_failed", "Integrity center could not be opened: {error}", "{error}", Err.Description), vbCritical, t("common.error", "Error")
+End Sub
+Public Sub OnOpenPersonnelHistoryCenterClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    frmPersonnelHistoryCenter.Show
+    Exit Sub
+ErrorHandler:
+    MsgBox tf("history.center.action_failed", "History center could not be opened: {error}", "{error}", Err.Description), vbCritical, t("common.error", "Error")
+End Sub
+
+Public Sub OnOpenGroupedPersonnelOrderClick(control As IRibbonControl)
+    On Error GoTo ErrorHandler
+    frmGroupedPersonnelOrderWizard.Show
+    Exit Sub
+ErrorHandler:
+    MsgBox tf("personnel.grouped.failed", "Grouped personnel order could not be opened: {error}", "{error}", Err.Description), vbCritical, t("common.error", "Error")
+End Sub
+
 Public Sub OnOpenPersonnelEnrollmentActionClick(control As IRibbonControl)
     mdlPersonnelEvents.OpenPersonnelEnrollmentAction
 End Sub
